@@ -9,6 +9,9 @@ Newest-first change log. Timestamps use repository commit dates (ISO 8601, local
 - Parse JPG SOF dimensions/bit depth and MP3 frame header metadata in `media_tool.py`.
 - Add real-file JPG/MP3 metadata tests.
 
+## 2026-11-21 20:15:00 -0500 - DDS 24-bit RGB round-trip test
+- Add synthetic R8G8B8 uncompressed DDS round-trip test (mask-based path).
+
 ## 2026-11-21 19:55:00 -0500 - DDS uncompressed RGB(A) mask-based support
 - Accept uncompressed RGB DDS with DDPF_RGB (with/without alpha) and preserve header masks on write.
 - Add X8R8G8B8 synthetic round-trip test.

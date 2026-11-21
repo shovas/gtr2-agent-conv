@@ -193,7 +193,6 @@ class MediaToolTest(unittest.TestCase):
             w,h = 2,1
             rgba = bytes([1,2,3,255, 4,5,6,255])
             img = media_tool.DdsImage(width=w,height=h,mipmaps=1,fourcc='UNCOMPRESSED',rgba=rgba,header=b'\x00'*128)
-            # craft X8R8G8B8 header (pf_flags=0x40, no alpha mask)
             b = bytearray(img.to_bytes())
             struct.pack_into('<I', b, 80, 0x40)
             struct.pack_into('<5I', b, 88, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0x00000000)
@@ -203,6 +202,26 @@ class MediaToolTest(unittest.TestCase):
             a = media_tool.read_dds(src)
             self.assertEqual(a.fourcc, 'UNCOMPRESSED')
             self.assertEqual(a.rgba, rgba)
+
+    def test_dds_uncompressed_r8g8b8_roundtrip(self):
+        import struct
+        with tempfile.TemporaryDirectory() as td:
+            src = Path(td) / "a.dds"
+            dst = Path(td) / "b.dds"
+            w,h = 1,1
+            rgba = bytes([10,20,30,255])
+            img = media_tool.DdsImage(width=w,height=h,mipmaps=1,fourcc='UNCOMPRESSED',rgba=rgba,header=b'\x00'*128)
+            b = bytearray(img.to_bytes())
+            struct.pack_into('<I', b, 80, 0x40)
+            struct.pack_into('<5I', b, 88, 24, 0xff0000, 0x00ff00, 0x0000ff, 0x000000)
+            # rebuild payload for 24-bit
+            b = b[:128] + bytes([30,20,10])
+            struct.pack_into('<I', b, 20, 3)
+            src.write_bytes(bytes(b))
+            info = media_tool.dds_roundtrip(src, dst)
+            self.assertEqual(info.format, "dds")
+            a = media_tool.read_dds(src)
+            self.assertEqual(a.rgba[:3], bytes([10,20,30]))
 
 
 if __name__ == "__main__":

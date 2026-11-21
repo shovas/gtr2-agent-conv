@@ -61,7 +61,7 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 ### DDS
 - **Read**: Identify + DDS header/pixel-format/caps semantic parse; DXT1 (BC1), DXT3 (BC2), DXT5 (BC3), and uncompressed RGB(A) mask-based pixel decode to RGBA.
 - **Write**: DXT1/DXT3/DXT5 (lossy) and uncompressed RGB(A) mask-based encode from RGBA + DDS file write; lossless byte copy possible.
-- **Verification**: `tests/test_media_tool.py` (synthetic DXT1, DXT3, DXT5, uncompressed A8R8G8B8 and X8R8G8B8 round-trips).
+- **Verification**: `tests/test_media_tool.py` (synthetic DXT1, DXT3, DXT5, A8R8G8B8, X8R8G8B8, R8G8B8 round-trips).
 - **Tool**: `media_tool.py`.
 - **Gaps**: BC4/5/6H/7, mipmaps, cube maps, and some uncompressed layouts not fully implemented.
 
