@@ -32,6 +32,12 @@ class FxmHeader:
     def known_magic(self) -> bool:
         return self.magic in MAGICS
 
+    @property
+    def be_fields(self) -> tuple[int, int, int, int, int, int]:
+        # Many observed integer fields look more plausible as big-endian; not confirmed as spec.
+        b = Path(self.path).read_bytes()
+        return struct.unpack_from(">HHIIII", b, 4)
+
 
 def read_header(path: str | Path) -> FxmHeader:
     p = Path(path)
@@ -50,8 +56,10 @@ def cmd_info(args: argparse.Namespace) -> int:
     print(f"size: {h.size}")
     print(f"magic: {h.magic!r}")
     print(f"known_magic: {h.known_magic}")
-    print(f"header_u16: {h.v1} {h.v2}")
-    print(f"header_u32: {h.f3} {h.f4} {h.f5} {h.f6}")
+    print(f"header_u16_le: {h.v1} {h.v2}")
+    print(f"header_u32_le: {h.f3} {h.f4} {h.f5} {h.f6}")
+    be = h.be_fields
+    print(f"header_be: {be[0]} {be[1]} {be[2]} {be[3]} {be[4]} {be[5]}")
     print(f"sha256: {hashlib.sha256(b).hexdigest()}")
     for s in strings[:8]:
         print(f"string: {s[:120]}")

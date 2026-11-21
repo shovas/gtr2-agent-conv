@@ -2,6 +2,10 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-21 18:25:00 -0500 - FXM/LMA header BE field observation
+- Report BE-interpreted FXM/FXA/LMA header fields in `fxm_tool.py` (observed plausible; semantics unconfirmed).
+- Add LMA BE-field assertion in tests.
+
 ## 2026-11-21 18:15:00 -0500 - Media identification and WAV semantic round-trip
 - Add `media_tool.py`: identifies WAV/DDS/TGA/BMP/JPG/MP3/BIK, parses basic headers, detects BMP-as-TGA quirk, and performs semantic WAV PCM round-trip via stdlib `wave`.
 - Add media tool tests.
