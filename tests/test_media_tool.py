@@ -52,6 +52,14 @@ class MediaToolTest(unittest.TestCase):
         self.assertGreater(info.details.get("width", 0), 0)
         self.assertIn("pf_fourcc", info.details)
 
+    def test_identify_dds_mipmaps_if_present(self):
+        p = ROOT.parent / "GTR2Steam/GameData/Animations/Objects/MARSHAL1.dds"
+        if not p.exists():
+            self.skipTest("DDS not present")
+        info = media_tool.identify(p)
+        self.assertEqual(info.format, "dds")
+        self.assertGreater(info.details.get("mipmaps", 0), 1)
+
     def test_identify_bik_if_present(self):
         p = ROOT.parent / "GTR2Steam/GameData/Locations/Barcelona/Barcelona.bik"
         if not p.exists():
