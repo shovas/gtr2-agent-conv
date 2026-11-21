@@ -102,7 +102,7 @@ python3 media_tool.py tga-roundtrip <src.tga> <dst.tga>
 python3 media_tool.py bmp-roundtrip <src.bmp> <dst.bmp>
 ```
 
-**Limitations**: DDS pixel decode/encode (DXT/BC) not implemented; TGA limited to type 2/3/10; BMP limited to uncompressed BI_RGB 24/32; JPG/MP3 semantic decode/encode/edit not implemented; BIK proprietary.
+**Limitations**: DDS limited to DXT1/DXT5 (BC1/BC3) with lossy simple encoder, no mipmaps/cube maps; TGA limited to type 2/3/10; BMP limited to uncompressed BI_RGB 24/32; JPG/MP3 semantic decode/encode/edit not implemented; BIK proprietary.
 
 ## 7. Consult format documentation
 

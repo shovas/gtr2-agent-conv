@@ -105,20 +105,36 @@ class MediaToolTest(unittest.TestCase):
             src = Path(td) / "a.dds"
             dst = Path(td) / "b.dds"
             w,h = 4,4
-            # solid red RGBA
             rgba = bytes([255,0,0,255] * (w*h))
             img = media_tool.DdsImage(width=w,height=h,mipmaps=1,fourcc='DXT1',rgba=rgba,header=b'\x00'*128)
             src.write_bytes(img.to_bytes())
             info = media_tool.dds_roundtrip(src, dst)
             self.assertEqual(info.format, "dds")
             a = media_tool.read_dds(src)
-            b = media_tool.read_dds(dst)
             self.assertEqual((a.width,a.height,a.fourcc), (w,h,'DXT1'))
-            # lossy, but solid red should stay close
             for i in range(0,len(a.rgba),4):
                 self.assertGreaterEqual(a.rgba[i], 200)
                 self.assertLessEqual(a.rgba[i+1], 20)
                 self.assertLessEqual(a.rgba[i+2], 20)
+
+    def test_dds_dxt5_synthetic_roundtrip(self):
+        with tempfile.TemporaryDirectory() as td:
+            src = Path(td) / "a.dds"
+            dst = Path(td) / "b.dds"
+            w,h = 4,4
+            # semi-transparent green
+            rgba = bytes([0,255,0,128] * (w*h))
+            img = media_tool.DdsImage(width=w,height=h,mipmaps=1,fourcc='DXT5',rgba=rgba,header=b'\x00'*128)
+            src.write_bytes(img.to_bytes())
+            info = media_tool.dds_roundtrip(src, dst)
+            self.assertEqual(info.format, "dds")
+            a = media_tool.read_dds(src)
+            self.assertEqual((a.width,a.height,a.fourcc), (w,h,'DXT5'))
+            for i in range(0,len(a.rgba),4):
+                self.assertLessEqual(a.rgba[i], 20)
+                self.assertGreaterEqual(a.rgba[i+1], 200)
+                self.assertLessEqual(a.rgba[i+2], 20)
+                self.assertTrue(80 <= a.rgba[i+3] <= 180)
 
 
 if __name__ == "__main__":

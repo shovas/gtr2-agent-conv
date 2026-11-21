@@ -268,7 +268,7 @@ def bmp_roundtrip(src: str | Path, dst: str | Path) -> MediaInfo:
     return identify(dst)
 
 
-# --- DDS DXT1 (BC1) support ---
+# --- DDS DXT1 (BC1) / DXT5 (BC3) support ---
 
 def _rgb565_to_rgba(c):
     r = ((c >> 11) & 0x1F) * 255 // 31
@@ -363,6 +363,127 @@ def encode_dxt1(rgba: bytes, width: int, height: int) -> bytes:
     return bytes(out)
 
 
+def _decode_dxt5_alpha(block: bytes) -> list[int]:
+    a0, a1 = block[0], block[1]
+    bits = int.from_bytes(block[2:8], 'little')
+    table = [0]*8
+    table[0], table[1] = a0, a1
+    if a0 > a1:
+        for i in range(2,8):
+            table[i] = ((8-i)*a0 + (i-1)*a1) // 7
+    else:
+        for i in range(2,6):
+            table[i] = ((6-i)*a0 + (i-1)*a1) // 5
+        table[6], table[7] = 0, 255
+    out = []
+    for i in range(16):
+        idx = (bits >> (3*i)) & 7
+        out.append(table[idx])
+    return out
+
+
+def _encode_dxt5_alpha(alphas: list[int]) -> bytes:
+    # Simple encoder: use a0=max, a1=min, 8-value mode when possible.
+    a0 = max(alphas)
+    a1 = min(alphas)
+    if a0 == a1:
+        a1 = max(0, a0-1) if a0 > 0 else 1
+    table = [0]*8
+    table[0], table[1] = a0, a1
+    if a0 > a1:
+        for i in range(2,8):
+            table[i] = ((8-i)*a0 + (i-1)*a1) // 7
+    else:
+        for i in range(2,6):
+            table[i] = ((6-i)*a0 + (i-1)*a1) // 5
+        table[6], table[7] = 0, 255
+    bits = 0
+    for i,a in enumerate(alphas):
+        best = min(range(8), key=lambda j: abs(a-table[j]))
+        bits |= (best << (3*i))
+    return bytes([a0,a1]) + bits.to_bytes(6,'little')
+
+
+def _decode_dxt5_block(block: bytes) -> list[tuple[int,int,int,int]]:
+    alphas = _decode_dxt5_alpha(block[:8])
+    colors = _decode_dxt1_block(block[8:16])  # color part same layout as DXT1, but always 4-color mode
+    # DXT5 color is always 4-color interpolation (no 1-bit alpha punchthrough)
+    c0,c1 = struct.unpack_from('<HH', block, 8)
+    bits = struct.unpack_from('<I', block, 12)[0]
+    p = [_rgb565_to_rgba(c0)[:3], _rgb565_to_rgba(c1)[:3]]
+    p.append(tuple((2*p[0][i]+p[1][i])//3 for i in range(3)))
+    p.append(tuple((p[0][i]+2*p[1][i])//3 for i in range(3)))
+    out=[]
+    for i in range(16):
+        idx = (bits >> (2*i)) & 3
+        out.append(p[idx] + (alphas[i],))
+    return out
+
+
+def _encode_dxt5_block(pixels: list[tuple[int,int,int,int]]) -> bytes:
+    alphas = [p[3] for p in pixels]
+    alpha_block = _encode_dxt5_alpha(alphas)
+    # encode color like DXT1 but always 4-color mode
+    opaque = [p[:3] for p in pixels]
+    lum = [0.299*c[0]+0.587*c[1]+0.114*c[2] for c in opaque]
+    i0 = max(range(16), key=lambda i: lum[i])
+    i1 = min(range(16), key=lambda i: lum[i])
+    c0 = _rgba_to_rgb565(*opaque[i0])
+    c1 = _rgba_to_rgb565(*opaque[i1])
+    if c0 == c1:
+        c1 = c0 ^ 1
+    if c0 <= c1:
+        c0, c1 = c1, c0
+    p0 = _rgb565_to_rgba(c0)[:3]
+    p1 = _rgb565_to_rgba(c1)[:3]
+    p = [p0, p1,
+         tuple((2*p0[i]+p1[i])//3 for i in range(3)),
+         tuple((p0[i]+2*p1[i])//3 for i in range(3))]
+    bits = 0
+    for i, px in enumerate(opaque):
+        best = min(range(4), key=lambda j: _color_dist2(px, p[j]))
+        bits |= (best << (2*i))
+    return alpha_block + struct.pack('<HHI', c0, c1, bits)
+
+
+def decode_dxt5(data: bytes, width: int, height: int) -> bytes:
+    out = bytearray(width * height * 4)
+    blocks_x = (width + 3) // 4
+    blocks_y = (height + 3) // 4
+    off = 0
+    for by in range(blocks_y):
+        for bx in range(blocks_x):
+            block = data[off:off+16]; off += 16
+            if len(block) < 16:
+                block = block.ljust(16, b'\x00')
+            px = _decode_dxt5_block(block)
+            for py in range(4):
+                for px_i in range(4):
+                    x = bx*4 + px_i
+                    y = by*4 + py
+                    if x < width and y < height:
+                        di = (y*width + x) * 4
+                        out[di:di+4] = bytes(px[py*4+px_i])
+    return bytes(out)
+
+
+def encode_dxt5(rgba: bytes, width: int, height: int) -> bytes:
+    blocks_x = (width + 3) // 4
+    blocks_y = (height + 3) // 4
+    out = bytearray()
+    for by in range(blocks_y):
+        for bx in range(blocks_x):
+            px = []
+            for py in range(4):
+                for px_i in range(4):
+                    x = min(bx*4 + px_i, width-1)
+                    y = min(by*4 + py, height-1)
+                    di = (y*width + x) * 4
+                    px.append(tuple(rgba[di:di+4]))
+            out.extend(_encode_dxt5_block(px))
+    return bytes(out)
+
+
 @dataclass
 class DdsImage:
     width: int
@@ -373,24 +494,21 @@ class DdsImage:
     header: bytes  # original 128-byte header for lossless metadata where possible
 
     def to_bytes(self) -> bytes:
-        # re-encode as DXT1 when fourcc is DXT1
-        if self.fourcc == 'DXT1':
-            payload = encode_dxt1(self.rgba, self.width, self.height)
+        if self.fourcc in ('DXT1', 'DXT5'):
+            payload = encode_dxt1(self.rgba, self.width, self.height) if self.fourcc == 'DXT1' else encode_dxt5(self.rgba, self.width, self.height)
             hdr = bytearray(self.header)
-            # update sizes/flags minimally
             linear = len(payload)
             struct.pack_into('<I', hdr, 0, 0x20534444)  # DDS 
             struct.pack_into('<I', hdr, 4, 124)
-            struct.pack_into('<I', hdr, 8, 0x1007)  # CAPS|HEIGHT|WIDTH|PIXELFORMAT|LINEARSIZE
+            struct.pack_into('<I', hdr, 8, 0x1007)
             struct.pack_into('<I', hdr, 12, self.height)
             struct.pack_into('<I', hdr, 16, self.width)
             struct.pack_into('<I', hdr, 20, linear)
             struct.pack_into('<I', hdr, 28, max(1, self.mipmaps))
-            # pixel format
             struct.pack_into('<I', hdr, 76, 32)
-            struct.pack_into('<I', hdr, 80, 0x4)  # DDPF_FOURCC
-            hdr[84:88] = b'DXT1'
-            struct.pack_into('<I', hdr, 108, 0x1000)  # DDSCAPS_TEXTURE
+            struct.pack_into('<I', hdr, 80, 0x4)
+            hdr[84:88] = self.fourcc.encode('ascii')
+            struct.pack_into('<I', hdr, 108, 0x1000)
             return bytes(hdr) + payload
         raise ValueError(f'Unsupported DDS fourcc for write: {self.fourcc}')
 
@@ -403,9 +521,12 @@ def read_dds(path: str | Path) -> DdsImage:
     hdr_size, flags, height, width, pitch, depth, mipmaps = struct.unpack_from('<7I', b, 4)
     pf_flags, fourcc = struct.unpack_from('<I4s', b, 80)
     fourcc_s = fourcc.decode('latin1','replace').strip('\x00')
-    if fourcc_s != 'DXT1':
+    if fourcc_s == 'DXT1':
+        rgba = decode_dxt1(b[128:], width, height)
+    elif fourcc_s == 'DXT5':
+        rgba = decode_dxt5(b[128:], width, height)
+    else:
         raise ValueError(f'Unsupported DDS fourcc for decode: {fourcc_s}')
-    rgba = decode_dxt1(b[128:], width, height)
     return DdsImage(width=width, height=height, mipmaps=mipmaps or 1, fourcc=fourcc_s, rgba=rgba, header=b[:128])
 
 
