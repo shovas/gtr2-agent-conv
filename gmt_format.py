@@ -112,6 +112,8 @@ class GmtStage:
     name: str
     raw: bytes
     strings: List[str] = field(default_factory=list)
+    tail_u32_64: int = 0  # observed; semantics unconfirmed
+    tail_u32_65: int = 0  # observed; semantics unconfirmed
 
 
 @dataclass
@@ -197,7 +199,8 @@ def _parse_materials(tail: bytes) -> List[GmtMaterial]:
                     break
                 sraw = raw[sb:sb + 264]
                 sname = sraw[:64].split(b'\x00', 1)[0].decode('latin-1', 'replace')
-                stages.append(GmtStage(index=si, name=sname, raw=sraw, strings=_extract_ascii_strings(sraw)))
+                t64, t65 = struct.unpack_from('<II', sraw, 256) if len(sraw) >= 264 else (0, 0)
+                stages.append(GmtStage(index=si, name=sname, raw=sraw, strings=_extract_ascii_strings(sraw), tail_u32_64=t64, tail_u32_65=t65))
         mats.append(GmtMaterial(index=i, raw=raw, name=name, strings=strings, header_raw=raw[:152], stages=stages))
     return mats
 

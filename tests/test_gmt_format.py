@@ -239,10 +239,8 @@ class GmtFormatTest(unittest.TestCase):
                 self.assertEqual(len(m.header_raw), 152)
                 hdr = struct.unpack_from('<38I', m.header_raw)
                 self.assertEqual(hdr[32:38], (1065353216, 2, 1, 1109393408, 0, 3))
-                s0 = struct.unpack_from('<66I', m.stages[0].raw)
-                s1 = struct.unpack_from('<66I', m.stages[1].raw)
-                self.assertEqual((s0[64], s0[65]), (3, 4))
-                self.assertEqual((s1[64], s1[65]), (7, 3))
+                self.assertEqual((m.stages[0].tail_u32_64, m.stages[0].tail_u32_65), (3, 4))
+                self.assertEqual((m.stages[1].tail_u32_64, m.stages[1].tail_u32_65), (7, 3))
                 return
         self.skipTest("sample not found")
 
