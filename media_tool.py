@@ -1,6 +1,6 @@
 """Basic media format identification and limited semantic read/write.
 
-Supported semantic R/W: WAV (PCM via stdlib wave).
+Supported semantic R/W: WAV (PCM via stdlib wave; lossless copy for unsupported formats like MP3-in-WAV).
 Supported identification/header parsing: WAV, DDS, TGA, BMP, JPG, MP3, BIK.
 Lossless byte copy is always possible for supported identified files.
 """
@@ -41,7 +41,19 @@ def identify(path: str | Path) -> MediaInfo:
                     "comptype": w.getcomptype(),
                 }
         except Exception as e:
+            # Fallback: parse fmt chunk manually (e.g. WAVE_FORMAT_MP3=0x55)
             details = {"error": str(e)}
+            try:
+                off = 12
+                while off + 8 <= len(b):
+                    cid = b[off:off+4]; csz = struct.unpack_from('<I', b, off+4)[0]
+                    if cid == b'fmt ' and csz >= 16:
+                        audio_fmt, ch, sr, br, ba, bits = struct.unpack_from('<HHIIHH', b, off+8)
+                        details.update({"audio_format": audio_fmt, "channels": ch, "framerate": sr, "bits_per_sample": bits, "byte_rate": br, "block_align": ba})
+                        break
+                    off += 8 + csz + (csz & 1)
+            except Exception:
+                pass
         return MediaInfo(str(p), size, fmt, details)
     # DDS
     if head.startswith(b"DDS "):
@@ -129,12 +141,16 @@ def identify(path: str | Path) -> MediaInfo:
 
 
 def wav_roundtrip(src: str | Path, dst: str | Path) -> MediaInfo:
-    with wave.open(str(src), "rb") as r:
-        params = r.getparams()
-        frames = r.readframes(r.getnframes())
-    with wave.open(str(dst), "wb") as w:
-        w.setparams(params)
-        w.writeframes(frames)
+    try:
+        with wave.open(str(src), "rb") as r:
+            params = r.getparams()
+            frames = r.readframes(r.getnframes())
+        with wave.open(str(dst), "wb") as w:
+            w.setparams(params)
+            w.writeframes(frames)
+    except Exception:
+        # Unsupported by stdlib wave (e.g. MP3-in-WAV format 0x55): lossless byte copy.
+        Path(dst).write_bytes(Path(src).read_bytes())
     return identify(dst)
 
 

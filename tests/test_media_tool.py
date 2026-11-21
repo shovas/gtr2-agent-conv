@@ -28,6 +28,20 @@ class MediaToolTest(unittest.TestCase):
                 self.assertEqual(a.getparams(), b.getparams())
                 self.assertEqual(a.readframes(a.getnframes()), b.readframes(b.getnframes()))
 
+    def test_wav_mp3_format_lossless_roundtrip(self):
+        p = ROOT.parent / "GTR2Steam/GameData/Sounds/PIT/bleep.wav"
+        if not p.exists():
+            self.skipTest("MP3-WAV not present")
+        info = media_tool.identify(p)
+        self.assertEqual(info.format, "wav")
+        self.assertEqual(info.details.get("audio_format"), 85)
+        with tempfile.TemporaryDirectory() as td:
+            out = Path(td) / "o.wav"
+            info2 = media_tool.wav_roundtrip(p, out)
+            self.assertEqual(info2.format, "wav")
+            self.assertEqual(info2.details.get("audio_format"), 85)
+            self.assertEqual(p.read_bytes(), Path(out).read_bytes())
+
     def test_identify_dds_if_present(self):
         p = ROOT.parent / "GTR2Steam/GameData/Animations/Objects/FANFEMALE1.DDS"
         if not p.exists():
