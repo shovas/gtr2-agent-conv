@@ -58,12 +58,24 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 - **Verification**: `tests/test_media_tool.py`.
 - **Tool**: `media_tool.py`.
 
-### DDS/TGA/BMP/JPG/MP3
-- **Read**: Identify by header/extension; DDS header fields parsed (size/flags/dims/mips/pixel format/caps); basic TGA/BMP header fields parsed; BMP-as-TGA quirk detection.
+### DDS
+- **Read**: Identify + DDS header/pixel-format/caps semantic parse.
 - **Write**: Lossless byte copy possible.
-- **Verification**: `tests/test_media_tool.py` (DDS real-file identification when present).
+- **Verification**: `tests/test_media_tool.py`.
 - **Tool**: `media_tool.py`.
-- **Gaps**: full semantic decode/encode/edit of pixel/audio data not implemented in-repo.
+- **Gaps**: pixel data decode/encode/edit (DXT/BC compressed) not implemented.
+
+### TGA
+- **Read/Write**: Semantic read/write for uncompressed truecolor/grayscale (type 2/3) and RLE truecolor (type 10) via `media_tool.py`. Type 2/3 round-trip is byte-identical; type 10 round-trip is pixel-identical (encoder emits raw packets).
+- **Verification**: `tests/test_media_tool.py` (synthetic type 2 byte round-trip, synthetic type 10 pixel round-trip, real type 2 when present).
+- **Gaps**: other TGA types/color maps not fully implemented.
+
+### BMP/JPG/MP3
+- **Read**: Identify; basic BMP header parse; BMP-as-TGA quirk detection.
+- **Write**: Lossless byte copy possible.
+- **Verification**: `tests/test_media_tool.py` (identification coverage where present).
+- **Tool**: `media_tool.py`.
+- **Gaps**: full semantic decode/encode/edit not implemented in-repo.
 
 ### BIK (Bink Video)
 - **Read**: Identify and parse basic header fields; lossless copy possible.

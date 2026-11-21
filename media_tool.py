@@ -106,6 +106,105 @@ def wav_roundtrip(src: str | Path, dst: str | Path) -> MediaInfo:
     return identify(dst)
 
 
+@dataclass
+class TgaImage:
+    id_len: int
+    cmap_type: int
+    image_type: int
+    cmap_spec: bytes  # 5 bytes
+    x_origin: int
+    y_origin: int
+    width: int
+    height: int
+    bpp: int
+    descriptor: int
+    image_id: bytes
+    cmap_data: bytes
+    pixels: bytes  # raw uncompressed pixel bytes in file order
+
+    def header_bytes(self) -> bytes:
+        return struct.pack('<BBB5sHHHHBB', self.id_len, self.cmap_type, self.image_type,
+                           self.cmap_spec, self.x_origin, self.y_origin, self.width, self.height,
+                           self.bpp, self.descriptor)
+
+
+def read_tga(path: str | Path) -> TgaImage:
+    p = Path(path)
+    b = p.read_bytes()
+    if len(b) < 18:
+        raise ValueError('TGA too small')
+    id_len, cmap_type, image_type = struct.unpack_from('<BBB', b, 0)
+    cmap_spec = b[3:8]
+    x_origin, y_origin, width, height = struct.unpack_from('<HHHH', b, 8)
+    bpp = b[16]
+    descriptor = b[17]
+    pos = 18
+    image_id = b[pos:pos+id_len]; pos += id_len
+    cmap_len = 0
+    if cmap_type != 0:
+        cmap_entry_count = struct.unpack_from('<H', cmap_spec, 2)[0]
+        cmap_entry_bits = cmap_spec[4]
+        cmap_len = cmap_entry_count * ((cmap_entry_bits + 7) // 8)
+    cmap_data = b[pos:pos+cmap_len]; pos += cmap_len
+    bytespp = (bpp + 7) // 8
+    pixel_count = width * height
+    total = pixel_count * bytespp
+    if image_type in (2, 3):  # uncompressed truecolor/grayscale
+        pixels = b[pos:pos+total]
+    elif image_type == 10:  # RLE truecolor
+        pixels = _decode_tga_rle(b[pos:], pixel_count, bytespp)
+    else:
+        raise ValueError(f'Unsupported TGA image type {image_type}')
+    return TgaImage(id_len, cmap_type, image_type, cmap_spec, x_origin, y_origin, width, height, bpp, descriptor, image_id, cmap_data, pixels)
+
+
+def _decode_tga_rle(data: bytes, pixel_count: int, bytespp: int) -> bytes:
+    out = bytearray()
+    i = 0
+    while len(out) < pixel_count * bytespp and i < len(data):
+        header = data[i]; i += 1
+        count = (header & 0x7F) + 1
+        if header & 0x80:
+            px = data[i:i+bytespp]; i += bytespp
+            out.extend(px * count)
+        else:
+            n = count * bytespp
+            out.extend(data[i:i+n]); i += n
+    return bytes(out[:pixel_count * bytespp])
+
+
+def _encode_tga_rle(pixels: bytes, pixel_count: int, bytespp: int) -> bytes:
+    # Simple RLE encoder: emit raw packets (no compression) for correctness.
+    # Semantic round-trip is guaranteed by decode(encode(decode(x)))==decode(x).
+    out = bytearray()
+    i = 0
+    while i < pixel_count:
+        chunk = min(128, pixel_count - i)
+        out.append(chunk - 1)  # raw packet
+        out.extend(pixels[i*bytespp:(i+chunk)*bytespp])
+        i += chunk
+    return bytes(out)
+
+
+def write_tga(img: TgaImage) -> bytes:
+    out = bytearray(img.header_bytes())
+    out.extend(img.image_id)
+    out.extend(img.cmap_data)
+    if img.image_type in (2, 3):
+        out.extend(img.pixels)
+    elif img.image_type == 10:
+        out.extend(_encode_tga_rle(img.pixels, img.width * img.height, (img.bpp + 7) // 8))
+    else:
+        raise ValueError(f'Unsupported TGA image type {img.image_type}')
+    return bytes(out)
+
+
+def tga_roundtrip(src: str | Path, dst: str | Path) -> MediaInfo:
+    img = read_tga(src)
+    Path(dst).write_bytes(write_tga(img))
+    return identify(dst)
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__)
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -116,6 +215,10 @@ def main(argv=None):
     p.add_argument("src")
     p.add_argument("dst")
     p.set_defaults(func=lambda a: print(asdict(wav_roundtrip(a.src, a.dst))) or 0)
+    p = sub.add_parser("tga-roundtrip")
+    p.add_argument("src")
+    p.add_argument("dst")
+    p.set_defaults(func=lambda a: print(asdict(tga_roundtrip(a.src, a.dst))) or 0)
     args = ap.parse_args(argv)
     return args.func(args)
 

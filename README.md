@@ -12,7 +12,7 @@ This repository is a work in progress. It currently provides inspected format do
 - **ISI encryption/decryption**: pure-Python ISI/rFactor sign+key decrypt/encrypt for GMT/MAS-style 16-byte-header files (`isi_crypt.py`), verified against rfactordec. Unknown-signature/non-standard encrypted GMTs may still be unresolved.
 - **FXM/FXA/LMA**: header identification and lossless round-trip supported; internal animation/keyframe semantics undecoded.
 - **BIK**: identify/lossless copy only (proprietary Bink codec).
-- **Standard media (DDS/TGA/BMP/JPG/MP3/WAV)**: identified; WAV parseable via stdlib; lossless byte copy possible. Full semantic read/write not fully implemented in-repo.
+- **Standard media (DDS/TGA/BMP/JPG/MP3/WAV/BIK)**: identified with basic header parsing; WAV PCM and TGA (type 2/3/10) semantic round-trip supported; DDS header semantic parse; lossless byte copy possible. Full pixel/audio decode/encode not implemented for all formats; BIK proprietary.
 
 See `CAPABILITIES.md` for details and `docs/` for format notes.
 
