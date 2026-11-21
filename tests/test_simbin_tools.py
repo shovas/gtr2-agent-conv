@@ -55,6 +55,8 @@ class SimbinToolsTest(unittest.TestCase):
         # Observed: BE-interpreted 24-byte header; last u32 may overlap following string data.
         self.assertEqual(h.be_fields[:5], (257, 256, 184, 1, 66))
         b = p.read_bytes()
+        self.assertIn(b'Bip01 Spine', b)
+        self.assertIn(b'Bip01 R Clavicle', b)
         with tempfile.TemporaryDirectory() as td:
             out = Path(td) / "x.lma"
             fxm_tool.main(["roundtrip", str(p), str(out)])
