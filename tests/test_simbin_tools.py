@@ -73,6 +73,18 @@ class SimbinToolsTest(unittest.TestCase):
         self.assertIn('Bip01 R Clavicle', names)
         self.assertIn('Bip01 R UpperArm', names)
 
+    def test_fxm_layout_family_observed(self):
+        # Observed: LMA driver files often have first string at 19; FXA/FXM pit files at 30.
+        cases = [
+            (ROOT.parent / "GTR2Steam/GameData/Animations/Driver/ExtDriver_A.LMA", 19),
+            (ROOT.parent / "GTR2Steam/GameData/Animations/Pit/FH.FXA", 30),
+        ]
+        for p, expected in cases:
+            if not p.exists():
+                self.skipTest(f"{p.name} not present")
+            b = p.read_bytes()
+            self.assertEqual(fxm_tool._first_string_offset(b), expected)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -50,10 +50,26 @@ def read_header(path: str | Path) -> FxmHeader:
     return FxmHeader(p, len(b), magic, v1, v2, f3, f4, f5, f6)
 
 
+def _first_string_offset(b: bytes, min_len: int = 4) -> int | None:
+    i = 0
+    while i < len(b):
+        if 32 <= b[i] < 127:
+            j = i
+            while j < len(b) and 32 <= b[j] < 127:
+                j += 1
+            if j < len(b) and b[j] == 0 and j - i >= min_len:
+                return i
+            i = j + 1
+        else:
+            i += 1
+    return None
+
+
 def cmd_info(args: argparse.Namespace) -> int:
     h = read_header(args.file)
     b = Path(args.file).read_bytes()
     strings = [s.decode("latin-1", "replace") for s in b.split(b"\x00") if len(s) > 4 and all(32 <= c < 127 or c in (9, 10, 13) for c in s[:20])]
+    first = _first_string_offset(b)
     print(f"path: {h.path}")
     print(f"size: {h.size}")
     print(f"magic: {h.magic!r}")
@@ -63,6 +79,7 @@ def cmd_info(args: argparse.Namespace) -> int:
     be = h.be_fields
     print(f"header_be: {be[0]} {be[1]} {be[2]} {be[3]} {be[4]} {be[5]}")
     print(f"sha256: {hashlib.sha256(b).hexdigest()}")
+    print(f"first_string_offset: {first}")
     for s in strings[:8]:
         print(f"string: {s[:120]}")
     return 0
