@@ -17,7 +17,7 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 - **Read/Decrypt**: Yes, for known ISI signatures. Pure-Python implementation in `isi_crypt.py` (isi_key/isi_crypt, enctype 0/1, GMT skip=4).
 - **Write/Encrypt**: Yes. Can encrypt with known sign/key; round-trip verified.
 - **Verification**: `tests/test_isi_crypt.py` (pure-Python round-trip; optional cross-check against `rfactordec` binary).
-- **Gaps**: Files without recognized ISI sign/key 16-byte header are not decrypted (e.g. `DETOMASO_PANTERA_RAINSCREEN.GMT` has unknown signature layout and `rfactordec -y` produced invalid GMT magic). Other/unknown encryption variants may require further analysis.
+- **Gaps**: Files without recognized ISI sign/key 16-byte header are not decrypted. `DETOMASO_PANTERA_RAINSCREEN.GMT` is not standard ISI 16-byte-header format; header repair (normal magic/flags) makes it structurally parseable/lossless-round-trippable, but semantic correctness is unverified. Other/unknown variants may require further analysis.
 
 ## 3D/mesh formats
 

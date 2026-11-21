@@ -200,6 +200,29 @@ class GmtFormatTest(unittest.TestCase):
                     self.assertTrue(check(g), gmt_name)
                     break
 
+    def test_detomaso_rainscreen_header_repair_roundtrip(self):
+        # Known odd case: not ISI 16-byte-header encrypted; header magic/flags are mangled.
+        # Repairing to normal GMT magic+flags yields a structurally parseable/lossless-roundtrip GMT.
+        import importlib.util, struct
+        mas_p = ROOT.parent / "GTLSteam/GameData/Teams/GTC-TC-76/Detomaso Pantera/DETOMASO_PANTERA_CPIT.gtl"
+        if not mas_p.exists():
+            self.skipTest("GTL DETOMASO CPIT not present")
+        spec = importlib.util.spec_from_file_location('mas', ROOT.parent / 'rfactortools/rfactortools/mas.py')
+        mas = importlib.util.module_from_spec(spec); spec.loader.exec_module(mas)
+        normal = bytes.fromhex('c8cfd2d8ced8e6c3d6ded8bebba7bf90')
+        for name, data in mas.mas_unpack_to_data(str(mas_p)):
+            if name.upper() == 'DETOMASO_PANTERA_RAINSCREEN.GMT':
+                repaired = bytearray(data)
+                repaired[4:8] = struct.pack('<I', 0)
+                repaired[8:24] = normal
+                repaired = bytes(repaired)
+                g = gmt_format.parse_gmt(name, data=repaired)
+                self.assertEqual(g.mesh_count, 0)
+                self.assertTrue(any('RAIN_ANIM' in s for s in g.materials[0].strings))
+                self.assertEqual(gmt_format.write_gmt(g), repaired)
+                return
+        self.skipTest("DETOMASO_PANTERA_RAINSCREEN.GMT not found")
+
 
 if __name__ == "__main__":
     unittest.main()

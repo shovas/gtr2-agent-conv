@@ -88,5 +88,5 @@ Most sampled shared animation GMTs were identical; do not generalize from that s
 - Fully decode flags at 0x04 and mesh record flags at rec[1] semantics.
 - Confirm 32/48-byte vertex field semantics (UVs, tangents, colors, packed normals).
 - Build full same-track/same-archive GTL-vs-GTR2 GMT diff inventory.
-- Handle encrypted GMTs. Added pure-Python ISI 16-byte-header decrypt/encrypt (`isi_crypt.py`, verified against rfactordec). `DETOMASO_PANTERA_RAINSCREEN.GMT` still unresolved: unknown/non-standard signature layout; `rfactordec -y` produced invalid GMT magic. Needs further analysis or a different decrypt path.
+- Handle encrypted GMTs. Added pure-Python ISI 16-byte-header decrypt/encrypt (`isi_crypt.py`, verified against rfactordec). `DETOMASO_PANTERA_RAINSCREEN.GMT` is not a standard ISI 16-byte-header encrypted GMT; it has mangled magic/flags and `mesh_count=0` but contains `RAIN_ANIM`/`RAIN_ANIM.TGA` strings. Repairing bytes 4..24 to `flags=0, normal magic` yields a structurally parseable, lossless-round-trippable GMT (test: `test_detomaso_rainscreen_header_repair_roundtrip`), but semantic correctness of this repair is unverified without a known-good reference.
 - `gmtconvert` not found in workspace; any GMT transform needs a new tested converter backed by format evidence.

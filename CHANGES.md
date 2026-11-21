@@ -2,6 +2,10 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-21 18:35:00 -0500 - DETOMASO rainscreen GMT header-repair evidence
+- Investigated `DETOMASO_PANTERA_RAINSCREEN.GMT`: not standard ISI 16-byte-header encryption; mangled magic/flags, `mesh_count=0`, contains `RAIN_ANIM` strings.
+- Added test showing header repair (normal magic/flags) yields structurally parseable, lossless-round-trippable GMT; semantic correctness unverified.
+
 ## 2026-11-21 18:25:00 -0500 - FXM/LMA header BE field observation
 - Report BE-interpreted FXM/FXA/LMA header fields in `fxm_tool.py` (observed plausible; semantics unconfirmed).
 - Add LMA BE-field assertion in tests.
