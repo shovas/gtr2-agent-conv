@@ -5,6 +5,7 @@ Based on observed GTR2/GT Legends GMTs; not a complete spec.
 """
 from __future__ import annotations
 
+import re
 import struct
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -89,27 +90,44 @@ def _detect_stride(d: bytes, rec: List[int]) -> int:
     return 32
 
 
+def _find_material_starts(tail: bytes, count: int) -> List[int]:
+    # Heuristic: material records often have "L0..." stage string at +152.
+    starts = [m.start() - 152 for m in re.finditer(b'L0', tail) if m.start() >= 152]
+    starts = [s for s in starts if s >= 8]
+    # Prefer exact count match starting at 8
+    if len(starts) == count and starts[0] == 8:
+        return starts
+    # Try filtering to those that look like aligned record starts (L0 at +152)
+    # by keeping starts where the name region looks plausible
+    cand = [s for s in starts if s >= 8 and all(0 < s2 - s for s2 in starts if s2 > s)]
+    if len(cand) == count and cand[0] == 8:
+        return cand
+    # Fallback: equal split
+    rec_size = (len(tail) - 8) // count if count else 0
+    if rec_size <= 0:
+        return []
+    return [8 + i * rec_size for i in range(count)]
+
+
 def _parse_materials(tail: bytes) -> List[GmtMaterial]:
     if len(tail) < 8:
         return []
     _h0, _h1, count = struct.unpack_from('<HHI', tail, 0)
     if count <= 0 or count > 4096:
         return []
-    rec_size = (len(tail) - 8) // count
-    if rec_size <= 0:
+    starts = _find_material_starts(tail, count)
+    if not starts:
         return []
     mats: List[GmtMaterial] = []
-    for i in range(count):
-        start = 8 + i * rec_size
-        end = 8 + (i + 1) * rec_size if i < count - 1 else len(tail)
+    for i, start in enumerate(starts):
+        end = starts[i + 1] if i + 1 < len(starts) else len(tail)
         raw = tail[start:end]
         name = raw[:64].split(b'\x00', 1)[0].decode('latin-1', 'replace')
-        # extract printable strings as observed clues
         strings: List[str] = []
         j = 0
         while j < len(raw):
-            b = raw[j]
-            if 32 <= b < 127:
+            bch = raw[j]
+            if 32 <= bch < 127:
                 k = j
                 while k < len(raw) and 32 <= raw[k] < 127:
                     k += 1

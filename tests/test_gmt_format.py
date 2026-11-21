@@ -71,6 +71,20 @@ class GmtFormatTest(unittest.TestCase):
                         self.assertLess(m.record.material_index, mat_count)
                 break
 
+    def test_material_l0_heuristic_bumper_a(self):
+        mas_p = ROOT.parent / "GTR2Steam/GameData/Teams/24H/BMW M3GTR Teams/BMW_M3GTR_OBJ.gtr"
+        if not mas_p.exists():
+            self.skipTest("archive not present")
+        import importlib.util
+        spec = importlib.util.spec_from_file_location('mas', ROOT.parent / 'rfactortools/rfactortools/mas.py')
+        mas = importlib.util.module_from_spec(spec); spec.loader.exec_module(mas)
+        for name, data in mas.mas_unpack_to_data(str(mas_p)):
+            if name == 'BMW_M3GTR_BUMPER_A.GMT':
+                g = gmt_format.parse_gmt(name, data=data)
+                self.assertEqual([m.name for m in g.materials], ['WC_TEAM_BODY1_PA', 'WC_TEAM_BODY2_FL'])
+                self.assertTrue(g.materials[0].strings[1].startswith('L0'))
+                break
+
 
 if __name__ == "__main__":
     unittest.main()

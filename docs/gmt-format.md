@@ -79,7 +79,7 @@ Most sampled shared animation GMTs were identical; do not generalize from that s
 - **Vertex stride**: 32 bytes in 85350 records, 48 bytes in 11 records (FUELHOSE, EXT_DRIVER_STYLE01-10), 2 records (GRATING1 in Donington.gtr/.gtl) have rec[6]=0 but 32-byte stride fits. `rec[6]` usually equals `vo+vc*stride`.
 - **32-byte vertex (observed)**: 8 float/u32 values - appears to include pos.xyz, normal.xyz, plus 2 extra u32/float fields (UV/color/packed); exact layout not fully confirmed.
 - **48-byte vertex (observed)**: 12 float/u32 values; likely extended (extra UV/tangent/skin data) - layout not fully confirmed.
-- **Material table**: tail at `obj_list_offset` starts `u16,u16,u32 count`; contains `count` material/object entries. BACKFIRE/GOALPOST fit equal-size split; BUMPER_A suggests variable-size or complex layout - **parser treats material split as best-effort, preserves raw tail for round-trip**.
+- **Material table**: tail at `obj_list_offset` starts `u16,u16,u32 count`; contains `count` material/object entries. Variable-size in general. **L0 heuristic**: many records have `L0...` stage string at `+152`; when L0 candidates match count and start at 8, `gmt_format.py` uses them as boundaries (fixes BUMPER_A). Fallback is equal split; raw tail always preserved for lossless round-trip.
 - **Structural round-trip**: `gmt_format.py` parses header, mesh table, mesh vertex/index blobs, material table best-effort, and preserves original bytes for lossless round-trip. Tested on real GTR2/GTL GMTs.
 
 ## Unknowns / next steps
