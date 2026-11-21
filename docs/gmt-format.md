@@ -19,7 +19,7 @@ First-pass binary analysis for GTL -> GTR2 conversion. **Not a complete spec**; 
 | Offset | Type (LE) | Observed/example | Notes |
 |---:|---|---|---|
 | 0x00 | u32 | 72138, 69904, 223002 | **Object/material list offset** (points near EOF; `size - offset` is trailing table size, commonly 1152+). Confirmed by ASCII names at offset. |
-| 0x04 | u32 | `0x04000000`, `0x04000020`, `0x20`, `0x0` | Flags/format bits (observed). Meaning not fully decoded; bit `0x20` and `0x04000000` appear common. |
+| 0x04 | u32 | `0x04000020` (12320), `0x20` (6207), `0x04000000` (6128), `0x0` (2273), `0x02000020` (2) | Header flags (observed across 26930 normal-magic archive GMTs). Semantics not fully proven; bits `0x04000000` and `0x20` dominate. |
 | 0x08 | 16 bytes | `c8 cf d2 d8 ce d8 e6 c3 d6 de d8 be bb a7 bf 90` | ISI obfuscated magic/signature family for normal GTR2/GTL GMTs. |
 | 0x16C | u32, u32 | `count, first_record` | Mesh table header. Validated on 26916/26931 archive GMTs with `0 < count <= 256` and bounds check. |
 | `first_record + i*108` | 27*u32 | record | Mesh record. Observed fields: `[1]=flags`, `[3]=vertex_count`, `[4]=vertex_offset`, `[10]=index_count`, `[11]=index_offset`. |
@@ -75,7 +75,7 @@ Most sampled shared animation GMTs were identical; do not generalize from that s
 
 ## Unknowns / next steps
 - Decode remaining body: material/texture object table at `obj_list_offset` - **partially observed**: header `u16/u16?, u32 count` followed by `count` records (~1220 bytes in BACKFIRE sample) containing object/material name, shader stage strings (`L0DIFFUSET0`, `L1USEVERTEXONLY`, `L2USEVERTEXPIXEL`), texture names (e.g. `BFA0.DDS`), and float params. Full record layout, LODs, UV sets, vertex format variants still unknown.
-- Fully decode flags at 0x04 and mesh record flags at rec[1].
+- Fully decode flags at 0x04 and mesh record flags at rec[1]. **Observed distributions**: header flags 5 values (see table). Mesh rec[1] flags 13 unique values across 85363 records: `0x20004011` (49709), `0x4011` (21390), `0x20004035` (8637), `0x4035` (3413), `0x20004015` (1585), `0x4015` (320), `0x20006011` (192), `0x6011` (80), `0x20006035` (18), `0x20004013` (11), `0x6015` (3), `0x6035` (3), `0x20004001` (2). Bit patterns visible (0x20000000, 0x4000/0x6000, low nibble variants) but semantics unproven. Also `rec[6] == vo+vc*32` in 85350/85363 records (13 exceptions: GRATING1, FUELHOSE, EXT_DRIVER_STYLE01-10).
 - Build full same-track/same-archive GTL-vs-GTR2 GMT diff inventory; cross-archive basename comparison is noisy due name collisions.
 - Handle encrypted GMTs: `rfactortools/crypt.py` needs `_crypt` C extension (not built here). `DETOMASO_PANTERA_RAINSCREEN.GMT` appears encrypted/scrambled.
 - `gmtconvert` not found in workspace; legacy expected it. Any GMT transformation needs a new, tested converter with format spec evidence.
