@@ -88,5 +88,5 @@ Most sampled shared animation GMTs were identical; do not generalize from that s
 - Fully decode flags at 0x04 and mesh record flags at rec[1] semantics.
 - Confirm 32/48-byte vertex field semantics (UVs, tangents, colors, packed normals).
 - Build full same-track/same-archive GTL-vs-GTR2 GMT diff inventory.
-- Handle encrypted GMTs (`rfactortools._crypt` C extension not built). `DETOMASO_PANTERA_RAINSCREEN.GMT` appears encrypted/scrambled.
+- Handle encrypted GMTs (`rfactortools._crypt` C extension not built). `DETOMASO_PANTERA_RAINSCREEN.GMT` appears encrypted/scrambled. **TODO**: experiment with decrypting encrypted GMTs. Tried compiling `rfactortools/rfactordec.c` and running with `-y` on `DETOMASO_PANTERA_RAINSCREEN.GMT`; output did not have normal GMT magic - likely wrong key/signature or different encryption. Needs proper decrypt path/verification.
 - `gmtconvert` not found in workspace; any GMT transform needs a new tested converter backed by format evidence.
