@@ -14,18 +14,29 @@ First-pass binary analysis for GTL -> GTR2 conversion. **Not a complete spec**; 
 - Referenced by `.trk` instances, car graphics/configs (`.cas`/vehicle chains), and MAS archive contents.
 - Conversion risk: incompatible GMT versions/layouts can cause invisible objects, load failures, or crashes.
 
-## Observed GTR2/GT Legends header (first 24+ bytes)
+## Observed GTR2/GT Legends header/structure (first pass)
 
 | Offset | Type (LE) | Observed/example | Notes |
 |---:|---|---|---|
-| 0x00 | u32 | 72138, 69904, 223002, 333428 | Version/size-related; close to, not always equal to, file size. |
-| 0x04 | u32 | `0x04000000`, `0x04000020` | Flags/version bits; differs in at least one GTL/GTR2 pair. |
-| 0x08 | 16 bytes | `c8 cf d2 d8 ce d8 e6 c3 d6 de d8 be bb a7 bf 90` | ISI obfuscated magic/signature family. Same family seen in GTR2/GT Legends GMTs and `GOALPOST.GMT`. |
-| 0x18+ | mixed u32/float | varies | Likely bounds/transform/metadata; not yet decoded. |
+| 0x00 | u32 | 72138, 69904, 223002 | **Object/material list offset** (points near EOF; `size - offset` is trailing table size, commonly 1152+). Confirmed by ASCII names at offset. |
+| 0x04 | u32 | `0x04000000`, `0x04000020`, `0x20`, `0x0` | Flags/format bits (observed). Meaning not fully decoded; bit `0x20` and `0x04000000` appear common. |
+| 0x08 | 16 bytes | `c8 cf d2 d8 ce d8 e6 c3 d6 de d8 be bb a7 bf 90` | ISI obfuscated magic/signature family for normal GTR2/GTL GMTs. |
+| 0x16C | u32, u32 | `count, first_record` | Mesh table header. Validated on 26916/26931 archive GMTs with `0 < count <= 256` and bounds check. |
+| `first_record + i*108` | 27*u32 | record | Mesh record. Observed fields: `[1]=flags`, `[3]=vertex_count`, `[4]=vertex_offset`, `[10]=index_count`, `[11]=index_offset`. |
+| vertex | 32 bytes | `u32, xyz floats, normal xyz floats, u32` | Observed by structure probe; consistent with external reference. |
+| indices | 4-byte lead + u16[] | triangle list | Observed `index_offset + 4 + index_count*2` within file. |
 
 Examples:
 - `BMW_M3GTR_OBJ.gtr` -> `BMW_M3GTR_BUMPER_A.GMT`: `06 0f 01 00 00 00 00 04 c8 cf ...`
 - `Anderstorp.gtl` -> `TWLAN13.GMT`: `ac 82 02 00 20 00 00 04 c8 cf ...`
+- `GOALPOST.GMT`: `4a 17 00 00 00 00 00 00 c8 cf ...`
+
+## Inventory findings (GTR2Steam + GTLSteam, `.gtr/.gtl/.mas` archives)
+
+- **26931 GMT files** scanned in archives.
+- **26930** have normal GTR2/GTL magic; **1** odd magic: `GTLSteam/GameData/Teams/GTC-TC-76/Detomaso Pantera/DETOMASO_PANTERA_CPIT.gtl` -> `DETOMASO_PANTERA_RAINSCREEN.GMT` (3072 bytes, magic `ced8e6c3d6ded8bdbba6bf9000000000`, flags `0xd8d2cfc8`). Looks encrypted/scrambled (GMT encryption skips first 4 bytes in `rfactortools/crypt.py`; C extension unavailable here). Treat as **needs decrypt/verify**, not normal GMT.
+- **26916** pass mesh-table bounds check with relaxed count (`<=256`); **15** fail strict `<=64` sanity cap: 14 are GTR2 `*_MOTEC_ADL2.GMT` cockpit display meshes with count 72-76 and valid bounds; 1 is the odd encrypted rainscreen. The old `<=64` cap was too strict for car cockpit GMTs.
+- Flag distribution: `0x04000020` (12320), `0x20` (6207), `0x04000000` (6128), `0x0` (2273), rare `0x02000020` (2), plus encrypted outlier.
 
 ## GTL vs GTR2 comparison
 
@@ -33,9 +44,9 @@ Loose GMTs present in both installs (same basename, case-insensitive): **22 comm
 
 | File | GTL | GTR2 | Observation |
 |---|---:|---:|---|
-| `M-FPDriver.gmt` | 335,096 bytes; hdr `333428, 0x04000020, c8cf...` | 224,670 bytes; hdr `223002, 0x04000000, c8cf...` | Same magic family, different flags/size/content. Not safely copy-assumable. |
+| `M-FPDriver.gmt` | 335,096 bytes; hdr obj=333428, fl=`0x04000020`, c8cf... | 224,670 bytes; hdr obj=223002, fl=`0x04000000`, c8cf... | Same magic family, different flags/obj offset/size/content. Not safely copy-assumable. |
 
-Most sampled shared animation GMTs were identical; do not generalize from that subset.
+Most sampled shared animation GMTs were identical; do not generalize from that subset. Car/track GMTs inside archives need per-file or per-category validation.
 
 ## Relation to rFactor GMT tooling
 
@@ -57,8 +68,12 @@ Most sampled shared animation GMTs were identical; do not generalize from that s
 ## External parser clues (reference only)
 - `../gtr2-agent-tools/scripts/gtr2_driving/gmt.py` (CC BY-NC 4.0, read-only, track-mesh focused) parses GTR2 GMTs by reading mesh table at `0x16C`: `u32 count, u32 first_record`; records 108 bytes, `u32[27]` with `flags=[1], vertex_count=[3], vertex_offset=[4], index_count=[10], index_offset=[11]`; vertices 32 bytes (`u32, pos xyz floats, normal xyz floats, u32`); indices `u16` triangle list with 4-byte lead. It validates bounds/counts and raises on implausible data. Useful as a structural clue; verify against GTL/GTR2 car and track GMT variants before relying on it.
 
+## Tooling
+- `gmt_tool.py`: `info`, `scan`, `diff` for GMT header/mesh-table inspection. Uses observed structure only; no geometry conversion.
+
 ## Unknowns / next steps
-- Decode full GMT body: sections, materials, textures, vertices/indices, normals/UVs, LODs, shaders.
-- Determine meaning of u32 at 0x00 and flags at 0x04.
-- Build an inventory of GTL GMTs differing from GTR2 counterparts by category (car/track/anim/driver).
-- Locate or reconstruct `gmtconvert` behavior before attempting GMT transforms.
+- Decode remaining body: material/texture object table (at `obj_list_offset`), LODs, shader params, UV sets, vertex format variants.
+- Fully decode flags at 0x04 and mesh record flags at rec[1].
+- Build full GTL-vs-GTR2 GMT diff inventory by category (car/track/anim/driver), including archive contents; current check only covered loose GMTs and one known M-FPDriver diff.
+- Handle encrypted GMTs: `rfactortools/crypt.py` needs `_crypt` C extension (not built here). `DETOMASO_PANTERA_RAINSCREEN.GMT` appears encrypted/scrambled.
+- `gmtconvert` not found in workspace; legacy expected it. Any GMT transformation needs a new, tested converter with format spec evidence.

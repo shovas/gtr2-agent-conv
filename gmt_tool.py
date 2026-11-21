@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Minimal GMT inspection/validation tool for GTL/GTR2 conversion.
+"""GMT inspection tool for GTL/GTR2 conversion.
 
-First-pass, evidence-based: validates observed GTR2/GT Legends GMT header family.
-It does NOT convert GMT geometry; use for inventory, sanity checks, and diffs.
+Evidence-based, first-pass: validates observed GTR2/GT Legends GMT headers and
+the mesh table at 0x16C. It does NOT convert GMT geometry.
 """
 from __future__ import annotations
 
@@ -18,25 +18,92 @@ GMT_MAGIC_GTR_GTL = bytes.fromhex("c8cfd2d8ced8e6c3d6ded8bebba7bf90")
 
 
 @dataclass
+class GmtMeshRecord:
+    index: int
+    flags: int
+    vertex_count: int
+    vertex_offset: int
+    index_count: int
+    index_offset: int
+
+    @property
+    def index_bytes_end(self) -> int:
+        # observed: 4-byte lead + u16 indices
+        return self.index_offset + 4 + self.index_count * 2
+
+    @property
+    def vertex_bytes_end(self) -> int:
+        # observed: 32-byte vertices
+        return self.vertex_offset + self.vertex_count * 32
+
+
+@dataclass
 class GmtHeader:
     path: Path
     size: int
-    v0: int
+    obj_list_offset: int
     flags: int
     magic: bytes
+    mesh_count: int | None = None
+    mesh_first: int | None = None
+    mesh_table_ok: bool = False
+    meshes: list[GmtMeshRecord] | None = None
+
+    @property
+    def v0(self) -> int:
+        # Back-compat alias; field is an offset, not a version.
+        return self.obj_list_offset
 
     @property
     def known_magic(self) -> bool:
         return self.magic == GMT_MAGIC_GTR_GTL
 
+    @property
+    def likely_encrypted(self) -> bool:
+        # GMT encryption skips first 4 bytes, so obj_list_offset may survive but
+        # flags/magic become scrambled. Heuristic, not proof.
+        return (not self.known_magic) and len(self.magic) == 16
 
-def read_header(path: str | os.PathLike) -> GmtHeader:
+
+def _parse_mesh_table(data: bytes) -> tuple[int | None, int | None, bool, list[GMTMeshRecord]]:
+    if len(data) < 0x174:
+        return None, None, False, []
+    count, first = struct.unpack_from("<II", data, 0x16C)
+    if not (0 < count <= 256 and first >= 0x174 and first + count * 108 <= len(data)):
+        return count, first, False, []
+    meshes: list[GMTMeshRecord] = []
+    for i in range(count):
+        rec = struct.unpack_from("<27I", data, first + i * 108)
+        meshes.append(GmtMeshRecord(
+            index=i,
+            flags=rec[1],
+            vertex_count=rec[3],
+            vertex_offset=rec[4],
+            index_count=rec[10],
+            index_offset=rec[11],
+        ))
+    ok = all(m.vertex_bytes_end <= len(data) and m.index_bytes_end <= len(data) for m in meshes)
+    return count, first, ok, meshes
+
+
+def read_header(path: str | os.PathLike, parse_meshes: bool = False) -> GmtHeader:
     p = Path(path)
     data = p.read_bytes()
     if len(data) < 24:
         raise ValueError(f"file too small for GMT header: {p}")
-    v0, flags, magic = struct.unpack_from("<II16s", data, 0)
-    return GmtHeader(path=p, size=len(data), v0=v0, flags=flags, magic=magic)
+    obj_list_offset, flags, magic = struct.unpack_from("<II16s", data, 0)
+    mesh_count, mesh_first, mesh_ok, meshes = _parse_mesh_table(data)
+    return GmtHeader(
+        path=p,
+        size=len(data),
+        obj_list_offset=obj_list_offset,
+        flags=flags,
+        magic=magic,
+        mesh_count=mesh_count,
+        mesh_first=mesh_first,
+        mesh_table_ok=mesh_ok,
+        meshes=meshes if parse_meshes else None,
+    )
 
 
 def sha256(path: str | os.PathLike) -> str:
@@ -53,35 +120,47 @@ def scan_gmts(root: str | os.PathLike) -> list[Path]:
 
 
 def cmd_info(args: argparse.Namespace) -> int:
-    h = read_header(args.file)
+    h = read_header(args.file, parse_meshes=args.meshes)
     print(f"path: {h.path}")
     print(f"size: {h.size}")
-    print(f"v0: {h.v0} (0x{h.v0:08x})")
+    print(f"obj_list_offset: {h.obj_list_offset} (0x{h.obj_list_offset:08x})")
     print(f"flags: {h.flags} (0x{h.flags:08x})")
     print(f"magic: {h.magic.hex()}")
     print(f"known_gtr_gtl_magic: {h.known_magic}")
+    print(f"likely_encrypted: {h.likely_encrypted}")
+    print(f"mesh_count: {h.mesh_count}")
+    print(f"mesh_first: {h.mesh_first}")
+    print(f"mesh_table_ok: {h.mesh_table_ok}")
     print(f"sha256: {sha256(h.path)}")
+    if args.meshes and h.meshes:
+        for m in h.meshes:
+            print(
+                f"mesh[{m.index}]: flags=0x{m.flags:08x} vc={m.vertex_count} vo={m.vertex_offset} "
+                f"ic={m.index_count} io={m.index_offset}"
+            )
     return 0
 
 
 def cmd_scan(args: argparse.Namespace) -> int:
+    paths = scan_gmts(args.root)
     bad = 0
-    for p in scan_gmts(args.root):
+    for p in paths:
         try:
             h = read_header(p)
         except Exception as e:  # noqa: BLE001
             print(f"ERROR\t{p}\t{e}")
             bad += 1
             continue
-        status = "OK" if h.known_magic else "UNKNOWN_MAGIC"
+        ok = h.known_magic and h.mesh_table_ok
+        status = "OK" if ok else ("UNKNOWN_MAGIC" if not h.known_magic else "BAD_MESH_TABLE")
         if status != "OK":
             bad += 1
         if args.verbose or status != "OK":
-            print(f"{status}\t{h.size}\t0x{h.flags:08x}\t{h.magic.hex()}\t{p}")
-    if args.verbose or bad:
-        print(f"scanned={len(scan_gmts(args.root))} issues={bad}")
-    else:
-        print(f"scanned={len(scan_gmts(args.root))} issues=0")
+            print(
+                f"{status}\t{h.size}\tobj=0x{h.obj_list_offset:08x}\tfl=0x{h.flags:08x}\t"
+                f"meshes={h.mesh_count}\t{h.magic.hex()}\t{p}"
+            )
+    print(f"scanned={len(paths)} issues={bad}")
     return 0 if bad == 0 else 1
 
 
@@ -107,7 +186,12 @@ def cmd_diff(args: argparse.Namespace) -> int:
             else:
                 diff += 1
                 lh, rh = read_header(lp), read_header(rp)
-                print(f"DIFF\t{name}\t{lh.size}\t{rh.size}\t0x{lh.flags:08x}\t0x{rh.flags:08x}")
+                print(
+                    f"DIFF\t{name}\t{lh.size}\t{rh.size}\t"
+                    f"obj=0x{lh.obj_list_offset:08x}/0x{rh.obj_list_offset:08x}\t"
+                    f"fl=0x{lh.flags:08x}/0x{rh.flags:08x}\t"
+                    f"meshes={lh.mesh_count}/{rh.mesh_count}"
+                )
     print(f"same={same} diff={diff} left_only={left_only} right_only={right_only}")
     return 0
 
@@ -116,11 +200,12 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     sub = ap.add_subparsers(dest="cmd", required=True)
 
-    p = sub.add_parser("info", help="show GMT header info")
+    p = sub.add_parser("info", help="show GMT header/mesh info")
     p.add_argument("file")
+    p.add_argument("--meshes", action="store_true", help="print mesh record summary")
     p.set_defaults(func=cmd_info)
 
-    p = sub.add_parser("scan", help="scan directory for .gmt files and validate header magic")
+    p = sub.add_parser("scan", help="scan directory for .gmt files and validate header/mesh table")
     p.add_argument("root")
     p.add_argument("-v", "--verbose", action="store_true")
     p.set_defaults(func=cmd_scan)
