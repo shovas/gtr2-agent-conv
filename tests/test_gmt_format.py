@@ -274,6 +274,35 @@ class GmtFormatTest(unittest.TestCase):
                     checked += 1
         self.assertGreater(checked, 0)
 
+    def test_material_texture_strings_in_stage3_observed(self):
+        # Observed in large L0-heuristic sample: texture filename strings (.DDS/.TGA/.BMP)
+        # appear in stage block 3, not stages 0-2, for nearly all materials.
+        import importlib.util, struct, glob, os, re
+        spec = importlib.util.spec_from_file_location('mas', ROOT.parent / 'rfactortools/rfactortools/mas.py')
+        mas = importlib.util.module_from_spec(spec); spec.loader.exec_module(mas)
+        archives = sorted(glob.glob(str(ROOT.parent / 'GTR2Steam/GameData/**/*.gtr'), recursive=True))[:6]
+        archives += sorted(glob.glob(str(ROOT.parent / 'GTLSteam/GameData/**/*.gtl'), recursive=True))[:3]
+        if not archives:
+            self.skipTest("no archives")
+        tex_re = re.compile(br'\.(DDS|TGA|BMP)', re.I)
+        s0=s1=s2=s3=0
+        for arc in archives:
+            for name, data in mas.mas_unpack_to_data(arc):
+                if not name.lower().endswith('.gmt'): continue
+                g = gmt_format.parse_gmt(name, data=data)
+                for m in g.materials:
+                    if not m.stages or not m.stages[0].name.startswith('L0'): continue
+                    for si, st in enumerate(m.stages[:4]):
+                        has = bool(tex_re.search(st.raw))
+                        if si==0 and has: s0+=1
+                        if si==1 and has: s1+=1
+                        if si==2 and has: s2+=1
+                        if si==3 and has: s3+=1
+        self.assertEqual(s0, 0)
+        self.assertEqual(s1, 0)
+        self.assertEqual(s2, 0)
+        self.assertGreater(s3, 0)
+
 
 if __name__ == "__main__":
     unittest.main()
