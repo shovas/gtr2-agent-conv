@@ -87,6 +87,19 @@ class MediaToolTest(unittest.TestCase):
             self.assertEqual(a.pixels, b.pixels)
             self.assertEqual((a.width,a.height,a.bpp,a.image_type), (2,2,24,10))
 
+    def test_bmp_roundtrip(self):
+        with tempfile.TemporaryDirectory() as td:
+            src = Path(td) / "a.bmp"
+            dst = Path(td) / "b.bmp"
+            img = media_tool.BmpImage(width=2, height=2, bpp=24, compression=0,
+                                      pixels_bgra=bytes(range(12)))
+            src.write_bytes(img.to_bytes())
+            info = media_tool.bmp_roundtrip(src, dst)
+            self.assertEqual(info.format, "bmp")
+            a = media_tool.read_bmp(src)
+            b = media_tool.read_bmp(dst)
+            self.assertEqual((a.width,a.height,a.bpp,a.pixels_bgra), (b.width,b.height,b.bpp,b.pixels_bgra))
+
 
 if __name__ == "__main__":
     unittest.main()

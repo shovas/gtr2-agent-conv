@@ -70,10 +70,14 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 - **Verification**: `tests/test_media_tool.py` (synthetic type 2 byte round-trip, synthetic type 10 pixel round-trip, real type 2 when present).
 - **Gaps**: other TGA types/color maps not fully implemented.
 
-### BMP/JPG/MP3
-- **Read**: Identify; basic BMP header parse; BMP-as-TGA quirk detection.
+### BMP
+- **Read/Write**: Semantic read/write for uncompressed BI_RGB 24/32-bit BMP via `media_tool.py` (top-down memory representation, bottom-up file write).
+- **Verification**: `tests/test_media_tool.py` (synthetic 24-bit round-trip).
+- **Gaps**: compressed/other DIB variants not implemented; BMP-as-TGA quirk detected but routed separately.
+
+### JPG/MP3
+- **Read**: Identify; basic header detection.
 - **Write**: Lossless byte copy possible.
-- **Verification**: `tests/test_media_tool.py` (identification coverage where present).
 - **Tool**: `media_tool.py`.
 - **Gaps**: full semantic decode/encode/edit not implemented in-repo.
 

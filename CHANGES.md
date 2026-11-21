@@ -2,6 +2,11 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-21 19:05:00 -0500 - BMP semantic read/write (BI_RGB 24/32)
+- Add semantic BMP read/write for uncompressed BI_RGB 24/32-bit in `media_tool.py`.
+- Fix BMP header identification unpack bug.
+- Add BMP round-trip test.
+
 ## 2026-11-21 18:55:00 -0500 - TGA semantic read/write (type 2/3/10)
 - Add TGA semantic read/write in `media_tool.py` for type 2/3 uncompressed and type 10 RLE (pixel-identical round-trip; type 2/3 byte-identical).
 - Add synthetic and real-file TGA round-trip tests.

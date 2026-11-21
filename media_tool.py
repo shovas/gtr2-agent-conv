@@ -63,7 +63,7 @@ def identify(path: str | Path) -> MediaInfo:
     if head.startswith(b"BM"):
         details = {}
         if size >= 54:
-            fsize, _, off = struct.unpack_from("<IHHI", b, 2)
+            fsize, _, _, off = struct.unpack_from("<IHHI", b, 2)
             dib = struct.unpack_from("<I", b, 14)[0]
             details = {"file_size_field": fsize, "pixel_offset": off, "dib_size": dib}
         return MediaInfo(str(p), size, "bmp", details)
@@ -205,6 +205,69 @@ def tga_roundtrip(src: str | Path, dst: str | Path) -> MediaInfo:
     return identify(dst)
 
 
+@dataclass
+class BmpImage:
+    width: int
+    height: int
+    bpp: int
+    compression: int
+    pixels_bgra: bytes  # top-down, no row padding, bpp/8 bytes per pixel
+
+    def to_bytes(self) -> bytes:
+        bytespp = self.bpp // 8
+        row_raw = self.width * bytespp
+        row_padded = (row_raw + 3) & ~3
+        pad = b'\x00' * (row_padded - row_raw)
+        pixel_data = bytearray()
+        # BMP stores bottom-up
+        for y in range(self.height - 1, -1, -1):
+            off = y * row_raw
+            pixel_data.extend(self.pixels_bgra[off:off+row_raw])
+            pixel_data.extend(pad)
+        pixel_offset = 14 + 40
+        file_size = pixel_offset + len(pixel_data)
+        hdr = struct.pack('<2sIHHI', b'BM', file_size, 0, 0, pixel_offset)
+        dib = struct.pack('<IiiHHIIiiII', 40, self.width, self.height, 1, self.bpp, 0,
+                          len(pixel_data), 2835, 2835, 0, 0)
+        return bytes(hdr + dib + pixel_data)
+
+
+def read_bmp(path: str | Path) -> BmpImage:
+    p = Path(path)
+    b = p.read_bytes()
+    if not b.startswith(b'BM') or len(b) < 54:
+        raise ValueError('Not a BMP')
+    pixel_offset = struct.unpack_from('<I', b, 10)[0]
+    dib = struct.unpack_from('<I', b, 14)[0]
+    if dib < 40:
+        raise ValueError(f'Unsupported BMP DIB size {dib}')
+    w, h, planes, bpp, comp = struct.unpack_from('<iiHHI', b, 18)
+    if comp != 0 or bpp not in (24, 32):
+        raise ValueError(f'Unsupported BMP compression/bpp {comp}/{bpp}')
+    height = abs(h)
+    top_down = h < 0
+    bytespp = bpp // 8
+    row_raw = w * bytespp
+    row_padded = (row_raw + 3) & ~3
+    pixels = bytearray(w * height * bytespp)
+    for row in range(height):
+        src_y = row if top_down else (height - 1 - row)
+        src_off = pixel_offset + src_y * row_padded
+        dst_off = row * row_raw
+        pixels[dst_off:dst_off+row_raw] = b[src_off:src_off+row_raw]
+    # store top-down in memory
+    # wait - I looped row from 0..height-1 as destination top-down, reading from src_y. ok.
+    # but src_y for bottom-up: height-1-row gives bottom row first. I want dst row 0 = top row.
+    # so for bottom-up (top_down False): src_y = height-1-row => dst_off=row*row_raw gives top-down. yes.
+    return BmpImage(width=w, height=height, bpp=bpp, compression=comp, pixels_bgra=bytes(pixels))
+
+
+def bmp_roundtrip(src: str | Path, dst: str | Path) -> MediaInfo:
+    img = read_bmp(src)
+    Path(dst).write_bytes(img.to_bytes())
+    return identify(dst)
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__)
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -219,6 +282,10 @@ def main(argv=None):
     p.add_argument("src")
     p.add_argument("dst")
     p.set_defaults(func=lambda a: print(asdict(tga_roundtrip(a.src, a.dst))) or 0)
+    p = sub.add_parser("bmp-roundtrip")
+    p.add_argument("src")
+    p.add_argument("dst")
+    p.set_defaults(func=lambda a: print(asdict(bmp_roundtrip(a.src, a.dst))) or 0)
     args = ap.parse_args(argv)
     return args.func(args)
 

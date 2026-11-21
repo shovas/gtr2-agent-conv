@@ -86,23 +86,23 @@ python3 fxm_tool.py info <file.fxm|file.fxa|file.lma>
 
 **Limitations**: Internal animation/keyframe/node semantics are not decoded.
 
-## 6. Identify media formats / WAV & TGA round-trip (partial)
+## 6. Identify media formats / WAV, TGA, BMP round-trip (partial)
 
-**What it does**: Identifies common GTL/GTR2 media files (WAV/DDS/TGA/BMP/JPG/MP3/BIK), parses basic headers, detects BMP-as-TGA quirk, performs semantic WAV PCM round-trip, and semantic TGA read/write (type 2/3/10).
+**What it does**: Identifies common GTL/GTR2 media files (WAV/DDS/TGA/BMP/JPG/MP3/BIK), parses basic headers, detects BMP-as-TGA quirk, and performs semantic round-trip for WAV PCM, TGA type 2/3/10, and uncompressed BI_RGB 24/32-bit BMP.
 
 **How to ask**:
 - "Identify this DDS/BMP/BIK file."
-- "Round-trip this WAV file and verify it."
-- "Round-trip this TGA file."
+- "Round-trip this WAV/TGA/BMP file and verify it."
 
 **Commands**:
 ```bash
 python3 media_tool.py info <file>
 python3 media_tool.py wav-roundtrip <src.wav> <dst.wav>
 python3 media_tool.py tga-roundtrip <src.tga> <dst.tga>
+python3 media_tool.py bmp-roundtrip <src.bmp> <dst.bmp>
 ```
 
-**Limitations**: DDS pixel decode/encode (DXT/BC) not implemented; TGA limited to type 2/3/10; BMP/JPG/MP3 semantic decode/encode/edit not implemented; BIK proprietary.
+**Limitations**: DDS pixel decode/encode (DXT/BC) not implemented; TGA limited to type 2/3/10; BMP limited to uncompressed BI_RGB 24/32; JPG/MP3 semantic decode/encode/edit not implemented; BIK proprietary.
 
 ## 7. Consult format documentation
 
