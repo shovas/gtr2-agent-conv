@@ -459,6 +459,26 @@ class GmtFormatTest(unittest.TestCase):
                     total += 1
         self.assertGreater(total, 0)
 
+    def test_vertex_base_f0_mostly_zero_observed(self):
+        # Observed: base vertex f0 (u32 at offset 0 of 32-byte vertex) is 0 in vast majority of samples.
+        import importlib.util, glob, os
+        spec = importlib.util.spec_from_file_location('mas', ROOT.parent / 'rfactortools/rfactortools/mas.py')
+        mas = importlib.util.module_from_spec(spec); spec.loader.exec_module(mas)
+        archives = sorted(glob.glob(str(ROOT.parent / 'GTR2Steam/GameData/**/*.gtr'), recursive=True))[:4]
+        archives += sorted(glob.glob(str(ROOT.parent / 'GTLSteam/GameData/**/*.gtl'), recursive=True))[:2]
+        if not archives:
+            self.skipTest("no archives")
+        zero=nonzero=0
+        for arc in archives:
+            for name, data in mas.mas_unpack_to_data(arc):
+                if not name.lower().endswith('.gmt'): continue
+                g = gmt_format.parse_gmt(name, data=data)
+                for mesh in g.meshes:
+                    for v in mesh.base_vertices[:20]:
+                        if v.f0 == 0: zero += 1
+                        else: nonzero += 1
+        self.assertGreater(zero, nonzero * 10)
+
 
 if __name__ == "__main__":
     unittest.main()
