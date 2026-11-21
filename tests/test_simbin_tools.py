@@ -45,6 +45,19 @@ class SimbinToolsTest(unittest.TestCase):
         self.assertTrue(h.known_magic)
         self.assertEqual(h.magic, b"FXA ")
 
+    def test_real_lma_if_present(self):
+        p = ROOT.parent / "GTR2Steam/GameData/Animations/Driver/ExtDriver_A.LMA"
+        if not p.exists():
+            self.skipTest("LMA not present")
+        h = fxm_tool.read_header(p)
+        self.assertTrue(h.known_magic)
+        self.assertEqual(h.magic, b"LMA ")
+        b = p.read_bytes()
+        with tempfile.TemporaryDirectory() as td:
+            out = Path(td) / "x.lma"
+            fxm_tool.main(["roundtrip", str(p), str(out)])
+            self.assertEqual(out.read_bytes(), b)
+
 
 if __name__ == "__main__":
     unittest.main()

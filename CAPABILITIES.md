@@ -44,9 +44,9 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 - **Tool**: `gzip_simbin_tool.py`.
 
 ### FXM/FXA/LMA
-- **Read**: Header identification + lossless container read.
+- **Read**: Header identification + lossless container read. Recognizes observed magics `FXM `, `FXA `, `LMA ` (extension may not match magic).
 - **Write**: Lossless round-trip.
-- **Verification**: `tests/test_simbin_tools.py`.
+- **Verification**: `tests/test_simbin_tools.py` (includes real LMA round-trip when present).
 - **Tool**: `fxm_tool.py`.
 - **Gaps**: internal animation/keyframe/node/bone semantics.
 

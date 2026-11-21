@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Inspect SimBin FXM/FXA/LMA animation container files.
 
-Observed magic: b'FXM ' or b'FXA '. LMA files observed with FXM magic.
+Observed magics: b'FXM ', b'FXA ', b'LMA ' (extension does not always match magic).
 Header is partially understood; tool validates magic and reports observed fields.
 Read/write is lossless at file-bytes level.
 """
@@ -13,7 +13,7 @@ import struct
 from dataclasses import dataclass
 from pathlib import Path
 
-MAGICS = {b"FXM ", b"FXA "}
+MAGICS = {b"FXM ", b"FXA ", b"LMA "}
 
 
 @dataclass

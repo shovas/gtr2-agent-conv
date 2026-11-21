@@ -2,6 +2,10 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-21 18:05:00 -0500 - FXM/FXA/LMA magic coverage
+- Recognize `LMA ` magic in `fxm_tool.py` (in addition to `FXM `/`FXA `); extension may not match magic.
+- Add real LMA header/round-trip test.
+
 ## 2026-11-21 17:52:00 -0500 - GMT 48-stride extra vertex decode view
 - Decode 48-stride 16-byte extra vertex blocks into `GmtVertexExtra(raw_u32, raw_f32)` while preserving lossless raw round-trip.
 - Add assertions in GMT format tests.
