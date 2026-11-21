@@ -120,6 +120,7 @@ class GmtMaterial:
     raw: bytes
     name: str
     strings: List[str]
+    header_raw: bytes = b""  # first 152 bytes of material record (observed)
     stages: List[GmtStage] = field(default_factory=list)
 
 
@@ -197,7 +198,7 @@ def _parse_materials(tail: bytes) -> List[GmtMaterial]:
                 sraw = raw[sb:sb + 264]
                 sname = sraw[:64].split(b'\x00', 1)[0].decode('latin-1', 'replace')
                 stages.append(GmtStage(index=si, name=sname, raw=sraw, strings=_extract_ascii_strings(sraw)))
-        mats.append(GmtMaterial(index=i, raw=raw, name=name, strings=strings, stages=stages))
+        mats.append(GmtMaterial(index=i, raw=raw, name=name, strings=strings, header_raw=raw[:152], stages=stages))
     return mats
 
 

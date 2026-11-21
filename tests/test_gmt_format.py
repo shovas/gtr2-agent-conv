@@ -223,6 +223,29 @@ class GmtFormatTest(unittest.TestCase):
                 return
         self.skipTest("DETOMASO_PANTERA_RAINSCREEN.GMT not found")
 
+    def test_material_header_and_stage_trailing_params_observed(self):
+        # Observed (semantics unconfirmed) numeric fields in material header and stage tails.
+        import importlib.util, struct
+        spec = importlib.util.spec_from_file_location('mas', ROOT.parent / 'rfactortools/rfactortools/mas.py')
+        mas = importlib.util.module_from_spec(spec); spec.loader.exec_module(mas)
+        mas_p = ROOT.parent / "GTR2Steam/GameData/Teams/24H/BMW M3GTR Teams/BMW_M3GTR_OBJ.gtr"
+        if not mas_p.exists():
+            self.skipTest("archive not present")
+        for name, data in mas.mas_unpack_to_data(str(mas_p)):
+            if name == 'BMW_M3GTR_BUMPER_A.GMT':
+                g = gmt_format.parse_gmt(name, data=data)
+                self.assertEqual(gmt_format.write_gmt(g), data)
+                m = g.materials[0]
+                self.assertEqual(len(m.header_raw), 152)
+                hdr = struct.unpack_from('<38I', m.header_raw)
+                self.assertEqual(hdr[32:38], (1065353216, 2, 1, 1109393408, 0, 3))
+                s0 = struct.unpack_from('<66I', m.stages[0].raw)
+                s1 = struct.unpack_from('<66I', m.stages[1].raw)
+                self.assertEqual((s0[64], s0[65]), (3, 4))
+                self.assertEqual((s1[64], s1[65]), (7, 3))
+                return
+        self.skipTest("sample not found")
+
 
 if __name__ == "__main__":
     unittest.main()
