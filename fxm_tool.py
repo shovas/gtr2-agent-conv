@@ -34,7 +34,8 @@ class FxmHeader:
 
     @property
     def be_fields(self) -> tuple[int, int, int, int, int, int]:
-        # Many observed integer fields look more plausible as big-endian; not confirmed as spec.
+        # Raw BE interpretation of bytes 4..28; observed plausible for some fields, but
+        # some entries may overlap string/table data depending on format variant. Unconfirmed.
         b = Path(self.path).read_bytes()
         return struct.unpack_from(">HHIIII", b, 4)
 

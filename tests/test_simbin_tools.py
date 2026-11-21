@@ -52,8 +52,8 @@ class SimbinToolsTest(unittest.TestCase):
         h = fxm_tool.read_header(p)
         self.assertTrue(h.known_magic)
         self.assertEqual(h.magic, b"LMA ")
-        # Observed: BE-interpreted header fields look plausible; semantics unconfirmed.
-        self.assertEqual(h.be_fields, (257, 256, 184, 1, 66, 1768960049))
+        # Observed: BE-interpreted 24-byte header; last u32 may overlap following string data.
+        self.assertEqual(h.be_fields[:5], (257, 256, 184, 1, 66))
         b = p.read_bytes()
         with tempfile.TemporaryDirectory() as td:
             out = Path(td) / "x.lma"
