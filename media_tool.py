@@ -640,8 +640,13 @@ class DdsImage:
             struct.pack_into('<I', hdr, 108, 0x1000)
             return bytes(hdr) + payload
         if self.fourcc == 'UNCOMPRESSED':
-            payload = encode_uncompressed_dds(self.rgba, self.width, self.height)
             hdr = bytearray(self.header)
+            rgb_bits, rmask, gmask, bmask, amask = struct.unpack_from('<5I', hdr, 88)
+            pf_flags = struct.unpack_from('<I', hdr, 80)[0] or 0x41
+            if rgb_bits == 0 or (rmask == 0 and gmask == 0 and bmask == 0):
+                rgb_bits, rmask, gmask, bmask, amask = 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000
+                pf_flags |= 0x41
+            payload = encode_uncompressed_dds(self.rgba, self.width, self.height, rgb_bits, rmask, gmask, bmask, amask)
             linear = len(payload)
             struct.pack_into('<I', hdr, 0, 0x20534444)
             struct.pack_into('<I', hdr, 4, 124)
@@ -651,9 +656,9 @@ class DdsImage:
             struct.pack_into('<I', hdr, 20, linear)
             struct.pack_into('<I', hdr, 28, max(1, self.mipmaps))
             struct.pack_into('<I', hdr, 76, 32)
-            struct.pack_into('<I', hdr, 80, 0x41)  # RGB|ALPHAPIXELS
+            struct.pack_into('<I', hdr, 80, pf_flags)
             hdr[84:88] = b'\x00\x00\x00\x00'
-            struct.pack_into('<5I', hdr, 88, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000)
+            struct.pack_into('<5I', hdr, 88, rgb_bits, rmask, gmask, bmask, amask)
             struct.pack_into('<I', hdr, 108, 0x1000)
             return bytes(hdr) + payload
         raise ValueError(f'Unsupported DDS fourcc for write: {self.fourcc}')
@@ -673,7 +678,7 @@ def read_dds(path: str | Path) -> DdsImage:
         rgba = decode_dxt3(b[128:], width, height)
     elif fourcc_s == 'DXT5':
         rgba = decode_dxt5(b[128:], width, height)
-    elif fourcc_s == '' and (pf_flags & 0x41):  # DDPF_RGB | DDPF_ALPHAPIXELS
+    elif fourcc_s == '' and (pf_flags & 0x40):  # DDPF_RGB (optional alpha)
         rgb_bits, rmask, gmask, bmask, amask = struct.unpack_from('<5I', b, 88)
         rgba = decode_uncompressed_dds(b[128:], width, height, rgb_bits, rmask, gmask, bmask, amask)
         fourcc_s = 'UNCOMPRESSED'
