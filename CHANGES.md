@@ -9,6 +9,9 @@ Newest-first change log. Timestamps use repository commit dates (ISO 8601, local
 - Parse JPG SOF dimensions/bit depth and MP3 frame header metadata in `media_tool.py`.
 - Add real-file JPG/MP3 metadata tests.
 
+## 2026-11-21 22:05:00 -0500 - GMT stage-3 observed param fields
+- Add observed stage-3 u32 offset 24/92 distribution test; semantics unconfirmed.
+
 ## 2026-11-21 21:55:00 -0500 - GMT common stage shader names observed
 - Add observed common stage 0-2 shader name catalog/test for L0-heuristic materials; note stage-3 offset-24 does not cleanly correlate with slot count.
 
