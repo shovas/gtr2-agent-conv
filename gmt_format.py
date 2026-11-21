@@ -80,11 +80,29 @@ class GmtMesh:
     stream3_data: bytes = b""  # rec[7]..rec[8], layout unconfirmed
 
 
+def _extract_ascii_strings(raw: bytes, min_len: int = 4) -> List[str]:
+    out: List[str] = []
+    i = 0
+    while i < len(raw):
+        bch = raw[i]
+        if 32 <= bch < 127:
+            j = i
+            while j < len(raw) and 32 <= raw[j] < 127:
+                j += 1
+            if j - i >= min_len:
+                out.append(raw[i:j].decode('latin-1', 'replace'))
+            i = j
+        else:
+            i += 1
+    return out
+
+
 @dataclass
 class GmtStage:
     index: int
     name: str
     raw: bytes
+    strings: List[str] = field(default_factory=list)
 
 
 @dataclass
@@ -160,19 +178,7 @@ def _parse_materials(tail: bytes) -> List[GmtMaterial]:
         end = starts[i + 1] if i + 1 < len(starts) else len(tail)
         raw = tail[start:end]
         name = raw[:64].split(b'\x00', 1)[0].decode('latin-1', 'replace')
-        strings: List[str] = []
-        j = 0
-        while j < len(raw):
-            bch = raw[j]
-            if 32 <= bch < 127:
-                k = j
-                while k < len(raw) and 32 <= raw[k] < 127:
-                    k += 1
-                if k - j >= 4:
-                    strings.append(raw[j:k].decode('latin-1', 'replace'))
-                j = k
-            else:
-                j += 1
+        strings = _extract_ascii_strings(raw)
         stages: List[GmtStage] = []
         if len(raw) >= 152 + 264:
             for si in range(4):
@@ -181,7 +187,7 @@ def _parse_materials(tail: bytes) -> List[GmtMaterial]:
                     break
                 sraw = raw[sb:sb + 264]
                 sname = sraw[:64].split(b'\x00', 1)[0].decode('latin-1', 'replace')
-                stages.append(GmtStage(index=si, name=sname, raw=sraw))
+                stages.append(GmtStage(index=si, name=sname, raw=sraw, strings=_extract_ascii_strings(sraw)))
         mats.append(GmtMaterial(index=i, raw=raw, name=name, strings=strings, stages=stages))
     return mats
 

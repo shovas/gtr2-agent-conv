@@ -172,6 +172,31 @@ class GmtFormatTest(unittest.TestCase):
                     self.assertEqual(len(m.extra_vertex_data), m.record.vertex_count * 16)
                     break
 
+    def test_material_stage_strings(self):
+        import importlib.util
+        spec = importlib.util.spec_from_file_location('mas', ROOT.parent / 'rfactortools/rfactortools/mas.py')
+        mas = importlib.util.module_from_spec(spec); spec.loader.exec_module(mas)
+
+        samples = [
+            (ROOT.parent / "GTR2Steam/GameData/Teams/24H/BMW M3GTR Teams/BMW_M3GTR_OBJ.gtr", 'BMW_M3GTR_BUMPER_A.GMT',
+             lambda g: ('BMW_M3GTR_BODY1.TGA' in g.materials[0].strings and 'EMAP_PAINT.DDS' in g.materials[0].strings and 'L0CMAPT0' in g.materials[0].stages[0].strings)),
+            (ROOT.parent / "GTR2Steam/GameData/Scripts/crew.gtr", 'FUELHOSE.GMT',
+             lambda g: ('FUELHOSE.DDS' in g.materials[0].strings and g.materials[0].stages[0].name == 'L0DIFFUSET0')),
+            (ROOT.parent / "GTR2Steam/GameData/Teams/TALENT.GTR", 'EXT_DRIVER_STYLE01.GMT',
+             lambda g: ('BODY_BLACKWHITE.DDS' in g.materials[0].strings)),
+            (ROOT.parent / "GTR2Steam/GameData/Locations/Anderstorp/Anderstorp.gtr", 'ANNOUNCERSOUND01.GMT',
+             lambda g: ('ROAD_S.TGA' in g.materials[0].strings and 'ROAD_B.TGA' in g.materials[0].strings)),
+        ]
+        for mas_p, gmt_name, check in samples:
+            if not mas_p.exists():
+                continue
+            for name, data in mas.mas_unpack_to_data(str(mas_p)):
+                if name == gmt_name:
+                    g = gmt_format.parse_gmt(name, data=data)
+                    self.assertEqual(gmt_format.write_gmt(g), data)
+                    self.assertTrue(check(g), gmt_name)
+                    break
+
 
 if __name__ == "__main__":
     unittest.main()
