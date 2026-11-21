@@ -435,6 +435,30 @@ class GmtFormatTest(unittest.TestCase):
         self.assertGreater(seen_s2, 0)
         self.assertGreater(seen_s3, 0)
 
+    def test_mesh_record_observed_invariants(self):
+        # Observed in scanned GTR2/GTL GMTs: rec[0]==0, vertex stride 32 or 48 (or 0 for empty).
+        import importlib.util, glob, os
+        spec = importlib.util.spec_from_file_location('mas', ROOT.parent / 'rfactortools/rfactortools/mas.py')
+        mas = importlib.util.module_from_spec(spec); spec.loader.exec_module(mas)
+        archives = sorted(glob.glob(str(ROOT.parent / 'GTR2Steam/GameData/**/*.gtr'), recursive=True))[:6]
+        archives += sorted(glob.glob(str(ROOT.parent / 'GTLSteam/GameData/**/*.gtl'), recursive=True))[:3]
+        if not archives:
+            self.skipTest("no archives")
+        total=0
+        for arc in archives:
+            for name, data in mas.mas_unpack_to_data(arc):
+                if not name.lower().endswith('.gmt'): continue
+                g = gmt_format.parse_gmt(name, data=data)
+                for mesh in g.meshes:
+                    r = mesh.record.raw
+                    self.assertEqual(r[0], 0)
+                    vc = r[3]
+                    if vc > 0 and r[6] > r[4] and (r[6]-r[4]) % vc == 0:
+                        st = (r[6]-r[4]) // vc
+                        self.assertIn(st, (32, 48))
+                    total += 1
+        self.assertGreater(total, 0)
+
 
 if __name__ == "__main__":
     unittest.main()
