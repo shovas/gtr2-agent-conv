@@ -361,5 +361,27 @@ class GmtFormatTest(unittest.TestCase):
         self.assertGreater(both+one, other)
 
 
+    def test_common_stage_shader_names_observed(self):
+        # Observed common stage 0-2 shader names in L0-heuristic materials (semantics unconfirmed).
+        import importlib.util, glob, os
+        spec = importlib.util.spec_from_file_location('mas', ROOT.parent / 'rfactortools/rfactortools/mas.py')
+        mas = importlib.util.module_from_spec(spec); spec.loader.exec_module(mas)
+        archives = sorted(glob.glob(str(ROOT.parent / 'GTR2Steam/GameData/**/*.gtr'), recursive=True))[:6]
+        archives += sorted(glob.glob(str(ROOT.parent / 'GTLSteam/GameData/**/*.gtl'), recursive=True))[:3]
+        if not archives:
+            self.skipTest("no archives")
+        seen = set()
+        for arc in archives:
+            for name, data in mas.mas_unpack_to_data(arc):
+                if not name.lower().endswith('.gmt'): continue
+                g = gmt_format.parse_gmt(name, data=data)
+                for m in g.materials:
+                    if not m.stages or not m.stages[0].name.startswith('L0'): continue
+                    for st in m.stages[:3]:
+                        if st.name: seen.add(st.name)
+        for expected in ['L0NOLIGHTING','L0DIFFUSET0','L1DIFFUSET0','L1BUMPSPECMAPT0','L2USEVERTEXPIXEL','L2SPECULART0']:
+            self.assertIn(expected, seen)
+
+
 if __name__ == "__main__":
     unittest.main()
