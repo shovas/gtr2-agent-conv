@@ -32,6 +32,12 @@ class GmtMeshRecord:
     @property
     def index_offset(self) -> int: return self.raw[11]
     @property
+    def vertex_block2_offset(self) -> int: return self.raw[5]
+    @property
+    def has_extra_vertex_block(self) -> bool:
+        vc, vo, v5, v6 = self.raw[3], self.raw[4], self.raw[5], self.raw[6]
+        return vc > 0 and v5 == vo + vc * 32 and v6 == vo + vc * 48
+    @property
     def vertex_end(self) -> int:
         # rec[6] is usually vo+vc*stride; sometimes 0
         v6 = self.raw[6]

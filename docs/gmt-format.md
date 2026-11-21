@@ -76,9 +76,9 @@ Most sampled shared animation GMTs were identical; do not generalize from that s
 ## Additional confirmed findings
 
 - **Mesh -> material index**: mesh rec[2] is within material table count for **85363/85363** mesh records checked.
-- **Vertex stride**: 32 bytes in 85350 records, 48 bytes in 11 records (FUELHOSE, EXT_DRIVER_STYLE01-10), 2 records (GRATING1 in Donington.gtr/.gtl) have rec[6]=0 but 32-byte stride fits. `rec[6]` usually equals `vo+vc*stride`.
-- **32-byte vertex (observed)**: 8 float/u32 values - appears to include pos.xyz, normal.xyz, plus 2 extra u32/float fields (UV/color/packed); exact layout not fully confirmed.
-- **48-byte vertex (observed)**: 12 float/u32 values; likely extended (extra UV/tangent/skin data) - layout not fully confirmed.
+- **Vertex stride/layout (confirmed structure)**: 32-byte base in 85352 records (`rec[5]==0, rec[6]==vo+vc*32`). 11 records have 48-byte extended vertices split into two contiguous blocks: base 32-byte block `vo..rec[5]` where `rec[5]==vo+vc*32`, extra 16-byte block `rec[5]..rec[6]` where `rec[6]==vo+vc*48` (FUELHOSE, EXT_DRIVER_STYLE01-10). 2 records (GRATING1) have `rec[6]==0` but 32-byte fits.
+- **32-byte base vertex (observed)**: 8 float/u32 values: `[f0, px,py,pz, nx,ny,nz, f7]`. `f0` often 0/1; pos xyz at 1-3; normal xyz at 4-6; `f7` often NaN/0xFFFFFFFF. UV/color semantics not fully confirmed.
+- **16-byte extra block (48-stride)**: 4 float/u32 values per vertex; observed NaN/zeros in FUELHOSE sample - semantics not fully confirmed.
 - **Material table**: tail at `obj_list_offset` starts `u16,u16,u32 count`; contains `count` material/object entries. Variable-size in general. **L0 heuristic**: many records have `L0...` stage string at `+152`; when L0 candidates match count and start at 8, `gmt_format.py` uses them as boundaries (fixes BUMPER_A). Fallback is equal split; raw tail always preserved for lossless round-trip.
 - **Structural round-trip**: `gmt_format.py` parses header, mesh table, mesh vertex/index blobs, material table best-effort, and preserves original bytes for lossless round-trip. Tested on real GTR2/GTL GMTs.
 

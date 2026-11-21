@@ -85,6 +85,23 @@ class GmtFormatTest(unittest.TestCase):
                 self.assertTrue(g.materials[0].strings[1].startswith('L0'))
                 break
 
+    def test_48byte_vertex_blocks(self):
+        mas_p = ROOT.parent / "GTR2Steam/GameData/Scripts/crew.gtr"
+        if not mas_p.exists():
+            self.skipTest("crew.gtr not present")
+        import importlib.util
+        spec = importlib.util.spec_from_file_location('mas', ROOT.parent / 'rfactortools/rfactortools/mas.py')
+        mas = importlib.util.module_from_spec(spec); spec.loader.exec_module(mas)
+        for name, data in mas.mas_unpack_to_data(str(mas_p)):
+            if name == 'FUELHOSE.GMT':
+                g = gmt_format.parse_gmt(name, data=data)
+                m = g.meshes[0].record
+                self.assertEqual(m.vertex_stride, 48)
+                self.assertTrue(m.has_extra_vertex_block)
+                self.assertEqual(m.vertex_block2_offset, m.vertex_offset + m.vertex_count * 32)
+                self.assertEqual(m.vertex_end, m.vertex_offset + m.vertex_count * 48)
+                break
+
 
 if __name__ == "__main__":
     unittest.main()
