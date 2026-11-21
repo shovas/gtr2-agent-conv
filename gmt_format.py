@@ -58,11 +58,19 @@ class GmtMesh:
 
 
 @dataclass
+class GmtStage:
+    index: int
+    name: str
+    raw: bytes
+
+
+@dataclass
 class GmtMaterial:
     index: int
     raw: bytes
     name: str
     strings: List[str]
+    stages: List[GmtStage] = field(default_factory=list)
 
 
 @dataclass
@@ -142,7 +150,16 @@ def _parse_materials(tail: bytes) -> List[GmtMaterial]:
                 j = k
             else:
                 j += 1
-        mats.append(GmtMaterial(index=i, raw=raw, name=name, strings=strings))
+        stages: List[GmtStage] = []
+        if len(raw) >= 152 + 264:
+            for si in range(4):
+                sb = 152 + si * 264
+                if sb + 264 > len(raw):
+                    break
+                sraw = raw[sb:sb + 264]
+                sname = sraw[:64].split(b'\x00', 1)[0].decode('latin-1', 'replace')
+                stages.append(GmtStage(index=si, name=sname, raw=sraw))
+        mats.append(GmtMaterial(index=i, raw=raw, name=name, strings=strings, stages=stages))
     return mats
 
 

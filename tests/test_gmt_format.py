@@ -83,6 +83,8 @@ class GmtFormatTest(unittest.TestCase):
                 g = gmt_format.parse_gmt(name, data=data)
                 self.assertEqual([m.name for m in g.materials], ['WC_TEAM_BODY1_PA', 'WC_TEAM_BODY2_FL'])
                 self.assertTrue(g.materials[0].strings[1].startswith('L0'))
+                self.assertEqual(g.materials[0].stages[0].name, 'L0CMAPT0')
+                self.assertEqual(g.materials[1].stages[0].name, 'L0DIFFUSET0')
                 break
 
     def test_48byte_vertex_blocks(self):
