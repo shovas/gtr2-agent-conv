@@ -37,6 +37,8 @@ Examples:
 - **26930** have normal GTR2/GTL magic; **1** odd magic: `GTLSteam/GameData/Teams/GTC-TC-76/Detomaso Pantera/DETOMASO_PANTERA_CPIT.gtl` -> `DETOMASO_PANTERA_RAINSCREEN.GMT` (3072 bytes, magic `ced8e6c3d6ded8bdbba6bf9000000000`, flags `0xd8d2cfc8`). Looks encrypted/scrambled (GMT encryption skips first 4 bytes in `rfactortools/crypt.py`; C extension unavailable here). Treat as **needs decrypt/verify**, not normal GMT.
 - **26916** pass mesh-table bounds check with relaxed count (`<=256`); **15** fail strict `<=64` sanity cap: 14 are GTR2 `*_MOTEC_ADL2.GMT` cockpit display meshes with count 72-76 and valid bounds; 1 is the odd encrypted rainscreen. The old `<=64` cap was too strict for car cockpit GMTs.
 - Flag distribution: `0x04000020` (12320), `0x20` (6207), `0x04000000` (6128), `0x0` (2273), rare `0x02000020` (2), plus encrypted outlier.
+- **Same-track archive comparison (Anderstorp GTL vs GTR2)**: 507 common GMT basenames, 57 identical, 450 different, 1 GTL-only, 190 GTR2-only. Same-name assets across different tracks are not comparable; same-track comparison is the meaningful check.
+- **Cross-archive basename comparison** is noisy (name collisions across different tracks/archives); do not use it as a conversion diff signal without same-track/archive context.
 
 ## GTL vs GTR2 comparison
 
@@ -72,8 +74,8 @@ Most sampled shared animation GMTs were identical; do not generalize from that s
 - `gmt_tool.py`: `info`, `scan`, `diff` for GMT header/mesh-table inspection. Uses observed structure only; no geometry conversion.
 
 ## Unknowns / next steps
-- Decode remaining body: material/texture object table (at `obj_list_offset`), LODs, shader params, UV sets, vertex format variants.
+- Decode remaining body: material/texture object table (at `obj_list_offset`, observed ASCII names like `WC_TEAM_BODY1_PA`; full record layout unknown), LODs, shader params, UV sets, vertex format variants.
 - Fully decode flags at 0x04 and mesh record flags at rec[1].
-- Build full GTL-vs-GTR2 GMT diff inventory by category (car/track/anim/driver), including archive contents; current check only covered loose GMTs and one known M-FPDriver diff.
+- Build full same-track/same-archive GTL-vs-GTR2 GMT diff inventory; cross-archive basename comparison is noisy due name collisions.
 - Handle encrypted GMTs: `rfactortools/crypt.py` needs `_crypt` C extension (not built here). `DETOMASO_PANTERA_RAINSCREEN.GMT` appears encrypted/scrambled.
 - `gmtconvert` not found in workspace; legacy expected it. Any GMT transformation needs a new, tested converter with format spec evidence.
