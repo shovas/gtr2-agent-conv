@@ -46,6 +46,23 @@ class MediaToolTest(unittest.TestCase):
         self.assertEqual(info.format, "bik")
         self.assertGreater(info.details.get("frames", 0), 0)
 
+    def test_identify_jpg_if_present(self):
+        p = ROOT.parent / "GTR2Steam/GameData/Locations/Anderstorp/3And_LOD.jpg"
+        if not p.exists():
+            self.skipTest("JPG not present")
+        info = media_tool.identify(p)
+        self.assertEqual(info.format, "jpg")
+        self.assertGreater(info.details.get("width", 0), 0)
+        self.assertGreater(info.details.get("height", 0), 0)
+
+    def test_identify_mp3_if_present(self):
+        p = ROOT.parent / "GTR2Steam/GameData/Sounds/DrivingSchool/Failed.mp3"
+        if not p.exists():
+            self.skipTest("MP3 not present")
+        info = media_tool.identify(p)
+        self.assertEqual(info.format, "mp3")
+        self.assertIn("bitrate_index", info.details)
+
     def test_tga_type2_roundtrip(self):
         with tempfile.TemporaryDirectory() as td:
             src = Path(td) / "a.tga"

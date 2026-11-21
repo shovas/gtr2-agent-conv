@@ -5,6 +5,10 @@ Newest-first change log. Timestamps use repository commit dates (ISO 8601, local
 ## 2026-11-21 19:45:00 -0500 - FXM/LMA observed node-name evidence
 - Add verifiable assertions for observed node-name strings in `ExtDriver_A.LMA` (lossless round-trip unchanged).
 
+## 2026-11-21 20:05:00 -0500 - JPG/MP3 metadata parsing
+- Parse JPG SOF dimensions/bit depth and MP3 frame header metadata in `media_tool.py`.
+- Add real-file JPG/MP3 metadata tests.
+
 ## 2026-11-21 19:55:00 -0500 - DDS uncompressed RGB(A) mask-based support
 - Accept uncompressed RGB DDS with DDPF_RGB (with/without alpha) and preserve header masks on write.
 - Add X8R8G8B8 synthetic round-trip test.

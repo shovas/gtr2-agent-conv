@@ -69,10 +69,42 @@ def identify(path: str | Path) -> MediaInfo:
         return MediaInfo(str(p), size, "bmp", details)
     # JPG
     if head.startswith(b"\xff\xd8\xff"):
-        return MediaInfo(str(p), size, "jpg", {})
+        details = {}
+        i = 2
+        while i < len(b) - 9:
+            if b[i] != 0xFF:
+                i += 1; continue
+            marker = b[i+1]
+            if marker in (0xC0, 0xC1, 0xC2):
+                ln = struct.unpack_from('>H', b, i+2)[0]
+                bits, h, w = struct.unpack_from('>BHH', b, i+4)
+                details = {'sof': marker, 'width': w, 'height': h, 'bits': bits}
+                break
+            if marker == 0xD9 or marker == 0xDA:
+                break
+            if i+4 <= len(b):
+                ln = struct.unpack_from('>H', b, i+2)[0]
+                i += 2 + max(ln,2)
+            else:
+                break
+        return MediaInfo(str(p), size, "jpg", details)
     # MP3
     if head.startswith(b"ID3") or (len(head) >= 2 and head[0] == 0xFF and (head[1] & 0xE0) == 0xE0):
-        return MediaInfo(str(p), size, "mp3", {"id3": head.startswith(b"ID3")})
+        details = {"id3": head.startswith(b"ID3")}
+        off = 0
+        if head.startswith(b"ID3") and len(b) > 10:
+            tag_size = ((b[6]&0x7f)<<21)|((b[7]&0x7f)<<14)|((b[8]&0x7f)<<7)|(b[9]&0x7f)
+            off = 10 + tag_size
+        # find frame sync
+        for j in range(off, min(len(b)-4, off+4096)):
+            if b[j] == 0xFF and (b[j+1] & 0xE0) == 0xE0:
+                ver = (b[j+1] >> 3) & 3
+                layer = (b[j+1] >> 1) & 3
+                br_idx = (b[j+2] >> 4) & 0xF
+                sr_idx = (b[j+2] >> 2) & 3
+                details.update({'mpeg_version_bits': ver, 'layer_bits': layer, 'bitrate_index': br_idx, 'samplerate_index': sr_idx})
+                break
+        return MediaInfo(str(p), size, "mp3", details)
     # BIK
     if head.startswith(b"BIKi") or head.startswith(b"KB2i"):
         details = {}

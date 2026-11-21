@@ -76,8 +76,9 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 - **Gaps**: compressed/other DIB variants not implemented; BMP-as-TGA quirk detected but routed separately.
 
 ### JPG/MP3
-- **Read**: Identify; basic header detection.
+- **Read**: Identify; JPG SOF dimension/bit-depth metadata parsed; MP3 frame header fields parsed (version/layer/bitrate/samplerate index, ID3 tag presence).
 - **Write**: Lossless byte copy possible.
+- **Verification**: `tests/test_media_tool.py` (real JPG/MP3 metadata parsing when present).
 - **Tool**: `media_tool.py`.
 - **Gaps**: full semantic decode/encode/edit not implemented in-repo.
 
