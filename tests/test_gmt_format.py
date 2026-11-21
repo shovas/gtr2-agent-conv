@@ -483,6 +483,32 @@ class GmtFormatTest(unittest.TestCase):
         self.assertGreater(total, 0)
         self.assertGreater(s23, 0)
 
+    def test_mesh_flag_bits_observed(self):
+        # Observed in scanned samples: bit 0 always set, bit 14 always set, bit 1 set iff 48-byte extra vertex block.
+        import importlib.util, glob, os
+        spec = importlib.util.spec_from_file_location('mas', ROOT.parent / 'rfactortools/rfactortools/mas.py')
+        mas = importlib.util.module_from_spec(spec); spec.loader.exec_module(mas)
+        archives = sorted(glob.glob(str(ROOT.parent / 'GTR2Steam/GameData/**/*.gtr'), recursive=True))[:6]
+        archives += sorted(glob.glob(str(ROOT.parent / 'GTLSteam/GameData/**/*.gtl'), recursive=True))[:3]
+        if not archives:
+            self.skipTest("no archives")
+        total=extra=0
+        for arc in archives:
+            for name, data in mas.mas_unpack_to_data(arc):
+                if not name.lower().endswith('.gmt'): continue
+                g = gmt_format.parse_gmt(name, data=data)
+                for mesh in g.meshes:
+                    r = mesh.record.raw
+                    f=r[1]
+                    self.assertTrue(f & 0x1)
+                    self.assertTrue(f & 0x4000)
+                    vc,vo,v5,v6=r[3],r[4],r[5],r[6]
+                    has_extra = vc>0 and v5==vo+vc*32 and v6==vo+vc*48
+                    self.assertEqual(bool(f & 0x2), has_extra)
+                    if has_extra: extra+=1
+                    total+=1
+        self.assertGreater(total, 0)
+
     def test_vertex_base_f0_mostly_zero_observed(self):
         # Observed: base vertex f0 (u32 at offset 0 of 32-byte vertex) is 0 in vast majority of samples.
         import importlib.util, glob, os
