@@ -108,5 +108,26 @@ class SimbinToolsTest(unittest.TestCase):
         self.assertGreater(checked, 0)
 
 
+    def test_fxm_offset30_family_signature(self):
+        # Observed: offset-30 FXA/FXM/LMA files have BE[2]==4096, BE[5]==528, and source string contains "3D Studio Max".
+        import struct, glob, os, re
+        paths=[]
+        for root in [ROOT.parent / 'GTR2Steam', ROOT.parent / 'GTLSteam']:
+            paths += glob.glob(str(root / '**/*.*'), recursive=True)
+        checked=0
+        for pth in paths:
+            if os.path.splitext(pth)[1].lower() not in ('.fxa','.fxm','.lma'): continue
+            b = Path(pth).read_bytes()
+            m = re.search(br'[\x20-\x7e]{4,}\x00', b)
+            if not m or m.start()!=30: continue
+            be = struct.unpack_from('>4sHHIIII', b, 0)
+            self.assertEqual(be[2], 4096)
+            self.assertEqual(be[5], 528)
+            s = m.group()[:-1].decode('latin1','replace')
+            self.assertIn('3D Studio Max', s)
+            checked += 1
+        self.assertGreater(checked, 0)
+
+
 if __name__ == "__main__":
     unittest.main()
