@@ -9,6 +9,9 @@ Newest-first change log. Timestamps use repository commit dates (ISO 8601, local
 - Parse JPG SOF dimensions/bit depth and MP3 frame header metadata in `media_tool.py`.
 - Add real-file JPG/MP3 metadata tests.
 
+## 2026-11-21 22:25:00 -0500 - GMT stream2/stream3 stride observation
+- Add observed test: when present, GMT mesh stream2/3 are 32 bytes/vertex (semantics unconfirmed).
+
 ## 2026-11-21 22:15:00 -0500 - WAV MP3-in-WAV lossless handling
 - Parse fmt chunk metadata when stdlib `wave` cannot read (e.g. format 0x55 MP3-in-WAV); fall back to lossless byte-copy round-trip.
 - Add real-file MP3-in-WAV lossless round-trip test.

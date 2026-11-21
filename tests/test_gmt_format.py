@@ -408,6 +408,33 @@ class GmtFormatTest(unittest.TestCase):
         self.assertIn(24, c92)
         self.assertTrue(set(c24).issubset(set(range(0,256))) or max(c24) < 1000)
 
+    def test_mesh_stream2_stream3_stride_observed(self):
+        # Observed: when present, stream2 (rec[6]..rec[7]) and stream3 (rec[7]..rec[8])
+        # are 32 bytes per vertex. Semantics unconfirmed.
+        import importlib.util, glob, os
+        spec = importlib.util.spec_from_file_location('mas', ROOT.parent / 'rfactortools/rfactortools/mas.py')
+        mas = importlib.util.module_from_spec(spec); spec.loader.exec_module(mas)
+        archives = sorted(glob.glob(str(ROOT.parent / 'GTR2Steam/GameData/**/*.gtr'), recursive=True))[:6]
+        archives += sorted(glob.glob(str(ROOT.parent / 'GTLSteam/GameData/**/*.gtl'), recursive=True))[:3]
+        if not archives:
+            self.skipTest("no archives")
+        seen_s2=seen_s3=0
+        for arc in archives:
+            for name, data in mas.mas_unpack_to_data(arc):
+                if not name.lower().endswith('.gmt'): continue
+                g = gmt_format.parse_gmt(name, data=data)
+                for mesh in g.meshes:
+                    vc = mesh.record.vertex_count
+                    if vc <= 0: continue
+                    if mesh.stream2_data:
+                        self.assertEqual(len(mesh.stream2_data), vc * 32)
+                        seen_s2 += 1
+                    if mesh.stream3_data:
+                        self.assertEqual(len(mesh.stream3_data), vc * 32)
+                        seen_s3 += 1
+        self.assertGreater(seen_s2, 0)
+        self.assertGreater(seen_s3, 0)
+
 
 if __name__ == "__main__":
     unittest.main()
