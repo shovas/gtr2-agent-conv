@@ -9,6 +9,9 @@ Newest-first change log. Timestamps use repository commit dates (ISO 8601, local
 - Parse JPG SOF dimensions/bit depth and MP3 frame header metadata in `media_tool.py`.
 - Add real-file JPG/MP3 metadata tests.
 
+## 2026-11-21 21:45:00 -0500 - GMT stage-3 texture slot pattern observation
+- Add observed test for stage-3 texture slot patterns (28,200)/(28,) across L0-heuristic materials.
+
 ## 2026-11-21 21:35:00 -0500 - GMT stage-3 texture offset observation
 - Add observed test: stage-3 texture strings commonly at offsets 28 and 200 within 264-byte stage block.
 

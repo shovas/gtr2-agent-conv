@@ -333,6 +333,33 @@ class GmtFormatTest(unittest.TestCase):
         # observed dominant offsets; allow rare others but they should be few
         self.assertGreater(at28 + at200, other * 10)
 
+    def test_stage3_texture_slot_patterns_observed(self):
+        # Observed: stage-3 texture slots commonly (28,200) or (28,); semantics unconfirmed.
+        import importlib.util, struct, glob, os, re
+        spec = importlib.util.spec_from_file_location('mas', ROOT.parent / 'rfactortools/rfactortools/mas.py')
+        mas = importlib.util.module_from_spec(spec); spec.loader.exec_module(mas)
+        archives = sorted(glob.glob(str(ROOT.parent / 'GTR2Steam/GameData/**/*.gtr'), recursive=True))[:6]
+        archives += sorted(glob.glob(str(ROOT.parent / 'GTLSteam/GameData/**/*.gtl'), recursive=True))[:3]
+        if not archives:
+            self.skipTest("no archives")
+        tex_re = re.compile(br'[\x20-\x7e]{4,}\.(DDS|TGA|BMP)\x00', re.I)
+        both=one=none=other=0
+        for arc in archives:
+            for name, data in mas.mas_unpack_to_data(arc):
+                if not name.lower().endswith('.gmt'): continue
+                g = gmt_format.parse_gmt(name, data=data)
+                for m in g.materials:
+                    if not m.stages or not m.stages[0].name.startswith('L0'): continue
+                    if len(m.stages) < 4: continue
+                    offs = tuple(mm.start() for mm in tex_re.finditer(m.stages[3].raw))
+                    if offs == (28,200): both+=1
+                    elif offs == (28,): one+=1
+                    elif offs == (): none+=1
+                    else: other+=1
+        self.assertGreater(both, 0)
+        self.assertGreater(one, 0)
+        self.assertGreater(both+one, other)
+
 
 if __name__ == "__main__":
     unittest.main()
