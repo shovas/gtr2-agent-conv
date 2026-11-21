@@ -15,6 +15,7 @@
 - `../hand_selected/` - hand-picked artifacts recovered from `tools.unsorted.irrelevant`. Small samples: `audtest/default.aud`, `gtr1_sniffnnbe5l6i/.../Mesh.gtr`, `xval_r7/*.car`, `xval_test` (`.gtr/.GMT/.TGA/.JPG`). Large generated output trees are present locally for reference but are outside this repo.
 - `../quickbms_scripts/` - large QuickBMS script collection (2745 files). **Format reference**; most relevant is `mas.bms` (GMOTORMAS10/CUBEMAS4/ISI MAS types). Use as spec cross-check; prefer native Python in `rfactortools`/this project for pipeline integration.
 - `../MAS2Extract/` - small C# GPLv3 tool for **rFactor 2 MAS2** (`GMOTOR_MAS_2.90`) extraction/deciphering. Useful as rF2-format reference, but not GMOTORMAS10/GTR2/GTL.
+- `../gtr2-agent-tools/` - GTR2 driving/UI automation toolkit (CC BY-NC 4.0). **Reference only** for format parsers in `scripts/gtr2_driving/`: `mas.py`, `gmt.py` (mesh table at 0x16C), `trackmap.py` (AIW), `cargears.py` (HDC/ENG/GRB), `pitzones.py` (TRK+MAS). Check license before reusing code.
 - `~/tmp/tools.unsorted.irrelevant/` - remaining large/generated/irrelevant items (installers, caches, etc.).
 
 ## `../rfactortools` facts (verified)

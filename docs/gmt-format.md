@@ -54,6 +54,9 @@ Most sampled shared animation GMTs were identical; do not generalize from that s
   - Smoke test in GTR2 for visual/load correctness.
 - **Edge cases**: if GTR2 rejects a GMT, investigate version/flag differences and use/port a real GMT converter. Legacy expected `gmtconvert`; current rfactortools snapshot lacks it.
 
+## External parser clues (reference only)
+- `../gtr2-agent-tools/scripts/gtr2_driving/gmt.py` (CC BY-NC 4.0, read-only, track-mesh focused) parses GTR2 GMTs by reading mesh table at `0x16C`: `u32 count, u32 first_record`; records 108 bytes, `u32[27]` with `flags=[1], vertex_count=[3], vertex_offset=[4], index_count=[10], index_offset=[11]`; vertices 32 bytes (`u32, pos xyz floats, normal xyz floats, u32`); indices `u16` triangle list with 4-byte lead. It validates bounds/counts and raises on implausible data. Useful as a structural clue; verify against GTL/GTR2 car and track GMT variants before relying on it.
+
 ## Unknowns / next steps
 - Decode full GMT body: sections, materials, textures, vertices/indices, normals/UVs, LODs, shaders.
 - Determine meaning of u32 at 0x00 and flags at 0x04.
