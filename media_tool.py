@@ -559,6 +559,58 @@ def encode_dxt3(rgba: bytes, width: int, height: int) -> bytes:
     return bytes(out)
 
 
+def _mask_shift_size(mask):
+    if mask == 0: return 0, 0
+    shift = 0
+    while (mask & 1) == 0:
+        mask >>= 1; shift += 1
+    size = 0
+    while (mask & 1) == 1:
+        mask >>= 1; size += 1
+    return shift, size
+
+
+def _mask_get(val, mask):
+    shift, size = _mask_shift_size(mask)
+    if size == 0: return 0
+    v = (val & ((1<< (shift+size)) - 1)) >> shift
+    return (v * 255) // ((1<<size)-1) if size < 8 else v & 0xFF
+
+
+def decode_uncompressed_dds(data: bytes, width: int, height: int, rgb_bits: int, rmask, gmask, bmask, amask) -> bytes:
+    bytespp = (rgb_bits + 7) // 8
+    out = bytearray(width*height*4)
+    for y in range(height):
+        for x in range(width):
+            off = (y*width+x)*bytespp
+            px = int.from_bytes(data[off:off+bytespp], 'little') if off+bytespp <= len(data) else 0
+            r = _mask_get(px, rmask)
+            g = _mask_get(px, gmask)
+            b = _mask_get(px, bmask)
+            a = _mask_get(px, amask) if amask else 255
+            di = (y*width+x)*4
+            out[di:di+4] = bytes([r,g,b,a])
+    return bytes(out)
+
+
+def encode_uncompressed_dds(rgba: bytes, width: int, height: int, rgb_bits=32, rmask=0x00ff0000, gmask=0x0000ff00, bmask=0x000000ff, amask=0xff000000) -> bytes:
+    bytespp = (rgb_bits + 7) // 8
+    out = bytearray(width*height*bytespp)
+    def put(val, mask):
+        shift, size = _mask_shift_size(mask)
+        if size == 0: return 0
+        v = (val * ((1<<size)-1) + 127) // 255
+        return (v << shift) & mask
+    for y in range(height):
+        for x in range(width):
+            di = (y*width+x)*4
+            r,g,b,a = rgba[di:di+4]
+            px = put(r,rmask)|put(g,gmask)|put(b,bmask)|put(a,amask)
+            off = (y*width+x)*bytespp
+            out[off:off+bytespp] = px.to_bytes(bytespp,'little')
+    return bytes(out)
+
+
 @dataclass
 class DdsImage:
     width: int
@@ -587,6 +639,23 @@ class DdsImage:
             hdr[84:88] = self.fourcc.encode('ascii')
             struct.pack_into('<I', hdr, 108, 0x1000)
             return bytes(hdr) + payload
+        if self.fourcc == 'UNCOMPRESSED':
+            payload = encode_uncompressed_dds(self.rgba, self.width, self.height)
+            hdr = bytearray(self.header)
+            linear = len(payload)
+            struct.pack_into('<I', hdr, 0, 0x20534444)
+            struct.pack_into('<I', hdr, 4, 124)
+            struct.pack_into('<I', hdr, 8, 0x1007)
+            struct.pack_into('<I', hdr, 12, self.height)
+            struct.pack_into('<I', hdr, 16, self.width)
+            struct.pack_into('<I', hdr, 20, linear)
+            struct.pack_into('<I', hdr, 28, max(1, self.mipmaps))
+            struct.pack_into('<I', hdr, 76, 32)
+            struct.pack_into('<I', hdr, 80, 0x41)  # RGB|ALPHAPIXELS
+            hdr[84:88] = b'\x00\x00\x00\x00'
+            struct.pack_into('<5I', hdr, 88, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000)
+            struct.pack_into('<I', hdr, 108, 0x1000)
+            return bytes(hdr) + payload
         raise ValueError(f'Unsupported DDS fourcc for write: {self.fourcc}')
 
 
@@ -604,6 +673,10 @@ def read_dds(path: str | Path) -> DdsImage:
         rgba = decode_dxt3(b[128:], width, height)
     elif fourcc_s == 'DXT5':
         rgba = decode_dxt5(b[128:], width, height)
+    elif fourcc_s == '' and (pf_flags & 0x41):  # DDPF_RGB | DDPF_ALPHAPIXELS
+        rgb_bits, rmask, gmask, bmask, amask = struct.unpack_from('<5I', b, 88)
+        rgba = decode_uncompressed_dds(b[128:], width, height, rgb_bits, rmask, gmask, bmask, amask)
+        fourcc_s = 'UNCOMPRESSED'
     else:
         raise ValueError(f'Unsupported DDS fourcc for decode: {fourcc_s}')
     return DdsImage(width=width, height=height, mipmaps=mipmaps or 1, fourcc=fourcc_s, rgba=rgba, header=b[:128])

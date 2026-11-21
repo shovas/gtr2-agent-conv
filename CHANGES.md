@@ -5,6 +5,10 @@ Newest-first change log. Timestamps use repository commit dates (ISO 8601, local
 ## 2026-11-21 19:45:00 -0500 - FXM/LMA observed node-name evidence
 - Add verifiable assertions for observed node-name strings in `ExtDriver_A.LMA` (lossless round-trip unchanged).
 
+## 2026-11-21 19:45:00 -0500 - DDS uncompressed A8R8G8B8 decode/encode
+- Add uncompressed A8R8G8B8 DDS decode/encode in `media_tool.py`.
+- Add synthetic uncompressed DDS round-trip test.
+
 ## 2026-11-21 19:35:00 -0500 - DDS DXT3 (BC2) decode/encode
 - Add DXT3 (BC2) decode/encode and DDS read/write support in `media_tool.py`.
 - Add synthetic DXT3 round-trip test.

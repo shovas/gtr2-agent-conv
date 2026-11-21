@@ -154,6 +154,20 @@ class MediaToolTest(unittest.TestCase):
                 self.assertGreaterEqual(a.rgba[i+2], 200)
                 self.assertTrue(50 <= a.rgba[i+3] <= 80)
 
+    def test_dds_uncompressed_synthetic_roundtrip(self):
+        with tempfile.TemporaryDirectory() as td:
+            src = Path(td) / "a.dds"
+            dst = Path(td) / "b.dds"
+            w,h = 2,2
+            rgba = bytes([10,20,30,255, 40,50,60,128, 70,80,90,0, 100,110,120,255])
+            img = media_tool.DdsImage(width=w,height=h,mipmaps=1,fourcc='UNCOMPRESSED',rgba=rgba,header=b'\x00'*128)
+            src.write_bytes(img.to_bytes())
+            info = media_tool.dds_roundtrip(src, dst)
+            self.assertEqual(info.format, "dds")
+            a = media_tool.read_dds(src)
+            self.assertEqual((a.width,a.height,a.fourcc), (w,h,'UNCOMPRESSED'))
+            self.assertEqual(a.rgba, rgba)
+
 
 if __name__ == "__main__":
     unittest.main()
