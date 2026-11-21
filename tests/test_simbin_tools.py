@@ -85,6 +85,28 @@ class SimbinToolsTest(unittest.TestCase):
             b = p.read_bytes()
             self.assertEqual(fxm_tool._first_string_offset(b), expected)
 
+    def test_lma_node_prefix_observed(self):
+        # Observed in sampled GTR2 LMAs: many Bip01 node names are preceded by a 12-byte
+        # record prefix LE(u32,u32,u32) where third==1 and second matches BE header u32 at offset 8.
+        # Semantics unconfirmed; this is a structural correlation test.
+        import struct, glob, os, re
+        paths = glob.glob(str(ROOT.parent / 'GTR2Steam/GameData/Animations/Driver/*.LMA'))
+        if not paths:
+            self.skipTest('no LMA files')
+        checked = 0
+        for p in paths:
+            b = Path(p).read_bytes()
+            be8 = struct.unpack_from('>I', b, 8)[0]
+            for m in re.finditer(b'Bip01[^\x00]{0,40}\x00', b):
+                off = m.start()
+                if off < 12:
+                    continue
+                a, c, d = struct.unpack_from('<III', b, off - 12)
+                # only assert on the common pattern family
+                if d == 1 and c == be8 and a in (0, 1):
+                    checked += 1
+        self.assertGreater(checked, 0)
+
 
 if __name__ == "__main__":
     unittest.main()
