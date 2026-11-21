@@ -74,7 +74,7 @@ Most sampled shared animation GMTs were identical; do not generalize from that s
 - `gmt_tool.py`: `info`, `scan`, `diff` for GMT header/mesh-table inspection. Uses observed structure only; no geometry conversion.
 
 ## Unknowns / next steps
-- Decode remaining body: material/texture object table (at `obj_list_offset`, observed ASCII names like `WC_TEAM_BODY1_PA`; full record layout unknown), LODs, shader params, UV sets, vertex format variants.
+- Decode remaining body: material/texture object table at `obj_list_offset` - **partially observed**: header `u16/u16?, u32 count` followed by `count` records (~1220 bytes in BACKFIRE sample) containing object/material name, shader stage strings (`L0DIFFUSET0`, `L1USEVERTEXONLY`, `L2USEVERTEXPIXEL`), texture names (e.g. `BFA0.DDS`), and float params. Full record layout, LODs, UV sets, vertex format variants still unknown.
 - Fully decode flags at 0x04 and mesh record flags at rec[1].
 - Build full same-track/same-archive GTL-vs-GTR2 GMT diff inventory; cross-archive basename comparison is noisy due name collisions.
 - Handle encrypted GMTs: `rfactortools/crypt.py` needs `_crypt` C extension (not built here). `DETOMASO_PANTERA_RAINSCREEN.GMT` appears encrypted/scrambled.
