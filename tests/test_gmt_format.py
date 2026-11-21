@@ -116,6 +116,10 @@ class GmtFormatTest(unittest.TestCase):
                 g = gmt_format.parse_gmt(name, data=data)
                 r = g.meshes[0].record
                 self.assertEqual((r.vertex_count, r.vertex_offset, r.raw[6], r.stream2_end, r.stream3_end), (20, 1164, 1804, 2444, 3084))
+                m = g.meshes[0]
+                self.assertEqual(len(m.stream2_data), 20 * 32)
+                self.assertEqual(len(m.stream3_data), 20 * 32)
+                self.assertEqual(gmt_format.write_gmt(g), data)
                 break
 
     def test_decoded_base_vertices_roundtrip(self):
@@ -134,6 +138,39 @@ class GmtFormatTest(unittest.TestCase):
                 self.assertAlmostEqual(v.nx, 0.23175576329231262, places=4)
                 self.assertEqual(v.f7, 0xFFFFFFFF)
                 break
+
+    def test_48byte_extra_block_and_driver_style(self):
+        import struct, math, importlib.util
+        spec = importlib.util.spec_from_file_location('mas', ROOT.parent / 'rfactortools/rfactortools/mas.py')
+        mas = importlib.util.module_from_spec(spec); spec.loader.exec_module(mas)
+
+        crew = ROOT.parent / "GTR2Steam/GameData/Scripts/crew.gtr"
+        if crew.exists():
+            for name, data in mas.mas_unpack_to_data(str(crew)):
+                if name == 'FUELHOSE.GMT':
+                    g = gmt_format.parse_gmt(name, data=data)
+                    self.assertEqual(gmt_format.write_gmt(g), data)
+                    m = g.meshes[0]
+                    self.assertTrue(m.record.has_extra_vertex_block)
+                    self.assertEqual(len(m.extra_vertex_data), m.record.vertex_count * 16)
+                    vals = struct.unpack_from('<4f', m.extra_vertex_data, 0)
+                    self.assertEqual(vals[0], 0.0)
+                    self.assertTrue(math.isnan(vals[1]))
+                    self.assertEqual(vals[2], 0.0)
+                    self.assertEqual(vals[3], 0.0)
+                    break
+
+        talent = ROOT.parent / "GTR2Steam/GameData/Teams/TALENT.GTR"
+        if talent.exists():
+            for name, data in mas.mas_unpack_to_data(str(talent)):
+                if name == 'EXT_DRIVER_STYLE01.GMT':
+                    g = gmt_format.parse_gmt(name, data=data)
+                    self.assertEqual(gmt_format.write_gmt(g), data)
+                    m = g.meshes[0]
+                    self.assertTrue(m.record.has_extra_vertex_block)
+                    self.assertEqual(m.record.vertex_stride, 48)
+                    self.assertEqual(len(m.extra_vertex_data), m.record.vertex_count * 16)
+                    break
 
 
 if __name__ == "__main__":
