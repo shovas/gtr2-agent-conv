@@ -34,6 +34,10 @@ class GmtMeshRecord:
     @property
     def vertex_block2_offset(self) -> int: return self.raw[5]
     @property
+    def stream2_end(self) -> int: return self.raw[7]
+    @property
+    def stream3_end(self) -> int: return self.raw[8]
+    @property
     def has_extra_vertex_block(self) -> bool:
         vc, vo, v5, v6 = self.raw[3], self.raw[4], self.raw[5], self.raw[6]
         return vc > 0 and v5 == vo + vc * 32 and v6 == vo + vc * 48

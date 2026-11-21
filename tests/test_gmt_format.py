@@ -104,6 +104,20 @@ class GmtFormatTest(unittest.TestCase):
                 self.assertEqual(m.vertex_end, m.vertex_offset + m.vertex_count * 48)
                 break
 
+    def test_extra_vertex_stream_offsets(self):
+        mas_p = ROOT.parent / "GTR2Steam/GameData/Locations/Anderstorp/Anderstorp.gtr"
+        if not mas_p.exists():
+            self.skipTest("Anderstorp.gtr not present")
+        import importlib.util
+        spec = importlib.util.spec_from_file_location('mas', ROOT.parent / 'rfactortools/rfactortools/mas.py')
+        mas = importlib.util.module_from_spec(spec); spec.loader.exec_module(mas)
+        for name, data in mas.mas_unpack_to_data(str(mas_p)):
+            if name == 'ANNOUNCERSOUND01.GMT':
+                g = gmt_format.parse_gmt(name, data=data)
+                r = g.meshes[0].record
+                self.assertEqual((r.vertex_count, r.vertex_offset, r.raw[6], r.stream2_end, r.stream3_end), (20, 1164, 1804, 2444, 3084))
+                break
+
 
 if __name__ == "__main__":
     unittest.main()
