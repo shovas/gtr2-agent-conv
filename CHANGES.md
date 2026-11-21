@@ -2,6 +2,10 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-21 19:35:00 -0500 - DDS DXT3 (BC2) decode/encode
+- Add DXT3 (BC2) decode/encode and DDS read/write support in `media_tool.py`.
+- Add synthetic DXT3 round-trip test.
+
 ## 2026-11-21 19:25:00 -0500 - DDS DXT5 (BC3) decode/encode
 - Add DXT5 (BC3) decode/encode and DDS read/write support in `media_tool.py`.
 - Add synthetic DXT5 round-trip test.

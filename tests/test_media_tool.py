@@ -136,6 +136,24 @@ class MediaToolTest(unittest.TestCase):
                 self.assertLessEqual(a.rgba[i+2], 20)
                 self.assertTrue(80 <= a.rgba[i+3] <= 180)
 
+    def test_dds_dxt3_synthetic_roundtrip(self):
+        with tempfile.TemporaryDirectory() as td:
+            src = Path(td) / "a.dds"
+            dst = Path(td) / "b.dds"
+            w,h = 4,4
+            rgba = bytes([0,0,255,64] * (w*h))
+            img = media_tool.DdsImage(width=w,height=h,mipmaps=1,fourcc='DXT3',rgba=rgba,header=b'\x00'*128)
+            src.write_bytes(img.to_bytes())
+            info = media_tool.dds_roundtrip(src, dst)
+            self.assertEqual(info.format, "dds")
+            a = media_tool.read_dds(src)
+            self.assertEqual((a.width,a.height,a.fourcc), (w,h,'DXT3'))
+            for i in range(0,len(a.rgba),4):
+                self.assertLessEqual(a.rgba[i], 20)
+                self.assertLessEqual(a.rgba[i+1], 20)
+                self.assertGreaterEqual(a.rgba[i+2], 200)
+                self.assertTrue(50 <= a.rgba[i+3] <= 80)
+
 
 if __name__ == "__main__":
     unittest.main()
