@@ -16,6 +16,7 @@
 - `../quickbms_scripts/` - large QuickBMS script collection (2745 files). **Format reference**; most relevant is `mas.bms` (GMOTORMAS10/CUBEMAS4/ISI MAS types). Use as spec cross-check; prefer native Python in `rfactortools`/this project for pipeline integration.
 - `../MAS2Extract/` - small C# GPLv3 tool for **rFactor 2 MAS2** (`GMOTOR_MAS_2.90`) extraction/deciphering. Useful as rF2-format reference, but not GMOTORMAS10/GTR2/GTL.
 - `../gtr2-agent-tools/` - GTR2 driving/UI automation toolkit (CC BY-NC 4.0). **Reference only** for format parsers in `scripts/gtr2_driving/`: `mas.py`, `gmt.py` (mesh table at 0x16C), `trackmap.py` (AIW), `cargears.py` (HDC/ENG/GRB), `pitzones.py` (TRK+MAS). Check license before reusing code.
+- `modding-tools-and-tutorials/` - local third-party modding tools/tutorials collection (131M, gitignored). **Reference only**; includes `GTL2GTR2 Converter v0.9.0.1` (simple ext/TRK-MAS rename only, no AIW/GDB fixes), RacerM rFactor->GTR2 track notes, GMT/hex-editing tutorial hints. Do not commit binaries.
 - `~/tmp/tools.unsorted.irrelevant/` - remaining large/generated/irrelevant items (installers, caches, etc.).
 
 ## `../rfactortools` facts (verified)

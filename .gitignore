@@ -1,3 +1,5 @@
 # Python
 __pycache__/
 *.pyc
+# Third-party modding tools/tutorials (large, not for git)
+modding-tools-and-tutorials/
