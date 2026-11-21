@@ -59,11 +59,11 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 - **Tool**: `media_tool.py`.
 
 ### DDS
-- **Read**: Identify + DDS header/pixel-format/caps semantic parse.
-- **Write**: Lossless byte copy possible.
-- **Verification**: `tests/test_media_tool.py`.
+- **Read**: Identify + DDS header/pixel-format/caps semantic parse; DXT1 (BC1) pixel decode to RGBA.
+- **Write**: DXT1 (BC1) encode from RGBA (lossy, simple encoder) + DDS file write; lossless byte copy possible.
+- **Verification**: `tests/test_media_tool.py` (synthetic DXT1 encode/decode/round-trip).
 - **Tool**: `media_tool.py`.
-- **Gaps**: pixel data decode/encode/edit (DXT/BC compressed) not implemented.
+- **Gaps**: DXT3/5/BC2/3/4/5/7, uncompressed RGBA variants, mipmaps, cube maps not fully implemented.
 
 ### TGA
 - **Read/Write**: Semantic read/write for uncompressed truecolor/grayscale (type 2/3) and RLE truecolor (type 10) via `media_tool.py`. Type 2/3 round-trip is byte-identical; type 10 round-trip is pixel-identical (encoder emits raw packets).

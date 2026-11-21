@@ -2,6 +2,10 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-21 19:15:00 -0500 - DDS DXT1 (BC1) decode/encode
+- Add DXT1 (BC1) decode/encode and DDS read/write in `media_tool.py` (lossy simple encoder).
+- Add synthetic DXT1 round-trip test.
+
 ## 2026-11-21 19:05:00 -0500 - BMP semantic read/write (BI_RGB 24/32)
 - Add semantic BMP read/write for uncompressed BI_RGB 24/32-bit in `media_tool.py`.
 - Fix BMP header identification unpack bug.

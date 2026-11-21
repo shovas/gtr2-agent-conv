@@ -268,6 +268,153 @@ def bmp_roundtrip(src: str | Path, dst: str | Path) -> MediaInfo:
     return identify(dst)
 
 
+# --- DDS DXT1 (BC1) support ---
+
+def _rgb565_to_rgba(c):
+    r = ((c >> 11) & 0x1F) * 255 // 31
+    g = ((c >> 5) & 0x3F) * 255 // 63
+    b = (c & 0x1F) * 255 // 31
+    return (r, g, b, 255)
+
+
+def _decode_dxt1_block(block: bytes) -> list[tuple[int,int,int,int]]:
+    c0, c1 = struct.unpack_from('<HH', block, 0)
+    bits = struct.unpack_from('<I', block, 4)[0]
+    p = [_rgb565_to_rgba(c0), _rgb565_to_rgba(c1)]
+    if c0 > c1:
+        p.append(tuple((2*p[0][i]+p[1][i])//3 for i in range(3)) + (255,))
+        p.append(tuple((p[0][i]+2*p[1][i])//3 for i in range(3)) + (255,))
+    else:
+        p.append(tuple((p[0][i]+p[1][i])//2 for i in range(3)) + (255,))
+        p.append((0,0,0,0))
+    out = []
+    for i in range(16):
+        out.append(p[(bits >> (2*i)) & 3])
+    return out
+
+
+def decode_dxt1(data: bytes, width: int, height: int) -> bytes:
+    out = bytearray(width * height * 4)
+    blocks_x = (width + 3) // 4
+    blocks_y = (height + 3) // 4
+    off = 0
+    for by in range(blocks_y):
+        for bx in range(blocks_x):
+            block = data[off:off+8]; off += 8
+            if len(block) < 8:
+                block = block.ljust(8, b'\x00')
+            px = _decode_dxt1_block(block)
+            for py in range(4):
+                for px_i in range(4):
+                    x = bx*4 + px_i
+                    y = by*4 + py
+                    if x < width and y < height:
+                        di = (y*width + x) * 4
+                        out[di:di+4] = bytes(px[py*4+px_i])
+    return bytes(out)
+
+
+def _rgba_to_rgb565(r,g,b,a=255):
+    return ((r >> 3) << 11) | ((g >> 2) << 5) | (b >> 3)
+
+
+def _color_dist2(a,b):
+    return sum((a[i]-b[i])**2 for i in range(3))
+
+
+def _encode_dxt1_block(pixels: list[tuple[int,int,int,int]]) -> bytes:
+    # Simple encoder: pick min/max luminance as endpoints, no alpha punchthrough.
+    opaque = [p[:3] for p in pixels]
+    lum = [0.299*c[0]+0.587*c[1]+0.114*c[2] for c in opaque]
+    i0 = max(range(16), key=lambda i: lum[i])
+    i1 = min(range(16), key=lambda i: lum[i])
+    c0 = _rgba_to_rgb565(*opaque[i0])
+    c1 = _rgba_to_rgb565(*opaque[i1])
+    if c0 == c1:
+        c1 = c0 ^ 1
+    if c0 <= c1:
+        c0, c1 = c1, c0
+        i0, i1 = i1, i0
+    p = [_rgb565_to_rgba(c0), _rgb565_to_rgba(c1),
+         tuple((2*p0+p1)//3 for p0,p1 in zip(_rgb565_to_rgba(c0)[:3], _rgb565_to_rgba(c1)[:3])) + (255,),
+         tuple((p0+2*p1)//3 for p0,p1 in zip(_rgb565_to_rgba(c0)[:3], _rgb565_to_rgba(c1)[:3])) + (255,)]
+    bits = 0
+    for i, px in enumerate(opaque):
+        # choose closest of 4 colors
+        best = min(range(4), key=lambda j: _color_dist2(px, p[j][:3]))
+        bits |= (best << (2*i))
+    return struct.pack('<HHI', c0, c1, bits)
+
+
+def encode_dxt1(rgba: bytes, width: int, height: int) -> bytes:
+    blocks_x = (width + 3) // 4
+    blocks_y = (height + 3) // 4
+    out = bytearray()
+    for by in range(blocks_y):
+        for bx in range(blocks_x):
+            px = []
+            for py in range(4):
+                for px_i in range(4):
+                    x = min(bx*4 + px_i, width-1)
+                    y = min(by*4 + py, height-1)
+                    di = (y*width + x) * 4
+                    px.append(tuple(rgba[di:di+4]))
+            out.extend(_encode_dxt1_block(px))
+    return bytes(out)
+
+
+@dataclass
+class DdsImage:
+    width: int
+    height: int
+    mipmaps: int
+    fourcc: str
+    rgba: bytes  # decoded top-level RGBA
+    header: bytes  # original 128-byte header for lossless metadata where possible
+
+    def to_bytes(self) -> bytes:
+        # re-encode as DXT1 when fourcc is DXT1
+        if self.fourcc == 'DXT1':
+            payload = encode_dxt1(self.rgba, self.width, self.height)
+            hdr = bytearray(self.header)
+            # update sizes/flags minimally
+            linear = len(payload)
+            struct.pack_into('<I', hdr, 0, 0x20534444)  # DDS 
+            struct.pack_into('<I', hdr, 4, 124)
+            struct.pack_into('<I', hdr, 8, 0x1007)  # CAPS|HEIGHT|WIDTH|PIXELFORMAT|LINEARSIZE
+            struct.pack_into('<I', hdr, 12, self.height)
+            struct.pack_into('<I', hdr, 16, self.width)
+            struct.pack_into('<I', hdr, 20, linear)
+            struct.pack_into('<I', hdr, 28, max(1, self.mipmaps))
+            # pixel format
+            struct.pack_into('<I', hdr, 76, 32)
+            struct.pack_into('<I', hdr, 80, 0x4)  # DDPF_FOURCC
+            hdr[84:88] = b'DXT1'
+            struct.pack_into('<I', hdr, 108, 0x1000)  # DDSCAPS_TEXTURE
+            return bytes(hdr) + payload
+        raise ValueError(f'Unsupported DDS fourcc for write: {self.fourcc}')
+
+
+def read_dds(path: str | Path) -> DdsImage:
+    p = Path(path)
+    b = p.read_bytes()
+    if not b.startswith(b'DDS ') or len(b) < 128:
+        raise ValueError('Not a DDS')
+    hdr_size, flags, height, width, pitch, depth, mipmaps = struct.unpack_from('<7I', b, 4)
+    pf_flags, fourcc = struct.unpack_from('<I4s', b, 80)
+    fourcc_s = fourcc.decode('latin1','replace').strip('\x00')
+    if fourcc_s != 'DXT1':
+        raise ValueError(f'Unsupported DDS fourcc for decode: {fourcc_s}')
+    rgba = decode_dxt1(b[128:], width, height)
+    return DdsImage(width=width, height=height, mipmaps=mipmaps or 1, fourcc=fourcc_s, rgba=rgba, header=b[:128])
+
+
+def dds_roundtrip(src: str | Path, dst: str | Path) -> MediaInfo:
+    img = read_dds(src)
+    Path(dst).write_bytes(img.to_bytes())
+    return identify(dst)
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__)
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -286,6 +433,10 @@ def main(argv=None):
     p.add_argument("src")
     p.add_argument("dst")
     p.set_defaults(func=lambda a: print(asdict(bmp_roundtrip(a.src, a.dst))) or 0)
+    p = sub.add_parser("dds-roundtrip")
+    p.add_argument("src")
+    p.add_argument("dst")
+    p.set_defaults(func=lambda a: print(asdict(dds_roundtrip(a.src, a.dst))) or 0)
     args = ap.parse_args(argv)
     return args.func(args)
 

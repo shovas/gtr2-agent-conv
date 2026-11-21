@@ -100,6 +100,26 @@ class MediaToolTest(unittest.TestCase):
             b = media_tool.read_bmp(dst)
             self.assertEqual((a.width,a.height,a.bpp,a.pixels_bgra), (b.width,b.height,b.bpp,b.pixels_bgra))
 
+    def test_dds_dxt1_synthetic_roundtrip(self):
+        with tempfile.TemporaryDirectory() as td:
+            src = Path(td) / "a.dds"
+            dst = Path(td) / "b.dds"
+            w,h = 4,4
+            # solid red RGBA
+            rgba = bytes([255,0,0,255] * (w*h))
+            img = media_tool.DdsImage(width=w,height=h,mipmaps=1,fourcc='DXT1',rgba=rgba,header=b'\x00'*128)
+            src.write_bytes(img.to_bytes())
+            info = media_tool.dds_roundtrip(src, dst)
+            self.assertEqual(info.format, "dds")
+            a = media_tool.read_dds(src)
+            b = media_tool.read_dds(dst)
+            self.assertEqual((a.width,a.height,a.fourcc), (w,h,'DXT1'))
+            # lossy, but solid red should stay close
+            for i in range(0,len(a.rgba),4):
+                self.assertGreaterEqual(a.rgba[i], 200)
+                self.assertLessEqual(a.rgba[i+1], 20)
+                self.assertLessEqual(a.rgba[i+2], 20)
+
 
 if __name__ == "__main__":
     unittest.main()
