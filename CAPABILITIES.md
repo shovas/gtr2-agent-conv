@@ -59,11 +59,11 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 - **Tool**: `media_tool.py`.
 
 ### DDS/TGA/BMP/JPG/MP3
-- **Read**: Identify by header/extension; basic header fields parsed for DDS/TGA/BMP and BMP-as-TGA quirk detection.
+- **Read**: Identify by header/extension; DDS header fields parsed (size/flags/dims/mips/pixel format/caps); basic TGA/BMP header fields parsed; BMP-as-TGA quirk detection.
 - **Write**: Lossless byte copy possible.
 - **Verification**: `tests/test_media_tool.py` (DDS real-file identification when present).
 - **Tool**: `media_tool.py`.
-- **Gaps**: full semantic decode/encode/edit not implemented in-repo.
+- **Gaps**: full semantic decode/encode/edit of pixel/audio data not implemented in-repo.
 
 ### BIK (Bink Video)
 - **Read**: Identify and parse basic header fields; lossless copy possible.

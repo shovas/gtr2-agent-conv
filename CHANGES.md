@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-21 18:45:00 -0500 - DDS header semantic field parsing
+- Parse DDS header/pixel-format/caps fields in `media_tool.py`; extend DDS identification test.
+
 ## 2026-11-21 18:35:00 -0500 - DETOMASO rainscreen GMT header-repair evidence
 - Investigated `DETOMASO_PANTERA_RAINSCREEN.GMT`: not standard ISI 16-byte-header encryption; mangled magic/flags, `mesh_count=0`, contains `RAIN_ANIM` strings.
 - Added test showing header repair (normal magic/flags) yields structurally parseable, lossless-round-trippable GMT; semantic correctness unverified.

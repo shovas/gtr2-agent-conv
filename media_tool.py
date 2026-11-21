@@ -48,10 +48,15 @@ def identify(path: str | Path) -> MediaInfo:
         details = {}
         if size >= 128:
             hdr_size, flags, height, width, pitch, depth, mipmaps = struct.unpack_from("<7I", b, 4)
-            pf_size, pf_flags, fourcc = struct.unpack_from("<2I4s", b, 76)
+            pf_size, pf_flags, fourcc, rgb_bits, rmask, gmask, bmask, amask = struct.unpack_from("<2I4s5I", b, 76)
+            caps1, caps2 = struct.unpack_from("<2I", b, 108)
             details = {
-                "header_size": hdr_size, "height": height, "width": width,
-                "mipmaps": mipmaps, "pf_fourcc": fourcc.decode("latin1", "replace").strip("\x00"),
+                "header_size": hdr_size, "flags": flags, "height": height, "width": width,
+                "pitch_or_linear_size": pitch, "depth": depth, "mipmaps": mipmaps,
+                "pf_size": pf_size, "pf_flags": pf_flags,
+                "pf_fourcc": fourcc.decode("latin1", "replace").strip("\x00"),
+                "rgb_bit_count": rgb_bits, "r_mask": rmask, "g_mask": gmask, "b_mask": bmask, "a_mask": amask,
+                "caps1": caps1, "caps2": caps2,
             }
         return MediaInfo(str(p), size, "dds", details)
     # BMP (may be TGA with .bmp extension in GTL/GTR2)
