@@ -15,9 +15,9 @@ First-pass inventory for GTL (`../GTLSteam/GameData`) and GTR2 (`../GTR2Steam/Ga
 | `.aiw` | 59 | Text waypoint file (SimBin header has null bytes) | `//[[gMa1.000f...]]` | high (text) | Text read/write; `rfactortools/aiw.py` parses it. Not a binary struct format despite null-padded header |
 | `.dsi` | 142 | Gzip-compressed SimBin text | gzip `1f8b08`, payload `//[[gMb1.000f...]]` | high | `gzip_simbin_tool.py` info/extract/create (deterministic gzip). Content round-trip verified |
 | `.hat` | 34 | Gzip-compressed SimBin text | gzip `1f8b08`, payload `//[[gMb1.000f...]]` | high | `gzip_simbin_tool.py` info/extract/create. Content round-trip verified |
-| `.fxm` | 135 | SimBin 3ds Max animation/export | `FXM `, header `<4sHHIIII...>` | medium | `fxm_tool.py` info/roundtrip; header fields observed, internal animation data not fully decoded |
-| `.fxa` | 4 | SimBin animation (FXM family) | `FXA ` | medium | `fxm_tool.py` info/roundtrip |
-| `.lma` | 116 | SimBin animation (FXM magic) | `FXM ` | medium | `fxm_tool.py` info/roundtrip (LMA uses FXM magic) |
+| `.fxm` | 135 | SimBin 3ds Max animation/export | `FXM ` | medium | `fxm_tool.py` info/nodes/roundtrip; header partially observed (BE fixed-header interpretation can overlap string data), node/bone name strings extractable; internal animation/keyframe semantics not fully decoded |
+| `.fxa` | 4 | SimBin animation (FXM family) | `FXA ` | medium | `fxm_tool.py` info/nodes/roundtrip; same container family observations as FXM |
+| `.lma` | 116 | SimBin animation (FXM magic/variant) | `LMA ` observed in GTR2/GT Legends | medium | `fxm_tool.py` info/nodes/roundtrip; node/bone strings extractable; internal structure unconfirmed |
 | `.svm` | 258 | SimBin text-like with null padding | `//[[gMa1.000f...]] [[\0...]]` | high (text-ish) | Treat as text/binary-safe bytes; preserve null padding. Not a structured binary format |
 | `.ani` | 60 | Text animation/script | `// ...` | high (text) | Plain text read/write |
 | `.bik` | 103 | Bink video (proprietary) | `BIKi` / Bink signature | low | Identify header + lossless copy. Full decode/encode requires Bink SDK/tools (proprietary) |
@@ -38,7 +38,7 @@ These are usually text but may contain null-padded SimBin headers: `.aiw`, `.svm
 ### Done / strong
 - **MAS (`.gtr/.gtl/.mas`)**: full read/write in `mas_tool.py`, tested on real GTR2/GTL archives.
 - **DSI/HAT**: gzip container understood; `gzip_simbin_tool.py` extracts/creates deterministic payloads.
-- **FXM/FXA/LMA**: header identified (`FXM `/`FXA `, `<4sHHIIII>` observed), strings/source metadata visible; lossless round-trip. Internal animation structure not fully decoded.
+- **FXM/FXA/LMA**: magic identified (`FXM `/`FXA `/`LMA `), lossless round-trip, heuristic node/bone name extraction; BE header interpretation may overlap string data. Internal animation/keyframe/node-record structure not fully decoded.
 
 ### Partial
 - **GMT**: header/mesh table partially decoded (`obj_list_offset`, flags, magic, mesh records, 32-byte vertices, u16 indices + 4-byte lead). Material/object table partially observed. No geometry converter. See `docs/gmt-format.md`.
@@ -55,4 +55,5 @@ python3 mas_tool.py list ../GTR2Steam/GameData/Locations/Anderstorp/Anderstorp.g
 python3 gmt_tool.py info ../GTR2Steam/GameData/Teams/M-FPDriver.gmt
 python3 gzip_simbin_tool.py info ../GTR2Steam/GameData/Locations/HAT_Dedicated/3ANDERSTORP.hat
 python3 fxm_tool.py info ../GTR2Steam/GameData/Animations/Pit/FH.FXA
+python3 fxm_tool.py nodes ../GTR2Steam/GameData/Animations/Driver/ExtDriver_A.LMA
 ```

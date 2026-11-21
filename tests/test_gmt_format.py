@@ -245,5 +245,35 @@ class GmtFormatTest(unittest.TestCase):
         self.skipTest("sample not found")
 
 
+    def test_material_header_observed_invariants(self):
+        # Observed across large L0-heuristic GMT sample (semantics unconfirmed):
+        # hdr_u32[32]==1065353216 (1.0f), hdr_u32[36]==0 always in sample.
+        import importlib.util, struct, glob, os
+        spec = importlib.util.spec_from_file_location('mas', ROOT.parent / 'rfactortools/rfactortools/mas.py')
+        mas = importlib.util.module_from_spec(spec); spec.loader.exec_module(mas)
+        archives = sorted(glob.glob(str(ROOT.parent / 'GTR2Steam/GameData/**/*.gtr'), recursive=True))[:8]
+        archives += sorted(glob.glob(str(ROOT.parent / 'GTLSteam/GameData/**/*.gtl'), recursive=True))[:4]
+        if not archives:
+            self.skipTest("no archives")
+        checked = 0
+        for arc in archives:
+            for name, data in mas.mas_unpack_to_data(arc):
+                if not name.lower().endswith('.gmt'):
+                    continue
+                g = gmt_format.parse_gmt(name, data=data)
+                self.assertEqual(gmt_format.write_gmt(g), data)
+                for m in g.materials:
+                    if len(m.header_raw) < 152:
+                        continue
+                    # Only assert on L0-heuristic/confident materials
+                    if not m.stages or not m.stages[0].name.startswith('L0'):
+                        continue
+                    hdr = struct.unpack_from('<38I', m.header_raw)
+                    self.assertEqual(hdr[32], 1065353216)
+                    self.assertEqual(hdr[36], 0)
+                    checked += 1
+        self.assertGreater(checked, 0)
+
+
 if __name__ == "__main__":
     unittest.main()

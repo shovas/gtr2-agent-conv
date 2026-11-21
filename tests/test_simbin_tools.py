@@ -62,6 +62,17 @@ class SimbinToolsTest(unittest.TestCase):
             fxm_tool.main(["roundtrip", str(p), str(out)])
             self.assertEqual(out.read_bytes(), b)
 
+    def test_lma_node_name_extraction(self):
+        p = ROOT.parent / "GTR2Steam/GameData/Animations/Driver/ExtDriver_A.LMA"
+        if not p.exists():
+            self.skipTest("LMA not present")
+        b = p.read_bytes()
+        nodes = fxm_tool.extract_strings(b)
+        names = [s for _, s in nodes]
+        self.assertIn('Bip01 Spine', names)
+        self.assertIn('Bip01 R Clavicle', names)
+        self.assertIn('Bip01 R UpperArm', names)
+
 
 if __name__ == "__main__":
     unittest.main()

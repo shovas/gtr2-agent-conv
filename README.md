@@ -10,7 +10,7 @@ This repository is a work in progress. It currently provides inspected format do
 - **DSI/HAT gzip containers**: read/write supported, with content round-trip tests.
 - **GMT meshes**: structural lossless read/write supported; partial field decode (mesh table, material/stage strings, vertex block layout, extra streams) with tests. Full semantics and encrypted GMTs are not fully resolved.
 - **ISI encryption/decryption**: pure-Python ISI/rFactor sign+key decrypt/encrypt for GMT/MAS-style 16-byte-header files (`isi_crypt.py`), verified against rfactordec. Unknown-signature/non-standard encrypted GMTs may still be unresolved.
-- **FXM/FXA/LMA**: header identification and lossless round-trip supported; internal animation/keyframe semantics undecoded.
+- **FXM/FXA/LMA**: header identification, heuristic node/bone name extraction, and lossless round-trip supported; internal animation/keyframe semantics undecoded.
 - **BIK**: identify/lossless copy only (proprietary Bink codec).
 - **Standard media (DDS/TGA/BMP/JPG/MP3/WAV/BIK)**: identified with basic header parsing; WAV PCM, TGA (type 2/3/10), BMP (BI_RGB 24/32), and DDS DXT1/DXT3/DXT5 (BC1/2/3, lossy) and uncompressed RGB(A) semantic round-trip supported; DDS header semantic parse; lossless byte copy possible. JPG/MP3 metadata parsing supported; full pixel/audio decode/encode not implemented for all formats; BIK proprietary.
 
@@ -22,7 +22,7 @@ See `CAPABILITIES.md` for details and `docs/` for format notes.
 - Inspect GMT headers/mesh/material structure and diff GMTs (`gmt_tool.py`, `gmt_format.py`).
 - Decrypt/encrypt ISI 16-byte-header GMT/MAS files (`isi_crypt.py`).
 - Inspect and round-trip gzip-wrapped SimBin DSI/HAT files (`gzip_simbin_tool.py`).
-- Inspect and lossless round-trip FXM/FXA/LMA headers/containers (`fxm_tool.py`).
+- Inspect, extract node names, and lossless round-trip FXM/FXA/LMA containers (`fxm_tool.py`).
 - Identify media formats and semantic WAV round-trip (`media_tool.py`).
 - Format documentation for GMT and binary format inventory in `docs/`.
 
@@ -63,7 +63,7 @@ No package install is required; tools are runnable as scripts from the repo root
 - `gmt_tool.py` / `gmt_format.py` - GMT inspection and structural parser/writer.
 - `isi_crypt.py` - Pure-Python ISI decrypt/encrypt for 16-byte-header files.
 - `gzip_simbin_tool.py` - DSI/HAT gzip container tool.
-- `fxm_tool.py` - FXM/FXA/LMA header/round-trip tool.
+- `fxm_tool.py` - FXM/FXA/LMA header/node extraction/round-trip tool.
 - `media_tool.py` - Media identification and WAV semantic round-trip.
 - `docs/` - format documentation.
 - `tests/` - unittest suite.

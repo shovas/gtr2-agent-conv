@@ -73,11 +73,12 @@ python3 gzip_simbin_tool.py info <file.hat|file.dsi>
 
 ## 5. Inspect/round-trip FXM/FXA/LMA files (partial)
 
-**What it does**: Identifies FXM/FXA/LMA headers and performs lossless round-trip.
+**What it does**: Identifies FXM/FXA/LMA headers, extracts heuristic node/bone names, and performs lossless round-trip.
 
 **How to ask**:
 - "What kind of FX file is this?"
 - "Lossless round-trip this FXA/FXM/LMA."
+- "List node/bone names from this LMA."
 
 **Command**:
 ```bash

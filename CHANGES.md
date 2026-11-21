@@ -9,6 +9,11 @@ Newest-first change log. Timestamps use repository commit dates (ISO 8601, local
 - Parse JPG SOF dimensions/bit depth and MP3 frame header metadata in `media_tool.py`.
 - Add real-file JPG/MP3 metadata tests.
 
+## 2026-11-21 20:55:00 -0500 - FXM/LMA node extraction and GMT header invariants
+- Add heuristic node/bone name extraction to `fxm_tool.py` (`nodes` command, `extract_strings`).
+- Add observed GMT material header invariants for L0-heuristic materials (u32[32]==1.0f, u32[36]==0) with scan test.
+- Document FXM/LMA header overlap caution and LMA magic observation.
+
 ## 2026-11-21 20:45:00 -0500 - GMT stage tail u32 observed fields
 - Expose `GmtStage.tail_u32_64/65` (stage byte offsets 256,260) with large-sample name correlation documented as semantics-unconfirmed.
 

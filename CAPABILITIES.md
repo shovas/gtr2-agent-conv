@@ -44,9 +44,9 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 - **Tool**: `gzip_simbin_tool.py`.
 
 ### FXM/FXA/LMA
-- **Read**: Header identification + lossless container read. Recognizes observed magics `FXM `, `FXA `, `LMA ` (extension may not match magic). Reports LE and BE header field interpretations (BE observed plausible, semantics unconfirmed).
+- **Read**: Header identification + lossless container read. Recognizes observed magics `FXM `, `FXA `, `LMA `. Reports LE/BE header field interpretations (BE fixed-header interpretation can overlap string data; semantics unconfirmed). Heuristic node/bone name extraction (`nodes`/`extract_strings`).
 - **Write**: Lossless round-trip.
-- **Verification**: `tests/test_simbin_tools.py` (includes real LMA round-trip and BE-field observation when present).
+- **Verification**: `tests/test_simbin_tools.py` (real LMA round-trip, BE-field observation, node-name extraction when present).
 - **Tool**: `fxm_tool.py`.
 - **Gaps**: internal animation/keyframe/node/bone semantics.
 

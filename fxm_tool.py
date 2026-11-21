@@ -3,6 +3,7 @@
 
 Observed magics: b'FXM ', b'FXA ', b'LMA ' (extension does not always match magic).
 Header is partially understood; tool validates magic and reports observed fields.
+Node/bone name strings can be extracted heuristically; internal record semantics unconfirmed.
 Read/write is lossless at file-bytes level.
 """
 from __future__ import annotations
@@ -67,6 +68,31 @@ def cmd_info(args: argparse.Namespace) -> int:
     return 0
 
 
+def extract_strings(b: bytes, min_len: int = 4) -> list[tuple[int, str]]:
+    out = []
+    i = 0
+    while i < len(b):
+        if 32 <= b[i] < 127:
+            j = i
+            while j < len(b) and 32 <= b[j] < 127:
+                j += 1
+            if j < len(b) and b[j] == 0 and j - i >= min_len:
+                out.append((i, b[i:j].decode('latin-1', 'replace')))
+            i = j + 1
+        else:
+            i += 1
+    return out
+
+
+def cmd_nodes(args: argparse.Namespace) -> int:
+    b = Path(args.file).read_bytes()
+    for off, s in extract_strings(b):
+        # heuristic: bone/node names often contain Bip01, Driver, or spaces/underscores
+        if args.all or any(k in s for k in ('Bip01', 'Driver', 'Bone', 'Node')):
+            print(f'{off}\t{s}')
+    return 0
+
+
 def cmd_roundtrip(args: argparse.Namespace) -> int:
     b = Path(args.file).read_bytes()
     Path(args.out).write_bytes(b)
@@ -79,6 +105,10 @@ def main(argv=None) -> int:
     p = sub.add_parser("info")
     p.add_argument("file")
     p.set_defaults(func=cmd_info)
+    p = sub.add_parser("nodes", help="extract likely node/bone names (heuristic)")
+    p.add_argument("file")
+    p.add_argument("--all", action="store_true")
+    p.set_defaults(func=cmd_nodes)
     p = sub.add_parser("roundtrip", help="lossless byte copy")
     p.add_argument("file")
     p.add_argument("out")
