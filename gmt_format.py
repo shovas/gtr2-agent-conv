@@ -70,11 +70,20 @@ class GmtVertexBase:
 
 
 @dataclass
+class GmtVertexExtra:
+    # Observed 16-byte extra block for 48-stride meshes: 4 u32/f32 values.
+    # Semantics unconfirmed; sampled FUELHOSE/EXT_DRIVER_STYLE01 show [0, NaN, 0, 0].
+    raw_u32: List[int]
+    raw_f32: List[float]
+
+
+@dataclass
 class GmtMesh:
     record: GmtMeshRecord
     vertex_data: bytes
     index_data: bytes  # includes 4-byte lead + u16 indices as stored
     base_vertices: List[GmtVertexBase] = field(default_factory=list)
+    extra_vertices: List[GmtVertexExtra] = field(default_factory=list)
     extra_vertex_data: bytes = b""  # 16-byte/vert block when has_extra_vertex_block
     stream2_data: bytes = b""  # rec[6]..rec[7], layout unconfirmed
     stream3_data: bytes = b""  # rec[7]..rec[8], layout unconfirmed
@@ -204,6 +213,18 @@ def _decode_base_vertices(vertex_data: bytes, count: int) -> List[GmtVertexBase]
     return out
 
 
+def _decode_extra_vertices(extra_data: bytes, count: int) -> List[GmtVertexExtra]:
+    out: List[GmtVertexExtra] = []
+    for i in range(count):
+        off = i * 16
+        if off + 16 > len(extra_data):
+            break
+        u = list(struct.unpack_from('<4I', extra_data, off))
+        f = list(struct.unpack_from('<4f', extra_data, off))
+        out.append(GmtVertexExtra(raw_u32=u, raw_f32=f))
+    return out
+
+
 def parse_gmt(path: str | Path, data: bytes | None = None) -> GmtFile:
     p = Path(path)
     d = data if data is not None else p.read_bytes()
@@ -226,15 +247,17 @@ def parse_gmt(path: str | Path, data: bytes | None = None) -> GmtFile:
         i_data = d[rec.index_offset:i_end] if rec.index_offset <= len(d) else b""
         base_vertices = _decode_base_vertices(v_data, rec.vertex_count)
         extra = b""
+        extra_vertices: List[GmtVertexExtra] = []
         s2 = b""
         s3 = b""
         if rec.has_extra_vertex_block:
             extra = d[rec.raw[5]:rec.raw[6]] if rec.raw[6] <= len(d) else b""
+            extra_vertices = _decode_extra_vertices(extra, rec.vertex_count)
         if rec.stream2_end > rec.raw[6] and rec.raw[6] > 0:
             s2 = d[rec.raw[6]:rec.stream2_end] if rec.stream2_end <= len(d) else b""
         if rec.stream3_end > rec.stream2_end and rec.stream2_end > 0:
             s3 = d[rec.stream2_end:rec.stream3_end] if rec.stream3_end <= len(d) else b""
-        meshes.append(GmtMesh(record=rec, vertex_data=v_data, index_data=i_data, base_vertices=base_vertices, extra_vertex_data=extra, stream2_data=s2, stream3_data=s3))
+        meshes.append(GmtMesh(record=rec, vertex_data=v_data, index_data=i_data, base_vertices=base_vertices, extra_vertices=extra_vertices, extra_vertex_data=extra, stream2_data=s2, stream3_data=s3))
     tail = d[obj_off:] if obj_off <= len(d) else b""
     materials = _parse_materials(tail)
     return GmtFile(

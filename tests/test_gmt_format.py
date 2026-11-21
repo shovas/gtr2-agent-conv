@@ -153,11 +153,14 @@ class GmtFormatTest(unittest.TestCase):
                     m = g.meshes[0]
                     self.assertTrue(m.record.has_extra_vertex_block)
                     self.assertEqual(len(m.extra_vertex_data), m.record.vertex_count * 16)
+                    self.assertEqual(len(m.extra_vertices), m.record.vertex_count)
                     vals = struct.unpack_from('<4f', m.extra_vertex_data, 0)
                     self.assertEqual(vals[0], 0.0)
                     self.assertTrue(math.isnan(vals[1]))
                     self.assertEqual(vals[2], 0.0)
                     self.assertEqual(vals[3], 0.0)
+                    self.assertEqual(m.extra_vertices[0].raw_u32[0], 0)
+                    self.assertEqual(m.extra_vertices[0].raw_u32[2], 0)
                     break
 
         talent = ROOT.parent / "GTR2Steam/GameData/Teams/TALENT.GTR"
