@@ -128,6 +128,25 @@ class SimbinToolsTest(unittest.TestCase):
             checked += 1
         self.assertGreater(checked, 0)
 
+    def test_fxm_offset30_contains_source_path(self):
+        # Observed: most offset-30 files contain a source path string (contains ":" or ":/") within 300 bytes after first string.
+        import glob, os, re
+        paths=[]
+        for root in [ROOT.parent / 'GTR2Steam', ROOT.parent / 'GTLSteam']:
+            paths += glob.glob(str(root / '**/*.*'), recursive=True)
+        off30=haspath=0
+        for pth in paths:
+            if os.path.splitext(pth)[1].lower() not in ('.fxa','.fxm','.lma'): continue
+            b = Path(pth).read_bytes()
+            m = re.search(br'[\x20-\x7e]{4,}\x00', b)
+            if not m or m.start()!=30: continue
+            off30 += 1
+            chunk = b[m.end():m.end()+300]
+            if b':\\' in chunk or b':/' in chunk:
+                haspath += 1
+        self.assertGreaterEqual(off30, 100)
+        self.assertGreaterEqual(haspath, off30 - 10)
+
 
 if __name__ == "__main__":
     unittest.main()
