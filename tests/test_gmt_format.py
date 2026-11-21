@@ -118,6 +118,23 @@ class GmtFormatTest(unittest.TestCase):
                 self.assertEqual((r.vertex_count, r.vertex_offset, r.raw[6], r.stream2_end, r.stream3_end), (20, 1164, 1804, 2444, 3084))
                 break
 
+    def test_decoded_base_vertices_roundtrip(self):
+        mas_p = ROOT.parent / "GTR2Steam/GameData/Teams/24H/BMW M3GTR Teams/BMW_M3GTR_OBJ.gtr"
+        if not mas_p.exists():
+            self.skipTest("archive not present")
+        import importlib.util
+        spec = importlib.util.spec_from_file_location('mas', ROOT.parent / 'rfactortools/rfactortools/mas.py')
+        mas = importlib.util.module_from_spec(spec); spec.loader.exec_module(mas)
+        for name, data in mas.mas_unpack_to_data(str(mas_p)):
+            if name == 'BMW_M3GTR_BUMPER_A.GMT':
+                g = gmt_format.parse_gmt(name, data=data)
+                self.assertEqual(gmt_format.write_gmt(g), data)
+                v = g.meshes[0].base_vertices[0]
+                self.assertAlmostEqual(v.x, 0.6859208345413208, places=4)
+                self.assertAlmostEqual(v.nx, 0.23175576329231262, places=4)
+                self.assertEqual(v.f7, 0xFFFFFFFF)
+                break
+
 
 if __name__ == "__main__":
     unittest.main()

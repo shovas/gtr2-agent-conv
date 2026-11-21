@@ -55,10 +55,25 @@ class GmtMeshRecord:
 
 
 @dataclass
+class GmtVertexBase:
+    # Observed 32-byte base layout: [u32/f32 f0, pos.xyz, norm.xyz, u32/f32 f7]
+    # Semantics of f0/f7 not fully confirmed; pos/norm observed plausible.
+    f0: int
+    x: float
+    y: float
+    z: float
+    nx: float
+    ny: float
+    nz: float
+    f7: int
+
+
+@dataclass
 class GmtMesh:
     record: GmtMeshRecord
     vertex_data: bytes
     index_data: bytes  # includes 4-byte lead + u16 indices as stored
+    base_vertices: List[GmtVertexBase] = field(default_factory=list)
 
 
 @dataclass
@@ -167,6 +182,18 @@ def _parse_materials(tail: bytes) -> List[GmtMaterial]:
     return mats
 
 
+def _decode_base_vertices(vertex_data: bytes, count: int) -> List[GmtVertexBase]:
+    out: List[GmtVertexBase] = []
+    for i in range(count):
+        off = i * 32
+        if off + 32 > len(vertex_data):
+            break
+        f0, x, y, z, nx, ny, nz = struct.unpack_from('<I3f3f', vertex_data, off)
+        f7 = struct.unpack_from('<I', vertex_data, off + 28)[0]
+        out.append(GmtVertexBase(f0=f0, x=x, y=y, z=z, nx=nx, ny=ny, nz=nz, f7=f7))
+    return out
+
+
 def parse_gmt(path: str | Path, data: bytes | None = None) -> GmtFile:
     p = Path(path)
     d = data if data is not None else p.read_bytes()
@@ -187,7 +214,8 @@ def parse_gmt(path: str | Path, data: bytes | None = None) -> GmtFile:
         i_end = rec.index_bytes_end
         v_data = d[rec.vertex_offset:v_end] if rec.vertex_offset <= len(d) else b""
         i_data = d[rec.index_offset:i_end] if rec.index_offset <= len(d) else b""
-        meshes.append(GmtMesh(record=rec, vertex_data=v_data, index_data=i_data))
+        base_vertices = _decode_base_vertices(v_data, rec.vertex_count)
+        meshes.append(GmtMesh(record=rec, vertex_data=v_data, index_data=i_data, base_vertices=base_vertices))
     tail = d[obj_off:] if obj_off <= len(d) else b""
     materials = _parse_materials(tail)
     return GmtFile(
