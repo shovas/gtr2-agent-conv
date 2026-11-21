@@ -86,7 +86,23 @@ python3 fxm_tool.py info <file.fxm|file.fxa|file.lma>
 
 **Limitations**: Internal animation/keyframe/node semantics are not decoded.
 
-## 6. Consult format documentation
+## 6. Identify media formats / WAV round-trip (partial)
+
+**What it does**: Identifies common GTL/GTR2 media files (WAV/DDS/TGA/BMP/JPG/MP3/BIK), parses basic headers, detects BMP-as-TGA quirk, and performs semantic WAV PCM round-trip.
+
+**How to ask**:
+- "Identify this DDS/BMP/BIK file."
+- "Round-trip this WAV file and verify it."
+
+**Commands**:
+```bash
+python3 media_tool.py info <file>
+python3 media_tool.py wav-roundtrip <src.wav> <dst.wav>
+```
+
+**Limitations**: Full semantic decode/encode/edit not implemented for DDS/TGA/BMP/JPG/MP3/BIK; BIK decode/encode is proprietary.
+
+## 7. Consult format documentation
 
 **What it does**: Provides evidence-based notes for GTL/GTR2 binary formats.
 
@@ -100,7 +116,7 @@ python3 fxm_tool.py info <file.fxm|file.fxa|file.lma>
 - `docs/binary-formats.md`
 - `CAPABILITIES.md`
 
-## 7. Run tests
+## 8. Run tests
 
 **What it does**: Runs the unittest suite covering MAS, GMT, DSI/HAT, and FXM tools.
 

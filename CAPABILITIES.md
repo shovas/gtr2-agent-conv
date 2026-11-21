@@ -53,18 +53,23 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 ## Media formats
 
 ### WAV
-- **Read**: Identify; stdlib `wave` can parse PCM.
-- **Write**: stdlib `wave` can write PCM; lossless byte copy possible.
-- **Gaps**: not wrapped by a project-specific semantic tool beyond identification/copy.
+- **Read**: Identify and parse PCM params/frames via stdlib `wave`.
+- **Write**: Semantic PCM round-trip via stdlib `wave`; lossless byte copy possible.
+- **Verification**: `tests/test_media_tool.py`.
+- **Tool**: `media_tool.py`.
 
 ### DDS/TGA/BMP/JPG/MP3
-- **Read**: Identify by header/extension; lossless byte copy possible.
+- **Read**: Identify by header/extension; basic header fields parsed for DDS/TGA/BMP and BMP-as-TGA quirk detection.
 - **Write**: Lossless byte copy possible.
-- **Gaps**: semantic decode/encode/edit not fully implemented in-repo. BMP includes files with TGA headers and `.bmp` extension (observed quirk).
+- **Verification**: `tests/test_media_tool.py` (DDS real-file identification when present).
+- **Tool**: `media_tool.py`.
+- **Gaps**: full semantic decode/encode/edit not implemented in-repo.
 
 ### BIK (Bink Video)
-- **Read**: Identify/lossless copy only.
+- **Read**: Identify and parse basic header fields; lossless copy possible.
 - **Write**: Lossless copy only.
+- **Verification**: `tests/test_media_tool.py` (real-file identification when present).
+- **Tool**: `media_tool.py`.
 - **Gaps**: proprietary codec; full decode/encode requires proprietary Bink SDK/licensed tools.
 
 ## Conversion pipeline

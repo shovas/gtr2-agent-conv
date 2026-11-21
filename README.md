@@ -23,6 +23,7 @@ See `CAPABILITIES.md` for details and `docs/` for format notes.
 - Decrypt/encrypt ISI 16-byte-header GMT/MAS files (`isi_crypt.py`).
 - Inspect and round-trip gzip-wrapped SimBin DSI/HAT files (`gzip_simbin_tool.py`).
 - Inspect and lossless round-trip FXM/FXA/LMA headers/containers (`fxm_tool.py`).
+- Identify media formats and semantic WAV round-trip (`media_tool.py`).
 - Format documentation for GMT and binary format inventory in `docs/`.
 
 ## Requirements
@@ -63,6 +64,7 @@ No package install is required; tools are runnable as scripts from the repo root
 - `isi_crypt.py` - Pure-Python ISI decrypt/encrypt for 16-byte-header files.
 - `gzip_simbin_tool.py` - DSI/HAT gzip container tool.
 - `fxm_tool.py` - FXM/FXA/LMA header/round-trip tool.
+- `media_tool.py` - Media identification and WAV semantic round-trip.
 - `docs/` - format documentation.
 - `tests/` - unittest suite.
 
