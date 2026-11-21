@@ -73,9 +73,19 @@ Most sampled shared animation GMTs were identical; do not generalize from that s
 ## Tooling
 - `gmt_tool.py`: `info`, `scan`, `diff` for GMT header/mesh-table inspection. Uses observed structure only; no geometry conversion.
 
+## Additional confirmed findings
+
+- **Mesh -> material index**: mesh rec[2] is within material table count for **85363/85363** mesh records checked.
+- **Vertex stride**: 32 bytes in 85350 records, 48 bytes in 11 records (FUELHOSE, EXT_DRIVER_STYLE01-10), 2 records (GRATING1 in Donington.gtr/.gtl) have rec[6]=0 but 32-byte stride fits. `rec[6]` usually equals `vo+vc*stride`.
+- **32-byte vertex (observed)**: 8 float/u32 values - appears to include pos.xyz, normal.xyz, plus 2 extra u32/float fields (UV/color/packed); exact layout not fully confirmed.
+- **48-byte vertex (observed)**: 12 float/u32 values; likely extended (extra UV/tangent/skin data) - layout not fully confirmed.
+- **Material table**: tail at `obj_list_offset` starts `u16,u16,u32 count`; contains `count` material/object entries. BACKFIRE/GOALPOST fit equal-size split; BUMPER_A suggests variable-size or complex layout - **parser treats material split as best-effort, preserves raw tail for round-trip**.
+- **Structural round-trip**: `gmt_format.py` parses header, mesh table, mesh vertex/index blobs, material table best-effort, and preserves original bytes for lossless round-trip. Tested on real GTR2/GTL GMTs.
+
 ## Unknowns / next steps
-- Decode remaining body: material/texture object table at `obj_list_offset` - **partially observed**: header `u16/u16?, u32 count` followed by `count` records (~1220 bytes in BACKFIRE sample) containing object/material name, shader stage strings (`L0DIFFUSET0`, `L1USEVERTEXONLY`, `L2USEVERTEXPIXEL`), texture names (e.g. `BFA0.DDS`), and float params. Full record layout, LODs, UV sets, vertex format variants still unknown.
-- Fully decode flags at 0x04 and mesh record flags at rec[1]. **Observed distributions**: header flags 5 values (see table). Mesh rec[1] flags 13 unique values across 85363 records: `0x20004011` (49709), `0x4011` (21390), `0x20004035` (8637), `0x4035` (3413), `0x20004015` (1585), `0x4015` (320), `0x20006011` (192), `0x6011` (80), `0x20006035` (18), `0x20004013` (11), `0x6015` (3), `0x6035` (3), `0x20004001` (2). Bit patterns visible (0x20000000, 0x4000/0x6000, low nibble variants) but semantics unproven. Also `rec[6] == vo+vc*32` in 85350/85363 records (13 exceptions: GRATING1, FUELHOSE, EXT_DRIVER_STYLE01-10).
-- Build full same-track/same-archive GTL-vs-GTR2 GMT diff inventory; cross-archive basename comparison is noisy due name collisions.
-- Handle encrypted GMTs: `rfactortools/crypt.py` needs `_crypt` C extension (not built here). `DETOMASO_PANTERA_RAINSCREEN.GMT` appears encrypted/scrambled.
-- `gmtconvert` not found in workspace; legacy expected it. Any GMT transformation needs a new, tested converter with format spec evidence.
+- Fully decode material/object record layout (variable-size?), texture stage slots, shader params, LODs, UV sets.
+- Fully decode flags at 0x04 and mesh record flags at rec[1] semantics.
+- Confirm 32/48-byte vertex field semantics (UVs, tangents, colors, packed normals).
+- Build full same-track/same-archive GTL-vs-GTR2 GMT diff inventory.
+- Handle encrypted GMTs (`rfactortools._crypt` C extension not built). `DETOMASO_PANTERA_RAINSCREEN.GMT` appears encrypted/scrambled.
+- `gmtconvert` not found in workspace; any GMT transform needs a new tested converter backed by format evidence.
