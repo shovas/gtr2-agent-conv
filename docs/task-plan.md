@@ -36,6 +36,20 @@ named tests/docs/tools.
 | 16 | FXM/GTTF record semantics, CUBE MTS, `.tgq` | Authoritative spec or runtime-validated reference | Observations only in `docs/binary-formats.md` |
 | 17 | GTR (2004) corpus | Not installed locally | `CAPABILITIES.md` coverage gaps |
 
+## TODO — PHS identity hypothesis
+
+The 5 GTL `.phs` files (PHYSICS/CARS/DRIVERS/AI/TRACKS, ~7.95 bits/byte
+entropy) are physics/AI data — confirmed distinct from the plain-text `.psh`
+pixel shaders. Because they are ISIMotor content, they may be the same binary
+format under a different name in other ISIMotor games (e.g. rFactor/GSC/AMS
+physics blobs such as `.hdv`, `.veh`, `.rcd`, `.gen`, or the Reiza `.cch`).
+Investigate whether a known ISI physics container or cipher applies:
+- compare PHS against `Physics2.gtl` content in GTR2/GTL mods and other game corpora;
+- check `../rfactortools` and `../quickbms_scripts` for physics-container parsers;
+- test whether the 5 files are a packed table of known `.hdv/.veh/.rcd` records.
+
+No cipher or spec found so far; this is an explicit follow-up, not a claim.
+
 ## Final verification
 ```
 python3 -m unittest discover -s tests -v   -> 157 tests OK (skipped=1)
