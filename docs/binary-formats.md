@@ -72,7 +72,7 @@ These are usually text but may contain null-padded SimBin headers: `.aiw`, `.svm
 
 ### Partial decoding of new mesh variants (task 4)
 - `CUBE_MTS_4.10` and `CUBE_MTS_4.20` share a verified header: `magic[16], u32 object_count, char name[8]` (`mts_format.py`, 4,200+ sampled meshes in `../NascarSimRacing`). Payload after 0x1C remains undecoded; same-name files across versions have unrelated sizes, so it is not a magic-only difference.
-- `RaceGMT\0` (643 DLC files in `../Race07Complete`) has a verified header: `magic[8], u32 name_len, name, u32 flags=0x04000020, 12+ bounding-box/vertex floats` (`race_gmt.py`). Same-size file diffs (e.g. `PEOPLE_STAND_01/02`) reveal repeating **36-byte** records (position triples) and **64-byte** records (likely 4x4 transforms) — `race_gmt.diff_strides()`. Payload starts at `16 + name_len` (unaligned).
+- `RaceGMT\0` (643 DLC files in `../Race07Complete`) has a verified header: `magic[8], u32 name_len, name, u32 flags=0x04000020, 12+ bounding-box/vertex floats` (`race_gmt.py`). Same-size file diffs (e.g. `PEOPLE_STAND_01/02`) reveal repeating **36-byte** records (3 × (x,y,z) position triples) and **64-byte** records (likely 4x4 transforms) — `race_gmt.diff_strides()`. Payload starts at `16 + name_len` (unaligned); `race_gmt.read_positions()` reads 552 consecutive 36-byte records from `PEOPLE_STAND_01` (verified). Index/material semantics still undecoded.
 - CUBE MTS 4.20 same-size file diffs reveal a dominant **48-byte** record stride (same size as the new-layout GMT 32+16 vertex layout) — `tests/test_mts_format.py`. Index/material structure still undecoded.
 
 ### GTR 2004 (GTR1) — previously missing target corpus (evidence only)

@@ -2,6 +2,10 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-22 07:45:00 -0500 - Task 4: RaceGMT positions decoded
+- Verify 36-byte records are 3×(x,y,z) position triples; `race_gmt.read_positions()` reads 552 records from PEOPLE_STAND_01.
+- Document in `docs/binary-formats.md`, `CAPABILITIES.md`; add test.
+
 ## 2026-11-22 07:15:00 -0500 - Task 4: record strides found
 - Same-size file diffs reveal `RaceGMT\0` record strides of 36 bytes (positions) and 64 bytes (transforms); add `race_gmt.diff_strides()` + test.
 - CUBE MTS 4.20 same-size diffs show a dominant 48-byte record stride; add test.

@@ -64,6 +64,22 @@ def diff_strides(a: bytes, b: bytes, gap: int = 4) -> dict:
     return {"runs": len(runs), "distances": dict(distances), "first_starts": starts[:8]}
 
 
+def read_positions(data: bytes) -> list[tuple[tuple[float, float, float], ...]]:
+    """Read the leading 36-byte triangle records as 3 position triples each.
+
+    Verified on PEOPLE_STAND_01..08 (48 records, 144 vertices); only the
+    position floats vary across same-size files. Returns one 3-tuple per record.
+    """
+    header = parse_header(data)
+    off = 16 + len(header.name.encode("latin-1"))
+    out = []
+    while off + 36 <= len(data):
+        vals = struct.unpack_from("<9f", data, off)
+        out.append(tuple((vals[i], vals[i + 1], vals[i + 2]) for i in (0, 3, 6)))
+        off += 36
+    return out
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("files", nargs="+")

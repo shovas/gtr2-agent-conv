@@ -33,6 +33,15 @@ class RaceGmtTest(unittest.TestCase):
         self.assertGreater(distances.get(36, 0), 10)
         self.assertGreater(distances.get(64, 0), 10)
 
+    def test_position_records(self):
+        p = ROOT.parent / "Race07Complete/GameData/Locations/Marrakech/Models/PEOPLE_STAND_01.gmt"
+        if not p.is_file():
+            self.skipTest("PEOPLE_STAND sample not present")
+        tris = race_gmt.read_positions(p.read_bytes())
+        self.assertEqual(len(tris), 552)
+        self.assertTrue(all(len(t) == 3 for t in tris))
+        self.assertAlmostEqual(tris[0][0][0], 25.1521, places=3)
+
     def test_rejects_other_gmt(self):
         with self.assertRaises(ValueError):
             race_gmt.parse_header(b"NOPE" + b"\0" * 64)
