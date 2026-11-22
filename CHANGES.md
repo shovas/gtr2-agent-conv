@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-22 15:45:00 -0500 - Task 4: RaceGMT stage numeric fields
+- `race_gmt.read_material_blocks()` resolves 264-byte stage records; u32 tail at +256 correlates with stage prefix (L0/L1/L2). Add test and document.
+
 ## 2026-11-22 15:15:00 -0500 - Task 4: RaceGMT material groups
 - Validate material/stage grouping: PEOPLE_STAND_01 has 20 strings = 5 groups of (material + L0/L1/L2 stage names). Add `race_gmt.read_material_strings()` + test.
 

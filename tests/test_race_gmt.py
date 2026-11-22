@@ -42,6 +42,19 @@ class RaceGmtTest(unittest.TestCase):
         self.assertTrue(all(len(t) == 3 for t in tris))
         self.assertAlmostEqual(tris[0][0][0], 25.1521, places=3)
 
+    def test_stage_numeric_tail_correlates_with_prefix(self):
+        files = [p for p in ROOT.parent.joinpath("Race07Complete").rglob("*.gmt")
+                 if p.read_bytes()[:8] == race_gmt.MAGIC]
+        if not files:
+            self.skipTest("RaceGMT files not present")
+        seen = {}
+        for p in files[:10]:
+            for b in race_gmt.read_material_blocks(p.read_bytes()):
+                seen.setdefault(b["name"][:2], b["tail"])
+        self.assertEqual(seen.get("L0"), (1, 1))
+        self.assertEqual(seen.get("L2"), (0, 0))
+        self.assertIn(seen.get("L1"), ((2, 1), (2, 4)))
+
     def test_material_stage_groups(self):
         p = ROOT.parent / "Race07Complete/GameData/Locations/Marrakech/Models/PEOPLE_STAND_01.gmt"
         if not p.is_file():

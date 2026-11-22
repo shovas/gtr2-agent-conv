@@ -89,6 +89,27 @@ def read_material_strings(data: bytes) -> list[str]:
             for m in re.finditer(rb"[A-Za-z0-9_]{4,40}\x00", data[16:])]
 
 
+STAGE_STRIDE = 264
+
+
+def read_material_blocks(data: bytes) -> list[dict]:
+    """Resolve material/stage blocks from the validated 264-byte stage grid.
+
+    Observed across 60 sampled files: stage strings (`L0`/`L1`/`L2` ...) are
+    spaced 264 bytes and each stage has u32 (1, 1) at +256.
+    """
+    import re
+    matches = [m.start() for m in re.finditer(rb"L[012][A-Z0-9_]{3,39}\x00", data)]
+    blocks = []
+    for off in matches:
+        if off + STAGE_STRIDE > len(data):
+            continue
+        tail = struct.unpack_from("<2I", data, off + 256)
+        name = data[off:data.find(b"\0", off)].decode("ascii")
+        blocks.append({"offset": off, "name": name, "tail": tail})
+    return blocks
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("files", nargs="+")
