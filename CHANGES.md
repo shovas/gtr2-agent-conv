@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-22 06:15:00 -0500 - Status update
+- Update `docs/task-plan.md` verification count to 181 tests.
+
 ## 2026-11-22 05:45:00 -0500 - Ranked tasks: pipeline text rules, diff harness, diagnostics, CI
 - `text_convert.py`: SCN→TRK rewrites + tree-level rF1→GTR2 conversion (AIW, archives, copies).
 - `corpus_diff.py`: same-name corpus comparison with optional MAS-member indexing.
