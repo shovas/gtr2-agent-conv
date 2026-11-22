@@ -2,6 +2,12 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 17:30:00 -0500 - NUL-name FXM variant generalized
+- `parse_nul_name_nodes()` now tries keyframe offsets (40,80,44,76), covering windshield-wiper files (keyframe at name+80, trailer `(0,0xb8,1)`). All 160/160 LMA files now parse; added test.
+
+## 2026-11-23 17:00:00 -0500 - NUL-name FXM variant decoded
+- `fxm_tool.parse_nul_name_nodes()` decodes the `LMA `-magic FXM variant with NUL-terminated node names: single 40-byte TRS key at name+40, 12-byte trailer. Validated 69/79 nodes in FPDRIVER_Vectra-SteerL_01.FXM and 137/160 LMA files; added test and docs.
+
 ## 2026-11-23 16:30:00 -0500 - GTR1 descriptor-less variant decoded
 - `gmt_semantic.read_gtr1_object_mesh()` decodes the 22,287 GTR1 files lacking the 0x194 grid: 36-byte triangle records at vertex_offset (u16 indices), 32-byte position records at index_offset (4-byte lead), true count from the object table. ARMCOSHAD01.GMT yields 30 positions / 28 valid triangles; 200/200 files validate. Add tests and document.
 

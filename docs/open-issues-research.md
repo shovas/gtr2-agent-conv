@@ -62,7 +62,11 @@ conclusively establishing it requires actual game execution.
   (the `Mar  1 2005` FXM build timestamp and DDS texture bytes), confirming 3 is the
   invariant for real animated nodes. Separately, some FXM files (e.g.
   `FPDRIVER_Vectra-SteerL_01.FXM`, `LMA ` magic) use NUL-terminated node names with
-  no marker/key_count fields — a distinct FXM variant not handled by the current parser.
+  no marker/key_count fields — a distinct FXM variant. **Resolved**: `fxm_tool.parse_nul_name_nodes()`
+  decodes it: `name\0`, 40-byte header, single 40-byte TRS key (pos/quat/scale), 12-byte
+  trailer `(1,0x50,1)`; the parser now tries keyframe offsets (40,80,44,76) to also
+  handle wiper files (offset 80, trailer `(0,0xb8,1)`). Validated on 69/79 nodes in the
+  driver file and **160/160** `LMA `-magic files parse; added tests.
 - **GMT `f0` — RESOLVED as marker**: non-zero in only 0.36% of 108,878 vertices,
   and **all 302 non-zero cases occur at vertex index 0** of a mesh. It is a per-mesh
   first-vertex marker/flag, not a per-vertex attribute. Added test.

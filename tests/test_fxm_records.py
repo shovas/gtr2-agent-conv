@@ -52,6 +52,30 @@ class FxmRecordTest(unittest.TestCase):
         self.assertGreater(qok, 0.9 * len(nodes) * 2)
         self.assertGreater(sok, 0.9 * len(nodes) * 2)
 
+    def test_nul_name_wiper_variant(self):
+        paths = glob.glob(str(ROOT.parent / "Race07Complete" / "**" / "BMW_MINI_CPITWIPER.FXA"),
+                          recursive=True)
+        if not paths:
+            self.skipTest("wiper FXM sample not present")
+        data = Path(paths[0]).read_bytes()
+        nodes = fxm_tool.parse_nul_name_nodes(data)
+        self.assertGreaterEqual(len(nodes), 2)
+        self.assertTrue(all(0.9 < n["quat_norm"] < 1.1 for n in nodes))
+        self.assertTrue(all(n["keyframe_offset"] - n["offset"] in (40, 80, 44, 76)
+                            for n in nodes))
+
+    def test_nul_name_fxm_variant(self):
+        p = ROOT.parent / "Race07Complete/GameData/Animations/Driver/FPDRIVER_Vectra-SteerL_01.FXM"
+        if not p.is_file():
+            self.skipTest("NUL-name FXM sample not present")
+        data = p.read_bytes()
+        self.assertEqual(data[:4], b"LMA ")
+        nodes = fxm_tool.parse_nul_name_nodes(data)
+        self.assertGreater(len(nodes), 50)
+        self.assertAlmostEqual(nodes[0]["quat_norm"], 1.0, places=2)
+        self.assertEqual(nodes[0]["name"], "Bip01")
+        self.assertTrue(all(0.9 < n["quat_norm"] < 1.1 for n in nodes))
+
     def test_key_count_is_not_a_key_count(self):
         import math
         import struct

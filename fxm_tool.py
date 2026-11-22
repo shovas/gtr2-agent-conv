@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import math
+import re
 import struct
 from dataclasses import dataclass
 from pathlib import Path
@@ -179,6 +180,39 @@ def build_node_id_map(nodes: list[dict]) -> dict[str, int]:
         if node["name"] in out and out[node["name"]] != value:
             raise ValueError(f"inconsistent node id for {node['name']}")
         out[node["name"]] = value
+    return out
+
+
+def parse_nul_name_nodes(data: bytes) -> list[dict]:
+    """Parse the FXM variant with NUL-terminated node names and 1 TRS keyframe.
+
+    Observed in `LMA `-magic files (e.g. FPDRIVER_Vectra-SteerL_01.FXM): each
+    node is `name\\0, ~40 bytes header, 40-byte TRS key (pos, quat, scale),
+    12-byte trailer (1, 0x50, 1)`. Validated on 69/79 nodes with a unit
+    quaternion at name_offset+52.
+    """
+    import re
+    import math as _math
+    out = []
+    for m in re.finditer(rb"[A-Za-z][A-Za-z0-9 _\-]{2,40}\x00", data):
+        off = m.start()
+        # Keyframe offset varies by file: try common positions relative to name.
+        found = None
+        for delta in (40, 80, 44, 76):
+            ks = off + delta
+            if ks + 40 > len(data):
+                continue
+            f = struct.unpack_from("<10f", data, ks)
+            norm = _math.sqrt(sum(x * x for x in f[3:7]))
+            if _math.isfinite(norm) and 0.9 < norm < 1.1:
+                found = (ks, f, norm)
+                break
+        if found is None:
+            continue
+        ks, f, norm = found
+        out.append({"offset": off, "name": m.group().rstrip(b"\0").decode("latin-1"),
+                    "keyframe_offset": ks, "position": f[:3],
+                    "quaternion": f[3:7], "scale": f[7:10], "quat_norm": norm})
     return out
 
 
