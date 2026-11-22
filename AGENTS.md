@@ -7,7 +7,7 @@
 ## Commands
 - Tests (unittest): `python3 -m unittest discover -s tests -v`
 - Pre-push safety/privacy check: `python3 pre_push_check.py` (must pass before pushing; allowlists `shovas` and its noreply email)
-- Tools: `mas_tool.py`, `gmt_tool.py`/`gmt_format.py`, `gmt_layout.py`, `isi_crypt.py`, `jca_crypt.py`, `rf1_to_gtr2.py`, `simbin_text_tool.py`, `simbin_events_tool.py`, `gzip_simbin_tool.py`, `fxm_tool.py`, `media_tool.py`. See `FEATURES.md` for usage.
+- Tools: `text_convert.py`, `corpus_diff.py`, `validate_materials.py`, `mas_tool.py`, `gmt_tool.py`/`gmt_format.py`, `gmt_layout.py`, `isi_crypt.py`, `jca_crypt.py`, `rf1_to_gtr2.py`, `simbin_text_tool.py`, `simbin_events_tool.py`, `gzip_simbin_tool.py`, `fxm_tool.py`, `media_tool.py`. See `FEATURES.md` for usage.
 
 ## Key locations
 - `../rfactortools/` - inspiration/reference repo (rFactor -> GSC2013 tools, Python package). Read before implementing conversions; reuse patterns where they fit GTR2.

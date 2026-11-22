@@ -1,0 +1,6 @@
+#!/bin/sh
+# Install: cp hooks/pre-push .git/hooks/pre-push && chmod +x .git/hooks/pre-push
+# Blocks the push if secrets, PII, oversized/game-data files or identity
+# issues are detected by pre_push_check.py.
+cd "$(git rev-parse --show-toplevel)" || exit 1
+python3 pre_push_check.py

@@ -2,6 +2,13 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-22 05:45:00 -0500 - Ranked tasks: pipeline text rules, diff harness, diagnostics, CI
+- `text_convert.py`: SCN→TRK rewrites + tree-level rF1→GTR2 conversion (AIW, archives, copies).
+- `corpus_diff.py`: same-name corpus comparison with optional MAS-member indexing.
+- `validate_materials.py`: SimBin material-prefix diagnostic.
+- GitHub Actions workflow + installable `hooks/pre-push` running `pre_push_check.py`.
+- Task 4 (RaceGMT/CUBE_MTS_4.20 internals) remains blocked: no mesh table found in sampled `RaceGMT\0` files.
+
 ## 2026-11-22 05:15:00 -0500 - GTR 2004 corpus added and reviewed
 - Add `../GTR1Vanilla/` (previously missing target-format corpus): 430 MAS type-0 archives.
 - Identify third GMT magic `c8cfd2d8ced8e6c3d6ded8bdbba6bf90` at 0x04 (33,477 files) plus 3 `OR_GMT_1.00` oddities; not parsed by `gmt_format.py`.

@@ -71,7 +71,11 @@ python3 -m unittest discover -s tests -v
 - `gzip_simbin_tool.py` - DSI/HAT/GTT/VCR gzip container tool.
 - `fxm_tool.py` - FXM/FXA/LMA header/node extraction and round-trip.
 - `media_tool.py` - media identification and semantic/lossless round-trip.
-- `pre_push_check.py` - safety/privacy checks (secrets, PII, binary files, identity) before pushing.
+- `text_convert.py` - SCN→TRK rewrite and tree-level rF1→GTR2 conversion (AIW + archives + copies).
+- `corpus_diff.py` - compare same-name files across two corpora (identical vs different counts).
+- `validate_materials.py` - SimBin material-prefix diagnostic (`GRAS`/`GRVL`/`ROAD`).
+- `pre_push_check.py` - safety/privacy checks (secrets, PII, binary files, identity) before pushing; `hooks/pre-push` installs it as a git hook.
+- `.github/workflows/tests.yml` - CI running checks + tests on push/PR.
 - `docs/`, `tests/` - documentation and unittest suite.
 
 ## License / third-party material

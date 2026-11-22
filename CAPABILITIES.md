@@ -124,4 +124,5 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 - **Status**: Not implemented as a complete, validated pipeline in this repo.
 - **Available building blocks**: MAS read/write (all observed variants), GMT structural inspection/round-trip, old→new layout bridge prototype, ISI + JCA decryption, AIW/SCN and GTTF/IRSR readers, DSI/HAT and FXM/FXA/LMA lossless handling, format docs.
 - **Verified carry-over**: 57 byte-identical same-name GMTs in Anderstorp GTL/GTR2 archives parse and repack correctly (`tests/test_carryover.py`); a prototype rF1→GTR2 archive pipeline converts a 253-GMT archive (`tests/test_rf1_pipeline.py`).
+- **Text-level conversion**: `text_convert.py` applies AIW rules and SCN→TRK SearchPath/MASFile rewrites over a whole rFactor tree; `corpus_diff.py` finds identical/different same-name files across corpora; `validate_materials.py` checks `GRAS`/`GRVL`/`ROAD` prefixes.
 - **Missing for full conversion**: validated GMT geometry semantics, vehicle/track config adaptation rules, FXM semantic handling where needed, comprehensive format coverage, and in-game validation workflow.

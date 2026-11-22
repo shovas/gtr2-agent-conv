@@ -171,7 +171,17 @@ python3 simbin_events_tool.py <file.gtt|file.vcr>
 - `CAPABILITIES.md`
 - `CHANGES.md`
 
-## 12. Run pre-push safety/privacy checks
+## 12. Corpus comparison and diagnostics
+
+**What it does**: Compare same-name files in two corpora (optionally inside MAS archives) to find safe carry-over candidates; check GMT material prefixes against SimBin conventions.
+**How to ask**: "Which GTL/GTR2 files are byte-identical?" / "Does this GMT have SimBin-safe surface names?"
+
+```bash
+python3 corpus_diff.py <dirA> <dirB> --ext gmt --archives
+python3 validate_materials.py <file.gmt>
+```
+
+## 13. Run pre-push safety/privacy checks
 
 **What it does**: Scans tracked files and commit metadata for secrets, personal home paths/emails, credentials in remote URLs, oversized/game-data files, untracked files, and commit identity mismatches.
 **How to ask**: "Check whether this repo is safe to push to GitHub."
@@ -181,7 +191,7 @@ python3 pre_push_check.py
 ```
 **Notes**: The username `shovas` and its GitHub noreply email are explicitly allowlisted. Editor swap files (`*.swp`) and `__pycache__` are ignored by `.gitignore`.
 
-## 13. Run tests
+## 14. Run tests
 
 **What it does**: Runs the unittest suite covering MAS, GMT, DSI/HAT/GTT/VCR, and FXM tools.
 
