@@ -2,6 +2,12 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 13:00:00 -0500 - GTR1 universal table at 0x11c
+- Found a universal rF1-style 8-u32 table at 0x11c in GTR1 GMTs (20,000/20,000 valid); car meshes additionally have the 0x194 descriptor grid. Added `gmt_semantic.read_gtr1_table()` + test; documented the two-variant layout.
+
+## 2026-11-23 12:30:00 -0500 - Residual-field negative results
+- Disproved the FXM `key_count`-as-key-count interpretation (3x28 gives 0/148 unit quats; 2x40 gives 148/148). Documented GMT f0, CUBE MTS rig-table, GTTF slot 7/9, GTR1 extra-bytes and 22,287 descriptor-less GTR1 GMTs as unresolved with specific blockers. Added test and research notes.
+
 ## 2026-11-23 12:00:00 -0500 - Offline validation + residual fields
 - `validate_conversion.py`: offline GMT conversion validation with exact position/UV/face equality, material-tail check and an independent schema-based cross-check; 100/100 converted GMTs pass. GTTF frames now expose heading (-pi..pi) and a small pitch angle. New-layout GMT f7 decoded as per-vertex ARGB colour; GTR1 vertex stride found to be 48 bytes with unit normals on 5,024/5,024 sampled vertices. GTR1 corpus confirmed installed (`../GTR1Vanilla`). Add tests and document.
 

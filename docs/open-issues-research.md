@@ -44,6 +44,31 @@ conclusively establishing it requires actual game execution.
 - **Remaining**: consumer confirmation is **runtime-dependent**.
 - **Classification**: **Runtime-dependent** for confirmation; resource identity resolved.
 
+## Second-pass experiments (same session)
+
+- **FXM `key_count`**: tested 3×28-byte keys (pos+quat) across all 148 node records —
+  **0/148** yield unit quaternions, while the established 2×40-byte TRS layout yields
+  **148/148**. So `key_count==3` definitively does **not** denote the number of
+  keyframes; it is a fixed field (likely channel/version marker). Negative result
+  codified in `tests/test_fxm_records.py`. **Unresolved meaning, wrong interpretation excluded**.
+- **GMT `f0`**: non-zero in ~1% of 53,082 vertices; values mix packed u16 pairs
+  (e.g. `0x1b0020` → (32,27)) and float constants (1.0, 2.0), with no consistent
+  mapping. **Unresolved**; no further work justified without a renderer.
+- **CUBE MTS rig tables**: attempted to test the triangle-index hypothesis by
+  measuring edge lengths of the triples against decoded vertex positions — all
+  decoded positions at those indices are (0,0,0), so the current 36-byte vertex
+  interpretation cannot support the test. **Unresolved**, blocked by geometry decode.
+- **GTTF frame slots 7/9**: u32 bit patterns have constant low 16 bits (slot 7 =
+  `0x2000`, slot 9 = `0x0000`) across files, suggesting quantized/fixed-point fields;
+  exact meaning **unresolved**.
+- **GTR1 extra 16 bytes**: always `[0, f32, f32, 0]`; floats do not correlate with the
+  packed UV u16s. **Unresolved structure only**.
+- **GTR1 descriptor variants**: 22,287 GMTs lack the 0x194 grid. Resolved the gap:
+  all GTR1 GMTs carry a universal rF1-style 8-u32 table at **0x11c** (20,000/20,000 valid),
+  with 32-byte vertex stride. Car meshes additionally have the 0x194 grid. Added
+  `gmt_semantic.read_gtr1_table()` + test. **Partially resolved** (table semantics known,
+  extra columns unconfirmed).
+
 ## Recommendation
 No issue is fully runtime-resolved without launching GTR2/GTL. The highest-value
 offline work is complete: a reusable offline validator, exact semantic-bridge

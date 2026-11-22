@@ -52,6 +52,31 @@ class FxmRecordTest(unittest.TestCase):
         self.assertGreater(qok, 0.9 * len(nodes) * 2)
         self.assertGreater(sok, 0.9 * len(nodes) * 2)
 
+    def test_key_count_is_not_a_key_count(self):
+        import math
+        import struct
+        checked = 0
+        for corpus in ("GTR2Steam", "GTLSteam", "Race07Complete", "VolvoTheGame"):
+            for p in ROOT.parent.joinpath(corpus).rglob("*"):
+                if not p.is_file():
+                    continue
+                data = p.read_bytes()
+                for node in fxm_tool.parse_node_records(data):
+                    f = struct.unpack_from("<21f", data, node["keyframe_offset"])
+                    # key_count==3 would suggest 3 x 28-byte keys with pos+quat;
+                    # that yields unit quaternions in 0/148 nodes.
+                    three = all(0.9 < math.sqrt(sum(x * x for x in f[k * 7 + 3:k * 7 + 7])) < 1.1
+                                for k in range(3))
+                    self.assertFalse(three)
+                    # The decoded 2 x 40-byte TRS layout is correct.
+                    two = all(0.9 < math.sqrt(sum(x * x for x in f[k * 10 + 3:k * 10 + 7])) < 1.1
+                              for k in range(2))
+                    self.assertTrue(two)
+                    checked += 1
+        if not checked:
+            self.skipTest("FXM corpora not present")
+        self.assertGreater(checked, 10)
+
     def test_node_id_is_name_stable_across_corpus(self):
         nodes = []
         checked = 0

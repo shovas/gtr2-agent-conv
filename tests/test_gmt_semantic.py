@@ -51,6 +51,30 @@ class GmtSemanticTest(unittest.TestCase):
         self.assertEqual(sub["faces"][0], (0, 1, 2))
         self.assertAlmostEqual(sub["positions"][0][0], 1.2258, places=3)
 
+    def test_gtr1_table_at_0x11c(self):
+        magic = bytes.fromhex("c8cfd2d8ced8e6c3d6ded8bdbba6bf90")
+        checked = 0
+        for archive in glob.glob(str(ROOT.parent / "GTR1Vanilla" / "**" / "*.gtr"),
+                                 recursive=True):
+            try:
+                _, entries = mas_tool.read_archive(archive)
+            except Exception:
+                continue
+            for entry in entries:
+                data = entry.data or b""
+                if data[4:20] != magic:
+                    continue
+                table = gmt_semantic.read_gtr1_table(data)
+                self.assertIsNotNone(table)
+                self.assertEqual(table["offset"], 0x11C)
+                self.assertGreater(table["vertex_count"], 0)
+                checked += 1
+            if checked >= 100:
+                break
+        if not checked:
+            self.skipTest("GTR1 GMT corpus not present")
+        self.assertGreaterEqual(checked, 100)
+
     def test_gtr1_vertex_stride_and_normals(self):
         magic = bytes.fromhex("c8cfd2d8ced8e6c3d6ded8bdbba6bf90")
         checked = unit = 0
