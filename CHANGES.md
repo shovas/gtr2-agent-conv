@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-22 16:45:00 -0500 - Task 4: full MTS table header coverage
+- `parse_mesh_table()` now returns validated count/offset headers even when submesh records use a different layout; header coverage 200/200 per variant, submesh records 120/200 (4.20) and 74/200 (4.10). Add tests and document.
+
 ## 2026-11-22 16:15:00 -0500 - Task 4: CUBE MTS 4.10 material records
 - `mts_format.parse_material_records()` resolves 36-byte records marked 128+index with 1.0f field; validated on TIREMANFRONT.MTS and documented.
 

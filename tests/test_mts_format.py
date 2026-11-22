@@ -204,6 +204,25 @@ class MtsFormatTest(unittest.TestCase):
         self.assertGreater(parsed, 0)
         self.assertLess(parsed, total)  # subset of files use this record kind
 
+    def test_mesh_table_header_without_submesh_records(self):
+        sample = None
+        for a in glob.glob(str(ROOT.parent / "NascarSimRacing" / "**" / "*"), recursive=True):
+            p = Path(a)
+            if p.is_file() and p.suffix.lower() == ".mas":
+                for e in mas_tool.read_archive(p)[1]:
+                    if e.name == "CLOUDRNY.MTS" and (e.data or b"")[:13] == b"CUBE_MTS_4.20":
+                        sample = e.data
+                        break
+            if sample:
+                break
+        if sample is None:
+            self.skipTest("CLOUDRNY.MTS sample not present")
+        table = mf.parse_mesh_table(sample)
+        self.assertIsNotNone(table)
+        self.assertEqual(table["header"][:4], (1, 328, 1406, 392))
+        self.assertEqual(table["header"][6:], (0, table["header"][7]))
+        self.assertEqual(table["submeshes"], [])
+
     def test_mesh_table_in_4_10_corpus(self):
         parsed = total = 0
         for a in glob.glob(str(ROOT.parent / "NascarSimRacing" / "**" / "*"), recursive=True):
@@ -238,7 +257,7 @@ class MtsFormatTest(unittest.TestCase):
                 break
         if total == 0:
             self.skipTest("CUBE MTS 4.20 corpus not present")
-        self.assertGreater(parsed / total, 0.3)
+        self.assertGreater(parsed / total, 0.9)
 
     def test_submesh_descriptor_grid(self):
         sample = None
