@@ -165,6 +165,18 @@ def cmd_nodes(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_keys(args: argparse.Namespace) -> int:
+    b = Path(args.file).read_bytes()
+    for node in parse_node_records(b):
+        dec = decode_node_keys(b, node)
+        print(f"{node['offset']}\t{node['name']}\tkeys={len(dec['keys'])}")
+        for i, key in enumerate(dec["keys"]):
+            pos = ",".join(f"{x:g}" for x in key["position"])
+            quat = ",".join(f"{x:g}" for x in key["quaternion"])
+            print(f"  key{i}\tpos=({pos})\tquat=({quat})\tnorm={key['quat_norm']:.4f}")
+    return 0
+
+
 def cmd_roundtrip(args: argparse.Namespace) -> int:
     b = Path(args.file).read_bytes()
     Path(args.out).write_bytes(b)
@@ -181,6 +193,9 @@ def main(argv=None) -> int:
     p.add_argument("file")
     p.add_argument("--all", action="store_true")
     p.set_defaults(func=cmd_nodes)
+    p = sub.add_parser("keys", help="decode skeleton node TRS keyframes")
+    p.add_argument("file")
+    p.set_defaults(func=cmd_keys)
     p = sub.add_parser("roundtrip", help="lossless byte copy")
     p.add_argument("file")
     p.add_argument("out")

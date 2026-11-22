@@ -1,9 +1,11 @@
 """Tests for structured FXM node/keyframe records."""
 import glob
+import io
 import os
 import struct
 import sys
 import unittest
+from contextlib import redirect_stdout
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -49,6 +51,18 @@ class FxmRecordTest(unittest.TestCase):
                 sok += all(abs(x - 1.0) < 0.05 for x in key["scale"])
         self.assertGreater(qok, 0.9 * len(nodes) * 2)
         self.assertGreater(sok, 0.9 * len(nodes) * 2)
+
+    def test_keys_cli(self):
+        if not SAMPLE.exists():
+            self.skipTest("FXM sample not present")
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            rc = fxm_tool.main(["keys", str(SAMPLE)])
+        out = buf.getvalue()
+        self.assertEqual(rc, 0)
+        self.assertIn("Bip01\t", out)
+        self.assertIn("key0\tpos=", out)
+        self.assertIn("norm=1.0000", out)
 
     def test_corpus_consistency(self):
         files = [p for p in ROOT.parent.joinpath("GTR2Steam").rglob("*")

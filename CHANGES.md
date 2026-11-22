@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-22 21:45:00 -0500 - Task 4: expose FXM keyframes in CLI
+- Add `fxm_tool.py keys` subcommand printing decoded skeleton node TRS keyframes (position/quaternion/scale/norm); add CLI test.
+
 ## 2026-11-22 21:15:00 -0500 - Task 4: FXM TRS keyframes decoded
 - `fxm_tool.decode_node_keys()` decodes the 84-byte keyframe block as 2 TRS keys (position/quaternion/scale) + 4-byte trailer; validated across all 27 nodes. Add test and document.
 
