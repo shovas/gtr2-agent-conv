@@ -2,6 +2,11 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-21 22:00:00 -0500 - F1 2002 corpus: MAS type-3 write fix
+- Add `../F12002/` as ancestral ISIMotor reference.
+- Fix latent `struct.pack` bug in `mas_tool.write_archive()` for type 3; all 63 archives now round-trip at member level.
+- Add `tests/test_f12002.py`: 63 type-3 archives (19,235 members), 12,640 standard CUBE_MTS_4.10 meshes + 460 header-variant meshes, no ISI encryption.
+
 ## 2026-11-21 21:40:00 -0500 - Automobilista corpus added and reviewed
 - Add `../Automobilista/` as late ISIMotor source reference.
 - Add `tests/test_ams.py`: 470 MAS type-1 archives; GSC-signature decryption cross-checked against `rfactordec`; sampled GMTs all use old-style (0x1D4/0xA8) layout.

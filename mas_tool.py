@@ -230,7 +230,7 @@ def write_archive(path: str | os.PathLike, entries: list[Entry], mas_type: int =
             elif mas_type == 1:
                 f.write(struct.pack("<BBxx236slll4x", e.type, e.flags, name, offset, size, zsize))
             elif mas_type == 3:
-                f.write(struct.pack("<4xlll4x236s", 0, offset, size, zsize, name))
+                f.write(struct.pack("<4xlll4x236s", offset, size, zsize, name))
             else:
                 raise ValueError(mas_type)
 

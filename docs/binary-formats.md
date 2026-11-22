@@ -1,6 +1,6 @@
 # Binary Formats Inventory (GTL/GTR2)
 
-First-pass inventory for GTL (`../GTLSteam/GameData`) and GTR2 (`../GTR2Steam/GameData`), with cross-game observations from BMW M3 Challenge (`../BMWM3Challenge`), rFactor 1 vanilla (`../RF1Vanilla`), Copa Petrobras de Marcas (`../CopaPetrobrasdeMarcas`), Sports Car GT (`../SportsCarGTUsa`) and Automobilista (`../Automobilista`). Goal: identify, understand, and provide read/write path for every binary file format possible.
+First-pass inventory for GTL (`../GTLSteam/GameData`) and GTR2 (`../GTR2Steam/GameData`), with cross-game observations from BMW M3 Challenge (`../BMWM3Challenge`), rFactor 1 vanilla (`../RF1Vanilla`), Copa Petrobras de Marcas (`../CopaPetrobrasdeMarcas`), Sports Car GT (`../SportsCarGTUsa`), Automobilista (`../Automobilista`) and F1 2002 (`../F12002`). Goal: identify, understand, and provide read/write path for every binary file format possible.
 
 **Legend**
 - **R/W**: lossless read/write capability in this repo/tooling, or standard library path.
@@ -37,6 +37,13 @@ First-pass inventory for GTL (`../GTLSteam/GameData`) and GTR2 (`../GTR2Steam/Ga
 These are usually text but may contain null-padded SimBin headers: `.aiw`, `.svm`, `.ani`, `.ds`, `.dst`, `.gdb`, `.trk`, `.car`, `.hdc`, `.eng`, `.tyr`, `.aud`, `.dmg`, `.sp`, `.grb`, `.hed`, `.cam`, `.grd`, `.rcd`, `.set`, `.txt`, `.cdb`, `.ddb`, `.tec`, `.fxm`? No - `.fxm` is binary FXM. `.cas` is text-like.
 
 ## Game-specific binary formats: status
+
+### F1 2002 (ISI, 2002) cross-corpus observations (evidence only, `../F12002`)
+- 63 `.mas` archives use the MAS type-3 signature `CUBEMAS4.10\0\0\0\0\0` (19,235 members). `mas_tool.py` reads and writes all 63 with member-level round-trip verified. This review fixed a latent struct-format bug in type-3 writing.
+- 13,100 `.mts` mesh members: 12,640 start with `CUBE_MTS_4.10\0\0\0` (CUBE-era ancestor of GMT); 460 start with an object-level record (`u32 count` + name) and have an undecoded header variant. MTS internals are not otherwise decoded.
+- No filesystem file carries a known ISI 16-byte-header signature; no encrypted MAS members observed.
+- Other formats are text or known families (`.veh` `\r\nHDVehi`, `.hdv`, `.scn` `CUBEASF`, `.aiw`, `.dst`, `.cin`, `.bmp/.tga/.jpg/.wav/.bik`).
+- Verification: `tests/test_f12002.py`.
 
 ### Automobilista (Reiza, 2016) cross-corpus observations (evidence only, `../Automobilista`)
 - 470 `.mas` archives all use the standard MAS type-1 signature (header-only scan).
