@@ -167,6 +167,33 @@ class MediaToolTest(unittest.TestCase):
             with open(pth, 'rb') as f: magic = f.read(4)
             self.assertEqual(magic, b'BIKi')
 
+    def test_jpg_sof_observed(self):
+        # Observed: GTR2/GTL JPGs are baseline SOF0, 8-bit, 3 components.
+        import glob, os, struct
+        paths = glob.glob(str(ROOT.parent / 'GTR2Steam/**/*.jpg'), recursive=True)
+        paths += glob.glob(str(ROOT.parent / 'GTR2Steam/**/*.jpeg'), recursive=True)
+        paths += glob.glob(str(ROOT.parent / 'GTLSteam/**/*.jpg'), recursive=True)
+        paths += glob.glob(str(ROOT.parent / 'GTLSteam/**/*.jpeg'), recursive=True)
+        if not paths:
+            self.skipTest("no JPG files")
+        for pth in paths:
+            with open(pth, 'rb') as f: b = f.read()
+            self.assertTrue(b.startswith(b'\xff\xd8'))
+            i=2; found=None
+            while i < len(b)-1:
+                if b[i]!=0xff: i+=1; continue
+                while i < len(b) and b[i]==0xff: i+=1
+                if i>=len(b): break
+                m=b[i]; i+=1
+                if m==0xD9 or m==0xDA: break
+                if i+2>len(b): break
+                ln=struct.unpack_from('>H',b,i)[0]
+                if m in (0xC0,0xC1,0xC2) and ln>=7:
+                    prec,comp=b[i+2],b[i+7]
+                    found=(m,prec,comp)
+                i+=ln
+            self.assertEqual(found, (0xC0, 8, 3))
+
     def test_identify_jpg_if_present(self):
         p = ROOT.parent / "GTR2Steam/GameData/Locations/Anderstorp/3And_LOD.jpg"
         if not p.exists():

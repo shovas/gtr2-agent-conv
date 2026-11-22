@@ -9,6 +9,9 @@ Newest-first change log. Timestamps use repository commit dates (ISO 8601, local
 - Parse JPG SOF dimensions/bit depth and MP3 frame header metadata in `media_tool.py`.
 - Add real-file JPG/MP3 metadata tests.
 
+## 2026-11-22 03:25:00 -0500 - JPG SOF observation
+- Add observed scan test: all 93 GTR2/GTL JPGs are baseline SOF0, 8-bit, 3 components.
+
 ## 2026-11-22 03:15:00 -0500 - GMT material header invariant refinement
 - Extend observed L0-heuristic material header invariants: u32[6..15]==0, [20..23]==1.0f, [28]==1.0f (in addition to [32]==1.0f, [36]==0).
 

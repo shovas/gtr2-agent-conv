@@ -28,7 +28,7 @@ First-pass inventory for GTL (`../GTLSteam/GameData`) and GTR2 (`../GTR2Steam/Ga
 | `.dds` | 56 (fs) / 34150 (MAS) | DirectDraw Surface texture | `DDS ` | high (standard) | Standard DDS; identify/parse; DXT1/3/5 + uncompressed RGB(A) semantic R/W in `media_tool.py`. Observed in 20,073 scanned MAS DDS headers: DXT1/DXT3/DXT5 and uncompressed RGB(A) (pf 0x41/0x40). |
 | `.tga` | 323 (fs) / 1157 (MAS) | Targa image | TGA header (e.g. type 2) | high (standard) | Semantic R/W for type 2/3/10 in `media_tool.py`; lossless copy for others. Observed in GTR2/GTL: types 2 and 10. |
 | `.bmp` | 207 (fs) / 544 (MAS) | **Mixed on fs**: 147 BMP (`BM`), 60 TGA-header (`00 00 02 00...`, type 2) with `.bmp` extension | `BM` or TGA header | high (standard containers) | Detect by header; semantic R/W for BI_RGB 24/32 BMP in `media_tool.py`; lossless copy for others. Observed BM BMPs: BI_RGB bpp 8/24/32. |
-| `.jpg` | 93 | JPEG image | `FFD8FFE0` | high (standard) | Standard JPEG; lossless copy possible |
+| `.jpg` | 93 | JPEG image | `FFD8FF...` | high (standard) | Identify/metadata parse/lossless copy in `media_tool.py`. Observed: all 93 GTR2/GTL JPGs are baseline SOF0, 8-bit, 3 components. Semantic decode/encode not implemented in-repo. |
 | `.mp3` | 8 | MP3 audio | `ID3` or MPEG frame | high (standard) | Standard MP3; lossless copy possible |
 | `.fxa`? (covered) | - | - | - | - | - |
 
