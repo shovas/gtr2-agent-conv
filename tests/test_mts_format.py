@@ -63,6 +63,24 @@ class MtsFormatTest(unittest.TestCase):
             outliers += sum(1 for v in vals if abs(v) > 1e5)
         self.assertGreater(outliers, 0)  # incompatible with plain coordinates
 
+    def test_48_byte_alignment_is_weak_on_largest_pair(self):
+        groups = {}
+        for a in glob.glob(str(ROOT.parent / "NascarSimRacing" / "**" / "*"), recursive=True):
+            p = Path(a)
+            if not p.is_file() or p.suffix.lower() != ".mas":
+                continue
+            for e in mas_tool.read_archive(p)[1]:
+                d = e.data or b""
+                if d[:13] == b"CUBE_MTS_4.20":
+                    groups.setdefault((e.name.lower(), len(d)), []).append(d)
+        pair = max((v for v in groups.values() if len(v) >= 2 and v[0] != v[1]),
+                   key=lambda v: sum(x != y for x, y in zip(v[0], v[1])))
+        if not pair:
+            self.skipTest("no same-size CUBE MTS 4.20 pair present")
+        diff = [i for i in range(len(pair[0])) if pair[0][i] != pair[1][i]]
+        best = max(sum(1 for s in diff if s % 48 in (36, 44)) / len(diff) for _ in (0,))
+        self.assertLess(best, 0.3)  # 48-byte grid does not explain most differing bytes
+
     def test_object_count_vs_submesh_names(self):
         hits = total = 0
         for a in glob.glob(str(ROOT.parent / "NascarSimRacing" / "**" / "*"), recursive=True):

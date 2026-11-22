@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-22 11:15:00 -0500 - Task 4: CUBE MTS 48-byte grid weakened
+- Full-payload tracing on the largest same-size pair showed only ~23% of differing bytes align to offsets 36/44 of a 48-byte grid; field values are mixed integer/float. Recorded as a negative-result test and documentation correction.
+
 ## 2026-11-22 10:45:00 -0500 - Task 4: RaceGMT triangle soup
 - Verify PEOPLE_STAND_01 has 552 triangles / 1,656 vertex slots but only 722 unique positions — shared-vertex triangle soup, no separate index buffer found. Add test and document.
 
