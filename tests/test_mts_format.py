@@ -385,6 +385,34 @@ class MtsFormatTest(unittest.TestCase):
         self.assertTrue(geo["positions_available"])
         self.assertTrue(geo["vertices"])
 
+    def test_vertex_decode_corpus(self):
+        import math
+        checked = ok = 0
+        for a in glob.glob(str(ROOT.parent / "NascarSimRacing" / "**" / "*"), recursive=True):
+            p = Path(a)
+            if not p.is_file() or p.suffix.lower() != ".mas":
+                continue
+            try:
+                entries = mas_tool.read_archive(p)[1]
+            except Exception:
+                continue
+            for e in entries:
+                d = e.data or b""
+                if d[:13] not in (b"CUBE_MTS_4.10", b"CUBE_MTS_4.20"):
+                    continue
+                geo = mf.read_geometry(d)
+                if not geo or not geo["vertices"]:
+                    continue
+                verts = geo["vertices"]
+                finite = sum(1 for v in verts if all(math.isfinite(x) for x in v))
+                ok += finite / len(verts) > 0.5
+                checked += 1
+            if checked >= 100:
+                break
+        if not checked:
+            self.skipTest("CUBE MTS corpus not present")
+        self.assertGreater(ok / checked, 0.95)
+
     def test_rig_table_triangles(self):
         sample = None
         for a in glob.glob(str(ROOT.parent / "NascarSimRacing" / "**" / "*"), recursive=True):
