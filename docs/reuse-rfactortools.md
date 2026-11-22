@@ -59,6 +59,15 @@ Concrete rules for rFactor→SimBin track conversion (GTL and GTR2 share layout)
 `rfactor2gtr2tracks.txt` adds: converted tracks need shadows set to MEDIUM in
 GTR2 or framerate collapses; the supplied GDBs are hand-verified.
 
+## Additional scratch references (not yet mined)
+
+`../legacy/` and `../old-tmp-files/` hold ad-hoc probe scripts from a previous
+attempt (dead absolute paths, imports of modules absent from the current
+`../rfactortools`). No verified findings have been extracted from them, but they
+are kept as possible future leads: notably `old-tmp-files/Brianza_Full.aiw`
+(a `gMa1.002f` variant) and the GMT/UV probe scripts (`phase3_uv*.py`,
+`phase3_diag*.py`). Revisit if field-level GMT semantics become the focus.
+
 ## 3. `../gtr2-tools` — concrete rFactor→SimBin AIW rules
 
 The freeware **AIW Repair Utility v1.0** (in `GTR2.Tools.Bundle.Vol.1`, idea

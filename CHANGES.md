@@ -2,6 +2,10 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-22 04:45:00 -0500 - Document old-tmp-files as legacy scratch
+- Add `../old-tmp-files/` to `AGENTS.md` as prior-attempt scratch (same caveats as `legacy/`), explicitly not ruled out as a future lead.
+- Note the `gMa1.002f` AIW fixture and GMT/UV probes in `docs/reuse-rfactortools.md` for possible later reuse.
+
 ## 2026-11-22 04:30:00 -0500 - gtr2-tools and Speednuts extractor reviewed
 - Add `../gtr2-tools/` and `../Speednuts_mas_extract/` as reference-only locations in `AGENTS.md`.
 - Mine `AIW Repair Utility v1.0` readme/INI: rFactor→SimBin AIW rules (scale `wp_galpha` 1.0→0.45, delete 12 rFactor-only tags, replace `wp_cheat` with `wp_event=(1.000,0,0)`).
