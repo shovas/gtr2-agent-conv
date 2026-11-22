@@ -48,9 +48,10 @@ conclusively establishing it requires actual game execution.
 
 - **FXM `key_count`**: tested 3×28-byte keys (pos+quat) across all 148 node records —
   **0/148** yield unit quaternions, while the established 2×40-byte TRS layout yields
-  **148/148**. So `key_count==3` definitively does **not** denote the number of
-  keyframes; it is a fixed field (likely channel/version marker). Negative result
-  codified in `tests/test_fxm_records.py`. **Unresolved meaning, wrong interpretation excluded**.
+  **148/148**. Both quaternion-first and position-first 3×28 alignments were tested
+  (0/138 either way), so no 3-key layout fits. `key_count==3` is a fixed field (likely
+  channel/version marker), definitely not a key count. Negative result codified in
+  `tests/test_fxm_records.py`. **Unresolved meaning, wrong interpretation excluded**.
 - **GMT `f0` — RESOLVED as marker**: non-zero in only 0.36% of 108,878 vertices,
   and **all 302 non-zero cases occur at vertex index 0** of a mesh. It is a per-mesh
   first-vertex marker/flag, not a per-vertex attribute. Added test.
