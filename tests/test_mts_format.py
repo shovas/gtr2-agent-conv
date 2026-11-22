@@ -185,6 +185,25 @@ class MtsFormatTest(unittest.TestCase):
         self.assertEqual([r["index"] for r in recs[:4]], [0, 1, 2, 3])
         self.assertEqual([r["offset"] for r in recs[:3]], [6760, 6796, 6832])
 
+    def test_material_records_in_4_10_corpus(self):
+        parsed = total = 0
+        for a in glob.glob(str(ROOT.parent / "NascarSimRacing" / "**" / "*"), recursive=True):
+            p = Path(a)
+            if not p.is_file() or p.suffix.lower() != ".mas":
+                continue
+            for e in mas_tool.read_archive(p)[1]:
+                d = e.data or b""
+                if d[:13] != b"CUBE_MTS_4.10":
+                    continue
+                total += 1
+                parsed += bool(mf.parse_material_records(d))
+            if total >= 300:
+                break
+        if total == 0:
+            self.skipTest("CUBE MTS 4.10 corpus not present")
+        self.assertGreater(parsed, 0)
+        self.assertLess(parsed, total)  # subset of files use this record kind
+
     def test_mesh_table_in_4_10_corpus(self):
         parsed = total = 0
         for a in glob.glob(str(ROOT.parent / "NascarSimRacing" / "**" / "*"), recursive=True):
