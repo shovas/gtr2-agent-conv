@@ -594,6 +594,30 @@ class GmtFormatTest(unittest.TestCase):
                 checked += 1
         self.assertGreater(checked, 0)
 
+    def test_mas_gmt_magic_observed(self):
+        # Observed: 26930/26931 MAS GMTs have normal magic; 1 known exception is DETOMASO_PANTERA_RAINSCREEN.GMT.
+        import importlib.util, glob, os
+        spec = importlib.util.spec_from_file_location('mas', ROOT.parent / 'rfactortools/rfactortools/mas.py')
+        mas = importlib.util.module_from_spec(spec); spec.loader.exec_module(mas)
+        normal = bytes.fromhex('c8cfd2d8ced8e6c3d6ded8bebba7bf90')
+        bad_magic = bytes.fromhex('ced8e6c3d6ded8bdbba6bf9000000000')
+        archives = sorted(glob.glob(str(ROOT.parent / 'GTR2Steam/GameData/**/*.gtr'), recursive=True))
+        archives += sorted(glob.glob(str(ROOT.parent / 'GTLSteam/GameData/**/*.gtl'), recursive=True))
+        if not archives:
+            self.skipTest("no archives")
+        bad = []
+        total = 0
+        for arc in archives:
+            for name, data in mas.mas_unpack_to_data(arc):
+                if not name.lower().endswith('.gmt') or len(data) < 24: continue
+                total += 1
+                mg = data[8:24]
+                if mg == normal:
+                    continue
+                bad.append((os.path.basename(arc), name, mg.hex()))
+        self.assertGreater(total, 0)
+        self.assertEqual(bad, [('DETOMASO_PANTERA_CPIT.gtl', 'DETOMASO_PANTERA_RAINSCREEN.GMT', bad_magic.hex())])
+
     def test_stage_texture_strings_stage3_only_observed(self):
         # Observed: texture-like strings (.dds/.tga/.bmp) in material stage blocks appear in stage 3 only in scanned samples.
         import importlib.util, glob, os

@@ -34,7 +34,7 @@ Examples:
 ## Inventory findings (GTR2Steam + GTLSteam, `.gtr/.gtl/.mas` archives)
 
 - **26931 GMT files** scanned in archives.
-- **26930** have normal GTR2/GTL magic; **1** odd magic: `GTLSteam/GameData/Teams/GTC-TC-76/Detomaso Pantera/DETOMASO_PANTERA_CPIT.gtl` -> `DETOMASO_PANTERA_RAINSCREEN.GMT` (3072 bytes, magic `ced8e6c3d6ded8bdbba6bf9000000000`, flags `0xd8d2cfc8`). Looks encrypted/scrambled (GMT encryption skips first 4 bytes in `rfactortools/crypt.py`; C extension unavailable here). Treat as **needs decrypt/verify**, not normal GMT.
+- **26930** have normal GTR2/GTL magic; **1** odd magic: `GTLSteam/GameData/Teams/GTC-TC-76/Detomaso Pantera/DETOMASO_PANTERA_CPIT.gtl` -> `DETOMASO_PANTERA_RAINSCREEN.GMT` (3072 bytes, magic `ced8e6c3d6ded8bdbba6bf9000000000`, flags `0xd8d2cfc8`). Observed as the only non-normal-magic GMT in 26,931 scanned MAS GMTs. Looks encrypted/scrambled (GMT encryption skips first 4 bytes in `rfactortools/crypt.py`; C extension unavailable here). Treat as **needs decrypt/verify**, not normal GMT.
 - **26916** pass mesh-table bounds check with relaxed count (`<=256`); **15** fail strict `<=64` sanity cap: 14 are GTR2 `*_MOTEC_ADL2.GMT` cockpit display meshes with count 72-76 and valid bounds; 1 is the odd encrypted rainscreen. The old `<=64` cap was too strict for car cockpit GMTs.
 - Flag distribution: `0x04000020` (12320), `0x20` (6207), `0x04000000` (6128), `0x0` (2273), rare `0x02000020` (2), plus encrypted outlier.
 - **Same-track archive comparison (Anderstorp GTL vs GTR2)**: 507 common GMT basenames, 57 identical, 450 different, 1 GTL-only, 190 GTR2-only. Same-name assets across different tracks are not comparable; same-track comparison is the meaningful check.
