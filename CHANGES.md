@@ -2,6 +2,11 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-21 21:40:00 -0500 - Automobilista corpus added and reviewed
+- Add `../Automobilista/` as late ISIMotor source reference.
+- Add `tests/test_ams.py`: 470 MAS type-1 archives; GSC-signature decryption cross-checked against `rfactordec`; sampled GMTs all use old-style (0x1D4/0xA8) layout.
+- Document in `docs/binary-formats.md`.
+
 ## 2026-11-21 21:20:00 -0500 - Sports Car GT: MAS type-2 support
 - Add `../SportsCarGTUsa/` as ancestral ISIMotor reference.
 - Extend `mas_tool.py` with signature-less MAS type-2 (8-byte header + 32-byte records): read/write all 61 archives; decode the 16-byte-header + zlib texture variant; preserve 22 undecoded-compression members losslessly. Add `--type 2` to `create`.

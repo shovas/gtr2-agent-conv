@@ -1,6 +1,6 @@
 # Binary Formats Inventory (GTL/GTR2)
 
-First-pass inventory for GTL (`../GTLSteam/GameData`) and GTR2 (`../GTR2Steam/GameData`), with cross-game observations from BMW M3 Challenge (`../BMWM3Challenge`), rFactor 1 vanilla (`../RF1Vanilla`), Copa Petrobras de Marcas (`../CopaPetrobrasdeMarcas`) and Sports Car GT (`../SportsCarGTUsa`). Goal: identify, understand, and provide read/write path for every binary file format possible.
+First-pass inventory for GTL (`../GTLSteam/GameData`) and GTR2 (`../GTR2Steam/GameData`), with cross-game observations from BMW M3 Challenge (`../BMWM3Challenge`), rFactor 1 vanilla (`../RF1Vanilla`), Copa Petrobras de Marcas (`../CopaPetrobrasdeMarcas`), Sports Car GT (`../SportsCarGTUsa`) and Automobilista (`../Automobilista`). Goal: identify, understand, and provide read/write path for every binary file format possible.
 
 **Legend**
 - **R/W**: lossless read/write capability in this repo/tooling, or standard library path.
@@ -37,6 +37,12 @@ First-pass inventory for GTL (`../GTLSteam/GameData`) and GTR2 (`../GTR2Steam/Ga
 These are usually text but may contain null-padded SimBin headers: `.aiw`, `.svm`, `.ani`, `.ds`, `.dst`, `.gdb`, `.trk`, `.car`, `.hdc`, `.eng`, `.tyr`, `.aud`, `.dmg`, `.sp`, `.grb`, `.hed`, `.cam`, `.grd`, `.rcd`, `.set`, `.txt`, `.cdb`, `.ddb`, `.tec`, `.fxm`? No - `.fxm` is binary FXM. `.cas` is text-like.
 
 ## Game-specific binary formats: status
+
+### Automobilista (Reiza, 2016) cross-corpus observations (evidence only, `../Automobilista`)
+- 470 `.mas` archives all use the standard MAS type-1 signature (header-only scan).
+- 470 archives hold 111,943 members, of which 91,974 are GMTs. Encrypted members use the Game Stock Car signature `0x4b1dca9f960524e8` (enctype 1), decryptable with `isi_crypt.py` skip=4. A real member (`AdelaideMesh.MAS::ADVERTISEMENT001.GMT`) matches `rfactordec` byte-for-byte.
+- All 91,974 GMTs use the **old-style magic** `...bba8bf90` at 0x1D4 (91,962 GSC-encrypted + 12 plain). Despite being the newest source game here, Automobilista keeps the old rF1-era GMT layout — same structural gap for GTR2 conversion as rF1/Copa.
+- Verification: `tests/test_ams.py`.
 
 ### Sports Car GT (1999) cross-corpus observations (evidence only, `../SportsCarGTUsa`)
 - 61 `.mas` archives have no 16-byte magic; they use the MAS type-2 layout from `quickbms_scripts/mas.bms`: 8-byte header `(count, data_size)`, then `count` 32-byte records `(name[16], offset, size, zsize, dummy)`, data starting at `8 + 32*count`. `mas_tool.py` now reads and writes this layout (16,070 members).
