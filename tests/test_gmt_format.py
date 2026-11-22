@@ -558,6 +558,7 @@ class GmtFormatTest(unittest.TestCase):
 
     def test_mesh_record_field_observations(self):
         # Observed in scanned samples: rec[0,9,12-23]==0; rec[24] in {0,0xFFFFFFFF}; material index in bounds.
+        # Rare observed rec[24..26] patterns: (0,0xFFFFFFFF,0) and (0xFFFFFFFF,0,1098907648==18.0f).
         import importlib.util, glob, os
         spec = importlib.util.spec_from_file_location('mas', ROOT.parent / 'rfactortools/rfactortools/mas.py')
         mas = importlib.util.module_from_spec(spec); spec.loader.exec_module(mas)
@@ -580,6 +581,8 @@ class GmtFormatTest(unittest.TestCase):
                     self.assertIn(r[24], (0, 0xFFFFFFFF))
                     if mcount:
                         self.assertLess(r[2], mcount)
+                    if (r[24], r[25], r[26]) not in ((0xFFFFFFFF, 0, 0), (0, 0xFFFFFFFF, 0), (0xFFFFFFFF, 0, 1098907648)):
+                        self.fail(f"unexpected rec[24..26] pattern {r[24],r[25],r[26]} in {name}")
                     checked += 1
         self.assertGreater(checked, 0)
 
