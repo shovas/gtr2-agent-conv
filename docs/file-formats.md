@@ -142,7 +142,7 @@ Notably absent in GTL GameData: rFactor-style `.veh/.scn/.gen/.hdv/.tbc/.sfx` (0
 
 ### `.bik` (binary video)
 - **Intent**: Bink video assets.
-- **Conversion notes**: copy as-is.
+- **Conversion notes**: copy as-is; `media_tool.py bink-decode` / `bink-encode` can decode to PNG frames and encode new BIKi videos via external tools (see `CAPABILITIES.md`).
 
 ### `.mp3` (binary audio)
 - **Intent**: occasional music/commentary/audio assets.

@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 11:30:00 -0500 - Docs: refresh stale claims
+- Reconciled README, FEATURES, CAPABILITIES, DEPENDENCIES, docs/binary-formats.md, docs/file-formats.md and docs/task-plan.md with verified findings: semantic GMT bridge, GTTF frame grid, all four IRSR variants, Bink decode+encode, EA TGQ decode, PHS resolved as PAR2 recovery containers. Task plan now reflects 244 tests and current open items; historical CHANGES entries left intact.
+
 ## 2026-11-23 11:00:00 -0500 - PHS review: program-analysis angles
 - Checked GTL executables/DLLs for PAR2 vocabulary (no hits), attempted Wine runtime trace (blocked by missing MFC42), compared recovery slices (distinct exponents 0x35/0x3a/0x3b) and entropy vs controls (slice bodies ≈ random, consistent with parity data). Added evidence to `docs/phs-research.md`.
 

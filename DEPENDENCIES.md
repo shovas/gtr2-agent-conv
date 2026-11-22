@@ -12,7 +12,9 @@
 - **`monodis` / .NET tooling** - used once to cross-check the JCA implementation against a third-party decryptor; not required for normal use.
 - **GCC / Python headers** - only needed if experimenting with building ISI decrypt/encrypt C code (`rfactordec.c` / `_crypt` extension). Not required for normal tool use.
 - **Pillow or other image libraries** - not currently required. Would be needed for semantic DDS/TGA/BMP/JPG read/write/edit beyond lossless copy/identification.
-- **Bink SDK/licensed tools** - required for full BIK decode/encode. Not included; current support is identify/lossless copy only.
+- **ffmpeg** (optional) - `media_tool.py bink-decode` / `tgq-decode` call the `ffmpeg` binary for BIK and EA TGQ video decode. Tests skip if absent.
+- **`bink_build` from `raynorpat/libbink`** (optional, LGPL-2.1) - external encoder used by `media_tool.py bink-encode`; invoked as a separate executable (set `BINKBUILD` or put it on `PATH`), its code is not copied into this repo. Test skips if absent.
+- **Bink SDK/licensed tools** - not required: decode uses ffmpeg and BIKi encoding uses the external LGPL `libbink` (validated round-trip on real GTR2 BIK).
 
 ## Development
 
@@ -24,3 +26,4 @@
 - Keep external reference repos/data outside this repository unless explicitly decided otherwise.
 - Do not add heavyweight dependencies without documenting them here and in `README.md`.
 - `jca_crypt.py` / `jca_tables.py` are GPLv2 (derived from the published `wtcced` algorithm/tables); all other modules are unaffected.
+- `libbink` (external encoder) and the GPLv3 Blender GMT importer (format-reference only) are LGPL/GPLv3 projects consulted as references; no third-party code was copied into this repo.

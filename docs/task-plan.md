@@ -25,39 +25,34 @@ named tests/docs/tools.
 | # | Task | Status | Evidence |
 |---:|---|---|---|
 | 11 | rF1→GTR2 pipeline | done (prototype) | `rf1_to_gtr2.py`, `tests/test_rf1_pipeline.py` (253 GMTs) |
-| 12 | GTTF/VCR reader | done (partial) | `simbin_events_tool.py`, `tests/test_simbin_events_tool.py`; metadata framing (driver/co-driver/car) now decoded |
+| 12 | GTTF/VCR reader | done (partial) | `simbin_events_tool.py`, `tests/test_simbin_events_tool.py`; metadata framing (all 4 variants) + 252-byte frame grid decoded |
+| 13 | Bink decode/encode | done (external tools) | ffmpeg decode + LGPL `raynorpat/libbink` encoder via `media_tool.py`; validated round-trip on real BIK |
+| 14 | PHS identity | done (resolved) | PAR2-style recovery containers for `GTL_Update_0901.exe`; `phs_tool.py`, `docs/phs-research.md` |
+| 15 | EA TGQ decode | done (external tool) | ffmpeg decodes all 22 `.TGQ` files (TQI video + `adpcm_ea`); `media_tool.py tgq-decode` |
 
 ## Wave 3 — blocked by external input
 | # | Task | Blocker | Evidence of attempt |
-|---:|---|---|---|
-| 13 | In-game validation | Requires running GTR2 with converted content | Converter output validates structurally only |
-| 14 | Bink decode/encode | done (external tools) | ffmpeg decode + LGPL `raynorpat/libbink` encoder via `media_tool.py`; validated round-trip on real BIK |
-| 15 | PHS cipher | No spec; not ISI, not JCA (all keys tried), no standard compression | 5 files, entropy ~7.95, `docs/binary-formats.md` |
-| 16 | GTTF remaining frame fields, CUBE MTS material semantics, `.tgq` encoding | Authoritative spec or runtime-validated reference | Observations only in `docs/binary-formats.md`; FXM skeleton/TRS keyframes, GTTF/IRSR metadata + frame grid, and EA TGQ decode were decoded (`fxm_tool.py keys`, `simbin_events_tool.py`, `media_tool.py tgq-decode`) |
-| 17 | GTR (2004) corpus | Not installed locally | `CAPABILITIES.md` coverage gaps |
+|---|---|---|---|
+| 16 | In-game validation | Requires running GTR2 with converted content | Converter output validates structurally only |
+| 17 | Residual field semantics | Authoritative spec or runtime-validated reference | GTTF frame fields beyond position/time, FXM key_count meaning, new-layout GMT f0/f7/extra streams, CUBE MTS per-rig table, `PHYSICS.PHS` opaque blob |
+| 18 | GTR (2004) corpus | Not installed locally | `CAPABILITIES.md` gaps; GTR1 descriptor grid partly decoded via `gmt_semantic.py` |
+| 19 | PHS runtime consumer | Wine trace blocked by missing MFC42.dll | No `.phs`/PAR2 strings in GTL executables; `docs/phs-research.md` |
 
-## TODO — PHS identity hypothesis
+## PHS — resolved
 
-The 5 GTL `.phs` files (PHYSICS/CARS/DRIVERS/AI/TRACKS, ~7.95 bits/byte
-entropy) are physics/AI data — confirmed distinct from the plain-text `.psh`
-pixel shaders. Because they are ISIMotor content, they may be the same binary
-format under a different name in other ISIMotor games (e.g. rFactor/GSC/AMS
-physics blobs such as `.hdv`, `.veh`, `.rcd`, `.gen`, or the Reiza `.cch`).
-Investigate whether a known ISI physics container or cipher applies:
-- compare PHS against `Physics2.gtl` content in GTR2/GTL mods and other game corpora;
-- check `../rfactortools` and `../quickbms_scripts` for physics-container parsers;
-- test whether the 5 files are a packed table of known `.hdv/.veh/.rcd` records.
-
-No cipher or spec found so far; this is an explicit follow-up, not a claim.
-
-**Checked (user-requested):** `../Speednuts_mas_extract/mas_extract.exe` run under Wine extracts
-`.phs` members byte-identically to `mas_tool.py` — it does not decrypt them. PHS files contain
-plaintext PAR2-style packets and labels (`phs_tool.py`), so they are mixed containers rather than
-uniformly encrypted; payload semantics remain undecoded.
+The five GTL `.phs` members were investigated and resolved: four are PAR2-style
+recovery containers for `GTL_Update_0901.exe` (verified packet chain, Main metadata
+with slice size 384000 and file id `2f1fc214...`, and a FileDesc packet naming the
+file); `PHYSICS.PHS` is a 13 KB opaque blob with no PAR2 packets. They are not
+encrypted physics data. `phs_tool.py`, `tests/test_phs_tool.py` and
+`docs/phs-research.md` hold the evidence table, ranked hypotheses and the
+recommendation to defer. Speednut's `mas_extract.exe` under Wine produces
+byte-identical members, so it does not decrypt PHS. A Wine runtime consumer trace
+was blocked by a missing `MFC42.DLL`.
 
 ## Final verification
 ```
-python3 -m unittest discover -s tests -v   -> 223 tests OK (skipped=1)
+python3 -m unittest discover -s tests -v   -> 244 tests OK (skipped=2)
 git status --short                          -> clean
 
 Additional corpora reviewed after the plan was written (F1CS2000, GameStockCar,

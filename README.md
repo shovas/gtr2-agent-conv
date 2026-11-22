@@ -18,19 +18,20 @@ Tools and format documentation for converting ISIMotor-lineage sim content (rFac
 | `docs/binary-formats.md` | Binary format inventory across all reviewed game corpora, observed magics, R/W status, gaps. |
 | `docs/file-formats.md` | Early first-pass GTL→GTR2 file-format map (text chains, extensions, conversion priorities). |
 | `docs/reuse-rfactortools.md` | Ready-made patterns mined from `../rfactortools` and third-party tutorials. |
-| `docs/task-plan.md` | Prioritised task plan with completion/blocked status and the PHS follow-up TODO. |
+| `docs/task-plan.md` | Prioritised task plan with completion/blocked status. |
+| `docs/phs-research.md` | Resolved PHS investigation: evidence table, ranked hypotheses, recommendation. |
 
 ## Features
 
 - Inspect/list/extract/create/update MAS archives of all observed variants (`mas_tool.py`: types 0, 1, 1X, 2, 3, 5, 6).
-- Inspect and round-trip GMT headers/mesh/material structure (`gmt_tool.py`, `gmt_format.py`); old→new layout bridge prototype (`gmt_layout.py`).
+- Inspect and round-trip GMT headers/mesh/material structure (`gmt_tool.py`, `gmt_format.py`); structural and semantic old→new layout bridges (`gmt_layout.py`, `gmt_semantic.py`).
 - Decrypt/encrypt ISI 16-byte-header files (`isi_crypt.py`) and SimBin JCA files (`jca_crypt.py`, GPLv2).
 - Prototype rF1→GTR2 archive pipeline: unpack → decrypt → layout bridge → repack → validate (`rf1_to_gtr2.py`).
 - Read AIW waypoints and SCN/TRK search paths / MASFile references, and apply documented rFactor→SimBin AIW rules (`simbin_text_tool.py`).
-- Read GTTF/IRSR headers, filenames and embedded strings (`simbin_events_tool.py`).
+- Read GTTF/IRSR headers, filenames, embedded strings, metadata framing and the 252-byte frame grid (`simbin_events_tool.py`).
 - Inspect and round-trip gzip-wrapped DSI/HAT/GTT/VCR files (`gzip_simbin_tool.py`).
 - Inspect, extract node names, and lossless round-trip FXM/FXA/LMA containers (`fxm_tool.py`).
-- Identify media formats and round-trip WAV PCM / TGA / BMP / DDS variants (`media_tool.py`).
+- Identify media formats, round-trip WAV PCM / TGA / BMP / DDS variants, decode Bink video (ffmpeg) and EA TGQ, and encode Bink-1 BIKi via an external LGPL tool (`media_tool.py`).
 - Format documentation in `docs/`.
 
 See `FEATURES.md` for example agent requests and `CAPABILITIES.md` for verification status and gaps.
@@ -62,19 +63,20 @@ python3 -m unittest discover -s tests -v
 
 - `mas_tool.py` - all observed MAS archive variants.
 - `gmt_tool.py` / `gmt_format.py` - GMT inspection and structural parser/writer.
-- `gmt_layout.py` - prototype structural old→new GMT layout bridge (geometry semantics unvalidated).
+- `gmt_layout.py` / `gmt_semantic.py` - structural and semantic old→new GMT bridges (semantic geometry preserved, in-game unvalidated).
 - `isi_crypt.py` - pure-Python ISI decrypt/encrypt for 16-byte-header files.
 - `jca_crypt.py` / `jca_tables.py` - native SimBin JCA decrypt/encrypt (**GPLv2**).
 - `rf1_to_gtr2.py` - prototype end-to-end archive conversion pipeline.
 - `simbin_text_tool.py` - AIW/SCN/TRK semantic reader.
-- `simbin_events_tool.py` - GTTF/IRSR header and string reader.
+- `simbin_events_tool.py` - GTTF/IRSR metadata, string and frame-grid reader.
 - `gzip_simbin_tool.py` - DSI/HAT/GTT/VCR gzip container tool.
 - `fxm_tool.py` - FXM/FXA/LMA header/node extraction and round-trip.
 - `media_tool.py` - media identification and semantic/lossless round-trip.
 - `text_convert.py` - SCN→TRK rewrite and tree-level rF1→GTR2 conversion (AIW + archives + copies).
 - `corpus_diff.py` - compare same-name files across two corpora (identical vs different counts).
 - `validate_materials.py` - SimBin material-prefix diagnostic (`GRAS`/`GRVL`/`ROAD`).
-- `mts_format.py` / `race_gmt.py` - partial header readers for CUBE MTS 4.10/4.20 and `RaceGMT\0` meshes.
+- `mts_format.py` / `race_gmt.py` - CUBE MTS 4.10/4.20 geometry/material readers and `RaceGMT\0` stage/channel decoders.
+- `phs_tool.py` - GTL PHS PAR2-style packet scanner (`docs/phs-research.md`).
 - `pre_push_check.py` - safety/privacy checks (secrets, PII, binary files, identity) before pushing; `hooks/pre-push` installs it as a git hook.
 - `.github/workflows/tests.yml` - CI running checks + tests on push/PR.
 - `docs/`, `tests/` - documentation and unittest suite.

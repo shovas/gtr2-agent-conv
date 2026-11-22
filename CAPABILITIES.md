@@ -16,8 +16,8 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 - **MAS type 6 (F1 2001)**: `CUBEMAS4.00`/`CUBEMAS4.01` signatures, 16-byte header + 256-byte records `(type, offset, size, zsize, crc, name[236])`; reads/writes all 80 archives in `../F12001` with signature preservation (`tests/test_f12001.py`).
 - **rF1→GTR2 prototype pipeline**: `rf1_to_gtr2.py` unpacks, decrypts ISI-signed members, applies the structural or `--semantic` GMT layout bridge, repacks as type 0 and validates with `gmt_format.py`. Verified on a 253-GMT archive (`tests/test_rf1_pipeline.py`). Semantic conversion available via `gmt_layout.old_to_new_semantic()` (validated structurally, not in-game).
 - **AIW/SCN text**: `simbin_text_tool.py` parses waypoints/features, SearchPath/MASFile/SkyBoxI (`tests/test_simbin_text_tool.py`). `aiw_for_simbin()` applies documented rFactor→SimBin rules (scale `wp_galpha` by 0.45, drop 12 rFactor-only tags, replace `wp_cheat` with `wp_event=(1.000,0,0)`) from the freeware AIW Repair Utility in `../gtr2-tools` (`tests/test_aiw_convert.py`).
-- **GTTF/IRSR**: `simbin_events_tool.py` reads magic/version/TRK/AIW filenames, embedded strings, and metadata framing (driver/co-driver/car: 31/31 GTTF, 4/4 GTL-IRSR, 5/5 rF1-IRSR, 9/9 GTR2-IRSR) across 29 GTT + 9 VCR files; lap/frame record semantics undecoded.
-- **Mesh variant headers/tables**: `mts_format.py` parses the shared CUBE MTS 4.10/4.20 header (magic/count/name), the 196-byte submesh descriptor grid, and the real geometry table (8-u32 count/offset header + 64-byte-spaced submesh records resolving vertex/normal offsets) — verified on 129/300 sampled 4.20 files. `race_gmt.py` parses the `RaceGMT\0` header and its 36-byte triangle records. Remaining: material/stage semantics and 4.10 table coverage.
+- **GTTF/IRSR**: `simbin_events_tool.py` reads magic/version/TRK/AIW filenames, embedded strings, metadata framing (driver/co-driver/car: 31/31 GTTF, 4/4 GTL-IRSR, 5/5 rF1-IRSR, 9/9 GTR2-IRSR), and the 252-byte GTTF frame grid (position + timestamp; 215 frames spanning 45.09s for a 45.297s lap) across 29 GTT + 9 VCR files; remaining frame fields uninterpreted.
+- **Mesh variant headers/tables**: `mts_format.py` parses the CUBE MTS 4.10/4.20 header, geometry table (200/200 sampled files), two submesh-record layouts (198/200 4.20, 200/200 4.10), 36-byte vertices and 16-byte normals (200/200 both variants), and 4.10 material/rig records (4 distinct shared rig tables across 22 files). `race_gmt.py` decodes the `RaceGMT\0` header, stage-type enum at +256 and per-material texture-channel field at +260 (1,535 groups). Remaining: per-rig table semantics, remaining frame/vertex fields.
 
 ## Coverage gaps (documented, not yet addressed)
 - **GTR 2004 corpus available** (`../GTR1Vanilla`) but its GMT magic (`...bba6bf90` at 0x04) is not parsed by `gmt_format.py` — a third layout distinct from GTL/GTR2 and rF1. See `docs/binary-formats.md`.
@@ -56,14 +56,14 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 - **Write**: Yes. Recompress with content round-trip.
 - **Verification**: `tests/test_simbin_tools.py` (DSI/HAT/GTT/VCR real-file tests when present).
 - **Tool**: `gzip_simbin_tool.py`.
-- **Gaps**: GTTF/VCR lap/frame record semantics not decoded; metadata framing (driver/co-driver/car) is decoded for GTTF and GTL-IRSR.
+- **Gaps**: metadata framing (driver/co-driver/team/car) decoded for all four variants and the GTTF frame grid is located; remaining frame fields uninterpreted.
 
 ### FXM/FXA/LMA
 - **Read**: Header identification + lossless container read. Recognizes observed magics `FXM `, `FXA `, `LMA `. Reports LE/BE header field interpretations (BE fixed-header interpretation can overlap string data; semantics unconfirmed). Decoded skeleton-node table (`parse_node_records`) and per-node TRS keyframes (`decode_node_keys`, 2 keys of position/quaternion/scale + trailer) via `fxm_tool.py keys`; heuristic name extraction retained via `nodes`.
 - **Write**: Lossless round-trip.
 - **Verification**: `tests/test_simbin_tools.py` (real LMA round-trip, BE-field observation, node-name extraction when present), `tests/test_fxm_records.py` (skeleton table + TRS decode + CLI).
 - **Tool**: `fxm_tool.py`.
-- **Gaps**: trailer/size_hint/key_count field semantics; writing/modifying animation data.
+- **Gaps**: `size_hint == 84 + bone_id` (name-stable id, 27 names) and `key_count==3` are verified; bone-id meaning and animation playback semantics unconfirmed; writing/modifying animation data unsupported.
 
 ### JCA (SimBin Race 07 / GTR Evolution / Race Room)
 - **Read/Decrypt**: Yes, native in `jca_crypt.py` — all 8 versions, optional zlib layer, XOR 0xEB, custom game keys (`raceroom`, `raceroom_plr`, `volvo`, `old_raceroom`).
@@ -74,10 +74,10 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 ## Other binary formats
 
 ### PHS (GTL MAS, 5 files observed)
-- **Read**: Identified (high-entropy physics/AI/track binary, distinct from plain-text `.psh` shaders). Lossless byte copy possible.
-- **Write**: Lossless byte copy possible.
-- **Verification**: `tests/test_simbin_tools.py`, `tests/test_fixtures.py` (5 files: PHYSICS/CARS/DRIVERS/AI/TRACKS).
-- **Gaps**: internal format/encryption undecoded — not ISI 16-byte-header, not JCA (all known keys tried), no standard compression. Follow-up hypothesis (may be another ISIMotor physics container under a different name) recorded in `docs/task-plan.md`.
+- **Read**: `phs_tool.py` decodes PAR2-style packet chains, Main metadata (slice 384000, 1 file) and FileDesc naming `GTL_Update_0901.exe`; four files are recovery containers for one update executable, `PHYSICS.PHS` is a 13 KB opaque blob. Lossless byte copy possible.
+- **Write**: Lossless byte copy possible; no encoder.
+- **Verification**: `tests/test_phs_tool.py` (3 tests: packet chain, Main metadata, FileDesc filename); `docs/phs-research.md` (evidence table, ranked hypotheses, recommendation to defer).
+- **Gaps**: parity payloads are not decoded (they reconstruct an updater, not gameplay data); GTL runtime consumer unconfirmed (Wine trace blocked by missing MFC42). Resolved as resources, not encryption — see `docs/phs-research.md`.
 
 ## Media formats
 
@@ -113,11 +113,17 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 - **Gaps**: full semantic decode/encode/edit not implemented in-repo.
 
 ### BIK (Bink Video)
-- **Read**: Identify and parse basic header fields; lossless copy possible.
-- **Write**: Lossless copy only.
-- **Verification**: `tests/test_media_tool.py` (real-file identification when present).
-- **Tool**: `media_tool.py`.
-- **Gaps**: proprietary codec; full decode/encode requires proprietary Bink SDK/licensed tools.
+- **Read**: Identify/parse header and decode to PNG frames via ffmpeg (`bink-decode`, verified on real GTR2 files).
+- **Write**: BIKi encoding via external LGPL-2.1 `raynorpat/libbink` `bink_build` (`bink-encode`); `--verify` passed and ffmpeg decoded the output with a GTR2-compatible BIKi header.
+- **Verification**: `tests/test_media_tool.py` (decode + encode round-trip when external tools present).
+- **Tool**: `media_tool.py`; `bink_build` is an external executable, code not copied into this repo.
+- **Gaps**: encoder is an external dependency; editing existing BIK content not implemented.
+
+### TGQ (Electronic Arts SCHl/TQI)
+- **Read**: `media_tool.py` identifies `SCHl` and decodes all 22 local F1 2000 `.TGQ` files to PNG frames via ffmpeg (TQI video 320x480 + `adpcm_ea` audio).
+- **Write**: Not implemented.
+- **Verification**: `tests/test_media_tool.py` (`test_tgq_identify_and_decode`).
+- **Gaps**: no in-repo codec; relies on external ffmpeg.
 
 ## Conversion pipeline
 

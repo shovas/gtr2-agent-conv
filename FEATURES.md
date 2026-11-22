@@ -56,7 +56,7 @@ python3 gmt_tool.py scan <dir>
 python3 gmt_tool.py diff <a.gmt> <b.gmt>
 ```
 
-**Limitations**: Does not fully decode material/stage numeric semantics, UV/LOD/shader/flag meanings, encrypted GMTs, or geometry conversion.
+**Limitations**: Stage type (+256) and texture channel (+260) are decoded, but UV/LOD/shader/flag meanings, encrypted GMTs, and in-game geometry correctness remain unresolved.
 
 ## 4. Inspect/round-trip DSI/HAT/GTT/VCR gzip containers
 
@@ -138,7 +138,7 @@ The `aiw-convert` mode applies the rFactor→GTR2/GTL rules from the AIW Repair 
 
 ## 9. Prototype conversion tools (unvalidated geometry)
 
-**What it does**: Structural old→new GMT layout bridge and an archive-level rF1→GTR2 pipeline (unpack → decrypt → convert → repack → validate).
+**What it does**: Structural and semantic old→new GMT bridges (`gmt_semantic.py` decodes positions/UVs/indices) and an archive-level rF1→GTR2 pipeline (unpack → decrypt → convert → repack → validate).
 **How to ask**: "Try converting this rFactor archive to GTR2 and tell me what was validated."
 
 ```bash
@@ -147,7 +147,7 @@ python3 -c "import gmt_layout,pathlib; pathlib.Path('new.gmt').write_bytes(gmt_l
 python3 rf1_to_gtr2.py <archive.mas> <out.gtr>
 python3 rf1_to_gtr2.py <archive.mas> --check
 ```
-**Limitations**: Geometry semantics and in-game behaviour are NOT validated — structural only.
+**Limitations**: Geometry is preserved structurally and validated on 60 real GMTs, but no ground-truth pair exists and in-game behaviour is NOT validated.
 
 ## 10. Read GTTF / IRSR headers (partial)
 
@@ -157,7 +157,7 @@ python3 rf1_to_gtr2.py <archive.mas> --check
 ```bash
 python3 simbin_events_tool.py <file.gtt|file.vcr>
 ```
-**Decoded**: GTTF metadata, GTL-IRSR, GTR2-IRSR and rF1-IRSR framing. **Limitations**: Lap/frame record semantics not decoded.
+**Decoded**: GTTF metadata, GTL-IRSR, GTR2-IRSR and rF1-IRSR framing, plus the 252-byte GTTF frame grid (position + timestamp; `--frames`). **Limitations**: remaining frame fields are uninterpreted.
 
 ## 11. Consult format documentation
 
