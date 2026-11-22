@@ -68,6 +68,27 @@ class MediaToolTest(unittest.TestCase):
         self.assertEqual(info.format, "bik")
         self.assertGreater(info.details.get("frames", 0), 0)
 
+    def test_dds_pixel_formats_observed_in_mas(self):
+        # Observed in scanned MAS DDS headers: DXT1/DXT3/DXT5 and uncompressed RGB(A) (pf 0x41/0x40, fourcc 0).
+        import glob, os, struct, importlib.util
+        spec = importlib.util.spec_from_file_location('mas', ROOT.parent / 'rfactortools/rfactortools/mas.py')
+        mas = importlib.util.module_from_spec(spec); spec.loader.exec_module(mas)
+        archives = sorted(glob.glob(str(ROOT.parent / 'GTR2Steam/GameData/**/*.gtr'), recursive=True))[:5]
+        archives += sorted(glob.glob(str(ROOT.parent / 'GTLSteam/GameData/**/*.gtl'), recursive=True))[:2]
+        if not archives:
+            self.skipTest("no archives")
+        allowed = {(0x4, b'DXT1'), (0x4, b'DXT3'), (0x4, b'DXT5'), (0x41, b'\x00\x00\x00\x00'), (0x40, b'\x00\x00\x00\x00')}
+        checked = 0
+        for arc in archives:
+            for name, d in mas.mas_unpack_to_data(arc):
+                if not name.lower().endswith('.dds') or len(d) < 128 or not d.startswith(b'DDS '):
+                    continue
+                pf_flags, cc = struct.unpack_from('<II', d, 80)
+                cc_b = struct.pack('<I', cc)
+                self.assertIn((pf_flags, cc_b), allowed)
+                checked += 1
+        self.assertGreater(checked, 0)
+
     def test_identify_jpg_if_present(self):
         p = ROOT.parent / "GTR2Steam/GameData/Locations/Anderstorp/3And_LOD.jpg"
         if not p.exists():
