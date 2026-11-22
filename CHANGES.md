@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 10:30:00 -0500 - PHS identified as PAR2 recovery data
+- Parsed the full PAR2-style packet chain: 64-byte header, contiguous lengths, Main packet (slice 384000, file id 2f1fc214...) and FileDesc naming `GTL_Update_0901.exe`. Four PHS files are recovery containers for one update executable; PHYSICS.PHS is an opaque 13KB blob. Updated `phs_tool.py`, tests, and `docs/phs-research.md` evidence table; recommend defer.
+
 ## 2026-11-23 10:00:00 -0500 - Task 4: PHS is a mixed container; Speednut checked
 - Found plaintext PAR2-style packets and labels in GTL PHS files (`phs_tool.py`, tests). Ran Speednut `mas_extract.exe` under Wine on `Physics2.gtl`: PHS members are byte-identical to `mas_tool.py` extraction, so it does not decrypt them. Revised the "uniformly encrypted PHS" interpretation in docs.
 
