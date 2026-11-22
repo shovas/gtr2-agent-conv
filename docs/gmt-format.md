@@ -75,7 +75,7 @@ The old and new tables are structurally related: the 8-u32 table at old 0x174 ha
 3. synthesizes one 108-byte mesh record per old object at 0x210 from the old table's vertex/stream offsets;
 4. keeps the name at 0x194 and all payload bytes unchanged.
 
-Verified: 6 sampled rF1 GMTs (1–3 objects) convert to files that `gmt_format.parse_gmt()` parses with the expected mesh count and that round-trip byte-for-byte. **Limitation:** old vertex records (u16 indices + position floats) are copied verbatim into the new vertex block; index counts are approximated from the old table. Geometry semantics and in-game rendering are NOT validated — treat this as a structural bridge, not a finished converter.
+Verified: 6 sampled rF1 GMTs (1–3 objects) convert to files that `gmt_format.parse_gmt()` parses with the expected mesh count and that round-trip byte-for-byte. **Limitation:** old vertex records (u16 indices + position floats) are copied verbatim into the new vertex block; index counts are approximated from the old table. Geometry semantics and in-game rendering are NOT validated — treat this as a structural bridge, not a finished converter. Searched for ground truth: 552 same-name GMTs exist in both old (rF1) and new (GTR2) corpora, 71 with matching vertex counts, but inspected pairs (e.g. nightlight01glow: Lienz vs Brno) have different positions/index data — they are different meshes, so no direct vertex mapping can be derived. Old vertex stride is 32 bytes (same as new) but field layouts differ (old packs u16 UVs and places position floats at words 5-7; new uses floats throughout).
 
 ## Conversion implications (GTL -> GTR2)
 

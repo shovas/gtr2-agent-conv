@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-22 23:15:00 -0500 - Task 4: GMT bridge ground-truth search (negative)
+- Searched 552 same-name old/new GMT pairs (71 with matching vertex counts); inspected pairs are different meshes, so no vertex mapping can be derived. Documented as a negative result; GMT bridge still needs in-game validation.
+
 ## 2026-11-22 22:45:00 -0500 - Task 4: expose MTS decodes in CLI
 - `mts_format.py --detail` prints decoded geometry table, submesh count, vertex/normal counts and material records; refresh stale module docstring. Add CLI test.
 
