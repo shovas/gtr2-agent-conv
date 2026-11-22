@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-22 20:15:00 -0500 - Task 4: material IDs reference external table
+- Verify decoded material IDs span 68 distinct values (313..442) with no contiguous table in the mesh file; document that exact semantics require an external material table not present in the corpus. Add negative-result test.
+
 ## 2026-11-22 19:45:00 -0500 - Task 4: no index block after normals
 - Verify bytes following the validated normal block are float data, not u16 vertex indices; add test and document. Material IDs remain stable but semantically unresolved.
 

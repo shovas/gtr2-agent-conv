@@ -167,6 +167,28 @@ class MtsFormatTest(unittest.TestCase):
         self.assertEqual(len(table["submeshes"]), 5)
         self.assertEqual(table["submeshes"][0], (129, 0, 150, 6448, 150, 13648))
 
+    def test_material_ids_have_no_local_name_table(self):
+        sample = None
+        for a in glob.glob(str(ROOT.parent / "NascarSimRacing" / "**" / "*"), recursive=True):
+            p = Path(a)
+            if p.is_file() and p.suffix.lower() == ".mas":
+                for e in mas_tool.read_archive(p)[1]:
+                    if e.name == "TIREMANFRONT.MTS" and (e.data or b"")[:13] == b"CUBE_MTS_4.10":
+                        sample = e.data
+                        break
+            if sample:
+                break
+        if sample is None:
+            self.skipTest("TIREMANFRONT.MTS sample not present")
+        vals = [x for r in mf.parse_material_records(sample)
+                for x in mf.decode_material_numbers(r)]
+        self.assertGreater(len(set(vals)), 20)
+        self.assertLess(max(vals), 1024)
+        # No contiguous u16 array of these IDs exists in the file: they are
+        # references to a table not shipped with the mesh.
+        pattern = struct.pack("<%dH" % 16, *vals[:16])
+        self.assertEqual(sample.find(pattern), -1)
+
     def test_material_numbers_stable_across_same_name_files(self):
         found = {}
         for a in glob.glob(str(ROOT.parent / "NascarSimRacing" / "**" / "*"), recursive=True):
