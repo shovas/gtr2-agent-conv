@@ -11,7 +11,7 @@ C extension is not built), but the source is readable and the following parts
 are directly reusable as *patterns* (we must not copy GPLv3 code verbatim into
 this repo without a licensing decision).
 
-| Module | Symols | Relevance to our goal |
+| Module | Symbols | Relevance to our goal |
 |---|---|---|
 | `rfactortools/aiw.py` | `parse_aiwfile`, `AIW.waypoints`, `Waypoint.pos/bitfields/branch_id`, `render_aiw` | AIW waypoint parsing: `[Waypoint]` sections, `wp_pos` vec3, `wp_bitfields`, `wp_branchID`. Matches the `//[[gMa1` + `[Features]` files we identified in GTR2/GTL. |
 | `rfactortools/scn_parser.py` | `process_scnfile`, `ScnParser`, `InfoScnParser` (`search_path`, `mas_files`, `has_skyboxi`), `scn2posix_path` | SCN/TRK parsing: `SearchPath=`, `MASFile=`, `Instance=SkyBoxI` keys and `{`/`}` sections. Directly applicable to our `.scn`/`.trk` files. |
@@ -24,7 +24,7 @@ this repo without a licensing decision).
 
 **Key insight:** For GTL→GTR2 the pipeline is *simpler* than rFactor→GSC2013:
 no encryption is involved, and the GMT layout is the same (new layout at 0x08).
-The GSC2013 converter's non- GMT steps (path resolution, GDB/VEH/SCN/SFX
+The GSC2013 converter's non-GMT steps (path resolution, GDB/VEH/SCN/SFX
 rewrites, exclusion list) are the reusable part.
 
 ## 2. Third-party tutorials — concrete conversion rules (reference only)

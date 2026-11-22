@@ -1,6 +1,8 @@
 # GTL -> GTR2 File Format Reference (first pass)
 
-Purpose: working reference for converting GT Legends (GTL) content to GTR2. This is a first-pass map based on local installs (`../GTLSteam`, `../GTR2Steam`), `../rfactortools`, `quickbms_scripts/mas.bms`, and small samples in `hand_selected/`. It is not a complete spec; verify against game behavior before treating any field as canonical.
+Purpose: working reference for converting GT Legends (GTL) content to GTR2. This is an early first-pass map based on local installs (`../GTLSteam`, `../GTR2Steam`), `../rfactortools`, `quickbms_scripts/mas.bms`, and small samples in `hand_selected/`. It is not a complete spec; verify against game behavior before treating any field as canonical.
+
+**Note:** the current, broader format inventory across all reviewed game corpora is in `docs/binary-formats.md`; GMT internals are detailed in `docs/gmt-format.md`. For agent-oriented usage, start with `README.md` and `FEATURES.md`.
 
 ## Observed extension inventory
 

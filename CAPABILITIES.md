@@ -4,7 +4,7 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 
 ## Archive formats
 
-### MAS / GMOTORMAS10 (`.gtr`, `.gtl`, `.mas`)
+### MAS / GMOTORMAS10 (`.gtr`, `.gtl`, `.mas`, `.bmw`)
 - **Read**: Yes. Parse GMOTORMAS10 container, list entries, extract files.
 - **Write**: Yes. Create new archives; add/update/delete entries.
 - **Verification**: `tests/test_mas_tool.py`; real GTR2/GTL round-trip tests when reference files present.
@@ -46,7 +46,7 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
   - Materials: L0 boundary heuristic; 264-byte stage blocks; ASCII texture/stage strings extracted.
 - **Verification**: `tests/test_gmt_format.py`, `tests/test_gmt_tool.py`; real GTR2/GT Legends samples.
 - **Tools**: `gmt_format.py`, `gmt_tool.py`.
-- **Gaps**: material/stage numeric param semantics, UV/LOD/shader/flag meanings, f0/f7/extra/stream semantics, geometry conversion, encrypted GMT decrypt/encrypt. The **old rFactor 1 GMT layout** (magic at 0x1D4 with 0xA8 byte, bounding box at 0x08) is not parsed by `gmt_format.py`; 9,630 such files exist in `../RF1Vanilla` and need a structural converter. See `docs/gmt-format.md`.
+- **Gaps**: material/stage numeric param semantics, UV/LOD/shader/flag meanings, f0/f7/extra/stream semantics, and validated geometry conversion. Decryption itself is handled (`isi_crypt.py`, `jca_crypt.py`), but decrypted/old-layout GMTs are not fully semantic-converted. The **old rFactor 1 GMT layout** (magic at 0x1D4 with 0xA8 byte) is not parsed by `gmt_format.py`; 9,630 such files exist in `../RF1Vanilla` (plus ~60k each in Copa/Stock Car Extreme/Automobilista). A prototype structural bridge (`gmt_layout.py`) makes them parseable but its geometry semantics are unvalidated. See `docs/gmt-format.md`.
 
 ## SimBin container formats
 
@@ -55,7 +55,7 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 - **Write**: Yes. Recompress with content round-trip.
 - **Verification**: `tests/test_simbin_tools.py` (DSI/HAT/GTT/VCR real-file tests when present).
 - **Tool**: `gzip_simbin_tool.py`.
-- **Gaps**: GTTF/VCR internal record semantics not fully decoded.
+- **Gaps**: GTTF/VCR lap/frame record semantics not decoded; `simbin_events_tool.py` reads magic/version/TRK/AIW filenames and embedded strings.
 
 ### FXM/FXA/LMA
 - **Read**: Header identification + lossless container read. Recognizes observed magics `FXM `, `FXA `, `LMA `. Reports LE/BE header field interpretations (BE fixed-header interpretation can overlap string data; semantics unconfirmed). Heuristic node/bone name extraction (`nodes`/`extract_strings`).
@@ -73,10 +73,10 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 ## Other binary formats
 
 ### PHS (GTL MAS, 5 files observed)
-- **Read**: Identified (high-entropy binary). Lossless byte copy possible.
+- **Read**: Identified (high-entropy physics/AI/track binary, distinct from plain-text `.psh` shaders). Lossless byte copy possible.
 - **Write**: Lossless byte copy possible.
-- **Verification**: `tests/test_simbin_tools.py` (confirms not decryptable by known ISI 16-byte-header scheme).
-- **Gaps**: internal format/encryption undecoded.
+- **Verification**: `tests/test_simbin_tools.py`, `tests/test_fixtures.py` (5 files: PHYSICS/CARS/DRIVERS/AI/TRACKS).
+- **Gaps**: internal format/encryption undecoded — not ISI 16-byte-header, not JCA (all known keys tried), no standard compression. Follow-up hypothesis (may be another ISIMotor physics container under a different name) recorded in `docs/task-plan.md`.
 
 ## Media formats
 
@@ -122,5 +122,6 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 
 ### GTL -> GTR2 end-to-end conversion
 - **Status**: Not implemented as a complete, validated pipeline in this repo.
-- **Available building blocks**: MAS read/write, GMT structural inspection/round-trip, DSI/HAT and FXM/FXA/LMA lossless handling, format docs.
-- **Missing for full conversion**: validated GMT semantic conversion where needed, vehicle/track config adaptation rules, encrypted GMT handling, FXM semantic handling where needed, comprehensive format coverage, and in-game validation workflow.
+- **Available building blocks**: MAS read/write (all observed variants), GMT structural inspection/round-trip, old→new layout bridge prototype, ISI + JCA decryption, AIW/SCN and GTTF/IRSR readers, DSI/HAT and FXM/FXA/LMA lossless handling, format docs.
+- **Verified carry-over**: 57 byte-identical same-name GMTs in Anderstorp GTL/GTR2 archives parse and repack correctly (`tests/test_carryover.py`); a prototype rF1→GTR2 archive pipeline converts a 253-GMT archive (`tests/test_rf1_pipeline.py`).
+- **Missing for full conversion**: validated GMT geometry semantics, vehicle/track config adaptation rules, FXM semantic handling where needed, comprehensive format coverage, and in-game validation workflow.

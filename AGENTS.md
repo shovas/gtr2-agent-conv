@@ -2,10 +2,11 @@
 
 ## Project scope
 - New project: conversion scripts from ISIMotor-lineage sim games (rFactor, Race 07, GSC 2013/GSCE, BMW M3 Challenge, Automobilista 1, etc.) to **GTR2**.
-- Repo is nascent; keep commands/tooling lightweight and document them here as they are added.
+- Repo is an agent-driven research project (see `README.md`); keep commands/tooling lightweight and document them here as they are added.
 
 ## Commands
 - Tests (unittest): `python3 -m unittest discover -s tests -v`
+- Tools: `mas_tool.py`, `gmt_tool.py`/`gmt_format.py`, `gmt_layout.py`, `isi_crypt.py`, `jca_crypt.py`, `rf1_to_gtr2.py`, `simbin_text_tool.py`, `simbin_events_tool.py`, `gzip_simbin_tool.py`, `fxm_tool.py`, `media_tool.py`. See `FEATURES.md` for usage.
 
 ## Key locations
 - `../rfactortools/` - inspiration/reference repo (rFactor -> GSC2013 tools, Python package). Read before implementing conversions; reuse patterns where they fit GTR2.

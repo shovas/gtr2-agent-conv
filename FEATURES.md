@@ -105,7 +105,53 @@ python3 media_tool.py bmp-roundtrip <src.bmp> <dst.bmp>
 
 **Limitations**: DDS limited to DXT1/DXT3/DXT5 and uncompressed RGB(A) mask-based formats, no mipmaps/cube maps; TGA limited to type 2/3/10; BMP limited to uncompressed BI_RGB 24/32; WAV compressed payloads (MP3/ADPCM) lossless-copy only; JPG/MP3 metadata parsed but full semantic decode/encode/edit not implemented; BIK proprietary.
 
-## 7. Consult format documentation
+## 7. Decrypt SimBin JCA files (Race 07, Volvo, etc.)
+
+**What it does**: Decrypts/encrypts SimBin JCA files (GMT, `.gdb`, `.trk`, `.scn`, `.cam`) with all 8 versions and known game keys. GPLv2 implementation.
+**How to ask**:
+- "Decrypt this Race 07 GMT and check its magic."
+- "Decrypt this Volvo `.trk` with the volvo key."
+
+**Commands**:
+```bash
+python3 jca_crypt.py decrypt <file.gmt> <out.gmt>
+python3 jca_crypt.py encrypt <file> <out.jca> --version 3
+```
+**Limitations**: Only known JCA keys/versions; JCA is unrelated to ISI 16-byte-header encryption.
+
+## 8. Read AIW / SCN / TRK semantics (partial)
+
+**What it does**: Extracts waypoints/features from `.aiw` and SearchPath/MASFile/SkyBoxI from `.scn`/`.trk`.
+**How to ask**: "What MAS files does this TRK reference?" / "How many waypoints does this AIW have?"
+
+```bash
+python3 simbin_text_tool.py aiw <file.aiw>
+python3 simbin_text_tool.py scn <file.trk>
+```
+
+## 9. Prototype conversion tools (unvalidated geometry)
+
+**What it does**: Structural old→new GMT layout bridge and an archive-level rF1→GTR2 pipeline (unpack → decrypt → convert → repack → validate).
+**How to ask**: "Try converting this rFactor archive to GTR2 and tell me what was validated."
+
+```bash
+python3 gmt_layout.py <old.gmt> <new.gmt>
+python3 rf1_to_gtr2.py <archive.mas> <out.gtr>
+python3 rf1_to_gtr2.py <archive.mas> --check
+```
+**Limitations**: Geometry semantics and in-game behaviour are NOT validated — structural only.
+
+## 10. Read GTTF / IRSR headers (partial)
+
+**What it does**: Reads time-trial/replay magic, version, TRK/AIW filenames and embedded strings from gzip payloads.
+**How to ask**: "Which track does this replay reference?"
+
+```bash
+python3 simbin_events_tool.py <file.gtt|file.vcr>
+```
+**Limitations**: Lap/frame record semantics not decoded.
+
+## 11. Consult format documentation
 
 **What it does**: Provides evidence-based notes for GTL/GTR2 binary formats.
 
@@ -117,9 +163,13 @@ python3 media_tool.py bmp-roundtrip <src.bmp> <dst.bmp>
 **Files**:
 - `docs/gmt-format.md`
 - `docs/binary-formats.md`
+- `docs/file-formats.md`
+- `docs/reuse-rfactortools.md`
+- `docs/task-plan.md`
 - `CAPABILITIES.md`
+- `CHANGES.md`
 
-## 8. Run tests
+## 12. Run tests
 
 **What it does**: Runs the unittest suite covering MAS, GMT, DSI/HAT/GTT/VCR, and FXM tools.
 

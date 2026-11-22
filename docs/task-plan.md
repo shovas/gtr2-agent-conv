@@ -52,6 +52,10 @@ No cipher or spec found so far; this is an explicit follow-up, not a claim.
 
 ## Final verification
 ```
-python3 -m unittest discover -s tests -v   -> 157 tests OK (skipped=1)
+python3 -m unittest discover -s tests -v   -> 166 tests OK (skipped=1)
 git status --short                          -> clean
+
+Additional corpora reviewed after the plan was written (F1CS2000, GameStockCar,
+NascarSimRacing, Race07Complete) are recorded in `AGENTS.md` and
+`docs/binary-formats.md`; no new plan tasks arose from them.
 ```

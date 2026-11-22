@@ -1,6 +1,6 @@
 # Binary Formats Inventory (GTL/GTR2)
 
-First-pass inventory for GTL (`../GTLSteam/GameData`) and GTR2 (`../GTR2Steam/GameData`), with cross-game observations from BMW M3 Challenge, rFactor 1 vanilla, Copa Petrobras de Marcas, Sports Car GT, Automobilista, F1 2000, F1 2001, F1 2002, F1 Challenge 99-02, Stock Car Extreme, Race 07, Volvo, NASCAR Thunder 2003/2004 and a third-party Race 07 decryptor binary. Goal: identify, understand, and provide read/write path for every binary file format possible.
+First-pass inventory for GTL (`../GTLSteam/GameData`) and GTR2 (`../GTR2Steam/GameData`), with cross-game observations from BMW M3 Challenge, rFactor 1 vanilla, Copa Petrobras de Marcas, Sports Car GT, Automobilista, F1 Championship Season 2000 / F1 2000 / F1 2001 / F1 2002 / F1 Challenge 99-02, Game Stock Car, NASCAR SimRacing / Thunder 2003 / Thunder 2004, Stock Car Extreme, Race 07 (vanilla + complete/DLC), Volvo and a third-party Race 07 decryptor binary. Goal: identify, understand, and provide read/write path for every binary file format possible.
 
 **Legend**
 - **R/W**: lossless read/write capability in this repo/tooling, or standard library path.
@@ -10,16 +10,16 @@ First-pass inventory for GTL (`../GTLSteam/GameData`) and GTR2 (`../GTR2Steam/Ga
 
 | Ext | GTL+GTR2 count | Kind | Magic/header (observed) | Understanding | R/W path |
 |---|---:|---|---|---|---|
-| `.gtl`, `.gtr`, `.bmw`, `.mas` | 1113 + 17 + 85 + 50 + 61 | Game archive (MAS) | type0 `GMOTORMAS10`, type1 `c8cfd2d8...`, type1X `cec3d5c7c0d9e6c9...`, type2 (no signature) | high | `mas_tool.py` create/list/extract/add/update/delete; round-trip verified on all corpus variants; type-1X signature preserved on rewrite |
-| `.gmt` | 56 loose (+26931 in archives) | 3D mesh/model | normal: `c8cfd2d8ced8e6c3d6ded8bebba7bf90` at 0x08; obj_list_offset at 0x00 | medium | `gmt_tool.py` info/scan/diff; `gmt_format.py` structural parse/write (header, mesh table, vertex/index blobs, material tail best-effort) with lossless round-trip tests. See `docs/gmt-format.md` |
-| `.aiw` | 59 | Text waypoint file (SimBin header has null bytes) | `//[[gMa1.000f...]]` | high (text) | Text read/write; `rfactortools/aiw.py` parses it. Observed: all 59 start with `//[[gMa1.000`; contain `[Features]`. Lossless byte round-trip trivial. |
+| `.gtl`, `.gtr`, `.bmw`, `.mas` | all reviewed corpora | Game archive (MAS) | type0 `GMOTORMAS10`, type1 `c8cfd2d8...`, type1X `cec3d5c7c0d9e6c9...`, type2 (no signature), type3 `CUBEMAS4.10`, type5 `CUBEMAS2.50`, type6 `CUBEMAS4.00/4.01` | high | `mas_tool.py` create/list/extract/add/update/delete; round-trip verified on all corpus variants; signatures preserved on rewrite |
+| `.gmt` | 56 loose (+26931 in GTL/GTR2 archives; ~100k more across other corpora) | 3D mesh/model | new layout: `c8cfd2d8...bba7bf90` at 0x08; old layout: `...bba8bf90` at 0x1D4; JCA header `0fb1ffff`; DLC header `RaceGMT\0` | medium | `gmt_tool.py`/`gmt_format.py` structural parse/write for the new layout; `isi_crypt.py`/`jca_crypt.py` decrypt; `gmt_layout.py` prototype old→new bridge (semantics unvalidated). See `docs/gmt-format.md` |
+| `.aiw` | 59 (GTL/GTR2) | Text waypoint file (SimBin header has null bytes) | `//[[gMa1.000f...]]` | high (text) | `simbin_text_tool.py aiw` parses waypoints/features; lossless byte round-trip trivial. Observed: all 59 start with `//[[gMa1.000`; contain `[Features]`. |
 | `.dsi` | 142 | Gzip-compressed SimBin text | gzip `1f8b08`, payload `//[[gMb1.000f...]]` | high | `gzip_simbin_tool.py` info/extract/create (deterministic gzip). Content round-trip verified |
 | `.hat` | 34 | Gzip-compressed SimBin text | gzip `1f8b08`, payload `//[[gMb1.000f...]]` | high | `gzip_simbin_tool.py` info/extract/create. Content round-trip verified |
-| `.gtt` | 29 | Gzip-compressed SimBin time-trial/ghost (GTTF payload) | gzip `1f8b08`, payload `//[[gMb1.000f...]]\nGTTF...` | high (container) | `gzip_simbin_tool.py` decompress/compress; content round-trip verified. Internal GTTF record semantics not fully decoded; observed header: magic+f32 ver+u32 len+TRK+u32 len+AIW. |
-| `.vcr` | 13 | Gzip-compressed SimBin replay (IRSR payload) | gzip `1f8b08`, payload `//[[gMb1.000f...]]\nIRSR...` | high (container) | `gzip_simbin_tool.py` decompress/compress; content round-trip verified. Internal replay record semantics not fully decoded; observed header: IRSR+f32 ver+u32 len+TRK+u32 len+AIW. |
+| `.gtt` | 29 | Gzip-compressed SimBin time-trial/ghost (GTTF payload) | gzip `1f8b08`, payload `//[[gMb1.000f...]]\nGTTF...` | high (container) | `gzip_simbin_tool.py` decompress/compress; `simbin_events_tool.py` reads magic/version/TRK/AIW/strings. Lap/frame record semantics undecoded. |
+| `.vcr` | 13 | Gzip-compressed SimBin replay (IRSR payload) | gzip `1f8b08`, payload `//[[gMb1.000f...]]\nIRSR...` | high (container) | `gzip_simbin_tool.py` decompress/compress; `simbin_events_tool.py` reads magic/version/TRK/AIW/strings. Frame record semantics undecoded. |
 | `.fxm` | 135 | SimBin 3ds Max animation/export | `FXM ` | medium | `fxm_tool.py` info/nodes/roundtrip; header partially observed (BE fixed-header interpretation can overlap string data), node/bone name strings extractable; internal animation/keyframe semantics not fully decoded |
 | `.fxa` | 4 | SimBin animation (FXM family) | `FXA ` | medium | `fxm_tool.py` info/nodes/roundtrip; same container family observations as FXM |
-| `.phs` | 5 (in GTL MAS) | Unknown SimBin/ISI binary (AI/physics/drivers/cars/tracks data) | high-entropy, no known magic; not ISI 16-byte-header signature | low | Identified; lossless byte copy possible. Not decryptable by known ISI 16-byte-header scheme; internal format undecoded. Observed: entropy ~7.95, no known game signature, ISI enctype 0/1 with embedded key/skip variants does not reduce entropy, no embedded gzip/zlib. Note: 0 files in GTR2/GTL installs carry known ISI 16-byte-header signatures. |
+| `.phs` | 5 (in GTL MAS) | SimBin physics/AI binary (PHYSICS/CARS/DRIVERS/AI/TRACKS; distinct from `.psh` shaders) | high-entropy, no known magic | low | Identified; lossless byte copy possible. Not ISI 16-byte-header, not JCA (all keys tried), no zlib/gzip. Follow-up hypothesis recorded in `docs/task-plan.md`. |
 | `.lma` | 116 | SimBin animation (FXM magic/variant) | `LMA ` observed in GTR2/GT Legends | medium | `fxm_tool.py` info/nodes/roundtrip; node/bone strings extractable; internal structure unconfirmed |
 | `.svm` | 258 | SimBin text-like with null padding | `//[[gMa1.000f...]] [[\0...]]` | high (text-ish) | Treat as text/binary-safe bytes; preserve null padding. Not a structured binary format |
 | `.ani` | 60 | Text animation/script | `// ...` | high (text) | Plain text read/write |
@@ -30,7 +30,6 @@ First-pass inventory for GTL (`../GTLSteam/GameData`) and GTR2 (`../GTR2Steam/Ga
 | `.bmp` | 207 (fs) / 544 (MAS) | **Mixed on fs**: 147 BMP (`BM`), 60 TGA-header (`00 00 02 00...`, type 2) with `.bmp` extension | `BM` or TGA header | high (standard containers) | Detect by header; semantic R/W for BI_RGB 24/32 BMP in `media_tool.py`; lossless copy for others. Observed BM BMPs: BI_RGB bpp 8/24/32. |
 | `.jpg` | 93 | JPEG image | `FFD8FF...` | high (standard) | Identify/metadata parse/lossless copy in `media_tool.py`. Observed: all 93 GTR2/GTL JPGs are baseline SOF0, 8-bit, 3 components. Semantic decode/encode not implemented in-repo. |
 | `.mp3` | 24 | MP3 audio | `ID3` or MPEG frame | high (standard) | Identify/metadata parse/lossless copy in `media_tool.py`. Observed: 23/24 have ID3/sync, 1 null-padded (`pitSoundsprivate.mp3`). Semantic decode/encode not implemented in-repo. |
-| `.fxa`? (covered) | - | - | - | - | - |
 
 ## Text formats observed as text/binary-safe
 
