@@ -2,6 +2,12 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-21 20:45:00 -0500 - RF1Vanilla corpus: rF1 encryption + GMT layouts
+- Add `../RF1Vanilla/` as workspace-root reference (AGENTS.md).
+- Add `tests/test_rf1_vanilla.py`: 85 MAS type-1 archives; 9,662 GMTs split 9,630 old-layout (magic at 0x1D4, byte 0xA8) / 32 GTR2-style (0x08, 0xA7); 120 ISI-encrypted GMTs decrypt with skip=4 (90 old + 30 new), cross-checked against `rfactordec`.
+- All 32 GTR2-style GMTs parse and round-trip with `gmt_format.py`.
+- Document in `docs/gmt-format.md`, `docs/binary-formats.md`.
+
 ## 2026-11-21 20:30:00 -0500 - BMW corpus folder rename
 - Update path references for workspace-root folder rename `BMW M3 Challenge` -> `BMWM3Challenge` (AGENTS.md, tests, docs).
 

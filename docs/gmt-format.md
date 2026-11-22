@@ -56,6 +56,17 @@ Most sampled shared animation GMTs were identical; do not generalize from that s
 - `rfactortools/gtr2.py` comment: "GMT files have different formats in GSC2013 and rFactor and need to be converted first."
 - Implication: GMT format varies by ISIMotor game/era. GTL and GTR2 are close SimBin-era siblings, but per-asset compatibility must be validated.
 
+## Verified rFactor 1 GMT variants (`../RF1Vanilla` corpus)
+
+Scanned all 9,662 GMT members inside 85 MAS type-1 `.mas` archives in `../RF1Vanilla`:
+
+- **9,630 old-layout GMTs**: 16-byte magic `c8 cf d2 d8 ce d8 e6 c3 d6 de d8 be bb a8 bf 90` at **0x1D4** (differs from GTR2's magic by one byte: `0xA8` vs `0xA7`). At 0x08 is a bounding box of 33 floats (396 bytes), with object counts/offsets at 0x174/404 and a 64-byte ASCII name at 0x194..0x1D4 — matching `rfactortools/programs/gmttool.py`. These do **not** have the GTR2 magic at 0x08 and are not parseable by `gmt_format.py`.
+- **32 new-layout GMTs**: magic `c8 cf d2 d8 ce d8 e6 c3 d6 de d8 be bb a7 bf 90` at **0x08**, identical to GTR2/GTL. All 32 parse with `gmt_format.parse_gmt()` and round-trip losslessly (verified in `tests/test_rf1_vanilla.py`).
+
+Encryption: 120 GMT members carry the known rFactor ISI 16-byte-header signature `0x38af5637e81bc9a0`. `isi_crypt.decrypt_bytes(data, skip=4)` recovers plaintext byte-for-byte identical to the `rfactordec` reference (cross-checked on `pits.mas::PIT_HELMET.GMT`). Of the 120, 90 are old-layout and 30 new-layout; the other 9,542 GMTs are plaintext.
+
+Conversion implication for rF1 -> GTR2: (1) decrypt with the ISI header scheme (`skip=4`) when the signature is present; (2) detect layout by magic location — old (0x1D4, `0xA8`) vs new (0x08, `0xA7`). Only new-layout GMTs are directly compatible with the current GTR2 parser; old-layout GMTs need a structural converter (not implemented).
+
 ## Conversion implications (GTL -> GTR2)
 
 - **Default**: binary carry-over with validation, not blind rewrite.

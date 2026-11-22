@@ -18,6 +18,7 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 - **Write/Encrypt**: Yes. Can encrypt with known sign/key; round-trip verified.
 - **Verification**: `tests/test_isi_crypt.py` (pure-Python round-trip; optional cross-check against `rfactordec` binary).
 - **Gaps**: Files without recognized ISI sign/key 16-byte header are not decrypted. `DETOMASO_PANTERA_RAINSCREEN.GMT` is not standard ISI 16-byte-header format; header repair (normal magic/flags) makes it structurally parseable/lossless-round-trippable, but semantic correctness is unverified. Other/unknown variants may require further analysis.
+- **Verified real corpus**: 120 rFactor 1 GMTs in `../RF1Vanilla` carry the known rFactor signature and decrypt with skip=4; output matches the `rfactordec` reference byte-for-byte (`tests/test_rf1_vanilla.py`). No GTR2/GTL install file carries a known ISI signature.
 
 ## 3D/mesh formats
 
@@ -33,7 +34,7 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
   - Materials: L0 boundary heuristic; 264-byte stage blocks; ASCII texture/stage strings extracted.
 - **Verification**: `tests/test_gmt_format.py`, `tests/test_gmt_tool.py`; real GTR2/GT Legends samples.
 - **Tools**: `gmt_format.py`, `gmt_tool.py`.
-- **Gaps**: material/stage numeric param semantics, UV/LOD/shader/flag meanings, f0/f7/extra/stream semantics, geometry conversion, encrypted GMT decrypt/encrypt.
+- **Gaps**: material/stage numeric param semantics, UV/LOD/shader/flag meanings, f0/f7/extra/stream semantics, geometry conversion, encrypted GMT decrypt/encrypt. The **old rFactor 1 GMT layout** (magic at 0x1D4 with 0xA8 byte, bounding box at 0x08) is not parsed by `gmt_format.py`; 9,630 such files exist in `../RF1Vanilla` and need a structural converter. See `docs/gmt-format.md`.
 
 ## SimBin container formats
 

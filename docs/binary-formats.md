@@ -1,6 +1,6 @@
 # Binary Formats Inventory (GTL/GTR2)
 
-First-pass inventory for GTL (`../GTLSteam/GameData`) and GTR2 (`../GTR2Steam/GameData`), with cross-game observations from BMW M3 Challenge (`../BMWM3Challenge`). Goal: identify, understand, and provide read/write path for every binary file format possible.
+First-pass inventory for GTL (`../GTLSteam/GameData`) and GTR2 (`../GTR2Steam/GameData`), with cross-game observations from BMW M3 Challenge (`../BMWM3Challenge`) and rFactor 1 vanilla (`../RF1Vanilla`). Goal: identify, understand, and provide read/write path for every binary file format possible.
 
 **Legend**
 - **R/W**: lossless read/write capability in this repo/tooling, or standard library path.
@@ -37,6 +37,12 @@ First-pass inventory for GTL (`../GTLSteam/GameData`) and GTR2 (`../GTR2Steam/Ga
 These are usually text but may contain null-padded SimBin headers: `.aiw`, `.svm`, `.ani`, `.ds`, `.dst`, `.gdb`, `.trk`, `.car`, `.hdc`, `.eng`, `.tyr`, `.aud`, `.dmg`, `.sp`, `.grb`, `.hed`, `.cam`, `.grd`, `.rcd`, `.set`, `.txt`, `.cdb`, `.ddb`, `.tec`, `.fxm`? No - `.fxm` is binary FXM. `.cas` is text-like.
 
 ## Game-specific binary formats: status
+
+### rFactor 1 vanilla cross-corpus observations (evidence only, `../RF1Vanilla`)
+- 85 `.mas` archives use the MAS type-1 signature (`c8cfd2d8ced8e6c9caddd8bebba6bf90`); all open with `mas_tool.py` (13,075 members).
+- 9,662 GMT members: 9,630 old-layout (magic `...bba8bf90` at 0x1D4, bounding box at 0x08) and 32 new-layout (GTR2/GTL magic `...bba7bf90` at 0x08). The 32 new-layout files parse and round-trip with `gmt_format.py`; see `docs/gmt-format.md`.
+- 120 GMT members are ISI 16-byte-header encrypted with the known rFactor signature; `isi_crypt.py` decrypts them with skip=4 (verified byte-for-byte against `rfactordec`). 90 are old-layout, 30 new-layout after decryption.
+- Verification: `tests/test_rf1_vanilla.py`.
 
 ### BMW M3 Challenge cross-corpus observations (evidence only)
 - 17 `.bmw` files are GMOTORMAS10 type-0 archives (2,720 members total), readable and member-level lossless round-trippable with `mas_tool.py` unchanged.
