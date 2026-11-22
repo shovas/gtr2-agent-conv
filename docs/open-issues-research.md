@@ -57,7 +57,12 @@ conclusively establishing it requires actual game execution.
   `key_count` cannot imply variable-length records. The 84 bytes decode as **2 TRS
   keys** (pos/quat/scale each) + 4-byte trailer; a plausible reading is that `3`
   counts the TRS *components* per key, but this cannot be confirmed offline.
-  **Unresolved meaning, several wrong interpretations excluded**.
+  **Unresolved meaning, several wrong interpretations excluded**. A general regex
+  scan across 604 files found 6,472 key_count=3 candidates plus 63 false positives
+  (the `Mar  1 2005` FXM build timestamp and DDS texture bytes), confirming 3 is the
+  invariant for real animated nodes. Separately, some FXM files (e.g.
+  `FPDRIVER_Vectra-SteerL_01.FXM`, `LMA ` magic) use NUL-terminated node names with
+  no marker/key_count fields — a distinct FXM variant not handled by the current parser.
 - **GMT `f0` — RESOLVED as marker**: non-zero in only 0.36% of 108,878 vertices,
   and **all 302 non-zero cases occur at vertex index 0** of a mesh. It is a per-mesh
   first-vertex marker/flag, not a per-vertex attribute. Added test.
