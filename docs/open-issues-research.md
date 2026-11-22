@@ -74,8 +74,13 @@ conclusively establishing it requires actual game execution.
 - **Experiment**: perturb one source vertex x by +1.0 in a real rF1 GMT, re-convert,
   and compare decoded output positions. Result: exactly vertex 0 changes, by
   exactly +1.0. Codified in `tests/test_validate_conversion.py`.
-- **Interpretation**: the bridge is a genuine per-vertex semantic transform, not an
-  accidental structural coincidence. Strengthens offline compatibility confidence.
+- **Third-party oracle**: the pure parsing functions of the GPLv3 Blender GTR2/rF1
+  GMT importer were executed in /tmp (not committed) against a converted GMT.
+  Its positions matched ours exactly (after its Blender Y/Z swap), and its UVs
+  matched exactly after undoing its V-flip. This is an independent implementation,
+  not our own reader.
+- **Interpretation**: the bridge is a genuine per-vertex semantic transform confirmed
+  by an independent implementation. Strengthens offline compatibility confidence.
 
 ## Recommendation
 No issue is fully runtime-resolved without launching GTR2/GTL. The highest-value

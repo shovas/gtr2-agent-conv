@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 13:30:00 -0500 - Third-party GMT oracle validation
+- Executed the GPLv3 Blender GTR2/rF1 importer's pure parsing functions in /tmp (not committed) against a converted GMT: positions and UVs matched our decoder exactly after accounting for Blender's Y/Z swap and V-flip. Independent confirmation of the semantic bridge. Documented in `docs/open-issues-research.md`.
+
 ## 2026-11-23 13:00:00 -0500 - GTR1 universal table at 0x11c
 - Found a universal rF1-style 8-u32 table at 0x11c in GTR1 GMTs (20,000/20,000 valid); car meshes additionally have the 0x194 descriptor grid. Added `gmt_semantic.read_gtr1_table()` + test; documented the two-variant layout.
 
