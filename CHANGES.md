@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-22 21:15:00 -0500 - Task 4: FXM TRS keyframes decoded
+- `fxm_tool.decode_node_keys()` decodes the 84-byte keyframe block as 2 TRS keys (position/quaternion/scale) + 4-byte trailer; validated across all 27 nodes. Add test and document.
+
 ## 2026-11-22 20:45:00 -0500 - Task 4: FXM skeleton node table decoded
 - `fxm_tool.parse_node_records()` walks the contiguous skeleton-node table anchored on `Bip01`; 27 clean records in FU_PreIdle4-R.FXM (name + 12-byte header + 84 keyframe bytes, stride name+96), replacing a loose regex that produced 3ds Max metadata false positives. Add tests and document. Keyframe float semantics remain unconfirmed.
 

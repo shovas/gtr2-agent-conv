@@ -32,6 +32,24 @@ class FxmRecordTest(unittest.TestCase):
         for a, bnode in zip(nodes, nodes[1:]):
             self.assertEqual(bnode["offset"] - a["offset"], len(a["name"]) + 96)
 
+    def test_keyframe_trs_decode(self):
+        if not SAMPLE.exists():
+            self.skipTest("FXM sample not present")
+        data = SAMPLE.read_bytes()
+        nodes = fxm_tool.parse_node_records(data)
+        qok = sok = 0
+        for node in nodes:
+            dec = fxm_tool.decode_node_keys(data, node)
+            self.assertEqual(len(dec["keys"]), 2)
+            for key in dec["keys"]:
+                self.assertEqual(len(key["position"]), 3)
+                self.assertEqual(len(key["quaternion"]), 4)
+                self.assertEqual(len(key["scale"]), 3)
+                qok += abs(key["quat_norm"] - 1.0) < 0.05
+                sok += all(abs(x - 1.0) < 0.05 for x in key["scale"])
+        self.assertGreater(qok, 0.9 * len(nodes) * 2)
+        self.assertGreater(sok, 0.9 * len(nodes) * 2)
+
     def test_corpus_consistency(self):
         files = [p for p in ROOT.parent.joinpath("GTR2Steam").rglob("*")
                  if p.is_file() and p.suffix.lower() in (".fxm", ".fxa", ".lma")]

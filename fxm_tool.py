@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import math
 import struct
 from dataclasses import dataclass
 from pathlib import Path
@@ -69,8 +70,8 @@ def parse_node_records(b: bytes) -> list[dict]:
     """Walk the contiguous skeleton-node table anchored on the `Bip01` record.
 
     Each record is `name (no NUL), u32 marker=1, u32 size_hint, u32 key_count=3,
-    84 bytes of keyframe data (3 x 28-byte keys)`.  Records are contiguous, so a
-    sequential walk from the strong `Bip01\\x01\\x00\\x00\\x00` anchor avoids the
+    84 bytes of keyframe data`.  The keyframe block decodes as 2 TRS keys
+    (see `decode_node_keys`).  Records are contiguous, so a sequential walk from the strong `Bip01\\x01\\x00\\x00\\x00` anchor avoids the
     false positives a free-standing name regex produces on 3ds Max metadata
     (e.g. build timestamps or material names).
     """
@@ -90,9 +91,33 @@ def parse_node_records(b: bytes) -> list[dict]:
             break
         out.append({"offset": pos, "name": name.decode("ascii"),
                     "size_hint": size_hint, "key_count": key_count,
-                    "keyframe_bytes": 84, "key_stride": 28})
+                    "keyframe_offset": marker + 12,
+                    "keyframe_bytes": 84})
         pos = marker + 12 + 84
     return out
+
+
+def decode_node_keys(b: bytes, node: dict) -> dict:
+    """Decode a node's 84-byte keyframe block into TRS keys.
+
+    Layout (validated across all 27 nodes of FU_PreIdle4-R.FXM): 2 keys of
+    10 floats each (position xyz, rotation quaternion xyzw, scale xyz) plus a
+    4-byte trailer.  Quaternion norms are ~1 in 54/54 keys and scale ~1 in
+    52/54; the two keys are usually identical for static/rest-pose nodes.
+    """
+    ko = node["keyframe_offset"]
+    f = struct.unpack_from("<21f", b, ko)
+    keys = []
+    for k in range(2):
+        base = k * 10
+        pos = list(f[base:base + 3])
+        quat = list(f[base + 3:base + 7])
+        scale = list(f[base + 7:base + 10])
+        norm = math.sqrt(sum(x * x for x in quat))
+        keys.append({"position": pos, "quaternion": quat,
+                     "scale": scale, "quat_norm": norm})
+    trailer = struct.unpack_from("<I", b, ko + 80)[0]
+    return {"node": node["name"], "keys": keys, "trailer": trailer}
 
 
 def cmd_info(args: argparse.Namespace) -> int:
