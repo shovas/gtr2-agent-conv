@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-22 22:15:00 -0500 - Task 4: GTTF/IRSR metadata framing decoded
+- `simbin_events_tool.parse_metadata()` decodes driver/co-driver/car after the TRK/AIW names: GTTF 31/31 files (two Pascal names + car), GTL-IRSR 4/4 (one name + car); other IRSR variants left undecoded. Expose via `EventFile` fields and CLI; add tests and document.
+
 ## 2026-11-22 21:45:00 -0500 - Task 4: expose FXM keyframes in CLI
 - Add `fxm_tool.py keys` subcommand printing decoded skeleton node TRS keyframes (position/quaternion/scale/norm); add CLI test.
 

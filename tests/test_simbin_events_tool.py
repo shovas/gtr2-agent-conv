@@ -44,6 +44,41 @@ class SimbinEventsToolTest(unittest.TestCase):
                 self.assertTrue(e.trk.lower().endswith(".trk"))
                 self.assertTrue(e.aiw.lower().endswith(".aiw"))
 
+    def test_gtt_metadata_framing(self):
+        files = _files(".gtt")
+        if not files:
+            self.skipTest("GTR2 GTT files not present")
+        for p in files:
+            with self.subTest(path=p.name):
+                e = setool.parse_file(p)
+                self.assertEqual(e.driver, "Henrik Roos")
+                self.assertEqual(e.co_driver, "Gabriele Gardel")
+                self.assertTrue(e.car.lower().endswith(".car"))
+                self.assertGreater(e.metadata_offset, 0)
+
+    def test_bmw_and_gtl_metadata(self):
+        bmw = ROOT.parent / "BMWM3Challenge"
+        gtl = ROOT.parent / "GTLSteam"
+        cases = []
+        for base, kind in ((bmw, "GTTF"), (gtl, "IRSR")):
+            if not base.exists():
+                continue
+            for p in glob.glob(str(base / "**" / "*"), recursive=True):
+                if Path(p).is_file() and Path(p).suffix.lower() in (".gtt", ".vcr"):
+                    cases.append((Path(p), kind))
+        if not cases:
+            self.skipTest("BMW M3 / GTL events not present")
+        for p, kind in cases:
+            with self.subTest(path=p.name):
+                e = setool.parse_file(p)
+                self.assertEqual(e.kind, kind)
+                self.assertTrue(e.driver)
+                self.assertTrue(e.car.lower().endswith((".car", ".veh")))
+                if kind == "GTTF":
+                    self.assertTrue(e.co_driver)
+                else:
+                    self.assertIsNone(e.co_driver)
+
     def test_driver_and_car_strings_extracted(self):
         files = _files(".gtt")
         if not files:

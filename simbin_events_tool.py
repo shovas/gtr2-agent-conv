@@ -28,10 +28,51 @@ class EventFile:
     trk: str
     aiw: str
     strings: list[tuple[int, str]] = field(default_factory=list)
+    driver: str | None = None
+    co_driver: str | None = None
+    car: str | None = None
+    metadata_offset: int = -1
 
 
 def _printable(data: bytes) -> bool:
     return all(32 <= c < 127 for c in data)
+
+
+def parse_metadata(data: bytes, off: int, kind: str) -> dict | None:
+    """Parse the metadata block immediately following the TRK/AIW filenames.
+
+    GTTF files (time trials): 11-byte prefix, then two 1-byte-length-prefixed
+    names (driver, co-driver), then a NUL-terminated car filename.
+    GTL-IRSR files (replays): same prefix, one name, then the car filename.
+    Other IRSR variants (GTR2 replays, rFactor replays) use a different layout
+    and are left undecoded (returns None).
+    """
+    if off + 12 > len(data) or data[off:off + 3] != b"\0\0\0":
+        return None
+    q = off + 11
+    names = []
+    for _ in range(2 if kind == "GTTF" else 1):
+        if q >= len(data):
+            return None
+        size = data[q]
+        q += 1
+        if not (0 < size < 80) or q + size > len(data):
+            return None
+        name = data[q:q + size]
+        if not name or not all(32 <= c < 127 for c in name):
+            return None
+        names.append(name.decode("latin-1"))
+        q += size
+    while q < len(data) and data[q] == 0:
+        q += 1
+    j = q
+    while j < len(data) and 32 <= data[j] < 127:
+        j += 1
+    car = data[q:j].decode("latin-1") if j > q else ""
+    if not car.lower().endswith((".car", ".veh")):
+        return None
+    return {"offset": off, "driver": names[0],
+            "co_driver": names[1] if len(names) > 1 else None, "car": car}
 
 
 def parse_payload(data: bytes) -> EventFile:
@@ -49,6 +90,7 @@ def parse_payload(data: bytes) -> EventFile:
             raise ValueError("invalid filename length")
         names.append(data[off:off + size].decode("latin-1"))
         off += size
+    meta = parse_metadata(data, off, kind)
     strings = []
     i = off
     while i < len(data):
@@ -61,7 +103,11 @@ def parse_payload(data: bytes) -> EventFile:
             i = j + 1
         else:
             i += 1
-    return EventFile(kind=kind, version=version, trk=names[0], aiw=names[1], strings=strings)
+    return EventFile(kind=kind, version=version, trk=names[0], aiw=names[1], strings=strings,
+                     driver=meta["driver"] if meta else None,
+                     co_driver=meta["co_driver"] if meta else None,
+                     car=meta["car"] if meta else None,
+                     metadata_offset=meta["offset"] if meta else -1)
 
 
 def parse_file(path: str | Path) -> EventFile:
@@ -77,6 +123,9 @@ def main(argv=None) -> int:
     args = ap.parse_args(argv)
     e = parse_file(args.file)
     print(f"kind={e.kind} version={e.version} trk={e.trk!r} aiw={e.aiw!r}")
+    if e.driver:
+        print(f"driver={e.driver!r} co_driver={e.co_driver!r} car={e.car!r} "
+              f"meta_offset={e.metadata_offset:#x}")
     print(f"printable_strings={len(e.strings)}")
     for off, s in e.strings[:args.strings]:
         print(f"  {off}: {s[:80]}")

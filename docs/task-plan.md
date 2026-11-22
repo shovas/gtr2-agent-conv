@@ -25,7 +25,7 @@ named tests/docs/tools.
 | # | Task | Status | Evidence |
 |---:|---|---|---|
 | 11 | rF1→GTR2 pipeline | done (prototype) | `rf1_to_gtr2.py`, `tests/test_rf1_pipeline.py` (253 GMTs) |
-| 12 | GTTF/VCR reader | done (partial) | `simbin_events_tool.py`, `tests/test_simbin_events_tool.py` |
+| 12 | GTTF/VCR reader | done (partial) | `simbin_events_tool.py`, `tests/test_simbin_events_tool.py`; metadata framing (driver/co-driver/car) now decoded |
 
 ## Wave 3 — blocked by external input
 | # | Task | Blocker | Evidence of attempt |
@@ -33,7 +33,7 @@ named tests/docs/tools.
 | 13 | In-game validation | Requires running GTR2 with converted content | Converter output validates structurally only |
 | 14 | Bink decode/encode | Proprietary SDK/licensed tools | `docs/binary-formats.md` (BIK, 137 files) |
 | 15 | PHS cipher | No spec; not ISI, not JCA (all keys tried), no standard compression | 5 files, entropy ~7.95, `docs/binary-formats.md` |
-| 16 | GTTF record semantics, CUBE MTS material IDs, `.tgq` | Authoritative spec or runtime-validated reference | Observations only in `docs/binary-formats.md`; FXM skeleton/TRS keyframes were decoded this turn (`fxm_tool.py keys`, `tests/test_fxm_records.py`) |
+| 16 | GTTF frame records, CUBE MTS material IDs, `.tgq` | Authoritative spec or runtime-validated reference | Observations only in `docs/binary-formats.md`; FXM skeleton/TRS keyframes and GTTF/IRSR metadata framing were decoded (`fxm_tool.py keys`, `simbin_events_tool.py`) |
 | 17 | GTR (2004) corpus | Not installed locally | `CAPABILITIES.md` coverage gaps |
 
 ## TODO — PHS identity hypothesis
@@ -52,7 +52,7 @@ No cipher or spec found so far; this is an explicit follow-up, not a claim.
 
 ## Final verification
 ```
-python3 -m unittest discover -s tests -v   -> 220 tests OK (skipped=1)
+python3 -m unittest discover -s tests -v   -> 222 tests OK (skipped=1)
 git status --short                          -> clean
 
 Additional corpora reviewed after the plan was written (F1CS2000, GameStockCar,
