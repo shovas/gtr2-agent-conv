@@ -20,6 +20,13 @@ class SimbinToolsTest(unittest.TestCase):
             dec = gzip_simbin_tool.decompress(p)
             self.assertEqual(dec, payload)
 
+    def test_real_dsi_if_present(self):
+        p = ROOT.parent / "GTR2Steam/GameData/DrivingSchool/Anderstorp/A1_Level 1.DSI"
+        if not p.exists():
+            self.skipTest("DSI not present")
+        dec = gzip_simbin_tool.decompress(p)
+        self.assertTrue(dec.startswith(b"//[[gMb1.000f"))
+
     def test_real_hat_if_present(self):
         p = ROOT.parent / "GTR2Steam/GameData/Locations/HAT_Dedicated/3ANDERSTORP.hat"
         if not p.exists():
