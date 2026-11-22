@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 08:30:00 -0500 - Task 4: Bink-1 encoding via libbink
+- `media_tool.bink_encode()` / `media_tool.py bink-encode` invoke the external LGPL-2.1 `raynorpat/libbink` `bink_build` tool. Built from source, encoded a decoded real GTR2 BIK: `--verify` passed, ffmpeg decoded the output, and the BIKi header layout matches. Encoding is no longer blocked. Add test and document.
+
 ## 2026-11-23 08:00:00 -0500 - Docs: Bink encoder search
 - Checked online options for Bink-1 encoding: the announced LGPL `jmarshall23/libbink` repo returns 404; `marcussacana/Bink2` targets Bink 2, not GTR2's Bink 1. Encoding remains blocked without licensed tools.
 

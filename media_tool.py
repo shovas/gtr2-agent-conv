@@ -763,6 +763,29 @@ def bink_decode(src: str | Path, out_dir: str | Path, frames: int = 0) -> list[P
     return sorted(out.glob("frame_*.png"))
 
 
+def bink_encode(frames_dir: str | Path, dst: str | Path, fps: int = 25,
+                verify: bool = True, exe: str | None = None) -> Path | None:
+    """Encode PNG/BMP frames into a Bink-1 BIKi video via external `bink_build`.
+
+    `bink_build` comes from the LGPL-2.1 `raynorpat/libbink` project and is
+    invoked as a separate executable (its code is not copied into this repo).
+    The output BIKi header layout matches GTR2/GTL Bink-1 videos.  Returns the
+    output path, or None when the external tool is unavailable.
+    """
+    import os
+    import shutil
+    import subprocess
+    tool = exe or os.environ.get("BINKBUILD") or shutil.which("bink_build")
+    if tool is None:
+        return None
+    out = Path(dst)
+    cmd = [tool, str(frames_dir), "-o", str(out), "--fps", str(fps)]
+    if verify:
+        cmd.append("--verify")
+    subprocess.run(cmd, check=True, capture_output=True)
+    return out if out.is_file() else None
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__)
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -774,6 +797,13 @@ def main(argv=None):
     p.add_argument("out_dir")
     p.add_argument("--frames", type=int, default=0)
     p.set_defaults(func=lambda a: print(len(bink_decode(a.src, a.out_dir, a.frames))))
+    p = sub.add_parser("bink-encode", help="encode PNG frames to BIKi via bink_build")
+    p.add_argument("frames_dir")
+    p.add_argument("dst")
+    p.add_argument("--fps", type=int, default=25)
+    p.add_argument("--exe", default=None)
+    p.set_defaults(func=lambda a: print(bink_encode(a.frames_dir, a.dst, a.fps,
+                                                   exe=a.exe) or "bink_build unavailable"))
     p = sub.add_parser("wav-roundtrip")
     p.add_argument("src")
     p.add_argument("dst")

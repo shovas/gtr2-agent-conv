@@ -31,7 +31,7 @@ named tests/docs/tools.
 | # | Task | Blocker | Evidence of attempt |
 |---:|---|---|---|
 | 13 | In-game validation | Requires running GTR2 with converted content | Converter output validates structurally only |
-| 14 | Bink decode/encode | Proprietary SDK/licensed tools | `docs/binary-formats.md` (BIK, 137 files) |
+| 14 | Bink decode/encode | done (external tools) | ffmpeg decode + LGPL `raynorpat/libbink` encoder via `media_tool.py`; validated round-trip on real BIK |
 | 15 | PHS cipher | No spec; not ISI, not JCA (all keys tried), no standard compression | 5 files, entropy ~7.95, `docs/binary-formats.md` |
 | 16 | GTTF frame records, CUBE MTS material IDs, `.tgq` | Authoritative spec or runtime-validated reference | Observations only in `docs/binary-formats.md`; FXM skeleton/TRS keyframes and GTTF/IRSR metadata framing were decoded (`fxm_tool.py keys`, `simbin_events_tool.py`) |
 | 17 | GTR (2004) corpus | Not installed locally | `CAPABILITIES.md` coverage gaps |

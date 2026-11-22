@@ -11,6 +11,28 @@ import media_tool  # noqa: E402
 
 
 class MediaToolTest(unittest.TestCase):
+    def test_bink_encode_via_libbink(self):
+        import os
+        import shutil
+        exe = os.environ.get("BINKBUILD") or shutil.which("bink_build")
+        if exe is None:
+            self.skipTest("bink_build not available")
+        src = ROOT.parent / "GTR2Steam/GameData/Locations/Barcelona/Barcelona.bik"
+        if not src.is_file():
+            self.skipTest("BIK sample not present")
+        with tempfile.TemporaryDirectory() as td:
+            frames = media_tool.bink_decode(src, td, frames=2)
+            self.assertEqual(len(frames), 2)
+            out = media_tool.bink_encode(Path(td), Path(td) / "out.bik",
+                                         fps=15, exe=exe)
+            self.assertIsNotNone(out)
+            self.assertEqual(out.read_bytes()[:4], b"BIKi")
+            # ffmpeg can decode the encoder's output.
+            self.assertTrue(shutil.which("ffmpeg"))
+            import subprocess
+            subprocess.run(["ffmpeg", "-v", "error", "-i", str(out),
+                            "-frames:v", "1", "-f", "null", "-"], check=True)
+
     def test_bink_decode_via_ffmpeg(self):
         import shutil
         if shutil.which("ffmpeg") is None:
