@@ -47,6 +47,28 @@ def submesh_names(data: bytes) -> list[str]:
     return [m[:-1].decode("ascii") for m in re.findall(rb"[A-Z0-9_]{4,32}\x00", data[28:])]
 
 
+DESCRIPTOR_STRIDE = 196
+DESCRIPTOR_START = 216
+
+
+def submesh_descriptors(data: bytes) -> list[tuple[int, str]]:
+    """Read (offset, name) for submesh descriptors at the verified 196-byte grid.
+
+    Observed on 206/300 sampled CUBE MTS 4.20 files with named submeshes:
+    names begin at 0xD8 (216) and repeat every 196 bytes.
+    """
+    out = []
+    for off in range(DESCRIPTOR_START, len(data) - 4, DESCRIPTOR_STRIDE):
+        end = data.find(b"\0", off, min(off + 64, len(data)))
+        if end < 0:
+            break
+        name = data[off:end]
+        if not (4 <= len(name) <= 32) or not all(48 <= c < 127 for c in name):
+            break
+        out.append((off, name.decode("ascii")))
+    return out
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("files", nargs="+")

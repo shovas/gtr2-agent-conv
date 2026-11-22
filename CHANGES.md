@@ -2,6 +2,10 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-22 12:15:00 -0500 - Task 4: CUBE MTS descriptor grid
+- Locate submesh names as anchors: in LIGHTBOX02.MTS names sit at 216/412/608/804 (196-byte stride); dominant spacing in 206/300 sampled files.
+- Add `mts_format.submesh_descriptors()` + test; document in `docs/binary-formats.md`.
+
 ## 2026-11-22 11:45:00 -0500 - Task 4: MTS float-run hypothesis rejected
 - A long plausible-float run in TLRA.MTS was tested and rejected as a normal array (140/814 unit-length triples); add negative-result test and document.
 

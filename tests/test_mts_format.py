@@ -104,6 +104,23 @@ class MtsFormatTest(unittest.TestCase):
             off += 12
         self.assertLess(sum(0.9 < m < 1.1 for m in mags) / len(mags), 0.5)
 
+    def test_submesh_descriptor_grid(self):
+        sample = None
+        for a in glob.glob(str(ROOT.parent / "NascarSimRacing" / "**" / "*"), recursive=True):
+            p = Path(a)
+            if p.is_file() and p.suffix.lower() == ".mas":
+                for e in mas_tool.read_archive(p)[1]:
+                    if e.name == "LIGHTBOX02.MTS" and (e.data or b"")[:13] == b"CUBE_MTS_4.20":
+                        sample = e.data
+                        break
+            if sample:
+                break
+        if sample is None:
+            self.skipTest("LIGHTBOX02.MTS sample not present")
+        desc = mf.submesh_descriptors(sample)
+        self.assertEqual([off for off, _ in desc], [216, 412, 608, 804])
+        self.assertEqual([n for _, n in desc], ["LIGHTBOX2B", "LIGHTBOXC", "LIGHTBOX2", "GSTAND2"])
+
     def test_object_count_vs_submesh_names(self):
         hits = total = 0
         for a in glob.glob(str(ROOT.parent / "NascarSimRacing" / "**" / "*"), recursive=True):
