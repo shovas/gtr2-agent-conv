@@ -1,10 +1,12 @@
-"""Tests for the partial CUBE MTS header parser."""
+"""Tests for the CUBE MTS header/geometry/material parser."""
 import glob
+import io
 import os
 import struct
 import sys
 import unittest
 from collections import Counter
+from contextlib import redirect_stdout
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -222,6 +224,20 @@ class MtsFormatTest(unittest.TestCase):
         vals = [mf.decode_material_numbers(r) for r in recs]
         self.assertGreater(len(vals), 10)
         self.assertTrue(all(0 < x < 1024 for v in vals for x in v))
+
+    def test_detail_cli(self):
+        loose = [p for p in ROOT.parent.joinpath("NascarSimRacing").rglob("*.MTS")
+                 if (p.read_bytes()[:16] in (mf.MAGIC_410, mf.MAGIC_420))]
+        if not loose:
+            self.skipTest("loose CUBE MTS files not present")
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            rc = mf.main(["--detail", str(loose[0])])
+        out = buf.getvalue()
+        self.assertEqual(rc, 0)
+        self.assertIn("MtsHeader(", out)
+        self.assertIn("table:", out)
+        self.assertIn("geometry:", out)
 
     def test_material_records_4_10(self):
         sample = None

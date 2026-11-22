@@ -2,8 +2,10 @@
 """Partial CUBE MTS mesh parser (4.10 and 4.20 variants).
 
 Verified from ../NascarSimRacing (4,200+ sampled meshes): both variants share
-`magic[16], u32 object_count, char name[8]`; the payload after 0x1C is not yet
-decoded. This module only reports the verified header, never edits files.
+`magic[16], u32 object_count, char name[8]`. Decoded structures: 8-u32 geometry
+table (200/200 files), 64-byte marker-based and alternate submesh records,
+36-byte vertices (3 position triples), 16-byte normals (3 floats + u32), and
+36-byte material records (4.10). This module only reads files, never edits them.
 """
 from __future__ import annotations
 
@@ -199,10 +201,27 @@ def read_geometry(data: bytes) -> dict | None:
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("files", nargs="+")
+    ap.add_argument("--detail", action="store_true",
+                    help="print decoded table, geometry and material structures")
     args = ap.parse_args(argv)
     for f in args.files:
         try:
-            print(f, parse_header(Path(f).read_bytes()))
+            data = Path(f).read_bytes()
+            print(f, parse_header(data))
+            if args.detail:
+                table = parse_mesh_table(data)
+                if table:
+                    print("  table:", {k: table[k] for k in ("table_offset", "header")},
+                          "submeshes=", len(table["submeshes"]))
+                geo = read_geometry(data)
+                if geo:
+                    print("  geometry:", "vertices=", len(geo["vertices"]),
+                          "normals=", len(geo["normals"]),
+                          "normal_end=", geo["normal_end"])
+                recs = parse_material_records(data)
+                if recs:
+                    print("  materials:", len(recs), "first=",
+                          decode_material_numbers(recs[0]))
         except ValueError as e:
             print(f, "ERROR", e)
     return 0
