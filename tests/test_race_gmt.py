@@ -42,6 +42,18 @@ class RaceGmtTest(unittest.TestCase):
         self.assertTrue(all(len(t) == 3 for t in tris))
         self.assertAlmostEqual(tris[0][0][0], 25.1521, places=3)
 
+    def test_material_stage_groups(self):
+        p = ROOT.parent / "Race07Complete/GameData/Locations/Marrakech/Models/PEOPLE_STAND_01.gmt"
+        if not p.is_file():
+            self.skipTest("PEOPLE_STAND sample not present")
+        ss = race_gmt.read_material_strings(p.read_bytes())
+        self.assertEqual(len(ss) % 4, 0)
+        groups = [ss[i:i + 4] for i in range(0, len(ss), 4)]
+        self.assertEqual(len(groups), 5)
+        for g in groups:
+            self.assertTrue(g[0].rstrip("\0"))
+            self.assertTrue(all(s.startswith("L") for s in g[1:]))
+
     def test_material_strings_present_in_payload(self):
         import re
         p = ROOT.parent / "Race07Complete/GameData/Locations/Marrakech/Models/PEOPLE_STAND_01.gmt"

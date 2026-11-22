@@ -82,6 +82,13 @@ def read_positions(data: bytes) -> list[tuple[tuple[float, float, float], ...]]:
     return out
 
 
+def read_material_strings(data: bytes) -> list[str]:
+    """Extract NUL-terminated ASCII material/stage strings from the payload."""
+    import re
+    return [m.group().decode("ascii")
+            for m in re.finditer(rb"[A-Za-z0-9_]{4,40}\x00", data[16:])]
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("files", nargs="+")
