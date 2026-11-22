@@ -1,6 +1,6 @@
 # Binary Formats Inventory (GTL/GTR2)
 
-First-pass inventory for GTL (`../GTLSteam/GameData`) and GTR2 (`../GTR2Steam/GameData`), with cross-game observations from BMW M3 Challenge (`../BMWM3Challenge`), rFactor 1 vanilla (`../RF1Vanilla`), Copa Petrobras de Marcas (`../CopaPetrobrasdeMarcas`), Sports Car GT (`../SportsCarGtUsa`), Automobilista (`../Automobilista`), F1 2002 (`../F12002`) and F1 Challenge 99-02 (`../F1C`). Goal: identify, understand, and provide read/write path for every binary file format possible.
+First-pass inventory for GTL (`../GTLSteam/GameData`) and GTR2 (`../GTR2Steam/GameData`), with cross-game observations from BMW M3 Challenge (`../BMWM3Challenge`), rFactor 1 vanilla (`../RF1Vanilla`), Copa Petrobras de Marcas (`../CopaPetrobrasdeMarcas`), Sports Car GT (`../SportsCarGtUsa`), Automobilista (`../Automobilista`), F1 2002 (`../F12002`), F1 Challenge 99-02 (`../F1C`) and Stock Car Extreme (`../StockCarExtreme`). Goal: identify, understand, and provide read/write path for every binary file format possible.
 
 **Legend**
 - **R/W**: lossless read/write capability in this repo/tooling, or standard library path.
@@ -37,6 +37,13 @@ First-pass inventory for GTL (`../GTLSteam/GameData`) and GTR2 (`../GTR2Steam/Ga
 These are usually text but may contain null-padded SimBin headers: `.aiw`, `.svm`, `.ani`, `.ds`, `.dst`, `.gdb`, `.trk`, `.car`, `.hdc`, `.eng`, `.tyr`, `.aud`, `.dmg`, `.sp`, `.grb`, `.hed`, `.cam`, `.grd`, `.rcd`, `.set`, `.txt`, `.cdb`, `.ddb`, `.tec`, `.fxm`? No - `.fxm` is binary FXM. `.cas` is text-like.
 
 ## Game-specific binary formats: status
+
+### Stock Car Extreme (Reiza, GSC-based) cross-corpus observations (evidence only, `../StockCarExtreme`)
+- 196 `.mas` archives use the standard MAS type-1 signature; 71,814 members total.
+- 62,522 members carry the Game Stock Car signature `0x4b1dca9f960524e8`, decryptable with `isi_crypt.py` skip=4. No loose filesystem file has a known ISI signature.
+- All 60,841 GMT members use the old-style magic `...bba8bf90` at 0x1D4 (60,840 encrypted + 1 plain) — consistent with Copa and Automobilista.
+- Other observed files are text/known families (`.veh`, `.rcd`, `.aiw`, `.gdb`, `.tdf`, `.cin`, `.cch` `//[[gMa1`, `.xcf` GIMP images, gzip `.vcr/.hat`).
+- Verification: `tests/test_stockcar_extreme.py`.
 
 ### F1 Challenge 99-02 (ISI, 2003) cross-corpus observations (evidence only, `../F1C`)
 - 197 `.mas` archives use MAS type 3 (`CUBEMAS4.10`); 21,977 members total. `mas_tool.py` reads/writes them.

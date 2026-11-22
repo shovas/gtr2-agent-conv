@@ -2,6 +2,12 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-21 22:35:00 -0500 - Stock Car Extreme corpus added and reviewed
+- Add `../StockCarExtreme/` as GSC-lineage source reference.
+- Add `tests/test_stockcar_extreme.py`: 196 MAS type-1 archives, GSC-signature decryption, sampled old-layout GMTs.
+- Document in `docs/binary-formats.md`.
+- Note: path references updated for the `SportsCarGtUsa` folder rename (separate commit).
+
 ## 2026-11-21 22:15:00 -0500 - F1 Challenge 99-02 corpus added and reviewed
 - Add `../F1C/` as ancestral ISIMotor reference (direct rFactor predecessor).
 - Add `tests/test_f1c.py`: 197 type-3 archives (21,977 members), 13,769 standard CUBE MTS meshes + 1,065 variants, no ISI encryption; member round-trip verified.
