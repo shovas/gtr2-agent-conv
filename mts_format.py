@@ -37,6 +37,16 @@ def parse_header(data: bytes) -> MtsHeader:
                      object_count=count, name=name, size=len(data))
 
 
+def submesh_names(data: bytes) -> list[str]:
+    """Extract uppercase ASCII submesh names from the payload (heuristic).
+
+    Observed on 644/800 sampled CUBE MTS 4.20 files: ``object_count - len(names)
+    == 1``. This is a correlation, not a proven semantic rule.
+    """
+    import re
+    return [m[:-1].decode("ascii") for m in re.findall(rb"[A-Z0-9_]{4,32}\x00", data[28:])]
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("files", nargs="+")

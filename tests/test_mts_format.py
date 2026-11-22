@@ -40,6 +40,25 @@ class MtsFormatTest(unittest.TestCase):
         self.assertIn("4.20", counts)
 
 
+    def test_object_count_vs_submesh_names(self):
+        hits = total = 0
+        for a in glob.glob(str(ROOT.parent / "NascarSimRacing" / "**" / "*"), recursive=True):
+            p = Path(a)
+            if not p.is_file() or p.suffix.lower() != ".mas":
+                continue
+            for e in mas_tool.read_archive(p)[1]:
+                d = e.data or b""
+                if d[:13] != b"CUBE_MTS_4.20":
+                    continue
+                h = mf.parse_header(d)
+                total += 1
+                hits += (h.object_count - len(mf.submesh_names(d)) == 1)
+            if total >= 400:
+                break
+        if total == 0:
+            self.skipTest("CUBE MTS 4.20 corpus not present")
+        self.assertGreater(hits / total, 0.5)
+
     def test_varying_fields_align_to_48_byte_grid(self):
         groups = {}
         for a in glob.glob(str(ROOT.parent / "NascarSimRacing" / "**" / "*"), recursive=True):
