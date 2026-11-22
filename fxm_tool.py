@@ -186,7 +186,8 @@ def cmd_keys(args: argparse.Namespace) -> int:
     b = Path(args.file).read_bytes()
     for node in parse_node_records(b):
         dec = decode_node_keys(b, node)
-        print(f"{node['offset']}\t{node['name']}\tkeys={len(dec['keys'])}")
+        print(f"{node['offset']}\t{node['name']}\tkeys={len(dec['keys'])}"
+              f"\tid={node['size_hint'] - 84}")
         for i, key in enumerate(dec["keys"]):
             pos = ",".join(f"{x:g}" for x in key["position"])
             quat = ",".join(f"{x:g}" for x in key["quaternion"])

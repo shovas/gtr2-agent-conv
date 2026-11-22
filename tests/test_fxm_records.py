@@ -88,6 +88,7 @@ class FxmRecordTest(unittest.TestCase):
         out = buf.getvalue()
         self.assertEqual(rc, 0)
         self.assertIn("Bip01\t", out)
+        self.assertIn("id=12", out)
         self.assertIn("key0\tpos=", out)
         self.assertIn("norm=1.0000", out)
 

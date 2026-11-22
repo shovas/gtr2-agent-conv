@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 04:00:00 -0500 - Task 4: show bone id in FXM CLI
+- `fxm_tool.py keys` now prints the decoded name-stable node id; update CLI test.
+
 ## 2026-11-23 03:30:00 -0500 - Task 4: new-layout stage-type map
 - `gmt_format.build_stage_type_map()` mirrors the RaceGMT stage-type decoder for new-layout GMTs; validated per-format values (L0DIFFUSET0→1, L1BUMPSPECMAPT0→5, L1SPECULART0→4). Add test and document.
 
