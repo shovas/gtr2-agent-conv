@@ -64,11 +64,14 @@ conclusively establishing it requires actual game execution.
   speed correlation (|r|<0.1). Exact meanings **unresolved**.
 - **GTR1 extra 16 bytes — RESOLVED**: always `[0, u, v, 0]` (zero padding + 2D float UV pair),
   confirmed across 2,215 vertices in 100 files. Added as `uv` field in `read_gtr1_vertices()`.
-- **GTR1 descriptor variants**: 22,287 GMTs lack the 0x194 grid. Resolved the gap:
-  all GTR1 GMTs carry a universal rF1-style 8-u32 table at **0x11c** (20,000/20,000 valid),
-  with 32-byte vertex stride. Car meshes additionally have the 0x194 grid. Added
-  `gmt_semantic.read_gtr1_table()` + test. **Partially resolved** (table semantics known,
-  extra columns unconfirmed).
+- **GTR1 descriptor variants**: 22,287 GMTs lack the 0x194 grid. All GTR1 GMTs carry a
+  universal rF1-style 8-u32 table at **0x11c** (20,000/20,000 valid) — added
+  `gmt_semantic.read_gtr1_table()` + test. However, the descriptor-less files (shadow
+  meshes like `ARMCOSHAD01.GMT`) have a **different layout**: the 0x11c vertex_offset
+  block holds u16 index arrays (not 48-byte vertices), and the extra_offset/index_offset
+  blocks hold float streams. Forcing the 48-byte vertex layout gives only 38.5% unit
+  normals (vs 100% for car meshes with 0x194 grids). Need a separate decoder for this
+  variant. **Partially resolved** (table identified, variant layout undecoded).
 
 ## Metamorphic validation (issues 1+2)
 
