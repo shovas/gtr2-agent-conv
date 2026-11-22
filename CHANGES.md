@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-22 17:45:00 -0500 - Task 4: material numeric field decoding
+- `mts_format.decode_material_numbers()` splits the 4.10 material packed u32 into two u16 fields; validated across 1,227 records (all <1024). Semantics still unconfirmed; documented.
+
 ## 2026-11-22 17:15:00 -0500 - Task 4: alternate CUBE MTS submesh records
 - Decode type-B submesh record `(count_a, 0, count_b, offset_b, count_c, offset_c, 0, 0)` at table+48; submesh coverage rises to 198/200 (4.20) and 200/200 (4.10). Add test and document.
 

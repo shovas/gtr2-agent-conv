@@ -152,6 +152,16 @@ def parse_material_records(data: bytes) -> list[dict]:
     return out
 
 
+def decode_material_numbers(record: dict) -> tuple[int, int, int]:
+    """Decode a 4.10 material record's packed/small numeric fields.
+
+    Observed: `packed` is two u16 values (typically ~350-430) and `small` is
+    another u16 in the same range. Their semantics are unconfirmed.
+    """
+    first, second = struct.unpack("<2H", struct.pack("<I", record["packed"]))
+    return first, second, record["small"]
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("files", nargs="+")
