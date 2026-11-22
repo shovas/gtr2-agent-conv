@@ -9,6 +9,9 @@ Newest-first change log. Timestamps use repository commit dates (ISO 8601, local
 - Parse JPG SOF dimensions/bit depth and MP3 frame header metadata in `media_tool.py`.
 - Add real-file JPG/MP3 metadata tests.
 
+## 2026-11-22 03:05:00 -0500 - BIK magic observation
+- Add observed scan test: all 137 GTR2/GTL `.bik` files start with `BIKi`.
+
 ## 2026-11-22 02:55:00 -0500 - GMT extra-vertex observation
 - Add observed scan test: extra 16-byte vertex raw_u32 == [0, 0xFFFFFFFF, 0, 0] in 11 meshes/2918 verts.
 

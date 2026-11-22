@@ -156,6 +156,17 @@ class MediaToolTest(unittest.TestCase):
         self.assertTrue(seen)
         self.assertTrue(seen.issubset({(8, 0), (24, 0), (32, 0)}))
 
+    def test_bik_magic_observed(self):
+        # Observed: all 137 GTR2/GTL .bik files start with BIKi.
+        import glob, os
+        paths = glob.glob(str(ROOT.parent / 'GTR2Steam/**/*.bik'), recursive=True)
+        paths += glob.glob(str(ROOT.parent / 'GTLSteam/**/*.bik'), recursive=True)
+        if not paths:
+            self.skipTest("no BIK files")
+        for pth in paths:
+            with open(pth, 'rb') as f: magic = f.read(4)
+            self.assertEqual(magic, b'BIKi')
+
     def test_identify_jpg_if_present(self):
         p = ROOT.parent / "GTR2Steam/GameData/Locations/Anderstorp/3And_LOD.jpg"
         if not p.exists():
