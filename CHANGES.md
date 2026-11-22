@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-22 13:15:00 -0500 - Task 4: descriptor tail states
+- Enumerate three dominant states of descriptor+164 u32 (0, 0x0B4CE680, 0xFFFFFFFF) across 2,001 descriptors; add `mts_format.descriptor_tail_u32()` + test.
+
 ## 2026-11-22 12:45:00 -0500 - Task 4: descriptor packed field decoded
 - Descriptor+32 u32 is a packed field: high16 0x4890/0x2890, low16 small values; add `mts_format.descriptor_fields()` + distribution test.
 - Pair diffs at +32/+164 did not resolve into vertex/index offsets; documented as unresolved.

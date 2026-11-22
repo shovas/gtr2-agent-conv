@@ -84,6 +84,14 @@ def descriptor_fields(data: bytes, offset: int) -> tuple[int, int]:
     return u >> 16, u & 0xFFFF
 
 
+DESCRIPTOR_164_STATES = (0x00000000, 0x0B4CE680, 0xFFFFFFFF)
+
+
+def descriptor_tail_u32(data: bytes, offset: int) -> int:
+    """Read descriptor+164; observed mostly in three states (see docs)."""
+    return struct.unpack_from("<I", data, offset + 164)[0]
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("files", nargs="+")
