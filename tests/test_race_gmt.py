@@ -42,6 +42,32 @@ class RaceGmtTest(unittest.TestCase):
         self.assertTrue(all(len(t) == 3 for t in tris))
         self.assertAlmostEqual(tris[0][0][0], 25.1521, places=3)
 
+    def test_stage_type_map_is_deterministic(self):
+        blocks = []
+        files = []
+        for p in glob.glob(str(ROOT.parent / "Race07Complete" / "**" / "*.gmt"), recursive=True):
+            data = Path(p).read_bytes()
+            if data[:8] == race_gmt.MAGIC:
+                files.append(data)
+        for data in files:
+            blocks.extend(race_gmt.read_material_blocks(data))
+        if not blocks:
+            self.skipTest("RaceGMT stage blocks not present")
+        tmap = race_gmt.build_stage_type_map(blocks)
+        expected = {
+            "L0DIFFUSET0": 1, "L1DIFFUSET0": 2, "L2DIFFUSET0": 0,
+            "L0CMAPT0": 3, "L1BUMPSPECMAPT0": 5, "L1CMAPT0": 7,
+        }
+        for name, typ in expected.items():
+            with self.subTest(name=name):
+                self.assertIn(name, tmap)
+                self.assertEqual(tmap[name][0], typ)
+        well_sampled = {n: v for n, v in tmap.items() if v[2] >= 20}
+        self.assertGreater(len(well_sampled), 0)
+        for name, (typ, count, total) in well_sampled.items():
+            with self.subTest(name=name):
+                self.assertGreaterEqual(count / total, 0.8)
+
     def test_stage_numeric_tail_correlates_with_prefix(self):
         files = [p for p in ROOT.parent.joinpath("Race07Complete").rglob("*.gmt")
                  if p.read_bytes()[:8] == race_gmt.MAGIC]

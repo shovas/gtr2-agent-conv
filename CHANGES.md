@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 00:00:00 -0500 - Task 4: RaceGMT stage-type enum decoded
+- `race_gmt.build_stage_type_map()` decodes the u32 at +256 as a stage-type enum (L0DIFFUSET0→1, L1DIFFUSET0→2, L2*→0, L0CMAPT0→3, L1BUMPSPECMAPT0→5, L1CMAPT0→7); 100% deterministic for 6 well-sampled RaceGMT stage names. Corrected an earlier contaminated probe that mixed in 54k new-layout GMTs; documented per-format type maps. Add test.
+
 ## 2026-11-22 23:15:00 -0500 - Task 4: GMT bridge ground-truth search (negative)
 - Searched 552 same-name old/new GMT pairs (71 with matching vertex counts); inspected pairs are different meshes, so no vertex mapping can be derived. Documented as a negative result; GMT bridge still needs in-game validation.
 

@@ -110,6 +110,25 @@ def read_material_blocks(data: bytes) -> list[dict]:
     return blocks
 
 
+def build_stage_type_map(blocks: list[dict]) -> dict[str, tuple[int, int, int]]:
+    """Map stage name to its dominant semantic type (first u32 tail).
+
+    The first tail u32 at +256 is a stage-type enum driven by the stage name:
+    diffuse -> 1/2, cubemap -> 3, specular -> 5, bump+specular -> 7, etc.
+    Returns `{name: (dominant_type, count, total_samples)}`. Blocks whose first
+    tail is >= 100 are skipped (false-positive stage-string offsets).
+    """
+    from collections import Counter
+    counts: dict[str, Counter] = {}
+    for block in blocks:
+        first = block["tail"][0]
+        if first >= 100:
+            continue
+        counts.setdefault(block["name"], Counter())[first] += 1
+    return {name: (c.most_common(1)[0][0], c.most_common(1)[0][1], sum(c.values()))
+            for name, c in counts.items()}
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("files", nargs="+")
