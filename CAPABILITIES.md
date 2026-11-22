@@ -9,7 +9,7 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 - **Write**: Yes. Create new archives; add/update/delete entries.
 - **Verification**: `tests/test_mas_tool.py`; real GTR2/GTL round-trip tests when reference files present.
 - **Tool**: `mas_tool.py`.
-- **Notes**: Handles observed GMOTORMAS10 layout used by GTR2/GT Legends. Also verified on the 17 `.bmw` archives in `../BMWM3Challenge` (type 0, member-level round-trip in `tests/test_bmw_m3.py`).
+- **Notes**: Handles observed GMOTORMAS10 layout used by GTR2/GT Legends. Also verified on the 17 `.bmw` archives in `../BMWM3Challenge` (type 0, member-level round-trip in `tests/test_bmw_m3.py`) and the 50 type-1X Petrobras de Marcas `.mas` archives in `../CopaPetrobrasdeMarcas` (type-1 layout with a different 16-byte signature; signature preserved on rewrite via `signature=` / `read_signature()`).
 
 ## Encryption
 

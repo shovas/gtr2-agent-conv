@@ -90,6 +90,41 @@ class MasToolTest(unittest.TestCase):
         rc = mas_tool.main(["delete", str(arc), "nope.bin"])
         self.assertEqual(rc, 1)
 
+    def test_type1x_petrobras_signature_preserved(self):
+        # Observed: Petrobras de Marcas MAS archives use the documented MAS_TYPE1X
+        # signature (same type-1 layout, different first 6 bytes); rewriting must
+        # preserve the original signature.
+        src = ROOT.parent / "CopaPetrobrasdeMarcas/Gamedata/Scripts/pits.mas"
+        if not src.exists():
+            self.skipTest("CopaPetrobrasdeMarcas corpus not present")
+        sig = mas_tool.read_signature(src)
+        self.assertEqual(sig, mas_tool.MAS_TYPE1X)
+        mtype, entries = mas_tool.read_archive(src)
+        self.assertEqual(mtype, 1)
+        out = self.dir / "pits_type1x.mas"
+        mas_tool.write_archive(out, entries, mas_type=mtype, signature=sig)
+        self.assertEqual(mas_tool.read_signature(out), sig)
+        m2, e2 = mas_tool.read_archive(out)
+        self.assertEqual(m2, mtype)
+        self.assertEqual([e.name for e in e2], [e.name for e in entries])
+        for a, b in zip(entries, e2):
+            self.assertEqual(a.data, b.data, a.name)
+
+    def test_type1x_archives_in_copa_corpus(self):
+        import glob
+        corpus = ROOT.parent / "CopaPetrobrasdeMarcas"
+        arcs = [Path(p) for p in glob.glob(str(corpus / "**" / "*"), recursive=True)
+                if os.path.isfile(p) and Path(p).suffix.lower() == ".mas"]
+        if not arcs:
+            self.skipTest("CopaPetrobrasdeMarcas corpus not present")
+        self.assertEqual(len(arcs), 50)
+        for arc in arcs:
+            sig = mas_tool.read_signature(arc)
+            self.assertEqual(sig, mas_tool.MAS_TYPE1X, arc)
+            mtype, entries = mas_tool.read_archive(arc)
+            self.assertEqual(mtype, 1, arc)
+            self.assertGreater(len(entries), 0, arc)
+
     def test_real_gtr_gtl_roundtrip_if_present(self):
         candidates = [
             ROOT.parent / "GTR2Steam/GameData/Teams/24H/BMW M3GTR Teams/BMW_M3GTR_CPIT.gtr",

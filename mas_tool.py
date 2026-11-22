@@ -16,6 +16,10 @@ from pathlib import Path
 
 MAS_TYPE0 = b"GMOTORMAS10\x00\x00\x00\x00\x00"
 MAS_TYPE1 = b"\xc8\xcf\xd2\xd8\xce\xd8\xe6\xc9\xca\xdd\xd8\xbe\xbb\xa6\xbf\x90"
+# Petrobras de Marcas variant: same type-1 layout, only the first 6 bytes differ.
+# Documented in quickbms_scripts/mas.bms as MAS_TYPE1X.
+MAS_TYPE1X = b"\xce\xc3\xd5\xc7\xc0\xd9\xe6\xc9\xca\xdd\xd8\xbe\xbb\xa6\xbf\x90"
+MAS_TYPE1X_SUFFIX = b"\xca\xdd\xd8\xbe\xbb\xa6\xbf\x90"
 MAS_TYPE3 = b"CUBEMAS4.10\x00\x00\x00\x00\x00"
 
 
@@ -37,7 +41,15 @@ def _mas_type(signature: bytes) -> int:
         return 1
     if signature == MAS_TYPE3:
         return 3
+    if signature[8:16] == MAS_TYPE1X_SUFFIX:
+        return 1
     raise ValueError(f"unsupported MAS signature: {signature!r}")
+
+
+def read_signature(path: str | os.PathLike) -> bytes:
+    """Return the raw 16-byte archive signature (needed to preserve variants on rewrite)."""
+    with open(path, "rb") as f:
+        return f.read(16)
 
 
 def read_archive(path: str | os.PathLike) -> tuple[int, list[Entry]]:
@@ -79,7 +91,8 @@ def read_archive(path: str | os.PathLike) -> tuple[int, list[Entry]]:
     return mtype, entries
 
 
-def write_archive(path: str | os.PathLike, entries: list[Entry], mas_type: int = 0) -> None:
+def write_archive(path: str | os.PathLike, entries: list[Entry], mas_type: int = 0,
+                  signature: bytes | None = None) -> None:
     if mas_type == 0:
         sig = MAS_TYPE0
         table_off = 24
@@ -91,6 +104,10 @@ def write_archive(path: str | os.PathLike, entries: list[Entry], mas_type: int =
         table_off = 24
     else:
         raise ValueError(f"unsupported mas_type {mas_type}")
+    if signature is not None:
+        if len(signature) != 16:
+            raise ValueError("signature must be 16 bytes")
+        sig = signature
 
     packed = []
     for e in entries:
@@ -157,7 +174,8 @@ def cmd_create(args: argparse.Namespace) -> int:
     for p in args.files:
         pp = Path(p)
         entries.append(Entry(name=pp.name, offset=0, size=0, zsize=0, data=pp.read_bytes()))
-    write_archive(args.archive, entries, mas_type=args.type)
+    sig = bytes.fromhex(args.signature) if args.signature else None
+    write_archive(args.archive, entries, mas_type=args.type, signature=sig)
     return 0
 
 
@@ -179,7 +197,7 @@ def cmd_add(args: argparse.Namespace) -> int:
     mtype, entries = read_archive(args.archive)
     for p in args.files:
         _upsert(entries, p, replace=False)
-    write_archive(args.archive, entries, mas_type=mtype)
+    write_archive(args.archive, entries, mas_type=mtype, signature=read_signature(args.archive))
     return 0
 
 
@@ -187,7 +205,7 @@ def cmd_update(args: argparse.Namespace) -> int:
     mtype, entries = read_archive(args.archive)
     for p in args.files:
         _upsert(entries, p, replace=True)
-    write_archive(args.archive, entries, mas_type=mtype)
+    write_archive(args.archive, entries, mas_type=mtype, signature=read_signature(args.archive))
     return 0
 
 
@@ -198,7 +216,7 @@ def cmd_delete(args: argparse.Namespace) -> int:
     if len(kept) == len(entries):
         print("no matching entries removed", file=sys.stderr)
         return 1
-    write_archive(args.archive, kept, mas_type=mtype)
+    write_archive(args.archive, kept, mas_type=mtype, signature=read_signature(args.archive))
     return 0
 
 
@@ -222,6 +240,7 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("archive")
     p.add_argument("files", nargs="+")
     p.add_argument("-t", "--type", type=int, default=0, choices=[0, 1, 3])
+    p.add_argument("--signature", help="override the 16-byte archive signature (hex), e.g. Petrobras type-1X")
     p.set_defaults(func=cmd_create)
 
     p = sub.add_parser("add", help="add files to archive")

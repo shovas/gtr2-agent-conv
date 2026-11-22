@@ -10,7 +10,7 @@ First-pass inventory for GTL (`../GTLSteam/GameData`) and GTR2 (`../GTR2Steam/Ga
 
 | Ext | GTL+GTR2 count | Kind | Magic/header (observed) | Understanding | R/W path |
 |---|---:|---|---|---|---|
-| `.gtl`, `.gtr`, `.bmw` | 1113 + 17 (BMW M3 Challenge) | Game archive (MAS) | `GMOTORMAS10\0\0\0\0\0` | high | `mas_tool.py` create/list/extract/add/update/delete; round-trip verified on real GTR2/GTL and BMW M3 Challenge `.bmw` archives |
+| `.gtl`, `.gtr`, `.bmw`, `.mas` | 1113 + 17 (BMW M3 Challenge) + 135 (rF1/Copa) | Game archive (MAS) | `GMOTORMAS10\0\0\0\0\0`, type1 `c8cfd2d8...`, type1X `cec3d5c7c0d9e6c9...` | high | `mas_tool.py` create/list/extract/add/update/delete; round-trip verified on GTR2/GTL, BMW `.bmw`, rF1 type-1 and Copa type-1X archives; type-1X signature preserved on rewrite |
 | `.gmt` | 56 loose (+26931 in archives) | 3D mesh/model | normal: `c8cfd2d8ced8e6c3d6ded8bebba7bf90` at 0x08; obj_list_offset at 0x00 | medium | `gmt_tool.py` info/scan/diff; `gmt_format.py` structural parse/write (header, mesh table, vertex/index blobs, material tail best-effort) with lossless round-trip tests. See `docs/gmt-format.md` |
 | `.aiw` | 59 | Text waypoint file (SimBin header has null bytes) | `//[[gMa1.000f...]]` | high (text) | Text read/write; `rfactortools/aiw.py` parses it. Observed: all 59 start with `//[[gMa1.000`; contain `[Features]`. Lossless byte round-trip trivial. |
 | `.dsi` | 142 | Gzip-compressed SimBin text | gzip `1f8b08`, payload `//[[gMb1.000f...]]` | high | `gzip_simbin_tool.py` info/extract/create (deterministic gzip). Content round-trip verified |
@@ -37,6 +37,12 @@ First-pass inventory for GTL (`../GTLSteam/GameData`) and GTR2 (`../GTR2Steam/Ga
 These are usually text but may contain null-padded SimBin headers: `.aiw`, `.svm`, `.ani`, `.ds`, `.dst`, `.gdb`, `.trk`, `.car`, `.hdc`, `.eng`, `.tyr`, `.aud`, `.dmg`, `.sp`, `.grb`, `.hed`, `.cam`, `.grd`, `.rcd`, `.set`, `.txt`, `.cdb`, `.ddb`, `.tec`, `.fxm`? No - `.fxm` is binary FXM. `.cas` is text-like.
 
 ## Game-specific binary formats: status
+
+### Copa Petrobras de Marcas cross-corpus observations (evidence only, `../CopaPetrobrasdeMarcas`)
+- 50 `.mas` archives use the MAS type-1X signature `cec3d5c7c0d9e6c9caddd8bebba6bf90` (documented as `MAS_TYPE1X` in `quickbms_scripts/mas.bms`: type-1 layout, first 6 bytes differ). All now read with `mas_tool.py`; signature preserved on rewrite (16,026 members total).
+- 13,679 members carry the Game Stock Car ISI signature `0x4b1dca9f960524e8` (enctype 1). `isi_crypt.decrypt_bytes(data, skip=4)` matches `rfactordec` byte-for-byte on `commonmaps.MAS::STARTBOX.GMT`.
+- Decrypted `STARTBOX.GMT` uses the old rF1-style magic `...bba8bf90` at 0x1D4, confirming this Reiza-era game keeps the old GMT layout.
+- Verification: `tests/test_mas_tool.py` (type-1X); encryption cross-check in this document.
 
 ### rFactor 1 vanilla cross-corpus observations (evidence only, `../RF1Vanilla`)
 - 85 `.mas` archives use the MAS type-1 signature (`c8cfd2d8ced8e6c9caddd8bebba6bf90`); all open with `mas_tool.py` (13,075 members).
