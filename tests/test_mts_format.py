@@ -40,6 +40,29 @@ class MtsFormatTest(unittest.TestCase):
         self.assertIn("4.20", counts)
 
 
+    def test_48_byte_records_are_not_simple_position_triples(self):
+        """Negative result: 48-byte grid does not decode as 3 float triples."""
+        groups = {}
+        for a in glob.glob(str(ROOT.parent / "NascarSimRacing" / "**" / "*"), recursive=True):
+            p = Path(a)
+            if not p.is_file() or p.suffix.lower() != ".mas":
+                continue
+            for e in mas_tool.read_archive(p)[1]:
+                d = e.data or b""
+                if d[:13] == b"CUBE_MTS_4.20":
+                    groups.setdefault((e.name.lower(), len(d)), []).append(d)
+            if any(len(v) >= 2 for v in groups.values()):
+                break
+        sample = next((v[0] for v in groups.values() if len(v) >= 2), None)
+        if sample is None:
+            self.skipTest("no same-size CUBE MTS 4.20 sample present")
+        import struct
+        outliers = 0
+        for off in range(0, len(sample) - 48, 48):
+            vals = struct.unpack_from("<12f", sample, off)
+            outliers += sum(1 for v in vals if abs(v) > 1e5)
+        self.assertGreater(outliers, 0)  # incompatible with plain coordinates
+
     def test_object_count_vs_submesh_names(self):
         hits = total = 0
         for a in glob.glob(str(ROOT.parent / "NascarSimRacing" / "**" / "*"), recursive=True):

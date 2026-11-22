@@ -2,6 +2,10 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-22 09:15:00 -0500 - Task 4: MTS vertex-triple hypothesis rejected
+- Field-level diff across 40 same-size CUBE MTS 4.20 pairs showed all 12 float slots vary, with values >1e5 in sampled records — 48-byte blocks are not simple position triples.
+- Add negative-result test and document in `docs/binary-formats.md`.
+
 ## 2026-11-22 08:45:00 -0500 - Task 4: CUBE MTS submesh count correlation
 - Extract uppercase submesh names from CUBE MTS 4.20 payloads; `object_count - len(names) == 1` in 644/800 sampled files (observed correlation, not proven).
 - Add `mts_format.submesh_names()` and test; document in `docs/binary-formats.md`.
