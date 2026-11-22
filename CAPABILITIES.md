@@ -19,7 +19,7 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 - **GTTF/IRSR**: `simbin_events_tool.py` reads magic/version/TRK/AIW filenames and embedded strings across 29 GTT + 9 VCR files; lap/frame record semantics undecoded.
 
 ## Coverage gaps (documented, not yet addressed)
-- **Missing game corpus**: GTR – FIA GT Racing Game (2004), the direct GTL/GTR2 predecessor, is not installed locally.
+- **GTR 2004 corpus available** (`../GTR1Vanilla`) but its GMT magic (`...bba6bf90` at 0x04) is not parsed by `gmt_format.py` — a third layout distinct from GTL/GTR2 and rF1. See `docs/binary-formats.md`.
 - **Untested ISI signatures**: `isi_crypt.GAMES` supports 8 signatures but real corpora exist only for rFactor and Game Stock Car; ARCA Sim Racing, Simulador Turismo Carretera, Top Race 2009, Superleague Formula, STC 2012 and Formula Truck have no local corpus.
 - See `docs/reuse-rfactortools.md` for reference material that may reduce these gaps.
 

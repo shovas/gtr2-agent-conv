@@ -2,6 +2,11 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-22 05:15:00 -0500 - GTR 2004 corpus added and reviewed
+- Add `../GTR1Vanilla/` (previously missing target-format corpus): 430 MAS type-0 archives.
+- Identify third GMT magic `c8cfd2d8ced8e6c3d6ded8bdbba6bf90` at 0x04 (33,477 files) plus 3 `OR_GMT_1.00` oddities; not parsed by `gmt_format.py`.
+- Add `tests/test_gtr1_vanilla.py`; document in `AGENTS.md`, `docs/binary-formats.md`, `CAPABILITIES.md`.
+
 ## 2026-11-22 05:00:00 -0500 - Status check
 - Update `docs/task-plan.md` verification count to 173 tests.
 

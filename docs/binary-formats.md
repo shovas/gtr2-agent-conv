@@ -70,6 +70,11 @@ These are usually text but may contain null-padded SimBin headers: `.aiw`, `.svm
 - 2 MAS type-0 `.gtr` archives.
 - Verification: `tests/test_race07_complete.py`.
 
+### GTR 2004 (GTR1) — previously missing target corpus (evidence only)
+- 430 MAS type-0 `.gtr` archives, 1.2G; sampled 60 archives / 34,385 members (mostly `.gmt`/`.dds`). No ISI encryption signatures.
+- 33,477 GMTs have a **third magic** `c8cfd2d8ced8e6c3d6ded8bdbba6bf90` at **0x04** (vs 0x08 in GTL/GTR2 with `...bba7bf90`, and 0x1D4 in rF1 with `...bba8bf90`). 3 files use `OR_GMT_1.00`. `gmt_format.py` does not parse this layout.
+- Verification: `tests/test_gtr1_vanilla.py`.
+
 ### Game Stock Car / NASCAR SimRacing / F1CS2000 (evidence only)
 - `F1CS2000/` is a byte-identical copy of `F12000/` (all 570 files MD5-match) — no new formats.
 - `GameStockCar/`: 48 MAS type-1 archives, 19,995 members; 19,987 GSC-signature encrypted; sampled GMTs all use the old 0x1D4/0xA8 layout (same as Copa/SCE/AMS).
