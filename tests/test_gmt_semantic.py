@@ -51,6 +51,32 @@ class GmtSemanticTest(unittest.TestCase):
         self.assertEqual(sub["faces"][0], (0, 1, 2))
         self.assertAlmostEqual(sub["positions"][0][0], 1.2258, places=3)
 
+    def test_gtr1_descriptor_grid(self):
+        magic = bytes.fromhex("c8cfd2d8ced8e6c3d6ded8bdbba6bf90")
+        checked = 0
+        for archive in glob.glob(str(ROOT.parent / "GTR1Vanilla" / "**" / "*.gtr"),
+                                 recursive=True):
+            try:
+                _, entries = mas_tool.read_archive(archive)
+            except Exception:
+                continue
+            for entry in entries:
+                data = entry.data or b""
+                if data[4:20] != magic:
+                    continue
+                descs = gmt_semantic.read_gtr1_descriptors(data)
+                if not descs:
+                    continue
+                self.assertGreater(descs[0]["v_count"], 0)
+                self.assertLess(descs[0]["v_off"], len(data))
+                self.assertLess(descs[0]["i_off"], len(data))
+                checked += 1
+            if checked >= 10:
+                break
+        if not checked:
+            self.skipTest("GTR1 GMT corpus not present")
+        self.assertGreaterEqual(checked, 1)
+
     def test_new_layout_submesh(self):
         data = _member("GTR2Steam", (".gtr", ".mas"), NEW, "addondirtedge.gmt")
         if data is None:

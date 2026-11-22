@@ -121,6 +121,26 @@ def read_gmt(data: bytes) -> dict:
             "face_count": sum(len(s["faces"]) for s in subs)}
 
 
+def read_gtr1_descriptors(data: bytes) -> list[dict]:
+    """Read the GTR1 (2004) 64-byte submesh descriptor grid at 0x194.
+
+    Each record is `(vertex_count, vertex_offset, index_count, index_offset)`;
+    records continue until an implausible entry is reached. Verified on real
+    GTR1 archives: vertex blocks are 32-byte records and index blocks are u16
+    arrays after a 4-byte lead. Full vertex-field semantics remain undecoded.
+    """
+    out = []
+    for off in range(0x194, len(data) - 64, 64):
+        vc, vo, ic, io = struct.unpack_from("<4I", data, off)
+        if not (0 < vc < 100000 and 0 < ic < 600000):
+            break
+        if vo == 0 or io == 0 or vo + vc * 32 > len(data) or io + ic * 2 > len(data):
+            break
+        out.append({"offset": off, "v_count": vc, "v_off": vo,
+                    "i_count": ic, "i_off": io})
+    return out
+
+
 def main(argv=None) -> int:
     import argparse
     ap = argparse.ArgumentParser(description=__doc__)

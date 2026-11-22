@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 05:30:00 -0500 - Task 4: GTR1 descriptor grid decoded
+- `gmt_semantic.read_gtr1_descriptors()` decodes GTR1's 64-byte `(vcount,voff,icount,ioff)` grid at 0x194 (valid in 184/300 sampled files); add test and document.
+
 ## 2026-11-23 05:00:00 -0500 - Task 4: semantic GMT bridge
 - `gmt_semantic.py` decodes both rF1 and GTR2 submeshes (positions, UVs, faces) via per-submesh headers; `gmt_layout.old_to_new_semantic()` rebuilds new-layout geometry preserving the material tail. Validated on 60 real rF1 GMTs (parse, decoded counts, lossless round-trip). Format knowledge from a GPLv3 reference importer, no code copied. Add tests and document.
 
