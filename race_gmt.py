@@ -37,6 +37,33 @@ def parse_header(data: bytes) -> RaceGmtHeader:
     return RaceGmtHeader(name=name, flags=flags, floats=floats, size=len(data))
 
 
+def diff_strides(a: bytes, b: bytes, gap: int = 4) -> dict:
+    """Infer record strides from two same-size files of the same asset.
+
+    Runs of differing bytes are grouped; distances between run starts reveal
+    the record stride. Observed on PEOPLE_STAND_01/02: 36-byte (position) and
+    64-byte (4x4 transform) strides.
+    """
+    from collections import Counter
+
+    if len(a) != len(b):
+        raise ValueError("files must be the same size")
+    diff = [i for i in range(len(a)) if a[i] != b[i]]
+    if not diff:
+        return {}
+    runs = []
+    start = prev = diff[0]
+    for i in diff[1:]:
+        if i - prev > gap:
+            runs.append((start, prev))
+            start = i
+        prev = i
+    runs.append((start, prev))
+    starts = [s for s, _ in runs]
+    distances = Counter(starts[i + 1] - starts[i] for i in range(len(starts) - 1))
+    return {"runs": len(runs), "distances": dict(distances), "first_starts": starts[:8]}
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("files", nargs="+")

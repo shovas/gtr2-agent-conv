@@ -11,6 +11,7 @@ sys.path.insert(0, str(ROOT))
 
 import mas_tool  # noqa: E402
 import mts_format as mf  # noqa: E402
+import race_gmt  # noqa: E402
 
 
 class MtsFormatTest(unittest.TestCase):
@@ -37,6 +38,26 @@ class MtsFormatTest(unittest.TestCase):
             self.skipTest("CUBE MTS corpus not present")
         self.assertIn("4.10", counts)
         self.assertIn("4.20", counts)
+
+
+    def test_48_byte_vertex_stride_from_same_size_pair(self):
+        groups = {}
+        for a in glob.glob(str(ROOT.parent / "NascarSimRacing" / "**" / "*"), recursive=True):
+            p = Path(a)
+            if not p.is_file() or p.suffix.lower() != ".mas":
+                continue
+            for e in mas_tool.read_archive(p)[1]:
+                d = e.data or b""
+                if d[:14] != mf.MAGIC_420[:14]:
+                    continue
+                groups.setdefault((e.name.lower(), len(d)), []).append(d)
+            if any(len(v) >= 2 for v in groups.values()):
+                break
+        pairs = [v for v in groups.values() if len(v) >= 2]
+        if not pairs:
+            self.skipTest("no same-size CUBE MTS 4.20 pair present")
+        best = max(race_gmt.diff_strides(v[0], v[1])["distances"].get(48, 0) for v in pairs)
+        self.assertGreater(best, 10)
 
 
 if __name__ == "__main__":

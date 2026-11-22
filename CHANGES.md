@@ -2,6 +2,11 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-22 07:15:00 -0500 - Task 4: record strides found
+- Same-size file diffs reveal `RaceGMT\0` record strides of 36 bytes (positions) and 64 bytes (transforms); add `race_gmt.diff_strides()` + test.
+- CUBE MTS 4.20 same-size diffs show a dominant 48-byte record stride; add test.
+- Document in `docs/binary-formats.md`, `CAPABILITIES.md`.
+
 ## 2026-11-22 06:45:00 -0500 - Task 4: partial mesh variant decode
 - Verify CUBE MTS 4.10/4.20 share `magic[16] + u32 count + name[8]` header across 4,200+ meshes; add `mts_format.py`.
 - Verify `RaceGMT\0` header (name length/name/flags/bounding box) across 643 files; add `race_gmt.py`.

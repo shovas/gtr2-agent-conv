@@ -72,7 +72,8 @@ These are usually text but may contain null-padded SimBin headers: `.aiw`, `.svm
 
 ### Partial decoding of new mesh variants (task 4)
 - `CUBE_MTS_4.10` and `CUBE_MTS_4.20` share a verified header: `magic[16], u32 object_count, char name[8]` (`mts_format.py`, 4,200+ sampled meshes in `../NascarSimRacing`). Payload after 0x1C remains undecoded; same-name files across versions have unrelated sizes, so it is not a magic-only difference.
-- `RaceGMT\0` (643 DLC files in `../Race07Complete`) has a verified header: `magic[8], u32 name_len, name, u32 flags=0x04000020, 12+ bounding-box floats` (`race_gmt.py`). Cross-comparing same-name files with new-layout GMTs showed different asset versions; no vertex/index table located. Geometry tables remain an honest gap.
+- `RaceGMT\0` (643 DLC files in `../Race07Complete`) has a verified header: `magic[8], u32 name_len, name, u32 flags=0x04000020, 12+ bounding-box/vertex floats` (`race_gmt.py`). Same-size file diffs (e.g. `PEOPLE_STAND_01/02`) reveal repeating **36-byte** records (position triples) and **64-byte** records (likely 4x4 transforms) — `race_gmt.diff_strides()`. Payload starts at `16 + name_len` (unaligned).
+- CUBE MTS 4.20 same-size file diffs reveal a dominant **48-byte** record stride (same size as the new-layout GMT 32+16 vertex layout) — `tests/test_mts_format.py`. Index/material structure still undecoded.
 
 ### GTR 2004 (GTR1) — previously missing target corpus (evidence only)
 - 430 MAS type-0 `.gtr` archives, 1.2G; sampled 60 archives / 34,385 members (mostly `.gmt`/`.dds`). No ISI encryption signatures.
