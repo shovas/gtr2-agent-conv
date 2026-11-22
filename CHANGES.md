@@ -2,6 +2,12 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-22 03:00:00 -0500 - Race07Complete corpus reviewed
+- Add `../Race07Complete/` (Race 07 + WTCC/STCC/Race On/GTR Evolution DLC, 12G).
+- Identify three GMT variants among 66,186 loose files: JCA-encrypted, standard new-layout, and new `RaceGMT\0` header (643 files, header only decoded).
+- Verify JCA decryption to standard layout and JCA-encrypted `.gdb/.trk/.scn/.cam`.
+- Add `tests/test_race07_complete.py`; document in `AGENTS.md`, `docs/binary-formats.md`.
+
 ## 2026-11-22 02:30:00 -0500 - Three more corpora reviewed
 - `F1CS2000/`: byte-identical copy of F12000 (570 files), no new formats.
 - `GameStockCar/`: 48 MAS type-1 archives (19,995 members), GSC encryption, old-layout GMTs.

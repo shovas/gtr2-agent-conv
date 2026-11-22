@@ -63,6 +63,14 @@ These are usually text but may contain null-padded SimBin headers: `.aiw`, `.svm
 - 476 `.hdr` audio headers paired with 476 `.dat` MPEG-audio files (`fff3`/`fffb` frame sync); 70 `.veh` (`\r\nHDVehi`) and 70 `.hdv` (`\r\n//`) text files.
 - Verification: `tests/test_nt2003.py`.
 
+### Race07Complete (Race 07 + DLC: WTCC, STCC, Race On, GTR Evolution) — evidence only
+- 12G, 122,292 files; `GameData` contains DLC markers `GTR_Evo.gdb`, `Stcc.gdb`, `SIM_OFFICIAL.gdb`, and many STCC/WTCC/Camaro/Volvo directories.
+- 66,186 loose `.gmt` files in **three** variants (sampled 1,000: ~693 JCA-encrypted, ~294 standard new-layout magic at 0x08, ~13 `RaceGMT\0`).
+- New format `RaceGMT\0`: 8-byte magic, u32 ASCII name length, name bytes, then float payload. 643 files observed (trees, people, track props from DLC tracks like MidOhio/Zolder09/Marrakech). Internal mesh structure not decoded — only header verified.
+- JCA-encrypted GMTs decrypt with `jca_crypt.py` default key to standard new-layout GMTs (verified). 80 `.gdb`, 66 `.trk`, 57 `.scn`, 141 `.cam` are also JCA-encrypted.
+- 2 MAS type-0 `.gtr` archives.
+- Verification: `tests/test_race07_complete.py`.
+
 ### Game Stock Car / NASCAR SimRacing / F1CS2000 (evidence only)
 - `F1CS2000/` is a byte-identical copy of `F12000/` (all 570 files MD5-match) — no new formats.
 - `GameStockCar/`: 48 MAS type-1 archives, 19,995 members; 19,987 GSC-signature encrypted; sampled GMTs all use the old 0x1D4/0xA8 layout (same as Copa/SCE/AMS).
