@@ -44,6 +44,34 @@ class SimbinEventsToolTest(unittest.TestCase):
                 self.assertTrue(e.trk.lower().endswith(".trk"))
                 self.assertTrue(e.aiw.lower().endswith(".aiw"))
 
+    def test_gttf_frame_grid(self):
+        import gzip
+        import re
+        files = _files(".gtt")
+        if not files:
+            self.skipTest("GTR2 GTT files not present")
+        checked = 0
+        for p in files[:6]:
+            data = gzip.decompress(p.read_bytes())
+            grid = setool.find_frame_grid(data)
+            if not grid:
+                continue
+            self.assertEqual(grid["stride"], 252)
+            frames = setool.read_frames(data, grid)
+            self.assertGreater(len(frames), 100)
+            self.assertTrue(all(0 < frames[i + 1]["time"] - frames[i]["time"] < 1.0
+                                for i in range(len(frames) - 1)))
+            self.assertTrue(any(abs(x) > 1 for x in frames[0]["position"]))
+            m = re.search(r"(\d)_(\d+)_(\d+)_", p.name)
+            if m:
+                lap = int(m.group(1)) * 60 + int(m.group(2)) + int(m.group(3)) / 1000
+                span = frames[-1]["time"] - frames[0]["time"]
+                self.assertLess(abs(span - lap), 2.0)
+            checked += 1
+        if not checked:
+            self.skipTest("no GTTF frame grids detected")
+        self.assertGreaterEqual(checked, 1)
+
     def test_gtt_metadata_framing(self):
         files = _files(".gtt")
         if not files:

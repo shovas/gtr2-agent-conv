@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import argparse
 import gzip
+import math
 import struct
 import sys
 from dataclasses import dataclass, field
@@ -189,10 +190,58 @@ def parse_file(path: str | Path) -> EventFile:
     return parse_payload(data)
 
 
+FRAME_STRIDE = 252
+FRAME_TIME_OFF = 20
+
+
+def find_frame_grid(data: bytes) -> dict | None:
+    """Locate the GTTF frame-record grid.
+
+    Records are 252 bytes apart; the f32 at +20 increases monotonically by
+    ~0.05..1.0 per frame and the first three floats are car positions.  The
+    grid start varies with metadata length, so each phase (mod 252) is tried.
+    """
+    best_run, best_start = 0, None
+    for phase in range(0, FRAME_STRIDE, 4):
+        run, start = 0, None
+        for off in range(phase, len(data) - FRAME_STRIDE - 24, FRAME_STRIDE):
+            if off + FRAME_STRIDE + 24 > len(data):
+                break
+            t0 = struct.unpack_from("<f", data, off + FRAME_TIME_OFF)[0]
+            t1 = struct.unpack_from("<f", data, off + FRAME_STRIDE + FRAME_TIME_OFF)[0]
+            if math.isfinite(t0) and math.isfinite(t1) and 0.05 < t1 - t0 < 1.0:
+                if run == 0:
+                    start = off
+                run += 1
+            else:
+                if run > best_run:
+                    best_run, best_start = run, start
+                run = 0
+        if run > best_run:
+            best_run, best_start = run, start
+    if best_run < 8 or best_start is None:
+        return None
+    return {"offset": best_start, "stride": FRAME_STRIDE, "count": best_run + 1}
+
+
+def read_frames(data: bytes, grid: dict) -> list[dict]:
+    """Decode frame positions and timestamps from a located grid."""
+    out = []
+    for i in range(grid["count"]):
+        off = grid["offset"] + i * grid["stride"]
+        if off + 24 > len(data):
+            break
+        out.append({"offset": off,
+                    "position": struct.unpack_from("<3f", data, off),
+                    "time": struct.unpack_from("<f", data, off + FRAME_TIME_OFF)[0]})
+    return out
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("file")
     ap.add_argument("--strings", type=int, default=12)
+    ap.add_argument("--frames", action="store_true", help="report the GTTF frame grid")
     args = ap.parse_args(argv)
     e = parse_file(args.file)
     print(f"kind={e.kind} version={e.version} trk={e.trk!r} aiw={e.aiw!r}")
@@ -202,6 +251,17 @@ def main(argv=None) -> int:
     print(f"printable_strings={len(e.strings)}")
     for off, s in e.strings[:args.strings]:
         print(f"  {off}: {s[:80]}")
+    if args.frames:
+        raw = Path(args.file).read_bytes()
+        if raw[:2] == b"\x1f\x8b":
+            raw = gzip.decompress(raw)
+        grid = find_frame_grid(raw)
+        if grid:
+            frames = read_frames(raw, grid)
+            print(f"frame_grid={grid} first_time={frames[0]['time']:.3f} "
+                  f"last_time={frames[-1]['time']:.3f}")
+        else:
+            print("frame_grid=none")
     return 0
 
 

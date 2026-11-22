@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 06:30:00 -0500 - Task 4: GTTF frame grid decoded
+- `simbin_events_tool.find_frame_grid()` / `read_frames()` decode 252-byte GTTF frame records (position + monotonic time); validated on 6 files against lap times. Add test, CLI flag and docs.
+
 ## 2026-11-23 06:00:00 -0500 - Task 4: Bink decode via ffmpeg
 - `media_tool.bink_decode()` / `media_tool.py bink-decode` decode BIK to PNG via ffmpeg's binkvideo decoder (verified on real GTR2 files); add test and document. Encoding remains proprietary.
 
