@@ -194,6 +194,20 @@ class MediaToolTest(unittest.TestCase):
                 i+=ln
             self.assertEqual(found, (0xC0, 8, 3))
 
+    def test_mp3_headers_observed(self):
+        # Observed: most GTR2/GTL MP3s start with ID3 or MPEG frame sync; one known null-padded file exists.
+        import glob, os
+        paths = glob.glob(str(ROOT.parent / 'GTR2Steam/**/*.mp3'), recursive=True)
+        paths += glob.glob(str(ROOT.parent / 'GTLSteam/**/*.mp3'), recursive=True)
+        if not paths:
+            self.skipTest("no MP3 files")
+        ok = 0
+        for pth in paths:
+            with open(pth, 'rb') as f: b = f.read(4)
+            if b.startswith(b'ID3') or (len(b)>=2 and b[0]==0xff and (b[1]&0xe0)==0xe0):
+                ok += 1
+        self.assertGreaterEqual(ok, len(paths)-1)
+
     def test_identify_jpg_if_present(self):
         p = ROOT.parent / "GTR2Steam/GameData/Locations/Anderstorp/3And_LOD.jpg"
         if not p.exists():

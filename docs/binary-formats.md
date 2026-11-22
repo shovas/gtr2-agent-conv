@@ -29,7 +29,7 @@ First-pass inventory for GTL (`../GTLSteam/GameData`) and GTR2 (`../GTR2Steam/Ga
 | `.tga` | 323 (fs) / 1157 (MAS) | Targa image | TGA header (e.g. type 2) | high (standard) | Semantic R/W for type 2/3/10 in `media_tool.py`; lossless copy for others. Observed in GTR2/GTL: types 2 and 10. |
 | `.bmp` | 207 (fs) / 544 (MAS) | **Mixed on fs**: 147 BMP (`BM`), 60 TGA-header (`00 00 02 00...`, type 2) with `.bmp` extension | `BM` or TGA header | high (standard containers) | Detect by header; semantic R/W for BI_RGB 24/32 BMP in `media_tool.py`; lossless copy for others. Observed BM BMPs: BI_RGB bpp 8/24/32. |
 | `.jpg` | 93 | JPEG image | `FFD8FF...` | high (standard) | Identify/metadata parse/lossless copy in `media_tool.py`. Observed: all 93 GTR2/GTL JPGs are baseline SOF0, 8-bit, 3 components. Semantic decode/encode not implemented in-repo. |
-| `.mp3` | 8 | MP3 audio | `ID3` or MPEG frame | high (standard) | Standard MP3; lossless copy possible |
+| `.mp3` | 24 | MP3 audio | `ID3` or MPEG frame | high (standard) | Identify/metadata parse/lossless copy in `media_tool.py`. Observed: 23/24 have ID3/sync, 1 null-padded (`pitSoundsprivate.mp3`). Semantic decode/encode not implemented in-repo. |
 | `.fxa`? (covered) | - | - | - | - | - |
 
 ## Text formats observed as text/binary-safe
