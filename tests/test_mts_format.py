@@ -238,6 +238,46 @@ class MtsFormatTest(unittest.TestCase):
         self.assertGreater(parsed, 0)
         self.assertLess(parsed, total)  # subset of files use this record kind
 
+    def test_geometry_blocks_from_table_offsets(self):
+        sample = None
+        for a in glob.glob(str(ROOT.parent / "NascarSimRacing" / "**" / "*"), recursive=True):
+            p = Path(a)
+            if p.is_file() and p.suffix.lower() == ".mas":
+                for e in mas_tool.read_archive(p)[1]:
+                    if e.name == "LIGHTBOX02.MTS" and (e.data or b"")[:13] == b"CUBE_MTS_4.20":
+                        sample = e.data
+                        break
+            if sample:
+                break
+        if sample is None:
+            self.skipTest("LIGHTBOX02.MTS sample not present")
+        geo = mf.read_geometry(sample)
+        self.assertEqual(len(geo["vertices"]), 118)
+        self.assertEqual(len(geo["normals"]), 97)
+        self.assertEqual(len(geo["indices"]), 0)
+
+    def test_vertex_normal_strides_from_offsets(self):
+        checked = 0
+        for a in glob.glob(str(ROOT.parent / "NascarSimRacing" / "**" / "*"), recursive=True):
+            p = Path(a)
+            if not p.is_file() or p.suffix.lower() != ".mas":
+                continue
+            for e in mas_tool.read_archive(p)[1]:
+                d = e.data or b""
+                if d[:13] != b"CUBE_MTS_4.20":
+                    continue
+                table = mf.parse_mesh_table(d)
+                if not table:
+                    continue
+                h = table["header"]
+                if h[2] and h[4] and h[3] < h[5]:
+                    self.assertEqual((h[5] - h[3]) / h[2], 36)
+                    self.assertEqual((h[7] - h[5]) / h[4], 16)
+                    checked += 1
+            if checked >= 50:
+                break
+        self.assertGreater(checked, 0)
+
     def test_alternate_submesh_record(self):
         sample = None
         for a in glob.glob(str(ROOT.parent / "NascarSimRacing" / "**" / "*"), recursive=True):

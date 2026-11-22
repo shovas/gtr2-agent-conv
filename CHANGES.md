@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-22 18:45:00 -0500 - Task 4: CUBE MTS geometry blocks decoded
+- `mts_format.read_geometry()` follows validated table offsets; vertex stride 36 bytes and normal stride 16 bytes confirmed in 200/200 sampled files (LIGHTBOX02: 118 vertices / 97 normals). Add tests and document.
+
 ## 2026-11-22 18:15:00 -0500 - Task 4: material numbers stable across files
 - Verify decoded material numbers are identical for all 79 records of TIREMANFRONT.MTS vs TIREMANBACK.MTS; add test and document as likely asset-level IDs.
 
