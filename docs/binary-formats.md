@@ -1,6 +1,6 @@
 # Binary Formats Inventory (GTL/GTR2)
 
-First-pass inventory for GTL (`../GTLSteam/GameData`) and GTR2 (`../GTR2Steam/GameData`), with cross-game observations from BMW M3 Challenge (`../BMWM3Challenge`), rFactor 1 vanilla (`../RF1Vanilla`), Copa Petrobras de Marcas (`../CopaPetrobrasdeMarcas`), Sports Car GT (`../SportsCarGTUsa`), Automobilista (`../Automobilista`) and F1 2002 (`../F12002`). Goal: identify, understand, and provide read/write path for every binary file format possible.
+First-pass inventory for GTL (`../GTLSteam/GameData`) and GTR2 (`../GTR2Steam/GameData`), with cross-game observations from BMW M3 Challenge (`../BMWM3Challenge`), rFactor 1 vanilla (`../RF1Vanilla`), Copa Petrobras de Marcas (`../CopaPetrobrasdeMarcas`), Sports Car GT (`../SportsCarGTUsa`), Automobilista (`../Automobilista`), F1 2002 (`../F12002`) and F1 Challenge 99-02 (`../F1C`). Goal: identify, understand, and provide read/write path for every binary file format possible.
 
 **Legend**
 - **R/W**: lossless read/write capability in this repo/tooling, or standard library path.
@@ -37,6 +37,13 @@ First-pass inventory for GTL (`../GTLSteam/GameData`) and GTR2 (`../GTR2Steam/Ga
 These are usually text but may contain null-padded SimBin headers: `.aiw`, `.svm`, `.ani`, `.ds`, `.dst`, `.gdb`, `.trk`, `.car`, `.hdc`, `.eng`, `.tyr`, `.aud`, `.dmg`, `.sp`, `.grb`, `.hed`, `.cam`, `.grd`, `.rcd`, `.set`, `.txt`, `.cdb`, `.ddb`, `.tec`, `.fxm`? No - `.fxm` is binary FXM. `.cas` is text-like.
 
 ## Game-specific binary formats: status
+
+### F1 Challenge 99-02 (ISI, 2003) cross-corpus observations (evidence only, `../F1C`)
+- 197 `.mas` archives use MAS type 3 (`CUBEMAS4.10`); 21,977 members total. `mas_tool.py` reads/writes them.
+- 14,834 `.mts` members: 13,769 with standard `CUBE_MTS_4.10\0\0\0` magic, 1,065 with an object-level header variant (unconfirmed semantics). 128 `.anm` animations start with an 8-character name and are not parsed.
+- No file carries a known ISI 16-byte-header signature; no encrypted MAS members.
+- F1C is the direct rFactor predecessor; its mesh format is still CUBE MTS (GMT appears in rFactor 1).
+- Verification: `tests/test_f1c.py`.
 
 ### F1 2002 (ISI, 2002) cross-corpus observations (evidence only, `../F12002`)
 - 63 `.mas` archives use the MAS type-3 signature `CUBEMAS4.10\0\0\0\0\0` (19,235 members). `mas_tool.py` reads and writes all 63 with member-level round-trip verified. This review fixed a latent struct-format bug in type-3 writing.

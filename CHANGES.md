@@ -2,6 +2,10 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-21 22:15:00 -0500 - F1 Challenge 99-02 corpus added and reviewed
+- Add `../F1C/` as ancestral ISIMotor reference (direct rFactor predecessor).
+- Add `tests/test_f1c.py`: 197 type-3 archives (21,977 members), 13,769 standard CUBE MTS meshes + 1,065 variants, no ISI encryption; member round-trip verified.
+
 ## 2026-11-21 22:00:00 -0500 - F1 2002 corpus: MAS type-3 write fix
 - Add `../F12002/` as ancestral ISIMotor reference.
 - Fix latent `struct.pack` bug in `mas_tool.write_archive()` for type 3; all 63 archives now round-trip at member level.
