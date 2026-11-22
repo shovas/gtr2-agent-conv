@@ -16,7 +16,7 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 - **MAS type 6 (F1 2001)**: `CUBEMAS4.00`/`CUBEMAS4.01` signatures, 16-byte header + 256-byte records `(type, offset, size, zsize, crc, name[236])`; reads/writes all 80 archives in `../F12001` with signature preservation (`tests/test_f12001.py`).
 - **rF1→GTR2 prototype pipeline**: `rf1_to_gtr2.py` unpacks, decrypts ISI-signed members, applies the structural GMT layout bridge, repacks as type 0 and validates with `gmt_format.py`. Verified on a 253-GMT archive (`tests/test_rf1_pipeline.py`). Geometry semantics remain unvalidated.
 - **AIW/SCN text**: `simbin_text_tool.py` parses waypoints/features, SearchPath/MASFile/SkyBoxI (`tests/test_simbin_text_tool.py`). `aiw_for_simbin()` applies documented rFactor→SimBin rules (scale `wp_galpha` by 0.45, drop 12 rFactor-only tags, replace `wp_cheat` with `wp_event=(1.000,0,0)`) from the freeware AIW Repair Utility in `../gtr2-tools` (`tests/test_aiw_convert.py`).
-- **GTTF/IRSR**: `simbin_events_tool.py` reads magic/version/TRK/AIW filenames and embedded strings across 29 GTT + 9 VCR files; lap/frame record semantics undecoded.
+- **GTTF/IRSR**: `simbin_events_tool.py` reads magic/version/TRK/AIW filenames, embedded strings, and metadata framing (driver/co-driver/car: 31/31 GTTF, 4/4 GTL-IRSR) across 29 GTT + 9 VCR files; lap/frame record semantics undecoded.
 - **Mesh variant headers/tables**: `mts_format.py` parses the shared CUBE MTS 4.10/4.20 header (magic/count/name), the 196-byte submesh descriptor grid, and the real geometry table (8-u32 count/offset header + 64-byte-spaced submesh records resolving vertex/normal offsets) — verified on 129/300 sampled 4.20 files. `race_gmt.py` parses the `RaceGMT\0` header and its 36-byte triangle records. Remaining: material/stage semantics and 4.10 table coverage.
 
 ## Coverage gaps (documented, not yet addressed)
@@ -56,7 +56,7 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 - **Write**: Yes. Recompress with content round-trip.
 - **Verification**: `tests/test_simbin_tools.py` (DSI/HAT/GTT/VCR real-file tests when present).
 - **Tool**: `gzip_simbin_tool.py`.
-- **Gaps**: GTTF/VCR lap/frame record semantics not decoded; `simbin_events_tool.py` reads magic/version/TRK/AIW filenames and embedded strings.
+- **Gaps**: GTTF/VCR lap/frame record semantics not decoded; metadata framing (driver/co-driver/car) is decoded for GTTF and GTL-IRSR.
 
 ### FXM/FXA/LMA
 - **Read**: Header identification + lossless container read. Recognizes observed magics `FXM `, `FXA `, `LMA `. Reports LE/BE header field interpretations (BE fixed-header interpretation can overlap string data; semantics unconfirmed). Decoded skeleton-node table (`parse_node_records`) and per-node TRS keyframes (`decode_node_keys`, 2 keys of position/quaternion/scale + trailer) via `fxm_tool.py keys`; heuristic name extraction retained via `nodes`.
