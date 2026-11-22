@@ -613,6 +613,32 @@ class GmtFormatTest(unittest.TestCase):
                                 checked += 1
         self.assertGreater(checked, 0)
 
+    def test_extra_vertex_u32_observed(self):
+        # Observed in 11 meshes (2918 verts): extra 16-byte vertex raw_u32 == [0, 0xFFFFFFFF, 0, 0].
+        import importlib.util, glob, os
+        spec = importlib.util.spec_from_file_location('mas', ROOT.parent / 'rfactortools/rfactortools/mas.py')
+        mas = importlib.util.module_from_spec(spec); spec.loader.exec_module(mas)
+        archives = []
+        for pat in ['GTR2Steam/GameData/Scripts/*.gtr', 'GTR2Steam/GameData/Teams/**/*.gtr', 'GTR2Steam/GameData/Vehicles/**/*.gtr',
+                    'GTLSteam/GameData/Scripts/*.gtl', 'GTLSteam/GameData/Teams/**/*.gtl', 'GTLSteam/GameData/Vehicles/**/*.gtl']:
+            archives += sorted(glob.glob(str(ROOT.parent / pat), recursive=True))
+        if not archives:
+            archives = sorted(glob.glob(str(ROOT.parent / 'GTR2Steam/GameData/**/*.gtr'), recursive=True))[:30]
+        meshes=verts=0
+        for arc in archives:
+            for name, data in mas.mas_unpack_to_data(arc):
+                if not name.lower().endswith('.gmt'): continue
+                g = gmt_format.parse_gmt(name, data=data)
+                for mesh in g.meshes:
+                    if not mesh.extra_vertices: continue
+                    meshes += 1
+                    for v in mesh.extra_vertices:
+                        self.assertEqual(v.raw_u32, [0, 0xFFFFFFFF, 0, 0])
+                        verts += 1
+            if meshes >= 11:
+                break
+        self.assertGreater(meshes, 0)
+
     def test_mesh_index_bounds_observed(self):
         # Observed: mesh index values are within vertex_count in scanned samples; index_count not always multiple of 3.
         import importlib.util, glob, os, struct
