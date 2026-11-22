@@ -1,0 +1,43 @@
+# Task plan status
+
+Plan order: quickest wins first (Wave 0 → 3). Evidence for each item is in the
+named tests/docs/tools.
+
+## Wave 0 — complete
+| # | Task | Status | Evidence |
+|---:|---|---|---|
+| 1 | Mine `../rfactortools` | done | `docs/reuse-rfactortools.md` |
+| 2 | Mine tutorials | done | `docs/reuse-rfactortools.md` (RacerM rules, GTL2GTR2 readme) |
+| 3 | Validation fixtures | done | `tests/test_fixtures.py` (57 identical, new-layout rF1, 5 PHS + DETOMASO) |
+| 4 | Loose-extension survey | done | `docs/binary-formats.md`; JCA text-file tests in `tests/test_race07.py`, `tests/test_volvo.py` |
+| 5 | Doc gaps | done | `CAPABILITIES.md` (missing GTR 2004, 6 untested ISI signatures) |
+
+## Wave 1 — complete
+| # | Task | Status | Evidence |
+|---:|---|---|---|
+| 6 | AIW/SCN semantics | done | `simbin_text_tool.py`, `tests/test_simbin_text_tool.py` |
+| 7 | JCA cross-check vs third-party tool | done | `monodis` IL confirms magic/offsets/LE/XOR 0xEB/keys; `docs/reuse-rfactortools.md` |
+| 8 | FXM cross-corpus | done | `tests/test_fxm_crosscorpus.py` (567 files, 54 mismatches) |
+| 9 | 57-pair carry-over test | done | `tests/test_carryover.py` |
+| 10 | GMT layout bridge prototype | done (partial) | `gmt_layout.py`, `tests/test_gmt_layout.py`; semantics unvalidated |
+
+## Wave 2 — complete
+| # | Task | Status | Evidence |
+|---:|---|---|---|
+| 11 | rF1→GTR2 pipeline | done (prototype) | `rf1_to_gtr2.py`, `tests/test_rf1_pipeline.py` (253 GMTs) |
+| 12 | GTTF/VCR reader | done (partial) | `simbin_events_tool.py`, `tests/test_simbin_events_tool.py` |
+
+## Wave 3 — blocked by external input
+| # | Task | Blocker | Evidence of attempt |
+|---:|---|---|---|
+| 13 | In-game validation | Requires running GTR2 with converted content | Converter output validates structurally only |
+| 14 | Bink decode/encode | Proprietary SDK/licensed tools | `docs/binary-formats.md` (BIK, 137 files) |
+| 15 | PHS cipher | No spec; not ISI, not JCA (all keys tried), no standard compression | 5 files, entropy ~7.95, `docs/binary-formats.md` |
+| 16 | FXM/GTTF record semantics, CUBE MTS, `.tgq` | Authoritative spec or runtime-validated reference | Observations only in `docs/binary-formats.md` |
+| 17 | GTR (2004) corpus | Not installed locally | `CAPABILITIES.md` coverage gaps |
+
+## Final verification
+```
+python3 -m unittest discover -s tests -v   -> 157 tests OK (skipped=1)
+git status --short                          -> clean
+```
