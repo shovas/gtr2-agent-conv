@@ -543,6 +543,34 @@ class GmtFormatTest(unittest.TestCase):
                     total+=1
         self.assertGreater(total, 0)
 
+    def test_vertex_f0_is_first_vertex_marker(self):
+        import glob
+        import mas_tool
+        indices = []
+        for archive in glob.glob(str(ROOT.parent / "GTR2Steam" / "**" / "*.gtr"), recursive=True):
+            try:
+                _, entries = mas_tool.read_archive(archive)
+            except Exception:
+                continue
+            for entry in entries:
+                data = entry.data or b""
+                if data[8:24] != bytes.fromhex("c8cfd2d8ced8e6c3d6ded8bebba7bf90"):
+                    continue
+                try:
+                    parsed = gmt_format.parse_gmt("x.gmt", data)
+                except Exception:
+                    continue
+                for mesh in parsed.meshes:
+                    for i, vertex in enumerate(mesh.base_vertices):
+                        if vertex.f0:
+                            indices.append(i)
+            if len(indices) > 200:
+                break
+        if not indices:
+            self.skipTest("GTR2 archived GMTs not present")
+        # Only the first vertex of a mesh ever has a non-zero f0.
+        self.assertTrue(all(i == 0 for i in indices))
+
     def test_vertex_f7_is_argb_color(self):
         import glob
         import mas_tool

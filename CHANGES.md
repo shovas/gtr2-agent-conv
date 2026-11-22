@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 16:00:00 -0500 - GMT f0 resolved as first-vertex marker
+- Proved that all 302 non-zero f0 values across 108,878 sampled GMT vertices occur at vertex index 0 of a mesh — a per-mesh first-vertex marker, not a per-vertex attribute. Add test and document.
+
 ## 2026-11-23 15:30:00 -0500 - GTR1 extra bytes decoded as UV
 - Confirmed the GTR1 48-byte vertex record's extra 16 bytes are `[0, u, v, 0]` (zero padding + 2D float UV) across 2,215 vertices in 100 files. Added `uv` field and test.
 

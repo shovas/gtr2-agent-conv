@@ -51,9 +51,9 @@ conclusively establishing it requires actual game execution.
   **148/148**. So `key_count==3` definitively does **not** denote the number of
   keyframes; it is a fixed field (likely channel/version marker). Negative result
   codified in `tests/test_fxm_records.py`. **Unresolved meaning, wrong interpretation excluded**.
-- **GMT `f0`**: non-zero in ~1% of 53,082 vertices; values mix packed u16 pairs
-  (e.g. `0x1b0020` → (32,27)) and float constants (1.0, 2.0), with no consistent
-  mapping. **Unresolved**; no further work justified without a renderer.
+- **GMT `f0` — RESOLVED as marker**: non-zero in only 0.36% of 108,878 vertices,
+  and **all 302 non-zero cases occur at vertex index 0** of a mesh. It is a per-mesh
+  first-vertex marker/flag, not a per-vertex attribute. Added test.
 - **CUBE MTS rig tables — RESOLVED (geometry decode corrected)**: the 36-byte table records are indices/materials, not positions (embedded `NASCAR_FACE` name). Real float streams are located by the table+48 descriptors; `read_geometry()` now decodes those as 64-byte-strided records and restores the `vertices` field (1,561 points). `rig_table_triangles()` proves all 79/79 per-rig triples index descriptor 0 with edge median 0.657. **Partially resolved** (geometry decoded and validated; exact semantic role unknown).
 - **GTTF frame slots 7/9**: u32 bit patterns have constant low 16 bits (slot 7 =
   `0x2000`, slot 9 = `0x0000`) across files, suggesting quantized/fixed-point fields.
