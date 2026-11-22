@@ -529,6 +529,25 @@ class GmtFormatTest(unittest.TestCase):
                         else: nonzero += 1
         self.assertGreater(zero, nonzero * 10)
 
+    def test_header_flags_observed_mask(self):
+        # Observed in normal-magic GMTs: file flags at offset 4 use only bits in 0x06000020.
+        import importlib.util, glob, os, struct
+        spec = importlib.util.spec_from_file_location('mas', ROOT.parent / 'rfactortools/rfactortools/mas.py')
+        mas = importlib.util.module_from_spec(spec); spec.loader.exec_module(mas)
+        archives = sorted(glob.glob(str(ROOT.parent / 'GTR2Steam/GameData/**/*.gtr'), recursive=True))[:8]
+        archives += sorted(glob.glob(str(ROOT.parent / 'GTLSteam/GameData/**/*.gtl'), recursive=True))[:4]
+        if not archives:
+            self.skipTest("no archives")
+        checked=0
+        for arc in archives:
+            for name, data in mas.mas_unpack_to_data(arc):
+                if not name.lower().endswith('.gmt') or len(data) < 24: continue
+                if data[8:24] != bytes.fromhex('c8cfd2d8ced8e6c3d6ded8bebba7bf90'): continue
+                flags = struct.unpack_from('<I', data, 4)[0]
+                self.assertEqual(flags & ~0x06000020, 0)
+                checked += 1
+        self.assertGreater(checked, 0)
+
     def test_mesh_index_bounds_observed(self):
         # Observed: mesh index values are within vertex_count in scanned samples; index_count not always multiple of 3.
         import importlib.util, glob, os, struct
