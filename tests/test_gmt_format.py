@@ -529,6 +529,33 @@ class GmtFormatTest(unittest.TestCase):
                         else: nonzero += 1
         self.assertGreater(zero, nonzero * 10)
 
+    def test_mesh_index_bounds_observed(self):
+        # Observed: mesh index values are within vertex_count in scanned samples; index_count not always multiple of 3.
+        import importlib.util, glob, os, struct
+        spec = importlib.util.spec_from_file_location('mas', ROOT.parent / 'rfactortools/rfactortools/mas.py')
+        mas = importlib.util.module_from_spec(spec); spec.loader.exec_module(mas)
+        archives = sorted(glob.glob(str(ROOT.parent / 'GTR2Steam/GameData/**/*.gtr'), recursive=True))[:6]
+        archives += sorted(glob.glob(str(ROOT.parent / 'GTLSteam/GameData/**/*.gtl'), recursive=True))[:3]
+        if not archives:
+            self.skipTest("no archives")
+        checked=mod3=0
+        for arc in archives:
+            for name, data in mas.mas_unpack_to_data(arc):
+                if not name.lower().endswith('.gmt'): continue
+                g = gmt_format.parse_gmt(name, data=data)
+                for mesh in g.meshes:
+                    r = mesh.record.raw
+                    vc,ic = r[3], r[10]
+                    idata = mesh.index_data
+                    if ic == 0 or len(idata) < 4 + ic*2: continue
+                    idx = struct.unpack_from('<'+str(ic)+'H', idata, 4)
+                    if vc > 0:
+                        self.assertLess(max(idx), vc)
+                    if ic % 3 != 0:
+                        mod3 += 1
+                    checked += 1
+        self.assertGreater(checked, 0)
+
 
 if __name__ == "__main__":
     unittest.main()

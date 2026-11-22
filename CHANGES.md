@@ -9,6 +9,9 @@ Newest-first change log. Timestamps use repository commit dates (ISO 8601, local
 - Parse JPG SOF dimensions/bit depth and MP3 frame header metadata in `media_tool.py`.
 - Add real-file JPG/MP3 metadata tests.
 
+## 2026-11-22 00:25:00 -0500 - GMT index bounds/topology observation
+- Add observed scan test: GMT mesh index refs within vertex_count; index_count not always multiple of 3.
+
 ## 2026-11-22 00:15:00 -0500 - PHS binary format identified
 - Identify 5 GTL `.phs` files in MAS archives as unknown/non-ISI-16byte-header binary; add observation test and docs.
 
