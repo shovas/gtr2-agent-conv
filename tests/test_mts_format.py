@@ -1,6 +1,7 @@
 """Tests for the partial CUBE MTS header parser."""
 import glob
 import os
+import struct
 import sys
 import unittest
 from collections import Counter
@@ -80,6 +81,28 @@ class MtsFormatTest(unittest.TestCase):
         diff = [i for i in range(len(pair[0])) if pair[0][i] != pair[1][i]]
         best = max(sum(1 for s in diff if s % 48 in (36, 44)) / len(diff) for _ in (0,))
         self.assertLess(best, 0.3)  # 48-byte grid does not explain most differing bytes
+
+    def test_candidate_float_run_is_not_a_normal_array(self):
+        import math
+        sample = None
+        for a in glob.glob(str(ROOT.parent / "NascarSimRacing" / "**" / "*"), recursive=True):
+            p = Path(a)
+            if p.is_file() and p.suffix.lower() == ".mas":
+                for e in mas_tool.read_archive(p)[1]:
+                    if e.name == "TLRA.MTS" and (e.data or b"")[:13] == b"CUBE_MTS_4.20":
+                        sample = e.data
+                        break
+            if sample:
+                break
+        if sample is None:
+            self.skipTest("TLRA.MTS sample not present")
+        off = 0xD388
+        mags = []
+        while off + 12 <= len(sample):
+            v = struct.unpack_from("<3f", sample, off)
+            mags.append(math.sqrt(sum(x * x for x in v)))
+            off += 12
+        self.assertLess(sum(0.9 < m < 1.1 for m in mags) / len(mags), 0.5)
 
     def test_object_count_vs_submesh_names(self):
         hits = total = 0

@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-22 11:45:00 -0500 - Task 4: MTS float-run hypothesis rejected
+- A long plausible-float run in TLRA.MTS was tested and rejected as a normal array (140/814 unit-length triples); add negative-result test and document.
+
 ## 2026-11-22 11:15:00 -0500 - Task 4: CUBE MTS 48-byte grid weakened
 - Full-payload tracing on the largest same-size pair showed only ~23% of differing bytes align to offsets 36/44 of a 48-byte grid; field values are mixed integer/float. Recorded as a negative-result test and documentation correction.
 
