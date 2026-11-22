@@ -42,6 +42,14 @@ class RaceGmtTest(unittest.TestCase):
         self.assertTrue(all(len(t) == 3 for t in tris))
         self.assertAlmostEqual(tris[0][0][0], 25.1521, places=3)
 
+    def test_triangles_share_vertices(self):
+        p = ROOT.parent / "Race07Complete/GameData/Locations/Marrakech/Models/PEOPLE_STAND_01.gmt"
+        if not p.is_file():
+            self.skipTest("PEOPLE_STAND sample not present")
+        tris = race_gmt.read_positions(p.read_bytes())
+        verts = [tuple(round(c, 4) for c in v) for t in tris for v in t]
+        self.assertLess(len(set(verts)), len(verts))  # shared vertices -> triangle soup
+
     def test_rejects_other_gmt(self):
         with self.assertRaises(ValueError):
             race_gmt.parse_header(b"NOPE" + b"\0" * 64)
