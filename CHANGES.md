@@ -9,6 +9,9 @@ Newest-first change log. Timestamps use repository commit dates (ISO 8601, local
 - Parse JPG SOF dimensions/bit depth and MP3 frame header metadata in `media_tool.py`.
 - Add real-file JPG/MP3 metadata tests.
 
+## 2026-11-22 02:35:00 -0500 - BMP format observation
+- Add observed scan test: GTR2/GTL BMP files/MAS entries use BI_RGB bpp 8/24/32 in scanned samples.
+
 ## 2026-11-22 02:25:00 -0500 - TGA type observation
 - Add observed scan test: GTR2/GTL TGA files/MAS entries use image types 2 and 10 only in scanned samples.
 

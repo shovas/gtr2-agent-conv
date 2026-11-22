@@ -131,6 +131,31 @@ class MediaToolTest(unittest.TestCase):
         self.assertTrue(types)
         self.assertTrue(types.issubset({2, 10}))
 
+    def test_bmp_formats_observed(self):
+        # Observed in GTR2/GTL files/MAS: BMP BI_RGB (comp 0) with bpp 8/24/32 in scanned samples.
+        import glob, os, struct, importlib.util
+        seen = set()
+        for root in [ROOT.parent / 'GTR2Steam', ROOT.parent / 'GTLSteam']:
+            for pth in glob.glob(str(root / '**/*.*'), recursive=True):
+                if os.path.splitext(pth)[1].lower() != '.bmp': continue
+                with open(pth, 'rb') as f: b = f.read(54)
+                if len(b) < 54 or b[:2] != b'BM': continue
+                dib = struct.unpack_from('<I', b, 14)[0]
+                if dib >= 40:
+                    seen.add((struct.unpack_from('<H', b, 28)[0], struct.unpack_from('<I', b, 30)[0]))
+        spec = importlib.util.spec_from_file_location('mas', ROOT.parent / 'rfactortools/rfactortools/mas.py')
+        mas = importlib.util.module_from_spec(spec); spec.loader.exec_module(mas)
+        archives = sorted(glob.glob(str(ROOT.parent / 'GTR2Steam/GameData/**/*.gtr'), recursive=True))[:4]
+        archives += sorted(glob.glob(str(ROOT.parent / 'GTLSteam/GameData/**/*.gtl'), recursive=True))[:2]
+        for arc in archives:
+            for name, d in mas.mas_unpack_to_data(arc):
+                if not name.lower().endswith('.bmp') or len(d) < 54 or d[:2] != b'BM': continue
+                dib = struct.unpack_from('<I', d, 14)[0]
+                if dib >= 40:
+                    seen.add((struct.unpack_from('<H', d, 28)[0], struct.unpack_from('<I', d, 30)[0]))
+        self.assertTrue(seen)
+        self.assertTrue(seen.issubset({(8, 0), (24, 0), (32, 0)}))
+
     def test_identify_jpg_if_present(self):
         p = ROOT.parent / "GTR2Steam/GameData/Locations/Anderstorp/3And_LOD.jpg"
         if not p.exists():
