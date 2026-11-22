@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 08:00:00 -0500 - Docs: Bink encoder search
+- Checked online options for Bink-1 encoding: the announced LGPL `jmarshall23/libbink` repo returns 404; `marcussacana/Bink2` targets Bink 2, not GTR2's Bink 1. Encoding remains blocked without licensed tools.
+
 ## 2026-11-23 07:30:00 -0500 - Docs: bounded PHS/.tgq probe results
 - Record negative results: PHS has no standard-compression stream (skip 0..64) and no repeating-key XOR signal (IC ~0.0039), and .tgq has no valid zlib stream or ASCII strings in the first 20 KB. Both remain blocked without an external spec.
 
