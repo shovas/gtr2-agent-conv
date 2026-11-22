@@ -65,6 +65,36 @@ def _first_string_offset(b: bytes, min_len: int = 4) -> int | None:
     return None
 
 
+def parse_node_records(b: bytes) -> list[dict]:
+    """Walk the contiguous skeleton-node table anchored on the `Bip01` record.
+
+    Each record is `name (no NUL), u32 marker=1, u32 size_hint, u32 key_count=3,
+    84 bytes of keyframe data (3 x 28-byte keys)`.  Records are contiguous, so a
+    sequential walk from the strong `Bip01\\x01\\x00\\x00\\x00` anchor avoids the
+    false positives a free-standing name regex produces on 3ds Max metadata
+    (e.g. build timestamps or material names).
+    """
+    out = []
+    pos = b.find(b"Bip01\x01\x00\x00\x00")
+    if pos < 0:
+        return out
+    while 0 <= pos < len(b):
+        marker = b.find(b"\x01\x00\x00\x00", pos + 1)
+        if marker < 0 or marker + 12 > len(b):
+            break
+        name = b[pos:marker]
+        if not name or not all(32 <= c < 127 for c in name):
+            break
+        size_hint, key_count = struct.unpack_from("<II", b, marker + 4)
+        if key_count != 3 or not (0x50 <= size_hint <= 0x80):
+            break
+        out.append({"offset": pos, "name": name.decode("ascii"),
+                    "size_hint": size_hint, "key_count": key_count,
+                    "keyframe_bytes": 84, "key_stride": 28})
+        pos = marker + 12 + 84
+    return out
+
+
 def cmd_info(args: argparse.Namespace) -> int:
     h = read_header(args.file)
     b = Path(args.file).read_bytes()
