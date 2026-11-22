@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 04:30:00 -0500 - Docs: GTR1 GMT layout scope note
+- Record that the GTR1 (2004) GMT magic at 0x04 has no new-layout geometry table in the first 0x400 bytes and needs a dedicated parser; investigated but not pursued (reference corpus only).
+
 ## 2026-11-23 04:00:00 -0500 - Task 4: show bone id in FXM CLI
 - `fxm_tool.py keys` now prints the decoded name-stable node id; update CLI test.
 

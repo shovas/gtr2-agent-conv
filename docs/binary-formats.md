@@ -76,7 +76,7 @@ These are usually text but may contain null-padded SimBin headers: `.aiw`, `.svm
 
 ### GTR 2004 (GTR1) — previously missing target corpus (evidence only)
 - 430 MAS type-0 `.gtr` archives, 1.2G; sampled 60 archives / 34,385 members (mostly `.gmt`/`.dds`). No ISI encryption signatures.
-- 33,477 GMTs have a **third magic** `c8cfd2d8ced8e6c3d6ded8bdbba6bf90` at **0x04** (vs 0x08 in GTL/GTR2 with `...bba7bf90`, and 0x1D4 in rF1 with `...bba8bf90`). 3 files use `OR_GMT_1.00`. `gmt_format.py` does not parse this layout.
+- 33,477 GMTs have a **third magic** `c8cfd2d8ced8e6c3d6ded8bdbba6bf90` at **0x04** (vs 0x08 in GTL/GTR2 with `...bba7bf90`, and 0x1D4 in rF1 with `...bba8bf90`). 3 files use `OR_GMT_1.00`. `gmt_format.py` does not parse this layout. The header differs by a 4-byte shift (u32 size-like field at 0x00, magic at 0x04); no new-layout 8-u32 geometry table pattern exists anywhere in the first 0x400 bytes, so it needs a dedicated parser. Investigated 2026-11-23; not pursued further (GTR1 is a reference corpus, not a conversion target).
 - Verification: `tests/test_gtr1_vanilla.py`.
 
 ### Game Stock Car / NASCAR SimRacing / F1CS2000 (evidence only)
