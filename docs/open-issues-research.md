@@ -61,7 +61,9 @@ conclusively establishing it requires actual game execution.
   Correlated slot 7's high byte against speed from position deltas: r=0.34 raw,
   r=0.40 if the high u16 is interpreted as float16 (0.01..256 range). The value
   *lags* speed — a smoothed/delayed quantity, not direct speed. Slot 9 shows no
-  speed correlation (|r|<0.1). Exact meanings **unresolved**.
+  speed correlation (|r|<0.1). No 2-byte small-integer fields (gear/flags) were found
+  anywhere in the 252-byte record, and only the time field is monotonic — no progress
+  counter. Exact meanings **unresolved**.
 - **GTR1 extra 16 bytes — RESOLVED**: always `[0, u, v, 0]` (zero padding + 2D float UV pair),
   confirmed across 2,215 vertices in 100 files. Added as `uv` field in `read_gtr1_vertices()`.
 - **GTR1 descriptor-less variant — RESOLVED**: 22,287 GMTs lack the 0x194 grid. Their
