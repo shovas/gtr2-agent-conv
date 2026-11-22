@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 09:00:00 -0500 - Docs: PHS keystream test
+- Pairwise XOR of all 5 GTL PHS files retains ~7.99 bits/byte entropy (no shared keystream); no local tool or online source documents the format. PHS remains blocked.
+
 ## 2026-11-23 08:30:00 -0500 - Task 4: Bink-1 encoding via libbink
 - `media_tool.bink_encode()` / `media_tool.py bink-encode` invoke the external LGPL-2.1 `raynorpat/libbink` `bink_build` tool. Built from source, encoded a decoded real GTR2 BIK: `--verify` passed, ffmpeg decoded the output, and the BIKi header layout matches. Encoding is no longer blocked. Add test and document.
 
