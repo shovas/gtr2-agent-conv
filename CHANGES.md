@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 10:00:00 -0500 - Task 4: PHS is a mixed container; Speednut checked
+- Found plaintext PAR2-style packets and labels in GTL PHS files (`phs_tool.py`, tests). Ran Speednut `mas_extract.exe` under Wine on `Physics2.gtl`: PHS members are byte-identical to `mas_tool.py` extraction, so it does not decrypt them. Revised the "uniformly encrypted PHS" interpretation in docs.
+
 ## 2026-11-23 09:30:00 -0500 - Task 4: EA TGQ decoded via ffmpeg
 - User identified `SCHl` as an Electronic Arts audio header; ffmpeg probes all 22 F1 2000 `.TGQ` files as TQI video (320x480, 25 fps) + `adpcm_ea` audio and decodes them. Added `media_tool.identify()` support, `tgq-decode` CLI and test; updated docs.
 

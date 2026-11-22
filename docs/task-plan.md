@@ -50,6 +50,11 @@ Investigate whether a known ISI physics container or cipher applies:
 
 No cipher or spec found so far; this is an explicit follow-up, not a claim.
 
+**Checked (user-requested):** `../Speednuts_mas_extract/mas_extract.exe` run under Wine extracts
+`.phs` members byte-identically to `mas_tool.py` — it does not decrypt them. PHS files contain
+plaintext PAR2-style packets and labels (`phs_tool.py`), so they are mixed containers rather than
+uniformly encrypted; payload semantics remain undecoded.
+
 ## Final verification
 ```
 python3 -m unittest discover -s tests -v   -> 223 tests OK (skipped=1)
