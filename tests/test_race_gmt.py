@@ -42,6 +42,26 @@ class RaceGmtTest(unittest.TestCase):
         self.assertTrue(all(len(t) == 3 for t in tris))
         self.assertAlmostEqual(tris[0][0][0], 25.1521, places=3)
 
+    def test_stage_channel_groups(self):
+        groups = 0
+        l2_nonzero = 0
+        for p in glob.glob(str(ROOT.parent / "Race07Complete" / "**" / "*.gmt"), recursive=True):
+            data = Path(p).read_bytes()
+            if data[:8] != race_gmt.MAGIC:
+                continue
+            for group in race_gmt.decode_stage_channels(
+                    race_gmt.read_material_blocks(data)):
+                groups += 1
+                for stage in group["stages"]:
+                    if stage["name"].startswith("L2"):
+                        l2_nonzero += stage["channel"] != 0
+                    elif stage["name"].startswith(("L0", "L1")):
+                        self.assertIn(stage["channel"], (0, 1, 3, 4, 5, 6))
+        if not groups:
+            self.skipTest("RaceGMT stage blocks not present")
+        self.assertGreater(groups, 1000)
+        self.assertEqual(l2_nonzero, 0)
+
     def test_stage_type_map_is_deterministic(self):
         blocks = []
         files = []

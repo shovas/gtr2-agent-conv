@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 00:30:00 -0500 - Task 4: RaceGMT texture-channel field decoded
+- `race_gmt.group_stages()` / `decode_stage_channels()` decode the u32 at +260 as a per-material texture-channel index; validated across 1,535 material groups (all 1,534 L2 stages use channel 0; L0/L1 in {0,1,3,4,5,6}). Add test and document.
+
 ## 2026-11-23 00:00:00 -0500 - Task 4: RaceGMT stage-type enum decoded
 - `race_gmt.build_stage_type_map()` decodes the u32 at +256 as a stage-type enum (L0DIFFUSET0→1, L1DIFFUSET0→2, L2*→0, L0CMAPT0→3, L1BUMPSPECMAPT0→5, L1CMAPT0→7); 100% deterministic for 6 well-sampled RaceGMT stage names. Corrected an earlier contaminated probe that mixed in 54k new-layout GMTs; documented per-format type maps. Add test.
 

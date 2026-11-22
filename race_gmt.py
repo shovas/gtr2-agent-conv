@@ -129,6 +129,28 @@ def build_stage_type_map(blocks: list[dict]) -> dict[str, tuple[int, int, int]]:
             for name, c in counts.items()}
 
 
+def group_stages(blocks: list[dict]) -> list[list[dict]]:
+    """Group flat stage blocks into material groups (contiguous 264-byte stride)."""
+    groups: list[list[dict]] = []
+    for block in blocks:
+        if not groups or block["offset"] - groups[-1][-1]["offset"] != STAGE_STRIDE:
+            groups.append([])
+        groups[-1].append(block)
+    return groups
+
+
+def decode_stage_channels(blocks: list[dict]) -> list[dict]:
+    """Return per-material stage (type, channel) pairs.
+
+    The u32 at +260 is a per-material texture-channel index. Observed domain:
+    1, 3, 4, 5, 6 for L0/L1 stages, always 0 for L2 stages (see tests).
+    """
+    return [{"offset": group[0]["offset"],
+             "stages": [{"name": s["name"], "type": s["tail"][0],
+                         "channel": s["tail"][1]} for s in group]}
+            for group in group_stages(blocks)]
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("files", nargs="+")
