@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-22 05:00:00 -0500 - Status check
+- Update `docs/task-plan.md` verification count to 173 tests.
+
 ## 2026-11-22 04:45:00 -0500 - Document old-tmp-files as legacy scratch
 - Add `../old-tmp-files/` to `AGENTS.md` as prior-attempt scratch (same caveats as `legacy/`), explicitly not ruled out as a future lead.
 - Note the `gMa1.002f` AIW fixture and GMT/UV probes in `docs/reuse-rfactortools.md` for possible later reuse.
