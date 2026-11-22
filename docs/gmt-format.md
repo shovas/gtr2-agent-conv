@@ -65,7 +65,17 @@ Scanned all 9,662 GMT members inside 85 MAS type-1 `.mas` archives in `../RF1Van
 
 Encryption: 120 GMT members carry the known rFactor ISI 16-byte-header signature `0x38af5637e81bc9a0`. `isi_crypt.decrypt_bytes(data, skip=4)` recovers plaintext byte-for-byte identical to the `rfactordec` reference (cross-checked on `pits.mas::PIT_HELMET.GMT`). Of the 120, 90 are old-layout and 30 new-layout; the other 9,542 GMTs are plaintext.
 
-Conversion implication for rF1 -> GTR2: (1) decrypt with the ISI header scheme (`skip=4`) when the signature is present; (2) detect layout by magic location — old (0x1D4, `0xA8`) vs new (0x08, `0xA7`). Only new-layout GMTs are directly compatible with the current GTR2 parser; old-layout GMTs need a structural converter (not implemented).
+Conversion implication for rF1 -> GTR2: (1) decrypt with the ISI header scheme (`skip=4`) when the signature is present; (2) detect layout by magic location — old (0x1D4, `0xA8`) vs new (0x08, `0xA7`). Only new-layout GMTs are directly compatible with the current GTR2 parser.
+
+### Structural old→new bridge (prototype, `gmt_layout.py`)
+
+The old and new tables are structurally related: the 8-u32 table at old 0x174 has the same shape as the tail of the new table at 0x16C, and the old header stores `(mesh_count=0, first_record=0)` at 0x16C (no new-style records). `gmt_layout.old_to_new()` therefore:
+1. moves the 16-byte magic from 0x1D4 to 0x08 (only byte 13 changes, `0xA8`→`0xA7`);
+2. writes `(object_count, 528)` + the old 8-u32 table at 0x16C;
+3. synthesizes one 108-byte mesh record per old object at 0x210 from the old table's vertex/stream offsets;
+4. keeps the name at 0x194 and all payload bytes unchanged.
+
+Verified: 6 sampled rF1 GMTs (1–3 objects) convert to files that `gmt_format.parse_gmt()` parses with the expected mesh count and that round-trip byte-for-byte. **Limitation:** old vertex records (u16 indices + position floats) are copied verbatim into the new vertex block; index counts are approximated from the old table. Geometry semantics and in-game rendering are NOT validated — treat this as a structural bridge, not a finished converter.
 
 ## Conversion implications (GTL -> GTR2)
 

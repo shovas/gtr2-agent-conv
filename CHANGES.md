@@ -2,6 +2,13 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-22 01:30:00 -0500 - Wave 1: text tools, cross-corpus tests, GMT layout bridge
+- Add `simbin_text_tool.py` (AIW waypoints/features, SCN/TRK SearchPath/MASFile/SkyBoxI) + tests on real GTR2/GTL files.
+- Add `tests/test_carryover.py`: 57 identical GTL/GTR2 GMTs parse and repack.
+- Add `tests/test_fxm_crosscorpus.py`: 567 FXM-family files, 54 extension/magic mismatches.
+- Cross-check JCA against `Race07Decryptor.exe` via `monodis` IL (confirms magic, header offsets, LE blocks, XOR 0xEB, custom keys, inflate workaround).
+- Add `gmt_layout.py` prototype: structural old→new GMT bridge; 6 sampled rF1 GMTs convert to parseable new-layout files. Geometry semantics explicitly unvalidated.
+
 ## 2026-11-22 01:00:00 -0500 - Task plan Wave 0: mining + fixtures
 - Add `docs/reuse-rfactortools.md`: ready-made parsers and full conversion pipeline in `../rfactortools`; RacerM/GTL2GTR2 tutorial conversion rules (material prefixes, SCN→TRK rewrites, SkyBoxI, DDS-only).
 - Add `tests/test_fixtures.py`: 57 identical same-name Anderstorp GMTs, new-layout rF1 GMTs, 5 PHS + DETOMASO edge cases.

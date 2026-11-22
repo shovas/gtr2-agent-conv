@@ -59,6 +59,20 @@ Concrete rules for rFactor→SimBin track conversion (GTL and GTR2 share layout)
 `rfactor2gtr2tracks.txt` adds: converted tracks need shadows set to MEDIUM in
 GTR2 or framerate collapses; the supplied GDBs are hand-verified.
 
+## JCA cross-check against the third-party decryptor (task #7)
+
+`Race07Decryptor.exe` is a single-file .NET 8 bundle. The managed assembly was
+carved out (valid PE at file offset 9,641,984) and disassembled with `monodis`.
+Its IL confirms our `jca_crypt.py` exactly:
+- `WtccCodec.IsEncrypted` checks magic `0F B1 FF FF`;
+- `Decrypt` reads version at +4, data_size at +8, zlen at +0x0C, payload at +0x10;
+- `Blowfish.DecryptBlocks` reads/writes LE u32 pairs — same as ours;
+- `KeyForVersion`/custom-key switch covers `volvo`, `raceroom`, `raceroom_plr`, `old_raceroom`;
+- `XorBuf` is called with constant `235` (`0xEB`);
+- `InflateWithWorkaround` mirrors the unaligned-tail workaround.
+
+No algorithm differences found; no code was copied.
+
 ## Actionable next steps derived from this mining
 
 - A GTL→GTR2 track converter should implement rules 2/3/4/6 above, plus

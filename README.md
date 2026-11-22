@@ -63,6 +63,8 @@ No package install is required; tools are runnable as scripts from the repo root
 - `gmt_tool.py` / `gmt_format.py` - GMT inspection and structural parser/writer.
 - `isi_crypt.py` - Pure-Python ISI decrypt/encrypt for 16-byte-header files.
 - `jca_crypt.py` - native SimBin JCA decrypt/encrypt (Race 07 etc.; **GPLv2**, with `jca_tables.py`).
+- `simbin_text_tool.py` - AIW/SCN/TRK semantic reader (waypoints, SearchPath, MASFile).
+- `gmt_layout.py` - prototype structural old→new GMT layout bridge (geometry semantics unvalidated).
 - `gzip_simbin_tool.py` - DSI/HAT/GTT/VCR gzip container tool.
 - `fxm_tool.py` - FXM/FXA/LMA header/node extraction/round-trip tool.
 - `media_tool.py` - Media identification and WAV semantic round-trip.
