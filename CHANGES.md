@@ -9,6 +9,10 @@ Newest-first change log. Timestamps use repository commit dates (ISO 8601, local
 - Parse JPG SOF dimensions/bit depth and MP3 frame header metadata in `media_tool.py`.
 - Add real-file JPG/MP3 metadata tests.
 
+## 2026-11-21 23:55:00 -0500 - VCR gzip container support
+- Recognize VCR as gzip-wrapped SimBin IRSR replay payload; content round-trip via `gzip_simbin_tool.py`.
+- Add real-file VCR decompress test.
+
 ## 2026-11-21 23:45:00 -0500 - GTT gzip container support
 - Recognize GTT as gzip-wrapped SimBin GTTF payload; content round-trip via `gzip_simbin_tool.py`.
 - Add real-file GTT decompress/identify test.

@@ -37,12 +37,12 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 
 ## SimBin container formats
 
-### DSI/HAT/GTT (gzip-wrapped)
-- **Read**: Yes. Detect gzip, decompress, inspect. GTT contains GTTF payload (time trial/ghost).
+### DSI/HAT/GTT/VCR (gzip-wrapped)
+- **Read**: Yes. Detect gzip, decompress, inspect. GTT contains GTTF payload (time trial/ghost); VCR contains IRSR replay payload.
 - **Write**: Yes. Recompress with content round-trip.
-- **Verification**: `tests/test_simbin_tools.py` (DSI/HAT/GTT real-file tests when present).
+- **Verification**: `tests/test_simbin_tools.py` (DSI/HAT/GTT/VCR real-file tests when present).
 - **Tool**: `gzip_simbin_tool.py`.
-- **Gaps**: GTTF internal record semantics not fully decoded.
+- **Gaps**: GTTF/VCR internal record semantics not fully decoded.
 
 ### FXM/FXA/LMA
 - **Read**: Header identification + lossless container read. Recognizes observed magics `FXM `, `FXA `, `LMA `. Reports LE/BE header field interpretations (BE fixed-header interpretation can overlap string data; semantics unconfirmed). Heuristic node/bone name extraction (`nodes`/`extract_strings`).
