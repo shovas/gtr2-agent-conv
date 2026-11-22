@@ -147,6 +147,44 @@ class MtsFormatTest(unittest.TestCase):
         self.assertGreater(flags / total, 0.95)
         self.assertGreater(lows / total, 0.9)
 
+    def test_mesh_table_resolves_submeshes(self):
+        sample = None
+        for a in glob.glob(str(ROOT.parent / "NascarSimRacing" / "**" / "*"), recursive=True):
+            p = Path(a)
+            if p.is_file() and p.suffix.lower() == ".mas":
+                for e in mas_tool.read_archive(p)[1]:
+                    if e.name == "LIGHTBOX02.MTS" and (e.data or b"")[:13] == b"CUBE_MTS_4.20":
+                        sample = e.data
+                        break
+            if sample:
+                break
+        if sample is None:
+            self.skipTest("LIGHTBOX02.MTS sample not present")
+        table = mf.parse_mesh_table(sample)
+        self.assertIsNotNone(table)
+        self.assertEqual(table["table_offset"], 0x500)
+        self.assertEqual(table["header"], (5, 328, 118, 648, 97, 4896, 0, 6448))
+        self.assertEqual(len(table["submeshes"]), 5)
+        self.assertEqual(table["submeshes"][0], (129, 0, 150, 6448, 150, 13648))
+
+    def test_mesh_table_across_corpus(self):
+        parsed = total = 0
+        for a in glob.glob(str(ROOT.parent / "NascarSimRacing" / "**" / "*"), recursive=True):
+            p = Path(a)
+            if not p.is_file() or p.suffix.lower() != ".mas":
+                continue
+            for e in mas_tool.read_archive(p)[1]:
+                d = e.data or b""
+                if d[:13] != b"CUBE_MTS_4.20":
+                    continue
+                total += 1
+                parsed += mf.parse_mesh_table(d) is not None
+            if total >= 100:
+                break
+        if total == 0:
+            self.skipTest("CUBE MTS 4.20 corpus not present")
+        self.assertGreater(parsed / total, 0.3)
+
     def test_submesh_descriptor_grid(self):
         sample = None
         for a in glob.glob(str(ROOT.parent / "NascarSimRacing" / "**" / "*"), recursive=True):

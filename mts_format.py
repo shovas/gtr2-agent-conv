@@ -92,6 +92,40 @@ def descriptor_tail_u32(data: bytes, offset: int) -> int:
     return struct.unpack_from("<I", data, offset + 164)[0]
 
 
+SUBMESH_MARKER = 129
+
+
+def parse_mesh_table(data: bytes) -> dict | None:
+    """Locate and decode the CUBE MTS submesh table.
+
+    Observed in LIGHTBOX02.MTS at 0x500:
+      (object_count, object_offset, vertex_count, vertex_offset,
+       normal_count, normal_offset, index_count, index_offset)
+    followed by per-submesh records beginning with marker 129:
+      (129, submesh_index, count_a, offset_a, count_b, offset_b, ...)
+    """
+    header = parse_header(data)
+    for off in range(0x100, min(len(data) - 32, 0x2000), 4):
+        v = struct.unpack_from("<8I", data, off)
+        if v[0] != header.object_count or not (0 < v[1] < len(data)):
+            continue
+        if not (0 < v[2] < 100000 and 0 < v[3] < len(data)):
+            continue
+        submeshes = []
+        p = off + 48  # first submesh record at table+0x30
+        while p + 24 <= len(data):
+            rec = struct.unpack_from("<6I", data, p)
+            if rec[0] != SUBMESH_MARKER or rec[1] != len(submeshes):
+                break
+            if rec[3] >= len(data) or rec[5] >= len(data):
+                break
+            submeshes.append(rec)
+            p += 64  # observed submesh record spacing
+        if submeshes:
+            return {"table_offset": off, "header": v, "submeshes": submeshes}
+    return None
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("files", nargs="+")

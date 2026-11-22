@@ -2,6 +2,10 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-22 13:45:00 -0500 - Task 4: CUBE MTS geometry table resolved
+- Find real CUBE MTS submesh table: 8-u32 count/offset header + 64-byte-spaced submesh records with marker 129. `LIGHTBOX02.MTS` at 0x500 resolves 5 submeshes and valid vertex/normal offsets; 129/300 sampled 4.20 files parse.
+- Add `mts_format.parse_mesh_table()` + exact/corpus tests; document in `docs/binary-formats.md`, `CAPABILITIES.md`.
+
 ## 2026-11-22 13:15:00 -0500 - Task 4: descriptor tail states
 - Enumerate three dominant states of descriptor+164 u32 (0, 0x0B4CE680, 0xFFFFFFFF) across 2,001 descriptors; add `mts_format.descriptor_tail_u32()` + test.
 
