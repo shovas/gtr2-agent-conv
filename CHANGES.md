@@ -2,6 +2,11 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-22 06:45:00 -0500 - Task 4: partial mesh variant decode
+- Verify CUBE MTS 4.10/4.20 share `magic[16] + u32 count + name[8]` header across 4,200+ meshes; add `mts_format.py`.
+- Verify `RaceGMT\0` header (name length/name/flags/bounding box) across 643 files; add `race_gmt.py`.
+- Cross-comparison found no same-asset pairs, so geometry tables remain undecoded (documented honestly).
+
 ## 2026-11-22 06:15:00 -0500 - Status update
 - Update `docs/task-plan.md` verification count to 181 tests.
 

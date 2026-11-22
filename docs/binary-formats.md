@@ -70,6 +70,10 @@ These are usually text but may contain null-padded SimBin headers: `.aiw`, `.svm
 - 2 MAS type-0 `.gtr` archives.
 - Verification: `tests/test_race07_complete.py`.
 
+### Partial decoding of new mesh variants (task 4)
+- `CUBE_MTS_4.10` and `CUBE_MTS_4.20` share a verified header: `magic[16], u32 object_count, char name[8]` (`mts_format.py`, 4,200+ sampled meshes in `../NascarSimRacing`). Payload after 0x1C remains undecoded; same-name files across versions have unrelated sizes, so it is not a magic-only difference.
+- `RaceGMT\0` (643 DLC files in `../Race07Complete`) has a verified header: `magic[8], u32 name_len, name, u32 flags=0x04000020, 12+ bounding-box floats` (`race_gmt.py`). Cross-comparing same-name files with new-layout GMTs showed different asset versions; no vertex/index table located. Geometry tables remain an honest gap.
+
 ### GTR 2004 (GTR1) — previously missing target corpus (evidence only)
 - 430 MAS type-0 `.gtr` archives, 1.2G; sampled 60 archives / 34,385 members (mostly `.gmt`/`.dds`). No ISI encryption signatures.
 - 33,477 GMTs have a **third magic** `c8cfd2d8ced8e6c3d6ded8bdbba6bf90` at **0x04** (vs 0x08 in GTL/GTR2 with `...bba7bf90`, and 0x1D4 in rF1 with `...bba8bf90`). 3 files use `OR_GMT_1.00`. `gmt_format.py` does not parse this layout.
