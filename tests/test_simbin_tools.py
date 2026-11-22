@@ -148,7 +148,7 @@ class SimbinToolsTest(unittest.TestCase):
 
 
     def test_fxm_offset30_family_signature(self):
-        # Observed: offset-30 FXA/FXM/LMA files have BE[2]==4096, BE[5]==528, and source string contains "3D Studio Max".
+        # Observed: offset-30 FXA/FXM/LMA files have BE u16[1]==257, BE u32[2]==4096, BE u32[4]==256, BE u32[5]==528, and source string contains "3D Studio Max".
         import struct, glob, os, re
         paths=[]
         for root in [ROOT.parent / 'GTR2Steam', ROOT.parent / 'GTLSteam']:
@@ -160,7 +160,9 @@ class SimbinToolsTest(unittest.TestCase):
             m = re.search(br'[\x20-\x7e]{4,}\x00', b)
             if not m or m.start()!=30: continue
             be = struct.unpack_from('>4sHHIIII', b, 0)
+            self.assertEqual(be[1], 257)
             self.assertEqual(be[2], 4096)
+            self.assertEqual(be[4], 256)
             self.assertEqual(be[5], 528)
             s = m.group()[:-1].decode('latin1','replace')
             self.assertIn('3D Studio Max', s)
