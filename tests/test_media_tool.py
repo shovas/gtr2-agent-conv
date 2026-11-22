@@ -111,6 +111,26 @@ class MediaToolTest(unittest.TestCase):
                 if sz == 0: break
         self.assertEqual(fmts, {1, 0x55})
 
+    def test_tga_types_observed(self):
+        # Observed in GTR2/GTL files/MAS: TGA image types 2 (uncompressed true-color) and 10 (RLE true-color).
+        import glob, os, struct, importlib.util
+        types = set()
+        for root in [ROOT.parent / 'GTR2Steam', ROOT.parent / 'GTLSteam']:
+            for pth in glob.glob(str(root / '**/*.*'), recursive=True):
+                if os.path.splitext(pth)[1].lower() != '.tga': continue
+                with open(pth, 'rb') as f: b = f.read(18)
+                if len(b) >= 18: types.add(b[2])
+        spec = importlib.util.spec_from_file_location('mas', ROOT.parent / 'rfactortools/rfactortools/mas.py')
+        mas = importlib.util.module_from_spec(spec); spec.loader.exec_module(mas)
+        archives = sorted(glob.glob(str(ROOT.parent / 'GTR2Steam/GameData/**/*.gtr'), recursive=True))[:4]
+        archives += sorted(glob.glob(str(ROOT.parent / 'GTLSteam/GameData/**/*.gtl'), recursive=True))[:2]
+        for arc in archives:
+            for name, d in mas.mas_unpack_to_data(arc):
+                if name.lower().endswith('.tga') and len(d) >= 18:
+                    types.add(d[2])
+        self.assertTrue(types)
+        self.assertTrue(types.issubset({2, 10}))
+
     def test_identify_jpg_if_present(self):
         p = ROOT.parent / "GTR2Steam/GameData/Locations/Anderstorp/3And_LOD.jpg"
         if not p.exists():
