@@ -67,6 +67,40 @@ class Race07Test(unittest.TestCase):
             if len(d) >= 0x1E4:
                 self.assertNotEqual(d[0x1D4:0x1E4], OLD_MAGIC, p)
 
+    def test_opaque_gmt_header_matches_jca_layout(self):
+        # Observed JCA header: magic 0xffffb10f, u32 file_version, u32 data_size,
+        # u32 compressed_size, then Blowfish-encrypted payload at 0x10.
+        gmts = _files("gmt")
+        if not gmts:
+            self.skipTest("Race07Vanilla corpus not present")
+        import struct
+        for p in gmts[:50]:
+            d = p.read_bytes()
+            magic, version, data_size, zlen = struct.unpack_from("<IIII", d, 0)
+            self.assertEqual(magic, 0xFFFFB10F, p)
+            self.assertIn(version, (0, 1, 2, 3, 4, 5, 6, 7), p)
+            self.assertGreater(data_size, 0, p)
+            self.assertLessEqual(zlen + 16, len(d) + 8, p)
+
+    def test_jca_decryption_with_external_wtcced_if_present(self):
+        # Optional verification: wtcced (GPLv2, Luigi Auriemma) decrypts these
+        # files to standard GTR2-layout GMTs. Not vendored in this repo.
+        tool = Path("/tmp/opencode/wtcced")
+        src = R07 / "GameData/Locations/Macau_2007/MODELS/CONE01.GMT"
+        if not tool.exists() or not src.exists():
+            self.skipTest("wtcced binary or sample not present")
+        import subprocess
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            td = Path(td)
+            enc, dec = td / "enc.gmt", td / "dec.gmt"
+            enc.write_bytes(src.read_bytes())
+            # wtcced exits non-zero even on success in this build; compare output.
+            subprocess.run([str(tool), "-o", str(enc), str(dec)], capture_output=True)
+            self.assertEqual(dec.read_bytes()[8:24], NEW_MAGIC)
+            g = gmt_format.parse_gmt(dec.name, dec.read_bytes())
+            self.assertEqual(gmt_format.write_gmt(g), dec.read_bytes())
+
     def test_fxm_family_extension_magic_mismatches(self):
         # Observed: 195 animation files; extension does not always match magic.
         counts = {}

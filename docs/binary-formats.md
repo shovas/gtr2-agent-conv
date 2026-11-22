@@ -40,7 +40,9 @@ These are usually text but may contain null-padded SimBin headers: `.aiw`, `.svm
 
 ### Race 07 (SimBin, 2007) cross-corpus observations (evidence only, `../Race07Vanilla`)
 - 2 small `.gtr` archives (`DevFiles/CamEd/ingame.gtr`, `GameData/Scripts/crew.gtr`) are MAS type 0. The 5 GMTs in `crew.gtr` use the **standard new layout** (magic at 0x08) and parse/round-trip with `gmt_format.py`.
-- All 21,687 loose GMTs start with `0f b1 ff ff 03 00 00 00`, have entropy ~7.9, match neither the standard 0x08 nor old 0x1D4 magic, and do not respond to ISI enctype 0/1 (skip 0/4/8/16), rfactordec altmode, or standard zlib/gzip/bz2/lzma. **Format undecoded** — a third, opaque GMT representation despite Race 07 being a GTL/GTR2 sibling.
+- All 21,687 loose GMTs start with `0f b1 ff ff 03 00 00 00`. This is **SimBin JCA encryption**, not a third GMT layout: header is `(magic 0xffffb10f, u32 file_version, u32 data_size, u32 zlen)` followed by a Blowfish-encrypted payload at 0x10. `quickbms_scripts/raceroom.bms` recognizes the magic and explicitly directs users to the external GPLv2 tool `wtcced` (`-k raceroom` for RaceRoom/JCA); the QuickBMS scripts themselves do **not** decrypt.
+- Verified decryption: `wtcced -o <enc.gmt> <dec.gmt>` (GPLv2 source from aluigi.org/papers/wtcced.zip; compiled here with 32-bit `unsigned long` -> `uint32_t` fixes for 64-bit Linux) turns real Race 07 GMTs into **standard GTR2-layout GMTs** (magic at 0x08) that parse and round-trip with `gmt_format.py`. The default file version 3 uses keytable 1 (`ver23_key`), zlib-decompress, then XOR with 0xEB.
+- No native Python implementation is vendored: the published algorithm/constant tables are GPLv2-derived, so adopting them requires a licensing decision for this repo. `tests/test_race07.py` contains an optional cross-check that runs when `/tmp/opencode/wtcced` exists.
 - 195 animation files (`FXM `/`FXA `/`LMA `): 77 FXM/FXM, 62 LMA/LMA, 22 FXM/LMA, 22 FXA/LMA, 12 FXA/FXA — extension/magic mismatches common.
 - No filesystem file carries a known ISI 16-byte signature.
 - Verification: `tests/test_race07.py`.
