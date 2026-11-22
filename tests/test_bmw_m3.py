@@ -1,4 +1,4 @@
-"""Observations from the BMW M3 Challenge reference corpus (../BMW M3 Challenge).
+"""Observations from the BMW M3 Challenge reference corpus (../BMWM3Challenge).
 
 BMW M3 Challenge is an older ISIMotor-lineage title. Its on-disk formats match the
 GTR2/GTL families already supported here; these tests record cross-game evidence,
@@ -17,7 +17,7 @@ sys.path.insert(0, str(ROOT))
 import fxm_tool  # noqa: E402
 import mas_tool  # noqa: E402
 
-BMW = ROOT.parent / "BMW M3 Challenge"
+BMW = ROOT.parent / "BMWM3Challenge"
 
 NORMAL_GMT_MAGIC = bytes.fromhex("c8cfd2d8ced8e6c3d6ded8bebba7bf90")
 MAS_MAGIC = b"GMOTORMAS10\x00\x00\x00\x00\x00"

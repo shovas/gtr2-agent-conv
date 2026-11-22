@@ -2,8 +2,11 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-21 20:30:00 -0500 - BMW corpus folder rename
+- Update path references for workspace-root folder rename `BMW M3 Challenge` -> `BMWM3Challenge` (AGENTS.md, tests, docs).
+
 ## 2026-11-21 20:25:00 -0500 - BMW M3 Challenge corpus added and reviewed
-- Add `../BMW M3 Challenge/` as workspace-root reference (AGENTS.md).
+- Add `../BMWM3Challenge/` as workspace-root reference (AGENTS.md).
 - Add `tests/test_bmw_m3.py`: 17 `.bmw` archives are GMOTORMAS10 type 0 with lossless member round-trip; 976 GMTs all have normal magic; 75 FXM-family files use known magics with 5 extension/magic mismatches.
 - Document findings in `docs/binary-formats.md` and `CAPABILITIES.md`.
 

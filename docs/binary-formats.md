@@ -1,6 +1,6 @@
 # Binary Formats Inventory (GTL/GTR2)
 
-First-pass inventory for GTL (`../GTLSteam/GameData`) and GTR2 (`../GTR2Steam/GameData`), with cross-game observations from BMW M3 Challenge (`../BMW M3 Challenge`). Goal: identify, understand, and provide read/write path for every binary file format possible.
+First-pass inventory for GTL (`../GTLSteam/GameData`) and GTR2 (`../GTR2Steam/GameData`), with cross-game observations from BMW M3 Challenge (`../BMWM3Challenge`). Goal: identify, understand, and provide read/write path for every binary file format possible.
 
 **Legend**
 - **R/W**: lossless read/write capability in this repo/tooling, or standard library path.
