@@ -9,6 +9,9 @@ Newest-first change log. Timestamps use repository commit dates (ISO 8601, local
 - Parse JPG SOF dimensions/bit depth and MP3 frame header metadata in `media_tool.py`.
 - Add real-file JPG/MP3 metadata tests.
 
+## 2026-11-22 02:05:00 -0500 - WAV format observation
+- Add observed scan test: GTR2/GTL WAV files are PCM (1) or MP3 (0x55) only in scanned installs.
+
 ## 2026-11-22 01:55:00 -0500 - DDS MAS pixel-format observation
 - Add observed scan test: MAS DDS headers contain only DXT1/DXT3/DXT5 and uncompressed RGB(A) (pf 0x41/0x40) in scanned samples.
 

@@ -89,6 +89,28 @@ class MediaToolTest(unittest.TestCase):
                 checked += 1
         self.assertGreater(checked, 0)
 
+    def test_wav_formats_observed(self):
+        # Observed in GTR2/GTL: WAV audio formats are PCM (1) or MP3 (0x55).
+        import glob, os, struct
+        paths = glob.glob(str(ROOT.parent / 'GTR2Steam/**/*.wav'), recursive=True)
+        paths += glob.glob(str(ROOT.parent / 'GTLSteam/**/*.wav'), recursive=True)
+        if not paths:
+            self.skipTest("no WAV files")
+        fmts = set()
+        for pth in paths:
+            with open(pth, 'rb') as f: b = f.read(64)
+            if len(b) < 20 or b[:4] != b'RIFF' or b[8:12] != b'WAVE':
+                continue
+            off = 12
+            while off + 8 <= len(b):
+                cid = b[off:off+4]; sz = struct.unpack_from('<I', b, off+4)[0]
+                if cid == b'fmt ' and sz >= 2:
+                    fmts.add(struct.unpack_from('<H', b, off+8)[0])
+                    break
+                off += 8 + sz
+                if sz == 0: break
+        self.assertEqual(fmts, {1, 0x55})
+
     def test_identify_jpg_if_present(self):
         p = ROOT.parent / "GTR2Steam/GameData/Locations/Anderstorp/3And_LOD.jpg"
         if not p.exists():

@@ -24,7 +24,7 @@ First-pass inventory for GTL (`../GTLSteam/GameData`) and GTR2 (`../GTR2Steam/Ga
 | `.svm` | 258 | SimBin text-like with null padding | `//[[gMa1.000f...]] [[\0...]]` | high (text-ish) | Treat as text/binary-safe bytes; preserve null padding. Not a structured binary format |
 | `.ani` | 60 | Text animation/script | `// ...` | high (text) | Plain text read/write |
 | `.bik` | 103 | Bink video (proprietary) | `BIKi` / Bink signature | low | Identify header + lossless copy. Full decode/encode requires Bink SDK/tools (proprietary) |
-| `.wav` | 1235 | RIFF WAVE audio | `RIFF....WAVEfmt ` | high | Python stdlib `wave` for PCM; lossless copy always possible |
+| `.wav` | 1245 | RIFF WAVE audio | `RIFF....WAVEfmt ` | high | Python stdlib `wave` for PCM; MP3-in-WAV (fmt 0x55) lossless copy. Observed in 1245 GTR2/GTL WAVs: PCM (1144) + MP3 0x55 (101). |
 | `.dds` | 56 (fs) / 34150 (MAS) | DirectDraw Surface texture | `DDS ` | high (standard) | Standard DDS; identify/parse; DXT1/3/5 + uncompressed RGB(A) semantic R/W in `media_tool.py`. Observed in 20,073 scanned MAS DDS headers: DXT1/DXT3/DXT5 and uncompressed RGB(A) (pf 0x41/0x40). |
 | `.tga` | 323 | Targa image | TGA header (e.g. type 2) | high (standard) | Standard TGA; lossless copy possible |
 | `.bmp` | 205 | **Mixed**: 145 real BMP (`BM`), 60 TGA-like (`00 00 02 00...`) | `BM` or TGA header | high (standard containers) | Detect by header: if `BM` parse as BMP; if TGA header parse as TGA. Preserve original bytes on round-trip |
