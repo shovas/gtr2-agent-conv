@@ -44,6 +44,8 @@ EMAIL = re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b")
 
 GAME_DATA_EXT = {".gtr", ".gtl", ".mas", ".bmw", ".dds", ".gmt", ".bik", ".car", ".exe", ".dll", ".zip", ".7z", ".rar"}
 MAX_TRACKED_BYTES = 2 * 1024 * 1024  # 2 MiB
+# These files intentionally contain example secrets/PII as detection patterns.
+EXCLUDE_FROM_CONTENT_SCAN = {"pre_push_check.py", "tests/test_pre_push_check.py"}
 
 
 @dataclass
@@ -89,6 +91,8 @@ def check_repo(allow_untracked: bool = False) -> list[Issue]:
             issues.append(Issue("SIZE", rel, f"file exceeds {MAX_TRACKED_BYTES} bytes"))
         if path.suffix.lower() in GAME_DATA_EXT:
             issues.append(Issue("BINARY", rel, "game-data/binary file should not be committed"))
+        if rel in EXCLUDE_FROM_CONTENT_SCAN:
+            continue
         try:
             text = path.read_text(encoding="utf-8")
         except (UnicodeDecodeError, OSError):
