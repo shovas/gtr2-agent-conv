@@ -9,6 +9,9 @@ Newest-first change log. Timestamps use repository commit dates (ISO 8601, local
 - Parse JPG SOF dimensions/bit depth and MP3 frame header metadata in `media_tool.py`.
 - Add real-file JPG/MP3 metadata tests.
 
+## 2026-11-22 01:45:00 -0500 - GMT header name field observation
+- Add observed scan test: 0x194..0x1D4 is 64-byte null-terminated ASCII object/name string.
+
 ## 2026-11-22 01:35:00 -0500 - GMT mesh table first_record observation
 - Add observed scan test: normal-magic GMT mesh table `first_record` is 528 (0x210) in scanned samples.
 

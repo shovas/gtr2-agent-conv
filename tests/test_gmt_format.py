@@ -569,6 +569,28 @@ class GmtFormatTest(unittest.TestCase):
                 checked += 1
         self.assertGreater(checked, 0)
 
+    def test_header_name_field_observed(self):
+        # Observed: 0x194..0x1D4 contains 64-byte null-terminated ASCII name (often matches basename; not always).
+        import importlib.util, glob, os
+        spec = importlib.util.spec_from_file_location('mas', ROOT.parent / 'rfactortools/rfactortools/mas.py')
+        mas = importlib.util.module_from_spec(spec); spec.loader.exec_module(mas)
+        archives = sorted(glob.glob(str(ROOT.parent / 'GTR2Steam/GameData/**/*.gtr'), recursive=True))[:8]
+        archives += sorted(glob.glob(str(ROOT.parent / 'GTLSteam/GameData/**/*.gtl'), recursive=True))[:4]
+        if not archives:
+            self.skipTest("no archives")
+        checked=0
+        for arc in archives:
+            for name, data in mas.mas_unpack_to_data(arc):
+                if not name.lower().endswith('.gmt') or len(data) < 0x1D4: continue
+                if data[8:24] != bytes.fromhex('c8cfd2d8ced8e6c3d6ded8bebba7bf90'): continue
+                raw = data[0x194:0x1D4]
+                self.assertEqual(len(raw), 64)
+                name_bytes = raw.split(b'\x00', 1)[0]
+                self.assertGreater(len(name_bytes), 0)
+                name_bytes.decode('ascii')
+                checked += 1
+        self.assertGreater(checked, 0)
+
     def test_mesh_index_bounds_observed(self):
         # Observed: mesh index values are within vertex_count in scanned samples; index_count not always multiple of 3.
         import importlib.util, glob, os, struct
