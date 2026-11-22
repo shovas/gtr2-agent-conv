@@ -48,6 +48,25 @@ class ValidateConversionTest(unittest.TestCase):
             self.skipTest("old-layout GMTs not present")
         self.assertEqual(checked, 10)
 
+    def test_metamorphic_position_perturbation(self):
+        import struct
+        import gmt_semantic
+        for data in _old_gmts(10):
+            subs = gmt_semantic.find_submeshes(data)
+            if not subs:
+                continue
+            before = gmt_semantic.read_gmt(data)["submeshes"][0]["positions"]
+            modified = bytearray(data)
+            pos = subs[0]["v_off"] + 4
+            x = struct.unpack_from("<f", modified, pos)[0]
+            struct.pack_into("<f", modified, pos, x + 1.0)
+            after = gmt_semantic.read_gmt(gmt_layout.old_to_new_semantic(bytes(modified)))["submeshes"][0]["positions"]
+            changed = [i for i, (a, b) in enumerate(zip(before, after)) if a != b]
+            self.assertEqual(changed, [0])
+            self.assertAlmostEqual(after[0][0] - before[0][0], 1.0, places=3)
+            return
+        self.skipTest("old-layout GMTs not present")
+
     def test_independent_reader_agrees_with_gmt_semantic(self):
         data = next(_old_gmts(1), None)
         if data is None:

@@ -69,6 +69,14 @@ conclusively establishing it requires actual game execution.
   `gmt_semantic.read_gtr1_table()` + test. **Partially resolved** (table semantics known,
   extra columns unconfirmed).
 
+## Metamorphic validation (issues 1+2)
+
+- **Experiment**: perturb one source vertex x by +1.0 in a real rF1 GMT, re-convert,
+  and compare decoded output positions. Result: exactly vertex 0 changes, by
+  exactly +1.0. Codified in `tests/test_validate_conversion.py`.
+- **Interpretation**: the bridge is a genuine per-vertex semantic transform, not an
+  accidental structural coincidence. Strengthens offline compatibility confidence.
+
 ## Recommendation
 No issue is fully runtime-resolved without launching GTR2/GTL. The highest-value
 offline work is complete: a reusable offline validator, exact semantic-bridge
