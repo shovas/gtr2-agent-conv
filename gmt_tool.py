@@ -15,6 +15,23 @@ from pathlib import Path
 
 # Observed in GTR2/GT Legends GMTs and hand_selected GOALPOST.GMT.
 GMT_MAGIC_GTR_GTL = bytes.fromhex("c8cfd2d8ced8e6c3d6ded8bebba7bf90")
+GMT_MAGIC_RF1_OLD = bytes.fromhex("c8cfd2d8ced8e6c3d6ded8bebba8bf90")
+GMT_MAGIC_GTR1 = bytes.fromhex("c8cfd2d8ced8e6c3d6ded8bdbba6bf90")
+
+
+def detect_variant(data: bytes) -> str:
+    """Identify known GMT-family variants by their observed magic location."""
+    if data[:4] == b"\x0f\xb1\xff\xff":
+        return "jca-encrypted"
+    if data[:8] == b"RaceGMT\0":
+        return "racegmt"
+    if len(data) >= 24 and data[8:24] == GMT_MAGIC_GTR_GTL:
+        return "new-gtr2-gtl"
+    if len(data) >= 0x1E4 and data[0x1D4:0x1E4] == GMT_MAGIC_RF1_OLD:
+        return "old-rfactor1"
+    if len(data) >= 20 and data[4:20] == GMT_MAGIC_GTR1:
+        return "old-gtr2004"
+    return "unknown"
 
 
 @dataclass
@@ -127,6 +144,7 @@ def cmd_info(args: argparse.Namespace) -> int:
     print(f"flags: {h.flags} (0x{h.flags:08x})")
     print(f"magic: {h.magic.hex()}")
     print(f"known_gtr_gtl_magic: {h.known_magic}")
+    print(f"variant: {detect_variant(Path(args.file).read_bytes())}")
     print(f"likely_encrypted: {h.likely_encrypted}")
     print(f"mesh_count: {h.mesh_count}")
     print(f"mesh_first: {h.mesh_first}")

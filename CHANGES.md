@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-22 10:15:00 -0500 - GMT family variant detection
+- `gmt_tool.detect_variant()` recognises new GTR2/GTL, old rF1, GTR 2004, JCA-encrypted and RaceGMT headers; add `tests/test_gmt_variants.py` with real-corpus samples.
+
 ## 2026-11-22 09:45:00 -0500 - Task 4: MTS name correlation confirmed in both variants
 - Extend `object_count - submesh_names == 1` test to CUBE MTS 4.10 (130/200 sampled) as well as 4.20; document.
 
