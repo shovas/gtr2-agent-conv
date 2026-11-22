@@ -52,6 +52,32 @@ class FxmRecordTest(unittest.TestCase):
         self.assertGreater(qok, 0.9 * len(nodes) * 2)
         self.assertGreater(sok, 0.9 * len(nodes) * 2)
 
+    def test_node_id_is_name_stable_across_corpus(self):
+        nodes = []
+        checked = 0
+        for corpus in ("GTR2Steam", "GTLSteam", "VolvoTheGame", "Race07Vanilla",
+                       "Race07Complete", "BMWM3Challenge"):
+            for p in ROOT.parent.joinpath(corpus).rglob("*"):
+                if not p.is_file() or p.suffix.lower() not in (".fxm", ".fxa", ".lma"):
+                    continue
+                data = p.read_bytes()
+                found = fxm_tool.parse_node_records(data)
+                if not found:
+                    continue
+                for node in found:
+                    self.assertEqual(fxm_tool.decode_node_keys(data, node)["trailer"],
+                                     node["size_hint"] - 84)
+                nodes.extend(found)
+                checked += 1
+        if not nodes:
+            self.skipTest("FXM corpora not present")
+        idmap = fxm_tool.build_node_id_map(nodes)
+        self.assertGreater(len(idmap), 10)
+        self.assertGreater(checked, 10)
+        self.assertEqual(idmap["Bip01"], 12)
+        self.assertEqual(idmap["Bip01 Pelvis"], 11)
+        self.assertEqual(idmap["Bip01 Head"], 13)
+
     def test_keys_cli(self):
         if not SAMPLE.exists():
             self.skipTest("FXM sample not present")
