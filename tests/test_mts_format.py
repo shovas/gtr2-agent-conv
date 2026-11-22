@@ -167,6 +167,24 @@ class MtsFormatTest(unittest.TestCase):
         self.assertEqual(len(table["submeshes"]), 5)
         self.assertEqual(table["submeshes"][0], (129, 0, 150, 6448, 150, 13648))
 
+    def test_mesh_table_in_4_10_corpus(self):
+        parsed = total = 0
+        for a in glob.glob(str(ROOT.parent / "NascarSimRacing" / "**" / "*"), recursive=True):
+            p = Path(a)
+            if not p.is_file() or p.suffix.lower() != ".mas":
+                continue
+            for e in mas_tool.read_archive(p)[1]:
+                d = e.data or b""
+                if d[:13] != b"CUBE_MTS_4.10":
+                    continue
+                total += 1
+                parsed += mf.parse_mesh_table(d) is not None
+            if total >= 100:
+                break
+        if total == 0:
+            self.skipTest("CUBE MTS 4.10 corpus not present")
+        self.assertGreater(parsed / total, 0.2)
+
     def test_mesh_table_across_corpus(self):
         parsed = total = 0
         for a in glob.glob(str(ROOT.parent / "NascarSimRacing" / "**" / "*"), recursive=True):

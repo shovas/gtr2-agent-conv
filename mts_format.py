@@ -92,7 +92,7 @@ def descriptor_tail_u32(data: bytes, offset: int) -> int:
     return struct.unpack_from("<I", data, offset + 164)[0]
 
 
-SUBMESH_MARKER = 129
+SUBMESH_MARKERS = (129, 130)  # 4.20 uses 129, 4.10 uses 130
 
 
 def parse_mesh_table(data: bytes) -> dict | None:
@@ -115,7 +115,7 @@ def parse_mesh_table(data: bytes) -> dict | None:
         p = off + 48  # first submesh record at table+0x30
         while p + 24 <= len(data):
             rec = struct.unpack_from("<6I", data, p)
-            if rec[0] != SUBMESH_MARKER or rec[1] != len(submeshes):
+            if rec[0] not in SUBMESH_MARKERS or rec[1] != len(submeshes):
                 break
             if rec[3] >= len(data) or rec[5] >= len(data):
                 break
