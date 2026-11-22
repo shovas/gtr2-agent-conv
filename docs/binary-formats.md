@@ -1,6 +1,6 @@
 # Binary Formats Inventory (GTL/GTR2)
 
-First-pass inventory for GTL (`../GTLSteam/GameData`) and GTR2 (`../GTR2Steam/GameData`), with cross-game observations from BMW M3 Challenge (`../BMWM3Challenge`) and rFactor 1 vanilla (`../RF1Vanilla`). Goal: identify, understand, and provide read/write path for every binary file format possible.
+First-pass inventory for GTL (`../GTLSteam/GameData`) and GTR2 (`../GTR2Steam/GameData`), with cross-game observations from BMW M3 Challenge (`../BMWM3Challenge`), rFactor 1 vanilla (`../RF1Vanilla`), Copa Petrobras de Marcas (`../CopaPetrobrasdeMarcas`) and Sports Car GT (`../SportsCarGTUsa`). Goal: identify, understand, and provide read/write path for every binary file format possible.
 
 **Legend**
 - **R/W**: lossless read/write capability in this repo/tooling, or standard library path.
@@ -10,7 +10,7 @@ First-pass inventory for GTL (`../GTLSteam/GameData`) and GTR2 (`../GTR2Steam/Ga
 
 | Ext | GTL+GTR2 count | Kind | Magic/header (observed) | Understanding | R/W path |
 |---|---:|---|---|---|---|
-| `.gtl`, `.gtr`, `.bmw`, `.mas` | 1113 + 17 (BMW M3 Challenge) + 135 (rF1/Copa) | Game archive (MAS) | `GMOTORMAS10\0\0\0\0\0`, type1 `c8cfd2d8...`, type1X `cec3d5c7c0d9e6c9...` | high | `mas_tool.py` create/list/extract/add/update/delete; round-trip verified on GTR2/GTL, BMW `.bmw`, rF1 type-1 and Copa type-1X archives; type-1X signature preserved on rewrite |
+| `.gtl`, `.gtr`, `.bmw`, `.mas` | 1113 + 17 + 85 + 50 + 61 | Game archive (MAS) | type0 `GMOTORMAS10`, type1 `c8cfd2d8...`, type1X `cec3d5c7c0d9e6c9...`, type2 (no signature) | high | `mas_tool.py` create/list/extract/add/update/delete; round-trip verified on all corpus variants; type-1X signature preserved on rewrite |
 | `.gmt` | 56 loose (+26931 in archives) | 3D mesh/model | normal: `c8cfd2d8ced8e6c3d6ded8bebba7bf90` at 0x08; obj_list_offset at 0x00 | medium | `gmt_tool.py` info/scan/diff; `gmt_format.py` structural parse/write (header, mesh table, vertex/index blobs, material tail best-effort) with lossless round-trip tests. See `docs/gmt-format.md` |
 | `.aiw` | 59 | Text waypoint file (SimBin header has null bytes) | `//[[gMa1.000f...]]` | high (text) | Text read/write; `rfactortools/aiw.py` parses it. Observed: all 59 start with `//[[gMa1.000`; contain `[Features]`. Lossless byte round-trip trivial. |
 | `.dsi` | 142 | Gzip-compressed SimBin text | gzip `1f8b08`, payload `//[[gMb1.000f...]]` | high | `gzip_simbin_tool.py` info/extract/create (deterministic gzip). Content round-trip verified |
@@ -37,6 +37,12 @@ First-pass inventory for GTL (`../GTLSteam/GameData`) and GTR2 (`../GTR2Steam/Ga
 These are usually text but may contain null-padded SimBin headers: `.aiw`, `.svm`, `.ani`, `.ds`, `.dst`, `.gdb`, `.trk`, `.car`, `.hdc`, `.eng`, `.tyr`, `.aud`, `.dmg`, `.sp`, `.grb`, `.hed`, `.cam`, `.grd`, `.rcd`, `.set`, `.txt`, `.cdb`, `.ddb`, `.tec`, `.fxm`? No - `.fxm` is binary FXM. `.cas` is text-like.
 
 ## Game-specific binary formats: status
+
+### Sports Car GT (1999) cross-corpus observations (evidence only, `../SportsCarGTUsa`)
+- 61 `.mas` archives have no 16-byte magic; they use the MAS type-2 layout from `quickbms_scripts/mas.bms`: 8-byte header `(count, data_size)`, then `count` 32-byte records `(name[16], offset, size, zsize, dummy)`, data starting at `8 + 32*count`. `mas_tool.py` now reads and writes this layout (16,070 members).
+- Member compression variants observed: 13,621 raw (`size == zsize` or `zsize == 0`), 2,427 with a 16-byte texture header `(width, height, flags, 0)` followed by a zlib stream of raw pixels (decoded by `mas_tool.py`), and 22 with an undecoded compression variant (stored losslessly, `Entry.type == 2`).
+- One archive (`WPEDIT.MAS`) has a malformed `zsize` on one member; data is preserved but `zsize` is normalized on rewrite.
+- Verification: `tests/test_scgt.py`.
 
 ### Copa Petrobras de Marcas cross-corpus observations (evidence only, `../CopaPetrobrasdeMarcas`)
 - 50 `.mas` archives use the MAS type-1X signature `cec3d5c7c0d9e6c9caddd8bebba6bf90` (documented as `MAS_TYPE1X` in `quickbms_scripts/mas.bms`: type-1 layout, first 6 bytes differ). All now read with `mas_tool.py`; signature preserved on rewrite (16,026 members total).
