@@ -47,6 +47,21 @@ def scn_to_trk(data: str, track_name: str = "") -> str:
     return "".join(out)
 
 
+def trk_extensions_to_gtr2(data: str) -> str:
+    """Rewrite GTL MASFile `.gtl` references to GTR2 `.gtr` (data-driven rule)."""
+    out = []
+    for line in data.splitlines(keepends=True):
+        stripped = line.strip()
+        if stripped.lower().startswith("masfile=") and stripped.lower().endswith(".gtl"):
+            prefix = line[:len(line) - len(line.lstrip())]
+            name = stripped.split("=", 1)[1].strip().strip('"')
+            newline = "\n" if line.endswith("\n") else ""
+            out.append(f'{prefix}MASFile={name[:-4]}.gtr{newline}')
+        else:
+            out.append(line)
+    return "".join(out)
+
+
 def convert_tree(source: str | Path, target: str | Path, check: bool = False) -> dict:
     """Convert an rFactor GameData tree: archives, AIW, SCN -> TRK, copy rest."""
     import mas_tool

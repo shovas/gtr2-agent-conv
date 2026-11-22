@@ -27,6 +27,14 @@ class TextConvertTest(unittest.TestCase):
         self.assertIn('MASFile="JOESVILLE_SPEEDWAY_MAP.gtl"', out)
         self.assertNotIn("SearchPath=.", out)
 
+    def test_gtl_trk_extensions(self):
+        src = "MASFile=Anderstorp.gtl\nMASFile=skies_north.gtl\nSearchPath=GameData\\Locations\n"
+        out = tc.trk_extensions_to_gtr2(src)
+        self.assertIn("MASFile=Anderstorp.gtr", out)
+        self.assertIn("MASFile=skies_north.gtr", out)
+        self.assertNotIn(".gtl", out)
+        self.assertIn("SearchPath=GameData\\Locations", out)
+
     def test_tree_check_on_real_corpus(self):
         src = ROOT.parent / "RF1Vanilla/GameData/Locations/Joesville"
         if not src.is_dir():
