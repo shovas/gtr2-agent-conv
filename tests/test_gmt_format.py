@@ -556,6 +556,33 @@ class GmtFormatTest(unittest.TestCase):
                     checked += 1
         self.assertGreater(checked, 0)
 
+    def test_mesh_record_field_observations(self):
+        # Observed in scanned samples: rec[0,9,12-23]==0; rec[24] in {0,0xFFFFFFFF}; material index in bounds.
+        import importlib.util, glob, os
+        spec = importlib.util.spec_from_file_location('mas', ROOT.parent / 'rfactortools/rfactortools/mas.py')
+        mas = importlib.util.module_from_spec(spec); spec.loader.exec_module(mas)
+        archives = sorted(glob.glob(str(ROOT.parent / 'GTR2Steam/GameData/**/*.gtr'), recursive=True))[:6]
+        archives += sorted(glob.glob(str(ROOT.parent / 'GTLSteam/GameData/**/*.gtl'), recursive=True))[:3]
+        if not archives:
+            self.skipTest("no archives")
+        checked=0
+        for arc in archives:
+            for name, data in mas.mas_unpack_to_data(arc):
+                if not name.lower().endswith('.gmt'): continue
+                g = gmt_format.parse_gmt(name, data=data)
+                mcount = len(g.materials)
+                for mesh in g.meshes:
+                    r = mesh.record.raw
+                    self.assertEqual(r[0], 0)
+                    self.assertEqual(r[9], 0)
+                    for i in range(12, 24):
+                        self.assertEqual(r[i], 0)
+                    self.assertIn(r[24], (0, 0xFFFFFFFF))
+                    if mcount:
+                        self.assertLess(r[2], mcount)
+                    checked += 1
+        self.assertGreater(checked, 0)
+
 
 if __name__ == "__main__":
     unittest.main()
