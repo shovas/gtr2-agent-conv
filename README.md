@@ -62,6 +62,7 @@ No package install is required; tools are runnable as scripts from the repo root
 - `mas_tool.py` - GMOTORMAS10 archive tool.
 - `gmt_tool.py` / `gmt_format.py` - GMT inspection and structural parser/writer.
 - `isi_crypt.py` - Pure-Python ISI decrypt/encrypt for 16-byte-header files.
+- `jca_crypt.py` - native SimBin JCA decrypt/encrypt (Race 07 etc.; **GPLv2**, with `jca_tables.py`).
 - `gzip_simbin_tool.py` - DSI/HAT/GTT/VCR gzip container tool.
 - `fxm_tool.py` - FXM/FXA/LMA header/node extraction/round-trip tool.
 - `media_tool.py` - Media identification and WAV semantic round-trip.
@@ -70,4 +71,4 @@ No package install is required; tools are runnable as scripts from the repo root
 
 ## License / third-party material
 
-Check individual file headers and external reference repositories before reuse. Some reference material outside this repo has restrictive licenses (e.g. CC BY-NC); this repo treats them as reference only.
+Check individual file headers and external reference repositories before reuse. Some reference material outside this repo has restrictive licenses (e.g. CC BY-NC); this repo treats them as reference only. `jca_crypt.py` and `jca_tables.py` are GPLv2 (derived from Luigi Auriemma's `wtcced`); all other modules are unaffected.

@@ -54,6 +54,12 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 - **Tool**: `fxm_tool.py`.
 - **Gaps**: internal animation/keyframe/node/bone semantics.
 
+### JCA (SimBin Race 07 / GTR Evolution / Race Room)
+- **Read/Decrypt**: Yes, native in `jca_crypt.py` — all 8 versions, optional zlib layer, XOR 0xEB, custom game keys (`raceroom`, `raceroom_plr`, `volvo`, `old_raceroom`).
+- **Write/Encrypt**: Yes, exact inverse; round-trip verified for all versions.
+- **Verification**: `tests/test_jca_crypt.py` — byte-for-byte match with `wtcced` on real Race 07 GMTs; 200 sampled GMTs decrypt and parse with `gmt_format.py`.
+- **Licensing**: `jca_crypt.py` and `jca_tables.py` are GPLv2 (derived from Luigi Auriemma's published `wtcced` algorithm/tables, user-approved). Other project modules are unaffected.
+
 ## Other binary formats
 
 ### PHS (GTL MAS, 5 files observed)
