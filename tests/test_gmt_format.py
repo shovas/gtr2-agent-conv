@@ -591,6 +591,28 @@ class GmtFormatTest(unittest.TestCase):
                 checked += 1
         self.assertGreater(checked, 0)
 
+    def test_stage_texture_strings_stage3_only_observed(self):
+        # Observed: texture-like strings (.dds/.tga/.bmp) in material stage blocks appear in stage 3 only in scanned samples.
+        import importlib.util, glob, os
+        spec = importlib.util.spec_from_file_location('mas', ROOT.parent / 'rfactortools/rfactortools/mas.py')
+        mas = importlib.util.module_from_spec(spec); spec.loader.exec_module(mas)
+        archives = sorted(glob.glob(str(ROOT.parent / 'GTR2Steam/GameData/**/*.gtr'), recursive=True))[:6]
+        archives += sorted(glob.glob(str(ROOT.parent / 'GTLSteam/GameData/**/*.gtl'), recursive=True))[:3]
+        if not archives:
+            self.skipTest("no archives")
+        checked=0
+        for arc in archives:
+            for name, data in mas.mas_unpack_to_data(arc):
+                if not name.lower().endswith('.gmt'): continue
+                g = gmt_format.parse_gmt(name, data=data)
+                for mat in g.materials:
+                    for stg in mat.stages:
+                        for s in stg.strings:
+                            if '.' in s and s.lower().split('.')[-1] in ('dds','tga','bmp'):
+                                self.assertEqual(stg.index, 3)
+                                checked += 1
+        self.assertGreater(checked, 0)
+
     def test_mesh_index_bounds_observed(self):
         # Observed: mesh index values are within vertex_count in scanned samples; index_count not always multiple of 3.
         import importlib.util, glob, os, struct
