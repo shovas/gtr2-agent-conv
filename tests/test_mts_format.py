@@ -71,7 +71,7 @@ class MtsFormatTest(unittest.TestCase):
                 continue
             for e in mas_tool.read_archive(p)[1]:
                 d = e.data or b""
-                if d[:13] != b"CUBE_MTS_4.20":
+                if d[:13] not in (b"CUBE_MTS_4.10", b"CUBE_MTS_4.20"):
                     continue
                 h = mf.parse_header(d)
                 total += 1

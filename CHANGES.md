@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-22 09:45:00 -0500 - Task 4: MTS name correlation confirmed in both variants
+- Extend `object_count - submesh_names == 1` test to CUBE MTS 4.10 (130/200 sampled) as well as 4.20; document.
+
 ## 2026-11-22 09:15:00 -0500 - Task 4: MTS vertex-triple hypothesis rejected
 - Field-level diff across 40 same-size CUBE MTS 4.20 pairs showed all 12 float slots vary, with values >1e5 in sampled records — 48-byte blocks are not simple position triples.
 - Add negative-result test and document in `docs/binary-formats.md`.
