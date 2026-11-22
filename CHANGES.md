@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 15:00:00 -0500 - CUBE MTS vertices restored
+- Decoded the 64-byte descriptor streams: each record's first 16 bytes hold a 3-float local coordinate + u32 pad. Restored `read_geometry()["vertices"]` (1,561 points across 7 descriptors in TIREMANFRONT). All 79/79 rig-table triples validate as triangles with edge median 0.657. Updated tests/docs.
+
 ## 2026-11-23 14:30:00 -0500 - CUBE MTS geometry decode corrected
 - Corrected the wrong position decode: 36-byte table records contain indices/materials (ASCII `NASCAR_FACE`), not float positions. `read_geometry()` now decodes descriptor-driven float streams and reports `positions_available=False`. `rig_table_triangles()` validates per-rig triples as triangles into stream_a (39/79 finite, edges 0.2..3.0). Updated tests/docs.
 

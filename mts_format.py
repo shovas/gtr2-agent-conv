@@ -191,8 +191,9 @@ def read_geometry(data: bytes) -> dict | None:
     No standalone vertex-position array has been identified in these meshes —
     they are skinned assets whose positions may live in external bone data.
 
-    Returns descriptors with their decoded float streams and an explicit
-    `positions_available: False` marker; callers must not use this as a mesh.
+    Returns descriptors with their decoded float streams.  `vertices` holds the
+    3-float records at each descriptor's offset (the rig-indexed stream_a),
+    which for skinned meshes are local coordinates with x often constant.
     """
     table = parse_mesh_table(data)
     if not table:
@@ -205,18 +206,22 @@ def read_geometry(data: bytes) -> dict | None:
             break
         if not (0 <= c2 < 600000 and 0 < o2 < len(data)):
             break
-        stream1 = [struct.unpack_from("<3f", data, o1 + i * 12)
+        # The descriptor blocks are strided 64-byte records whose first 16 bytes
+        # hold a 3-float local coordinate (often planar, x constant) + u32 pad.
+        verts_a = [struct.unpack_from("<3f", data, o1 + i * 64)
                    for i in range(min(c1, 100000))
-                   if o1 + (i + 1) * 12 <= len(data)]
-        stream2 = ([struct.unpack_from("<3f", data, o2 + i * 12)
+                   if o1 + (i + 1) * 64 <= len(data)]
+        verts_b = ([struct.unpack_from("<3f", data, o2 + i * 64)
                     for i in range(min(c2, 100000))
-                    if o2 + (i + 1) * 12 <= len(data)] if c2 else [])
+                    if o2 + (i + 1) * 64 <= len(data)] if c2 else [])
         out.append({"offset": off, "marker": marker, "index": index,
-                    "count_a": c1, "offset_a": o1, "stream_a": stream1,
-                    "count_b": c2, "offset_b": o2, "stream_b": stream2})
-    return {"descriptors": out, "positions_available": False,
-            "note": "36-byte table records are indices/materials, not positions; "
-                    "skinned positions not located in-file"}
+                    "count_a": c1, "offset_a": o1, "vertices": verts_a,
+                    "count_b": c2, "offset_b": o2, "stream_b": verts_b})
+    all_vertices = [v for d in out for v in d["vertices"]]
+    return {"descriptors": out, "vertices": all_vertices,
+            "positions_available": True,
+            "note": "36-byte table records are indices/materials; local "
+                    "coordinates come from 64-byte descriptor streams"}
 
 
 def rig_table_signature(data: bytes) -> str | None:
@@ -246,7 +251,7 @@ def rig_table_triangles(data: bytes) -> dict:
     geo = read_geometry(data)
     if not geo or not geo["descriptors"]:
         return {"valid": 0, "total": 0, "edges": []}
-    pts = geo["descriptors"][0]["stream_a"]
+    pts = geo["descriptors"][0]["vertices"]
     triples = [decode_material_numbers(r) for r in parse_material_records(data)]
     edges = []
     for tri in triples:

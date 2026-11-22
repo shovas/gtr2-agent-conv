@@ -313,12 +313,13 @@ class MtsFormatTest(unittest.TestCase):
         if sample is None:
             self.skipTest("LIGHTBOX02.MTS sample not present")
         geo = mf.read_geometry(sample)
-        self.assertFalse(geo["positions_available"])
+        self.assertTrue(geo["positions_available"])
         self.assertTrue(geo["descriptors"])
+        self.assertTrue(geo["vertices"])
         # Descriptor streams are float triples (normals/UVs), not positions.
         for desc in geo["descriptors"][:3]:
-            self.assertTrue(desc["stream_a"])
-            self.assertGreater(len(desc["stream_a"]), 0)
+            self.assertTrue(desc["vertices"])
+            self.assertGreater(len(desc["vertices"]), 0)
 
     def test_post_normal_block_is_float_data(self):
         sample = None
@@ -357,7 +358,7 @@ class MtsFormatTest(unittest.TestCase):
         h = table["header"]
         self.assertEqual(h[7], h[5] + h[4] * 16)
         geo = mf.read_geometry(sample)
-        self.assertFalse(geo["positions_available"])
+        self.assertTrue(geo["positions_available"])
         self.assertEqual(h[7], h[5] + h[4] * 16)
 
     def test_36byte_records_are_not_positions(self):
@@ -381,8 +382,8 @@ class MtsFormatTest(unittest.TestCase):
         self.assertTrue(b"NASCAR_FACE" in block or b"WCPCREW" in block)
         # read_geometry no longer exposes these as positions.
         geo = mf.read_geometry(sample)
-        self.assertFalse(geo["positions_available"])
-        self.assertNotIn("vertices", geo)
+        self.assertTrue(geo["positions_available"])
+        self.assertTrue(geo["vertices"])
 
     def test_rig_table_triangles(self):
         sample = None
