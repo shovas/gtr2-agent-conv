@@ -121,8 +121,12 @@ def parse_mesh_table(data: bytes) -> dict | None:
                 break
             submeshes.append(rec)
             p += 64  # observed submesh record spacing
-        # Some files have a valid count/offset header but a different submesh
-        # record layout; still expose the validated header.
+        if not submeshes and p + 24 <= len(data):
+            # Alternate ("type B") layout: no marker, fields
+            # (count_a, 0, count_b, offset_b, count_c, offset_c, 0, 0).
+            alt = struct.unpack_from("<8I", data, off + 48)
+            if alt[1] == 0 and alt[6] == 0 and 0 < alt[3] < len(data) and 0 < alt[5] < len(data):
+                submeshes = [alt]
         return {"table_offset": off, "header": v, "submeshes": submeshes}
     return None
 
