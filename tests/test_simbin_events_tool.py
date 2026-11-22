@@ -56,6 +56,19 @@ class SimbinEventsToolTest(unittest.TestCase):
                 self.assertTrue(e.car.lower().endswith(".car"))
                 self.assertGreater(e.metadata_offset, 0)
 
+    def test_gtr2_replay_metadata(self):
+        files = _files(".vcr")
+        if not files:
+            self.skipTest("GTR2 VCR files not present")
+        for p in files:
+            with self.subTest(path=p.name):
+                e = setool.parse_file(p)
+                self.assertEqual(e.kind, "IRSR")
+                self.assertTrue(e.team)
+                self.assertTrue(e.driver)
+                self.assertIsNone(e.co_driver)
+                self.assertTrue(e.car.lower().endswith(".car"))
+
     def test_rf1_replay_metadata(self):
         base = ROOT.parent / "RF1Vanilla"
         files = [p for p in base.rglob("*") if p.is_file() and p.suffix.lower() == ".vcr"]

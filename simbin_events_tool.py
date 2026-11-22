@@ -30,6 +30,7 @@ class EventFile:
     strings: list[tuple[int, str]] = field(default_factory=list)
     driver: str | None = None
     co_driver: str | None = None
+    team: str | None = None
     car: str | None = None
     metadata_offset: int = -1
 
@@ -73,6 +74,36 @@ def parse_metadata(data: bytes, off: int, kind: str) -> dict | None:
         return None
     return {"offset": off, "driver": names[0],
             "co_driver": names[1] if len(names) > 1 else None, "car": car}
+
+
+def parse_gtr2_irsr_metadata(data: bytes, off: int) -> dict | None:
+    """Parse GTR2-IRSR metadata: 11-byte prefix, 5-byte field, two Pascal names
+    (team, driver), then a NUL-terminated car filename. Validated on 9 files.
+    """
+    if off + 16 >= len(data):
+        return None
+    q = off + 16
+    names = []
+    for _ in range(2):
+        size = data[q]
+        q += 1
+        if not (0 < size < 80) or q + size > len(data):
+            return None
+        name = data[q:q + size]
+        if not name or not all(32 <= c < 127 for c in name):
+            return None
+        names.append(name.decode("latin-1"))
+        q += size
+    while q < len(data) and data[q] == 0:
+        q += 1
+    j = q
+    while j < len(data) and 32 <= data[j] < 127:
+        j += 1
+    car = data[q:j].decode("latin-1")
+    if not car.lower().endswith(".car"):
+        return None
+    return {"offset": off, "driver": names[1], "co_driver": None,
+            "team": names[0], "car": car}
 
 
 def _read_u32_string(data: bytes, off: int) -> tuple[str, int]:
@@ -129,6 +160,8 @@ def parse_payload(data: bytes) -> EventFile:
         second, off = _read_u32_string(data, off)
         names = [first, second]
         meta = parse_metadata(data, off, kind)
+        if meta is None and kind == "IRSR":
+            meta = parse_gtr2_irsr_metadata(data, off)
         trk, aiw = names
     strings = []
     i = off
@@ -145,6 +178,7 @@ def parse_payload(data: bytes) -> EventFile:
     return EventFile(kind=kind, version=version, trk=trk, aiw=aiw, strings=strings,
                      driver=meta["driver"] if meta else None,
                      co_driver=meta["co_driver"] if meta else None,
+                     team=meta.get("team") if meta else None,
                      car=meta["car"] if meta else None,
                      metadata_offset=meta["offset"] if meta else -1)
 
@@ -163,8 +197,8 @@ def main(argv=None) -> int:
     e = parse_file(args.file)
     print(f"kind={e.kind} version={e.version} trk={e.trk!r} aiw={e.aiw!r}")
     if e.driver:
-        print(f"driver={e.driver!r} co_driver={e.co_driver!r} car={e.car!r} "
-              f"meta_offset={e.metadata_offset:#x}")
+        print(f"driver={e.driver!r} co_driver={e.co_driver!r} team={e.team!r} "
+              f"car={e.car!r} meta_offset={e.metadata_offset:#x}")
     print(f"printable_strings={len(e.strings)}")
     for off, s in e.strings[:args.strings]:
         print(f"  {off}: {s[:80]}")
