@@ -1,6 +1,6 @@
 # Binary Formats Inventory (GTL/GTR2)
 
-First-pass inventory for GTL (`../GTLSteam/GameData`) and GTR2 (`../GTR2Steam/GameData`). Goal: identify, understand, and provide read/write path for every binary file format possible.
+First-pass inventory for GTL (`../GTLSteam/GameData`) and GTR2 (`../GTR2Steam/GameData`), with cross-game observations from BMW M3 Challenge (`../BMW M3 Challenge`). Goal: identify, understand, and provide read/write path for every binary file format possible.
 
 **Legend**
 - **R/W**: lossless read/write capability in this repo/tooling, or standard library path.
@@ -10,7 +10,7 @@ First-pass inventory for GTL (`../GTLSteam/GameData`) and GTR2 (`../GTR2Steam/Ga
 
 | Ext | GTL+GTR2 count | Kind | Magic/header (observed) | Understanding | R/W path |
 |---|---:|---|---|---|---|
-| `.gtl`, `.gtr` | 1113 | Game archive (MAS) | `GMOTORMAS10\0\0\0\0\0` | high | `mas_tool.py` create/list/extract/add/update/delete; round-trip verified on real files |
+| `.gtl`, `.gtr`, `.bmw` | 1113 + 17 (BMW M3 Challenge) | Game archive (MAS) | `GMOTORMAS10\0\0\0\0\0` | high | `mas_tool.py` create/list/extract/add/update/delete; round-trip verified on real GTR2/GTL and BMW M3 Challenge `.bmw` archives |
 | `.gmt` | 56 loose (+26931 in archives) | 3D mesh/model | normal: `c8cfd2d8ced8e6c3d6ded8bebba7bf90` at 0x08; obj_list_offset at 0x00 | medium | `gmt_tool.py` info/scan/diff; `gmt_format.py` structural parse/write (header, mesh table, vertex/index blobs, material tail best-effort) with lossless round-trip tests. See `docs/gmt-format.md` |
 | `.aiw` | 59 | Text waypoint file (SimBin header has null bytes) | `//[[gMa1.000f...]]` | high (text) | Text read/write; `rfactortools/aiw.py` parses it. Observed: all 59 start with `//[[gMa1.000`; contain `[Features]`. Lossless byte round-trip trivial. |
 | `.dsi` | 142 | Gzip-compressed SimBin text | gzip `1f8b08`, payload `//[[gMb1.000f...]]` | high | `gzip_simbin_tool.py` info/extract/create (deterministic gzip). Content round-trip verified |
@@ -38,8 +38,15 @@ These are usually text but may contain null-padded SimBin headers: `.aiw`, `.svm
 
 ## Game-specific binary formats: status
 
+### BMW M3 Challenge cross-corpus observations (evidence only)
+- 17 `.bmw` files are GMOTORMAS10 type-0 archives (2,720 members total), readable and member-level lossless round-trippable with `mas_tool.py` unchanged.
+- 976 GMTs (26 loose + 950 inside `.bmw`) all have normal GMT magic.
+- 75 FXM-family files (`FXM `/`FXA `/`LMA ` magics) all use known magics; 5 have extension != magic (e.g. `TE_wait-l.FXM` is `LMA `, `FPDriverRHD_M02.LMA` is `FXM `).
+- `.psh`/`.vsh` inside archives are plain-text HLSL/PS1.1 shader sources; embedded `.db` is a Windows thumbnail cache. No new binary format found.
+- Verification: `tests/test_bmw_m3.py`.
+
 ### Done / strong
-- **MAS (`.gtr/.gtl/.mas`)**: full read/write in `mas_tool.py`, tested on real GTR2/GTL archives.
+- **MAS (`.gtr/.gtl/.mas/.bmw`)**: full read/write in `mas_tool.py`, tested on real GTR2/GTL and BMW M3 Challenge archives.
 - **DSI/HAT/GTT/VCR**: gzip container understood; `gzip_simbin_tool.py` extracts/creates deterministic payloads (GTTF for GTT, IRSR for VCR).
 - **FXM/FXA/LMA**: magic identified (`FXM `/`FXA `/`LMA `), lossless round-trip, heuristic node/bone name extraction; BE header interpretation may overlap string data. Two observed layout families: first string at offset 19 (common in LMA driver skeletons, bone names; 113 files observed with BE u16[1]==257, BE u32[2] in {1,256}, BE u32[3] in {80,184}, BE u32[4]==1, BE u32[5] in {65,66,67,77}) and offset 30 (common in FXA/FXM pit animations, "3D Studio Max..." source string; all 142 offset-30 files observed with BE u16[1]==257, BE u32[2]==4096, BE u32[4]==256, BE u32[5]==528; most contain a source path string within 300 bytes). In sampled GTR2 LMAs, many Bip01 node names are preceded by a 12-byte LE(u32,u32,u32) prefix where third==1 and second matches BE header u32 at offset 8 (semantics unconfirmed). Internal animation/keyframe/node-record structure not fully decoded.
 

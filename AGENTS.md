@@ -10,6 +10,7 @@
 ## Key locations
 - `../rfactortools/` - inspiration/reference repo (rFactor -> GSC2013 tools, Python package). Read before implementing conversions; reuse patterns where they fit GTR2.
 - `../GTR2Steam/` - local GTR2 Steam install (1.6G). **Target-format reference**: real `GameData` layout, `.car/.hdc/.eng/.tyr/.aud/.gdb/.trk`, and `.gtr` GMOTORMAS10 archives. Read-only reference; do not copy into repo.
+- `../BMW M3 Challenge/` - local BMW M3 Challenge install (369M, moved from in-project to workspace root). **ISIMotor source reference**: 17 `.bmw` GMOTORMAS10 archives (readable by `mas_tool.py`), loose `.gmt/.fxm/.fxa/.lma/.car/.hdc/.eng/.tyr/.trk/.aiw` and media. Read-only reference; do not copy into repo.
 - `../GTLSteam/` - local GT Legends Steam install (1.8G). **ISIMotor source reference**: `.CAR` (uppercase) files, `.gtl` GMOTORMAS10 archives, GTL-era GDB/classes. Read-only reference; do not copy into repo.
 - `../legacy/` - prior attempt artifacts moved from `tools.unsorted`. Contains ad-hoc probe/phase scripts and small sample fixtures (`aiw_*`, `Brianza_*`). Treat as reference, not authoritative; not part of this repo.
 - `../hand_selected/` - hand-picked artifacts recovered from `tools.unsorted.irrelevant`. Small samples: `audtest/default.aud`, `gtr1_sniffnnbe5l6i/.../Mesh.gtr`, `xval_r7/*.car`, `xval_test` (`.gtr/.GMT/.TGA/.JPG`). Large generated output trees are present locally for reference but are outside this repo.
