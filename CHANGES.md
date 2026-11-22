@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 02:00:00 -0500 - Task 4: FXM key_count invariant
+- Verify `key_count==3` in all 148 sampled node records (fixed field, distinct from the 2 decoded TRS keys); add corpus assertion and document as unconfirmed-meaning invariant.
+
 ## 2026-11-23 01:30:00 -0500 - Task 4: expose RaceGMT materials in CLI
 - `race_gmt.py --materials` prints decoded material groups with per-stage type/channel; add CLI test.
 

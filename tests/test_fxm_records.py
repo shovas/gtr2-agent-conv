@@ -65,6 +65,7 @@ class FxmRecordTest(unittest.TestCase):
                 if not found:
                     continue
                 for node in found:
+                    self.assertEqual(node["key_count"], 3)
                     self.assertEqual(fxm_tool.decode_node_keys(data, node)["trailer"],
                                      node["size_hint"] - 84)
                 nodes.extend(found)
