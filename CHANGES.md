@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-22 19:45:00 -0500 - Task 4: no index block after normals
+- Verify bytes following the validated normal block are float data, not u16 vertex indices; add test and document. Material IDs remain stable but semantically unresolved.
+
 ## 2026-11-22 19:15:00 -0500 - Task 4: MTS table fields corrected
 - Tighten table validation (v[1]>=0x100, ordered offsets) preserving 200/200 coverage; verify last table u32 is the end of the normal block, not a u16 index array. `read_geometry()` no longer emits bogus indices. Add tests and document.
 

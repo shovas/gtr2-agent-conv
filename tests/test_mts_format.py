@@ -256,6 +256,26 @@ class MtsFormatTest(unittest.TestCase):
         self.assertEqual(len(geo["normals"]), 97)
         self.assertEqual(len(geo["indices"]), 0)
 
+    def test_post_normal_block_is_float_data(self):
+        sample = None
+        for a in glob.glob(str(ROOT.parent / "NascarSimRacing" / "**" / "*"), recursive=True):
+            p = Path(a)
+            if p.is_file() and p.suffix.lower() == ".mas":
+                for e in mas_tool.read_archive(p)[1]:
+                    if e.name == "LIGHTBOX02.MTS" and (e.data or b"")[:13] == b"CUBE_MTS_4.20":
+                        sample = e.data
+                        break
+            if sample:
+                break
+        if sample is None:
+            self.skipTest("LIGHTBOX02.MTS sample not present")
+        h = mf.parse_mesh_table(sample)["header"]
+        off = h[7]
+        values = struct.unpack_from("<64f", sample, off)
+        # Float bit patterns in 0x3x-0x4x range, not small u16 vertex indices.
+        words = struct.unpack_from("<32I", sample, off)
+        self.assertGreater(sum(1 for w in words if 0x3E000000 <= w <= 0x4B000000), 5)
+
     def test_normal_end_field_is_not_an_index_array(self):
         sample = None
         for a in glob.glob(str(ROOT.parent / "NascarSimRacing" / "**" / "*"), recursive=True):
