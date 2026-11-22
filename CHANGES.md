@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 03:30:00 -0500 - Task 4: new-layout stage-type map
+- `gmt_format.build_stage_type_map()` mirrors the RaceGMT stage-type decoder for new-layout GMTs; validated per-format values (L0DIFFUSET0→1, L1BUMPSPECMAPT0→5, L1SPECULART0→4). Add test and document.
+
 ## 2026-11-23 03:00:00 -0500 - Task 4: GTR2-IRSR metadata decoded
 - `simbin_events_tool.parse_gtr2_irsr_metadata()` decodes GTR2 replays (11-byte prefix, 5-byte field, team/driver Pascal names, car filename); validated 9/9 files. Added `EventFile.team` and CLI output; add test and document.
 

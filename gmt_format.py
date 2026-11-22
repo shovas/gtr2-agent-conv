@@ -229,6 +229,24 @@ def _decode_extra_vertices(extra_data: bytes, count: int) -> List[GmtVertexExtra
     return out
 
 
+def build_stage_type_map(materials: List[GmtMaterial]) -> dict:
+    """Map new-layout GMT stage name -> dominant type (tail_u32_64).
+
+    Mirrors `race_gmt.build_stage_type_map()`. Per-format maps are required:
+    new-layout values differ from RaceGMT (e.g. L1SPECULART0 is 4, not 5).
+    Returns `{name: (dominant_type, count, total)}`, ignoring implausible tails.
+    """
+    from collections import Counter
+    counts: dict[str, Counter] = {}
+    for material in materials:
+        for stage in material.stages:
+            if not stage.name or stage.tail_u32_64 >= 100:
+                continue
+            counts.setdefault(stage.name, Counter())[stage.tail_u32_64] += 1
+    return {name: (c.most_common(1)[0][0], c.most_common(1)[0][1], sum(c.values()))
+            for name, c in counts.items()}
+
+
 def parse_gmt(path: str | Path, data: bytes | None = None) -> GmtFile:
     p = Path(path)
     d = data if data is not None else p.read_bytes()

@@ -223,6 +223,37 @@ class GmtFormatTest(unittest.TestCase):
                 return
         self.skipTest("DETOMASO_PANTERA_RAINSCREEN.GMT not found")
 
+    def test_stage_type_map_new_layout(self):
+        import glob
+        import mas_tool
+        materials = []
+        count = 0
+        paths = glob.glob(str(ROOT.parent / "GTR2Steam" / "**" / "*.gtr"), recursive=True)
+        paths += glob.glob(str(ROOT.parent / "GTR2Steam" / "**" / "*.mas"), recursive=True)
+        for archive in paths:
+            try:
+                _, entries = mas_tool.read_archive(archive)
+            except Exception:
+                continue
+            for entry in entries:
+                if not entry.name.lower().endswith(".gmt"):
+                    continue
+                try:
+                    g = gmt_format.parse_gmt("x.gmt", entry.data or b"")
+                except Exception:
+                    continue
+                materials.extend(g.materials)
+                count += 1
+            if count >= 400:
+                break
+        if not materials:
+            self.skipTest("GTR2 archived GMTs not present")
+        tmap = gmt_format.build_stage_type_map(materials)
+        # Per-format values differ from RaceGMT (see race_gmt tests).
+        self.assertEqual(tmap["L0DIFFUSET0"][0], 1)
+        self.assertEqual(tmap["L1BUMPSPECMAPT0"][0], 5)
+        self.assertEqual(tmap["L1SPECULART0"][0], 4)
+
     def test_material_header_and_stage_trailing_params_observed(self):
         # Observed (semantics unconfirmed) numeric fields in material header and stage tails.
         import importlib.util, struct
