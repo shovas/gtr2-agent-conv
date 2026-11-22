@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 11:00:00 -0500 - PHS review: program-analysis angles
+- Checked GTL executables/DLLs for PAR2 vocabulary (no hits), attempted Wine runtime trace (blocked by missing MFC42), compared recovery slices (distinct exponents 0x35/0x3a/0x3b) and entropy vs controls (slice bodies ≈ random, consistent with parity data). Added evidence to `docs/phs-research.md`.
+
 ## 2026-11-23 10:30:00 -0500 - PHS identified as PAR2 recovery data
 - Parsed the full PAR2-style packet chain: 64-byte header, contiguous lengths, Main packet (slice 384000, file id 2f1fc214...) and FileDesc naming `GTL_Update_0901.exe`. Four PHS files are recovery containers for one update executable; PHYSICS.PHS is an opaque 13KB blob. Updated `phs_tool.py`, tests, and `docs/phs-research.md` evidence table; recommend defer.
 

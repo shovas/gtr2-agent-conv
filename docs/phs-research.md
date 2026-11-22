@@ -50,6 +50,23 @@ structured physics data.
 - `tests/test_phs_tool.py` — validates packet chain, Main metadata and FileDesc filename
 - `docs/binary-formats.md`, `CHANGES.md` — experiment log
 
+## Follow-up review (2026-11-23, second pass)
+
+New angles tried that were not in the first investigation:
+
+| Experiment | Result | Interpretation |
+|---|---|---|
+| `strings` for `PAR2`, `PAR 2.0`, `RecvSlic`, `FileDesc`, `Update_0901` across `GTL.exe`, `GTLDedicated.exe`, `GTLConfig.exe`, `GTLReporter.exe`, and all DLLs | **No hits** | GTL binaries contain no PAR2 vocabulary; consistent with PHS being unused update artifacts, not proof (loader may use hashes/indices) |
+| Runtime trace under Wine (`WINEDEBUG=+file`) | GTL exits with status 53; `Net.dll` needs `MFC42.DLL`, unavailable; winetricks `mfc42` fails (status 43) | Runtime consumer trace is **blocked by environment**, not by evidence |
+| Compare `RecvSlic` bodies across AI/TRACKS/CARS | Distinct bodies, exponent fields `0x3b`, `0x3a`, `0x35`; each body MD5 differs | Distinct recovery slices for one file — expected PAR2 behaviour |
+| Entropy of slice bodies vs controls | Slice bodies 7.9996 bits/byte ≈ `os.urandom` 7.9969; compressed BIK 7.73; zlib text 2.67 | Uniformly random, consistent with Reed–Solomon parity data |
+| File length divisibility | 384000-byte slice size; files hold 1–2 full slices plus metadata/partial slices | Consistent with truncated/partial PAR2 sets |
+| `PHYSICS.PHS` entropy | 7.986 (slightly below the other four); no PAR2 packets | Still opaque; could be a partial slice or unrelated blob |
+
+Excluded by this pass: a literal PAR2-aware loader in the GTL binaries; a feasible
+Wine runtime trace in this environment; identical recovery slices across the PHS
+files. None of these contradict the recovery-container conclusion.
+
 ## Recommendation
 
 **Defer further decoding.** The recovery-data hypothesis is structurally validated;
