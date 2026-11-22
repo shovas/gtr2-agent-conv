@@ -75,6 +75,40 @@ def parse_metadata(data: bytes, off: int, kind: str) -> dict | None:
             "co_driver": names[1] if len(names) > 1 else None, "car": car}
 
 
+def _read_u32_string(data: bytes, off: int) -> tuple[str, int]:
+    size = struct.unpack_from("<I", data, off)[0]
+    off += 4
+    if size > 4096 or off + size > len(data):
+        raise ValueError("invalid filename length")
+    return data[off:off + size].decode("latin-1"), off + size
+
+
+def parse_rf1_metadata(data: bytes, off: int) -> dict | None:
+    """Parse rFactor-era IRSR metadata: 9-byte prefix, 1-byte-length driver,
+    NUL-terminated vehicle and skin names. Validated on 5 RF1Vanilla replays.
+    """
+    RF1_PREFIX = bytes.fromhex("000048030100000000")
+    if data[off:off + 9] != RF1_PREFIX:
+        return None
+    q = off + 9
+    if q >= len(data):
+        return None
+    size = data[q]
+    if not (0 < size < 80) or q + 1 + size > len(data):
+        return None
+    driver = data[q + 1:q + 1 + size].decode("latin-1")
+    q += 1 + size
+    if q >= len(data) or data[q] != 0:
+        return None
+    j = data.find(b"\0", q + 1)
+    if j < 0:
+        return None
+    vehicle = data[q + 1:j].decode("latin-1")
+    if not vehicle.lower().endswith(".veh"):
+        return None
+    return {"offset": off, "driver": driver, "co_driver": None, "car": vehicle}
+
+
 def parse_payload(data: bytes) -> EventFile:
     kind = next((m.decode() for m in MAGICS if m in data[:64]), None)
     if kind is None:
@@ -82,15 +116,20 @@ def parse_payload(data: bytes) -> EventFile:
     off = data.index(kind.encode()) + 4
     version = struct.unpack_from("<f", data, off)[0]
     off += 4
-    names = []
-    for _ in range(2):
-        size = struct.unpack_from("<I", data, off)[0]
-        off += 4
-        if size > 4096 or off + size > len(data):
-            raise ValueError("invalid filename length")
-        names.append(data[off:off + size].decode("latin-1"))
-        off += size
-    meta = parse_metadata(data, off, kind)
+    first, off = _read_u32_string(data, off)
+    if first.lower().endswith(".rfm"):
+        # rFactor-lineage replay: mod, (empty), SCN, AIW.
+        names = [first]
+        for _ in range(3):
+            name, off = _read_u32_string(data, off)
+            names.append(name)
+        meta = parse_rf1_metadata(data, off)
+        trk, aiw = names[2], names[3]
+    else:
+        second, off = _read_u32_string(data, off)
+        names = [first, second]
+        meta = parse_metadata(data, off, kind)
+        trk, aiw = names
     strings = []
     i = off
     while i < len(data):
@@ -103,7 +142,7 @@ def parse_payload(data: bytes) -> EventFile:
             i = j + 1
         else:
             i += 1
-    return EventFile(kind=kind, version=version, trk=names[0], aiw=names[1], strings=strings,
+    return EventFile(kind=kind, version=version, trk=trk, aiw=aiw, strings=strings,
                      driver=meta["driver"] if meta else None,
                      co_driver=meta["co_driver"] if meta else None,
                      car=meta["car"] if meta else None,

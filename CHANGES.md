@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 02:30:00 -0500 - Task 4: rF1-IRSR metadata decoded
+- `simbin_events_tool.parse_rf1_metadata()` decodes rFactor-era replays (mod/SCN/AIW strings, fixed 9-byte prefix, driver and vehicle names); validated 5/5 RF1Vanilla files. Branch added to `parse_payload` keyed on `.rfm`; add test and document.
+
 ## 2026-11-23 02:00:00 -0500 - Task 4: FXM key_count invariant
 - Verify `key_count==3` in all 148 sampled node records (fixed field, distinct from the 2 decoded TRS keys); add corpus assertion and document as unconfirmed-meaning invariant.
 

@@ -56,6 +56,21 @@ class SimbinEventsToolTest(unittest.TestCase):
                 self.assertTrue(e.car.lower().endswith(".car"))
                 self.assertGreater(e.metadata_offset, 0)
 
+    def test_rf1_replay_metadata(self):
+        base = ROOT.parent / "RF1Vanilla"
+        files = [p for p in base.rglob("*") if p.is_file() and p.suffix.lower() == ".vcr"]
+        if not files:
+            self.skipTest("rF1 replays not present")
+        for p in files:
+            with self.subTest(path=p.name):
+                e = setool.parse_file(p)
+                self.assertEqual(e.kind, "IRSR")
+                self.assertTrue(e.trk.lower().endswith(".scn"))
+                self.assertTrue(e.aiw.lower().endswith(".aiw"))
+                self.assertEqual(e.driver, "Shovas")
+                self.assertTrue(e.car.lower().endswith(".veh"))
+                self.assertIsNone(e.co_driver)
+
     def test_bmw_and_gtl_metadata(self):
         bmw = ROOT.parent / "BMWM3Challenge"
         gtl = ROOT.parent / "GTLSteam"
