@@ -1,6 +1,6 @@
 # Binary Formats Inventory (GTL/GTR2)
 
-First-pass inventory for GTL (`../GTLSteam/GameData`) and GTR2 (`../GTR2Steam/GameData`), with cross-game observations from BMW M3 Challenge (`../BMWM3Challenge`), rFactor 1 vanilla (`../RF1Vanilla`), Copa Petrobras de Marcas (`../CopaPetrobrasdeMarcas`), Sports Car GT (`../SportsCarGtUsa`), Automobilista (`../Automobilista`), F1 2002 (`../F12002`), F1 Challenge 99-02 (`../F1C`) and Stock Car Extreme (`../StockCarExtreme`). Goal: identify, understand, and provide read/write path for every binary file format possible.
+First-pass inventory for GTL (`../GTLSteam/GameData`) and GTR2 (`../GTR2Steam/GameData`), with cross-game observations from BMW M3 Challenge (`../BMWM3Challenge`), rFactor 1 vanilla (`../RF1Vanilla`), Copa Petrobras de Marcas (`../CopaPetrobrasdeMarcas`), Sports Car GT (`../SportsCarGtUsa`), Automobilista (`../Automobilista`), F1 2002 (`../F12002`), F1 Challenge 99-02 (`../F1C`), Stock Car Extreme (`../StockCarExtreme`) and Race 07 (`../Race07Vanilla`). Goal: identify, understand, and provide read/write path for every binary file format possible.
 
 **Legend**
 - **R/W**: lossless read/write capability in this repo/tooling, or standard library path.
@@ -37,6 +37,13 @@ First-pass inventory for GTL (`../GTLSteam/GameData`) and GTR2 (`../GTR2Steam/Ga
 These are usually text but may contain null-padded SimBin headers: `.aiw`, `.svm`, `.ani`, `.ds`, `.dst`, `.gdb`, `.trk`, `.car`, `.hdc`, `.eng`, `.tyr`, `.aud`, `.dmg`, `.sp`, `.grb`, `.hed`, `.cam`, `.grd`, `.rcd`, `.set`, `.txt`, `.cdb`, `.ddb`, `.tec`, `.fxm`? No - `.fxm` is binary FXM. `.cas` is text-like.
 
 ## Game-specific binary formats: status
+
+### Race 07 (SimBin, 2007) cross-corpus observations (evidence only, `../Race07Vanilla`)
+- 2 small `.gtr` archives (`DevFiles/CamEd/ingame.gtr`, `GameData/Scripts/crew.gtr`) are MAS type 0. The 5 GMTs in `crew.gtr` use the **standard new layout** (magic at 0x08) and parse/round-trip with `gmt_format.py`.
+- All 21,687 loose GMTs start with `0f b1 ff ff 03 00 00 00`, have entropy ~7.9, match neither the standard 0x08 nor old 0x1D4 magic, and do not respond to ISI enctype 0/1 (skip 0/4/8/16), rfactordec altmode, or standard zlib/gzip/bz2/lzma. **Format undecoded** — a third, opaque GMT representation despite Race 07 being a GTL/GTR2 sibling.
+- 195 animation files (`FXM `/`FXA `/`LMA `): 77 FXM/FXM, 62 LMA/LMA, 22 FXM/LMA, 22 FXA/LMA, 12 FXA/FXA — extension/magic mismatches common.
+- No filesystem file carries a known ISI 16-byte signature.
+- Verification: `tests/test_race07.py`.
 
 ### Stock Car Extreme (Reiza, GSC-based) cross-corpus observations (evidence only, `../StockCarExtreme`)
 - 196 `.mas` archives use the standard MAS type-1 signature; 71,814 members total.

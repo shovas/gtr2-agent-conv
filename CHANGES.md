@@ -2,6 +2,11 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-21 22:50:00 -0500 - Race 07 corpus: opaque loose GMTs documented
+- Add `../Race07Vanilla/` as SimBin sibling reference.
+- Add `tests/test_race07.py`: 2 MAS type-0 archives (5 standard-layout GMTs in `crew.gtr`), 21,687 loose GMTs with opaque `0fb1ffff03000000` header (undecoded), FXM-family extension/magic mismatches.
+- Document in `docs/binary-formats.md`.
+
 ## 2026-11-21 22:35:00 -0500 - Stock Car Extreme corpus added and reviewed
 - Add `../StockCarExtreme/` as GSC-lineage source reference.
 - Add `tests/test_stockcar_extreme.py`: 196 MAS type-1 archives, GSC-signature decryption, sampled old-layout GMTs.
