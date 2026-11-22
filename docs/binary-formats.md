@@ -19,7 +19,7 @@ First-pass inventory for GTL (`../GTLSteam/GameData`) and GTR2 (`../GTR2Steam/Ga
 | `.vcr` | 13 | Gzip-compressed SimBin replay (IRSR payload) | gzip `1f8b08`, payload `//[[gMb1.000f...]]\nIRSR...` | high (container) | `gzip_simbin_tool.py` decompress/compress; `simbin_events_tool.py` reads magic/version/TRK/AIW/strings. Frame record semantics undecoded. |
 | `.fxm` | 135 | SimBin 3ds Max animation/export | `FXM ` | medium | `fxm_tool.py` info/nodes/roundtrip; header partially observed (BE fixed-header interpretation can overlap string data), decoded skeleton-node table + TRS keyframes via `parse_node_records()` / `decode_node_keys()`, exposed by `fxm_tool.py keys`; trailer semantics unconfirmed |
 | `.fxa` | 4 | SimBin animation (FXM family) | `FXA ` | medium | `fxm_tool.py` info/nodes/roundtrip; same container family observations as FXM |
-| `.phs` | 5 (in GTL MAS) | SimBin physics/AI binary (PHYSICS/CARS/DRIVERS/AI/TRACKS; distinct from `.psh` shaders) | high-entropy, no known magic | low | Identified; lossless byte copy possible. Not ISI 16-byte-header, not JCA (all keys tried), no zlib/gzip. Follow-up hypothesis recorded in `docs/task-plan.md`. |
+| `.phs` | 5 (in GTL MAS) | SimBin physics/AI binary (PHYSICS/CARS/DRIVERS/AI/TRACKS; distinct from `.psh` shaders) | high-entropy, no known magic | low | Identified; lossless byte copy possible. Not ISI 16-byte-header, not JCA (all keys tried). Bounded 2026-11-23 probe: no zlib/gzip/lzma/bz2 stream at any skip 0..64 and no repeating-key XOR signal (index of coincidence ~0.0039, i.e. random) across key lengths 2..32. Follow-up hypothesis recorded in `docs/task-plan.md`. |
 | `.lma` | 116 | SimBin animation (FXM magic/variant) | `LMA ` observed in GTR2/GT Legends | medium | `fxm_tool.py` info/nodes/roundtrip; node/bone strings extractable; internal structure unconfirmed |
 | `.svm` | 258 | SimBin text-like with null padding | `//[[gMa1.000f...]] [[\0...]]` | high (text-ish) | Treat as text/binary-safe bytes; preserve null padding. Not a structured binary format |
 | `.ani` | 60 | Text animation/script | `// ...` | high (text) | Plain text read/write |
@@ -89,7 +89,7 @@ These are usually text but may contain null-padded SimBin headers: `.aiw`, `.svm
 - 118 `.mas` archives use the `CUBEMAS2.50\0` signature (type 5 in `mas_tool.py`): 12-byte magic, u32 count, u32 data_size, then 256-byte records `name[244], size, zsize, 4 padding` starting at 0x14. Data is sequential after the table. 30,909 members total.
 - Member compression variants: 25,392 raw (`size == zsize`), 23,997 plain zlib (`.vrl` meshes), 5,198 16-byte-header + zlib (`.bmp` textures), and 319 tiny textures with an undecoded variant preserved losslessly (`Entry.type == 2`).
 - All 118 archives round-trip at member level with `mas_tool.py`.
-- Other formats: 71 `.scn` (`CUBEASF`), 55 `.aiw`, 26 `.veh`, 22 `.tgq` (`SCHl` header — not decoded).
+- Other formats: 71 `.scn` (`CUBEASF`), 55 `.aiw`, 26 `.veh`, 22 `.tgq` (`SCHl` header — not decoded). Bounded 2026-11-23 probe: no valid zlib stream at candidate `78 9c/da/01` headers and no ASCII strings in the first 20 KB; only QuickBMS `SCHl` reference targets a different game.
 - Verification: `tests/test_f12000.py`.
 
 ### NASCAR Thunder 2004 (ISI, 2003) cross-corpus observations (evidence only, `../NT2004`)

@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 07:30:00 -0500 - Docs: bounded PHS/.tgq probe results
+- Record negative results: PHS has no standard-compression stream (skip 0..64) and no repeating-key XOR signal (IC ~0.0039), and .tgq has no valid zlib stream or ASCII strings in the first 20 KB. Both remain blocked without an external spec.
+
 ## 2026-11-23 07:00:00 -0500 - Task 4: MTS records are shared rig tables
 - `mts_format.rig_table_signature()` shows the 4.10 36-byte records are shared per rig (4 distinct tables across 22 files: pit crew, R_ARM/R_TGT, L_ARM, JET), revising the earlier "per-asset material ID" interpretation. Add test and document.
 
