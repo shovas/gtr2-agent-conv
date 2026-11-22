@@ -2,6 +2,10 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-22 12:45:00 -0500 - Task 4: descriptor packed field decoded
+- Descriptor+32 u32 is a packed field: high16 0x4890/0x2890, low16 small values; add `mts_format.descriptor_fields()` + distribution test.
+- Pair diffs at +32/+164 did not resolve into vertex/index offsets; documented as unresolved.
+
 ## 2026-11-22 12:15:00 -0500 - Task 4: CUBE MTS descriptor grid
 - Locate submesh names as anchors: in LIGHTBOX02.MTS names sit at 216/412/608/804 (196-byte stride); dominant spacing in 206/300 sampled files.
 - Add `mts_format.submesh_descriptors()` + test; document in `docs/binary-formats.md`.

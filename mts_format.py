@@ -69,6 +69,21 @@ def submesh_descriptors(data: bytes) -> list[tuple[int, str]]:
     return out
 
 
+DESCRIPTOR_FLAG_32 = 0x4890
+DESCRIPTOR_FLAG_ALT = 0x2890
+
+
+def descriptor_fields(data: bytes, offset: int) -> tuple[int, int]:
+    """Decode the observed packed u32 at descriptor+32 as (flag, low).
+
+    Across 2,001 sampled descriptors the high 16 bits were 0x4890 (1,953)
+    or 0x2890 (48); the low 16 bits are small values (0, 2, 32, 96, 2048,
+    2080). Semantics of the two halves are unconfirmed.
+    """
+    u = struct.unpack_from("<I", data, offset + 32)[0]
+    return u >> 16, u & 0xFFFF
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("files", nargs="+")

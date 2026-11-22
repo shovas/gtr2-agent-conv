@@ -104,6 +104,28 @@ class MtsFormatTest(unittest.TestCase):
             off += 12
         self.assertLess(sum(0.9 < m < 1.1 for m in mags) / len(mags), 0.5)
 
+    def test_descriptor_packed_field_pattern(self):
+        flags = lows = total = 0
+        for a in glob.glob(str(ROOT.parent / "NascarSimRacing" / "**" / "*"), recursive=True):
+            p = Path(a)
+            if not p.is_file() or p.suffix.lower() != ".mas":
+                continue
+            for e in mas_tool.read_archive(p)[1]:
+                d = e.data or b""
+                if d[:13] != b"CUBE_MTS_4.20":
+                    continue
+                for off, _ in mf.submesh_descriptors(d):
+                    hi, lo = mf.descriptor_fields(d, off)
+                    total += 1
+                    flags += hi in (mf.DESCRIPTOR_FLAG_32, mf.DESCRIPTOR_FLAG_ALT)
+                    lows += lo in (0, 2, 32, 96, 2048, 2080)
+            if total >= 1000:
+                break
+        if total == 0:
+            self.skipTest("CUBE MTS descriptors not present")
+        self.assertGreater(flags / total, 0.95)
+        self.assertGreater(lows / total, 0.9)
+
     def test_submesh_descriptor_grid(self):
         sample = None
         for a in glob.glob(str(ROOT.parent / "NascarSimRacing" / "**" / "*"), recursive=True):
