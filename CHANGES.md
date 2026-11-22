@@ -9,6 +9,9 @@ Newest-first change log. Timestamps use repository commit dates (ISO 8601, local
 - Parse JPG SOF dimensions/bit depth and MP3 frame header metadata in `media_tool.py`.
 - Add real-file JPG/MP3 metadata tests.
 
+## 2026-11-22 00:55:00 -0500 - FXM offset-19 header observations
+- Add observed scan test: offset-19 FXA/FXM/LMA files have BE u16[1]==257, BE u32[2] in {1,256}, BE u32[5] in {65,66,67,77}.
+
 ## 2026-11-22 00:45:00 -0500 - GMT mesh rec[24..26] pattern observations
 - Refine observed scan: rec[24..26] only three patterns in 50,054 meshes: (0xFFFFFFFF,0,0), (0,0xFFFFFFFF,0), (0xFFFFFFFF,0,1098907648==18.0f).
 

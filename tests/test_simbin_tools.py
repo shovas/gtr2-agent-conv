@@ -187,6 +187,25 @@ class SimbinToolsTest(unittest.TestCase):
         self.assertGreaterEqual(haspath, off30 - 10)
 
 
+    def test_fxm_offset19_header_observations(self):
+        # Observed: offset-19 FXA/FXM/LMA files have BE u16[1]==257; BE u32[2] in {1,256}; BE u32[5] in {65,66,67,77}.
+        import struct, glob, os, re
+        paths=[]
+        for root in [ROOT.parent / 'GTR2Steam', ROOT.parent / 'GTLSteam']:
+            paths += glob.glob(str(root / '**/*.*'), recursive=True)
+        checked=0
+        for pth in paths:
+            if os.path.splitext(pth)[1].lower() not in ('.fxa','.fxm','.lma'): continue
+            b = Path(pth).read_bytes()
+            m = re.search(br'[\x20-\x7e]{4,}\x00', b)
+            if not m or m.start()!=19: continue
+            be = struct.unpack_from('>4sHHIIII', b, 0)
+            self.assertEqual(be[1], 257)
+            self.assertIn(be[2], (1, 256))
+            self.assertIn(be[5], (65, 66, 67, 77))
+            checked += 1
+        self.assertGreater(checked, 0)
+
     def test_phs_files_not_isi_16byte(self):
         # Observed: 5 .phs files in GTL MAS archives have unknown signatures, not ISI 16-byte-header.
         import importlib.util
