@@ -57,10 +57,12 @@ conclusively establishing it requires actual game execution.
 - **CUBE MTS rig tables — RESOLVED (geometry decode corrected)**: the 36-byte table records are indices/materials, not positions (embedded `NASCAR_FACE` name). Real float streams are located by the table+48 descriptors; `read_geometry()` now decodes those as 64-byte-strided records and restores the `vertices` field (1,561 points). `rig_table_triangles()` proves all 79/79 per-rig triples index descriptor 0 with edge median 0.657. **Partially resolved** (geometry decoded and validated; exact semantic role unknown).
 - **GTTF frame slots 7/9**: u32 bit patterns have constant low 16 bits (slot 7 =
   `0x2000`, slot 9 = `0x0000`) across files, suggesting quantized/fixed-point fields.
-  Tested slot 9's high u16 against speed derived from position deltas across six
-  files: correlation |r| < 0.1, so it is **not** a speed field. Exact meaning **unresolved**.
-- **GTR1 extra 16 bytes**: always `[0, f32, f32, 0]`; floats do not correlate with the
-  packed UV u16s. **Unresolved structure only**.
+  Correlated slot 7's high byte against speed from position deltas: r=0.34, and the
+  value *lags* the speed (e.g. speed rises 2→110 km/h while slot7-adjusted rises
+  33→54) — a smoothed/delayed quantity, not direct speed. Slot 9 shows no speed
+  correlation (|r|<0.1). Exact meanings **unresolved**.
+- **GTR1 extra 16 bytes — RESOLVED**: always `[0, u, v, 0]` (zero padding + 2D float UV pair),
+  confirmed across 2,215 vertices in 100 files. Added as `uv` field in `read_gtr1_vertices()`.
 - **GTR1 descriptor variants**: 22,287 GMTs lack the 0x194 grid. Resolved the gap:
   all GTR1 GMTs carry a universal rF1-style 8-u32 table at **0x11c** (20,000/20,000 valid),
   with 32-byte vertex stride. Car meshes additionally have the 0x194 grid. Added

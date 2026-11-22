@@ -155,12 +155,14 @@ def read_gtr1_vertices(data: bytes, sub: dict) -> list[dict]:
         off = sub["v_off"] + i * 48
         if off + 48 > len(data):
             break
+        extra = struct.unpack_from("<4f", data, off + 32)
         out.append({"offset": off,
                     "uv_packed": struct.unpack_from("<I", data, off)[0],
                     "position": struct.unpack_from("<3f", data, off + 4),
                     "normal": struct.unpack_from("<3f", data, off + 16),
                     "color": struct.unpack_from("<I", data, off + 28)[0],
-                    "extra": data[off + 32:off + 48]})
+                    "uv": (extra[1], extra[2]),
+                    "extra_padding": (extra[0], extra[3])})
     return out
 
 

@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 15:30:00 -0500 - GTR1 extra bytes decoded as UV
+- Confirmed the GTR1 48-byte vertex record's extra 16 bytes are `[0, u, v, 0]` (zero padding + 2D float UV) across 2,215 vertices in 100 files. Added `uv` field and test.
+
 ## 2026-11-23 15:00:00 -0500 - CUBE MTS vertices restored
 - Decoded the 64-byte descriptor streams: each record's first 16 bytes hold a 3-float local coordinate + u32 pad. Restored `read_geometry()["vertices"]` (1,561 points across 7 descriptors in TIREMANFRONT). All 79/79 rig-table triples validate as triangles with edge median 0.657. Updated tests/docs.
 

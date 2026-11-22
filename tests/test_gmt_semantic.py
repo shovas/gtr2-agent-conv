@@ -103,6 +103,8 @@ class GmtSemanticTest(unittest.TestCase):
             self.skipTest("GTR1 GMT corpus not present")
         self.assertGreater(unit / checked, 0.95)
         self.assertEqual(verts[0]["color"], 0xFFFFFFFF)
+        # Extra 16 bytes are [0, u, v, 0] — a 2D UV pair with zero padding.
+        self.assertTrue(all(p["extra_padding"] == (0.0, 0.0) for p in verts))
 
     def test_gtr1_descriptor_grid(self):
         magic = bytes.fromhex("c8cfd2d8ced8e6c3d6ded8bdbba6bf90")
