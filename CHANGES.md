@@ -2,6 +2,12 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-22 02:30:00 -0500 - Three more corpora reviewed
+- `F1CS2000/`: byte-identical copy of F12000 (570 files), no new formats.
+- `GameStockCar/`: 48 MAS type-1 archives (19,995 members), GSC encryption, old-layout GMTs.
+- `NascarSimRacing/`: 311 MAS type-3 archives, 26,473 CUBE MTS meshes with new `CUBE_MTS_4.20` magic (25,689 vs 784 `4.10`).
+- Add `tests/test_three_corpora.py`; document in `AGENTS.md`, `docs/binary-formats.md`.
+
 ## 2026-11-22 02:00:00 -0500 - Wave 2: rF1 pipeline + GTTF/IRSR reader
 - Add `rf1_to_gtr2.py`: unpack → ISI decrypt → GMT layout bridge → type-0 repack → validation; verified on a 253-GMT archive.
 - Add `simbin_events_tool.py`: GTTF/IRSR magic, version, TRK/AIW filenames, embedded strings across 29 GTT + 9 VCR files.

@@ -63,6 +63,12 @@ These are usually text but may contain null-padded SimBin headers: `.aiw`, `.svm
 - 476 `.hdr` audio headers paired with 476 `.dat` MPEG-audio files (`fff3`/`fffb` frame sync); 70 `.veh` (`\r\nHDVehi`) and 70 `.hdv` (`\r\n//`) text files.
 - Verification: `tests/test_nt2003.py`.
 
+### Game Stock Car / NASCAR SimRacing / F1CS2000 (evidence only)
+- `F1CS2000/` is a byte-identical copy of `F12000/` (all 570 files MD5-match) — no new formats.
+- `GameStockCar/`: 48 MAS type-1 archives, 19,995 members; 19,987 GSC-signature encrypted; sampled GMTs all use the old 0x1D4/0xA8 layout (same as Copa/SCE/AMS).
+- `NascarSimRacing/`: 311 MAS type-3 archives, 36,716 members; 26,473 `.mts` meshes use **two magic versions**: `CUBE_MTS_4.20\0\0\0` (25,689) and `CUBE_MTS_4.10\0\0\0` (784). No ISI encryption signatures. 4.20 internals are not decoded (only magic/prevalence verified).
+- Verification: `tests/test_three_corpora.py`.
+
 ### F1 2000 (ISI, 2000) cross-corpus observations (evidence only, `../F12000`)
 - 118 `.mas` archives use the `CUBEMAS2.50\0` signature (type 5 in `mas_tool.py`): 12-byte magic, u32 count, u32 data_size, then 256-byte records `name[244], size, zsize, 4 padding` starting at 0x14. Data is sequential after the table. 30,909 members total.
 - Member compression variants: 25,392 raw (`size == zsize`), 23,997 plain zlib (`.vrl` meshes), 5,198 16-byte-header + zlib (`.bmp` textures), and 319 tiny textures with an undecoded variant preserved losslessly (`Entry.type == 2`).
