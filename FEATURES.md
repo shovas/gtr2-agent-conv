@@ -80,12 +80,14 @@ python3 gzip_simbin_tool.py info <file.hat|file.dsi>
 - "Lossless round-trip this FXA/FXM/LMA."
 - "List node/bone names from this LMA."
 
-**Command**:
+**Commands**:
 ```bash
 python3 fxm_tool.py info <file.fxm|file.fxa|file.lma>
+python3 fxm_tool.py nodes <file.fxm>            # heuristic name extraction
+python3 fxm_tool.py keys <file.fxm>             # decoded skeleton node TRS keyframes
 ```
 
-**Limitations**: Internal animation/keyframe/node semantics are not decoded.
+**Decoded**: contiguous skeleton-node table, per-node 2 TRS keys (position/quaternion/scale), and a name-stable bone ID (`size_hint == 84 + id`). **Limitations**: `key_count` meaning and animation playback semantics are unconfirmed.
 
 ## 6. Identify media formats / WAV, TGA, BMP round-trip (partial)
 
@@ -145,13 +147,13 @@ python3 rf1_to_gtr2.py <archive.mas> --check
 
 ## 10. Read GTTF / IRSR headers (partial)
 
-**What it does**: Reads time-trial/replay magic, version, TRK/AIW filenames and embedded strings from gzip payloads.
-**How to ask**: "Which track does this replay reference?"
+**What it does**: Reads time-trial/replay magic, version, track/scene filenames, embedded strings, and decoded metadata (driver/co-driver/team/car) from gzip payloads.
+**How to ask**: "Which track and driver does this replay reference?"
 
 ```bash
 python3 simbin_events_tool.py <file.gtt|file.vcr>
 ```
-**Limitations**: Lap/frame record semantics not decoded.
+**Decoded**: GTTF metadata, GTL-IRSR, GTR2-IRSR and rF1-IRSR framing. **Limitations**: Lap/frame record semantics not decoded.
 
 ## 11. Consult format documentation
 
@@ -203,3 +205,28 @@ python3 pre_push_check.py
 ```bash
 python3 -m unittest discover -s tests -v
 ```
+
+## 15. Inspect CUBE MTS meshes (Nascar SimRacing / F1C lineage)
+
+**What it does**: Parses 4.10/4.20 mesh headers, geometry tables, submesh records, vertex/normal blocks and material records.
+
+**How to ask**: "Show the decoded geometry of this CUBE MTS mesh."
+
+```bash
+python3 mts_format.py <file.mts>
+python3 mts_format.py --detail <file.mts>
+```
+
+**Decoded**: 8-u32 geometry table, two submesh-record layouts, 36-byte vertices / 16-byte normals, 4.10 material records. **Limitations**: material IDs reference an external table not present locally; no triangle/index block in this layout.
+
+## 16. Inspect `RaceGMT` material/stage blocks (Race 07 DLC)
+
+**What it does**: Decodes 264-byte stage blocks into material groups with stage types and texture channels.
+
+**How to ask**: "List the materials and texture channels in this Race 07 mesh."
+
+```bash
+python3 race_gmt.py --materials <file.gmt>
+```
+
+**Decoded**: stage-type enum at +256 and per-material texture-channel index at +260. **Limitations**: the 36-byte position grid is experimental and is not a validated triangle decoder.
