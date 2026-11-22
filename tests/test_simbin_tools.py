@@ -43,6 +43,29 @@ class SimbinToolsTest(unittest.TestCase):
         self.assertTrue(dec.startswith(b"//[[gMb1.000f"))
         self.assertIn(b"IRSR", dec[:80])
 
+    def test_gtt_vcr_header_fields_observed(self):
+        # Observed: GTTF/VCR payloads have magic + f32 version + u32 len + TRK + u32 len + AIW.
+        import gzip, struct
+        cases = [
+            (ROOT.parent / "GTR2Steam/TimeTrial/Anderstorp/Henrik Roos - 0_45_297_AndS_550.GTT", b'GTTF', 1.0),
+            (ROOT.parent / "GTR2Steam/ReplayData/Anderstorp HOT LAP.Vcr", b'IRSR', 1.0499999523162842),
+        ]
+        for pth, magic, ver in cases:
+            if not pth.exists():
+                self.skipTest(f"{pth.name} not present")
+            dec = gzip.decompress(pth.read_bytes())
+            i = dec.find(magic)
+            self.assertGreaterEqual(i, 0)
+            off = i + 4
+            f = struct.unpack_from('<f', dec, off)[0]; off += 4
+            self.assertAlmostEqual(f, ver, places=3)
+            ln = struct.unpack_from('<I', dec, off)[0]; off += 4
+            trk = dec[off:off+ln]; off += ln
+            ln2 = struct.unpack_from('<I', dec, off)[0]; off += 4
+            aiw = dec[off:off+ln2]
+            self.assertTrue(trk.upper().endswith(b'.TRK'))
+            self.assertTrue(aiw.upper().endswith(b'.AIW'))
+
     def test_fxm_header(self):
         with tempfile.TemporaryDirectory() as td:
             p = Path(td) / "a.fxm"
