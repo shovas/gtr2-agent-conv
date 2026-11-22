@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 06:00:00 -0500 - Task 4: Bink decode via ffmpeg
+- `media_tool.bink_decode()` / `media_tool.py bink-decode` decode BIK to PNG via ffmpeg's binkvideo decoder (verified on real GTR2 files); add test and document. Encoding remains proprietary.
+
 ## 2026-11-23 05:30:00 -0500 - Task 4: GTR1 descriptor grid decoded
 - `gmt_semantic.read_gtr1_descriptors()` decodes GTR1's 64-byte `(vcount,voff,icount,ioff)` grid at 0x194 (valid in 184/300 sampled files); add test and document.
 

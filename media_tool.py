@@ -741,12 +741,39 @@ def dds_roundtrip(src: str | Path, dst: str | Path) -> MediaInfo:
     return identify(dst)
 
 
+def bink_decode(src: str | Path, out_dir: str | Path, frames: int = 0) -> list[Path]:
+    """Decode a Bink video to PNG frames using an external ffmpeg binary.
+
+    ffmpeg's `binkvideo` decoder handles GTR2/GTL BIK files (verified on real
+    local assets). Decode-only: no open-source Bink encoder is available.
+    Returns the written frame paths (empty if ffmpeg is unavailable).
+    """
+    import shutil
+    import subprocess
+    exe = shutil.which("ffmpeg")
+    if exe is None:
+        return []
+    out = Path(out_dir)
+    out.mkdir(parents=True, exist_ok=True)
+    cmd = [exe, "-v", "error", "-i", str(src), "-vsync", "0"]
+    if frames > 0:
+        cmd += ["-frames:v", str(frames)]
+    cmd += [str(out / "frame_%04d.png")]
+    subprocess.run(cmd, check=True, capture_output=True)
+    return sorted(out.glob("frame_*.png"))
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__)
     sub = ap.add_subparsers(dest="cmd", required=True)
     p = sub.add_parser("info")
     p.add_argument("file")
     p.set_defaults(func=lambda a: print(asdict(identify(a.file))) or 0)
+    p = sub.add_parser("bink-decode", help="decode BIK to PNG frames via ffmpeg")
+    p.add_argument("src")
+    p.add_argument("out_dir")
+    p.add_argument("--frames", type=int, default=0)
+    p.set_defaults(func=lambda a: print(len(bink_decode(a.src, a.out_dir, a.frames))))
     p = sub.add_parser("wav-roundtrip")
     p.add_argument("src")
     p.add_argument("dst")

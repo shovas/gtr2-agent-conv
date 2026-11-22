@@ -11,6 +11,18 @@ import media_tool  # noqa: E402
 
 
 class MediaToolTest(unittest.TestCase):
+    def test_bink_decode_via_ffmpeg(self):
+        import shutil
+        if shutil.which("ffmpeg") is None:
+            self.skipTest("ffmpeg not available")
+        src = ROOT.parent / "GTR2Steam/GameData/Locations/Barcelona/Barcelona.bik"
+        if not src.is_file():
+            self.skipTest("BIK sample not present")
+        with tempfile.TemporaryDirectory() as td:
+            frames = media_tool.bink_decode(src, td, frames=2)
+            self.assertEqual(len(frames), 2)
+            self.assertTrue(all(f.stat().st_size > 100 for f in frames))
+
     def test_wav_roundtrip(self):
         with tempfile.TemporaryDirectory() as td:
             src = Path(td) / "a.wav"

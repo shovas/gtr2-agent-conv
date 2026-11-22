@@ -82,6 +82,8 @@ python3 gzip_simbin_tool.py info <file.hat|file.dsi>
 
 **Commands**:
 ```bash
+python3 media_tool.py bink-decode <file.bik> <out_dir> [--frames N]
+
 python3 fxm_tool.py info <file.fxm|file.fxa|file.lma>
 python3 fxm_tool.py nodes <file.fxm>            # heuristic name extraction
 python3 fxm_tool.py keys <file.fxm>             # decoded skeleton node TRS keyframes
@@ -105,7 +107,7 @@ python3 media_tool.py tga-roundtrip <src.tga> <dst.tga>
 python3 media_tool.py bmp-roundtrip <src.bmp> <dst.bmp>
 ```
 
-**Limitations**: DDS limited to DXT1/DXT3/DXT5 and uncompressed RGB(A) mask-based formats, no mipmaps/cube maps; TGA limited to type 2/3/10; BMP limited to uncompressed BI_RGB 24/32; WAV compressed payloads (MP3/ADPCM) lossless-copy only; JPG/MP3 metadata parsed but full semantic decode/encode/edit not implemented; BIK proprietary.
+**Limitations**: DDS limited to DXT1/DXT3/DXT5 and uncompressed RGB(A) mask-based formats, no mipmaps/cube maps; TGA limited to type 2/3/10; BMP limited to uncompressed BI_RGB 24/32; WAV compressed payloads (MP3/ADPCM) lossless-copy only; JPG/MP3 metadata parsed but full semantic decode/encode/edit not implemented; BIK decode via ffmpeg (`media_tool.py bink-decode`); encoding proprietary.
 
 ## 7. Decrypt SimBin JCA files (Race 07, Volvo, etc.)
 
