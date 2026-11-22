@@ -33,7 +33,7 @@ named tests/docs/tools.
 | 13 | In-game validation | Requires running GTR2 with converted content | Converter output validates structurally only |
 | 14 | Bink decode/encode | Proprietary SDK/licensed tools | `docs/binary-formats.md` (BIK, 137 files) |
 | 15 | PHS cipher | No spec; not ISI, not JCA (all keys tried), no standard compression | 5 files, entropy ~7.95, `docs/binary-formats.md` |
-| 16 | FXM/GTTF record semantics, CUBE MTS, `.tgq` | Authoritative spec or runtime-validated reference | Observations only in `docs/binary-formats.md` |
+| 16 | GTTF record semantics, CUBE MTS material IDs, `.tgq` | Authoritative spec or runtime-validated reference | Observations only in `docs/binary-formats.md`; FXM skeleton/TRS keyframes were decoded this turn (`fxm_tool.py keys`, `tests/test_fxm_records.py`) |
 | 17 | GTR (2004) corpus | Not installed locally | `CAPABILITIES.md` coverage gaps |
 
 ## TODO — PHS identity hypothesis
@@ -52,7 +52,7 @@ No cipher or spec found so far; this is an explicit follow-up, not a claim.
 
 ## Final verification
 ```
-python3 -m unittest discover -s tests -v   -> 181 tests OK (skipped=1)
+python3 -m unittest discover -s tests -v   -> 220 tests OK (skipped=1)
 git status --short                          -> clean
 
 Additional corpora reviewed after the plan was written (F1CS2000, GameStockCar,

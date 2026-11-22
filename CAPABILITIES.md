@@ -59,11 +59,11 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 - **Gaps**: GTTF/VCR lap/frame record semantics not decoded; `simbin_events_tool.py` reads magic/version/TRK/AIW filenames and embedded strings.
 
 ### FXM/FXA/LMA
-- **Read**: Header identification + lossless container read. Recognizes observed magics `FXM `, `FXA `, `LMA `. Reports LE/BE header field interpretations (BE fixed-header interpretation can overlap string data; semantics unconfirmed). Heuristic node/bone name extraction (`nodes`/`extract_strings`).
+- **Read**: Header identification + lossless container read. Recognizes observed magics `FXM `, `FXA `, `LMA `. Reports LE/BE header field interpretations (BE fixed-header interpretation can overlap string data; semantics unconfirmed). Decoded skeleton-node table (`parse_node_records`) and per-node TRS keyframes (`decode_node_keys`, 2 keys of position/quaternion/scale + trailer) via `fxm_tool.py keys`; heuristic name extraction retained via `nodes`.
 - **Write**: Lossless round-trip.
-- **Verification**: `tests/test_simbin_tools.py` (real LMA round-trip, BE-field observation, node-name extraction when present).
+- **Verification**: `tests/test_simbin_tools.py` (real LMA round-trip, BE-field observation, node-name extraction when present), `tests/test_fxm_records.py` (skeleton table + TRS decode + CLI).
 - **Tool**: `fxm_tool.py`.
-- **Gaps**: internal animation/keyframe/node/bone semantics.
+- **Gaps**: trailer/size_hint/key_count field semantics; writing/modifying animation data.
 
 ### JCA (SimBin Race 07 / GTR Evolution / Race Room)
 - **Read/Decrypt**: Yes, native in `jca_crypt.py` — all 8 versions, optional zlib layer, XOR 0xEB, custom game keys (`raceroom`, `raceroom_plr`, `volvo`, `old_raceroom`).
