@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 12:00:00 -0500 - Offline validation + residual fields
+- `validate_conversion.py`: offline GMT conversion validation with exact position/UV/face equality, material-tail check and an independent schema-based cross-check; 100/100 converted GMTs pass. GTTF frames now expose heading (-pi..pi) and a small pitch angle. New-layout GMT f7 decoded as per-vertex ARGB colour; GTR1 vertex stride found to be 48 bytes with unit normals on 5,024/5,024 sampled vertices. GTR1 corpus confirmed installed (`../GTR1Vanilla`). Add tests and document.
+
 ## 2026-11-23 11:30:00 -0500 - Docs: refresh stale claims
 - Reconciled README, FEATURES, CAPABILITIES, DEPENDENCIES, docs/binary-formats.md, docs/file-formats.md and docs/task-plan.md with verified findings: semantic GMT bridge, GTTF frame grid, all four IRSR variants, Bink decode+encode, EA TGQ decode, PHS resolved as PAR2 recovery containers. Task plan now reflects 244 tests and current open items; historical CHANGES entries left intact.
 

@@ -543,6 +543,42 @@ class GmtFormatTest(unittest.TestCase):
                     total+=1
         self.assertGreater(total, 0)
 
+    def test_vertex_f7_is_argb_color(self):
+        import glob
+        import mas_tool
+        colors = {}
+        total = white = 0
+        for archive in glob.glob(str(ROOT.parent / "GTR2Steam" / "**" / "*.gtr"), recursive=True):
+            try:
+                _, entries = mas_tool.read_archive(archive)
+            except Exception:
+                continue
+            for entry in entries:
+                data = entry.data or b""
+                if data[8:24] != bytes.fromhex("c8cfd2d8ced8e6c3d6ded8bebba7bf90"):
+                    continue
+                try:
+                    parsed = gmt_format.parse_gmt("x.gmt", data)
+                except Exception:
+                    continue
+                for mesh in parsed.meshes:
+                    for vertex in mesh.base_vertices:
+                        total += 1
+                        colors[vertex.f7] = colors.get(vertex.f7, 0) + 1
+                        white += vertex.f7 == 0xFFFFFFFF
+            if total > 40000:
+                break
+        if not total:
+            self.skipTest("GTR2 archived GMTs not present")
+        self.assertGreater(white / total, 0.9)
+        other = {k: v for k, v in colors.items() if k != 0xFFFFFFFF}
+        self.assertTrue(other)
+        # Non-default values are ARGB with alpha 0xFF and near-equal RGB.
+        for value in other:
+            self.assertEqual(value >> 24, 0xFF)
+            r, g, b = (value >> 16) & 0xFF, (value >> 8) & 0xFF, value & 0xFF
+            self.assertLess(max(r, g, b) - min(r, g, b), 8)
+
     def test_vertex_base_f0_mostly_zero_observed(self):
         # Observed: base vertex f0 (u32 at offset 0 of 32-byte vertex) is 0 in vast majority of samples.
         import importlib.util, glob, os

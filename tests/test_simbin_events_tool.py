@@ -1,5 +1,6 @@
 """Tests for the GTTF/IRSR structural reader (29 GTT + 13 VCR files)."""
 import glob
+import math
 import os
 import sys
 import unittest
@@ -62,6 +63,8 @@ class SimbinEventsToolTest(unittest.TestCase):
             self.assertTrue(all(0 < frames[i + 1]["time"] - frames[i]["time"] < 1.0
                                 for i in range(len(frames) - 1)))
             self.assertTrue(any(abs(x) > 1 for x in frames[0]["position"]))
+            self.assertTrue(all(-math.pi <= fr["heading"] <= math.pi for fr in frames))
+            self.assertTrue(any(abs(fr["pitch"]) > 0.001 for fr in frames))
             m = re.search(r"(\d)_(\d+)_(\d+)_", p.name)
             if m:
                 lap = int(m.group(1)) * 60 + int(m.group(2)) + int(m.group(3)) / 1000

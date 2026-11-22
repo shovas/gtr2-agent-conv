@@ -35,7 +35,7 @@ named tests/docs/tools.
 |---|---|---|---|
 | 16 | In-game validation | Requires running GTR2 with converted content | Converter output validates structurally only |
 | 17 | Residual field semantics | Authoritative spec or runtime-validated reference | GTTF frame fields beyond position/time, FXM key_count meaning, new-layout GMT f0/f7/extra streams, CUBE MTS per-rig table, `PHYSICS.PHS` opaque blob |
-| 18 | GTR (2004) corpus | Not installed locally | `CAPABILITIES.md` gaps; GTR1 descriptor grid partly decoded via `gmt_semantic.py` |
+| 18 | GTR (2004) full layout | Incomplete format understanding (corpus IS installed: `../GTR1Vanilla`, 3,613 files) | `gmt_semantic.read_gtr1_descriptors()` decodes the 64-byte grid at 0x194 (184/300 files); full descriptor variants and vertex fields remain |
 | 19 | PHS runtime consumer | Wine trace blocked by missing MFC42.dll | No `.phs`/PAR2 strings in GTL executables; `docs/phs-research.md` |
 
 ## PHS — resolved

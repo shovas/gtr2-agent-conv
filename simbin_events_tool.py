@@ -233,6 +233,8 @@ def read_frames(data: bytes, grid: dict) -> list[dict]:
             break
         out.append({"offset": off,
                     "position": struct.unpack_from("<3f", data, off),
+                    "heading": struct.unpack_from("<f", data, off + 12)[0],
+                    "pitch": struct.unpack_from("<f", data, off + 16)[0],
                     "time": struct.unpack_from("<f", data, off + FRAME_TIME_OFF)[0]})
     return out
 

@@ -121,6 +121,27 @@ def read_gmt(data: bytes) -> dict:
             "face_count": sum(len(s["faces"]) for s in subs)}
 
 
+def read_gtr1_vertices(data: bytes, sub: dict) -> list[dict]:
+    """Decode GTR1 48-byte vertex records.
+
+    Layout: u32 packed UV (two u16), pos xyz (3 f32), normal xyz (3 f32),
+    u32 ARGB colour (usually 0xFFFFFFFF), 16 extra bytes.  Validated by unit
+    normals across the local GTR1 corpus (40/40 in a sample file).
+    """
+    out = []
+    for i in range(sub["v_count"]):
+        off = sub["v_off"] + i * 48
+        if off + 48 > len(data):
+            break
+        out.append({"offset": off,
+                    "uv_packed": struct.unpack_from("<I", data, off)[0],
+                    "position": struct.unpack_from("<3f", data, off + 4),
+                    "normal": struct.unpack_from("<3f", data, off + 16),
+                    "color": struct.unpack_from("<I", data, off + 28)[0],
+                    "extra": data[off + 32:off + 48]})
+    return out
+
+
 def read_gtr1_descriptors(data: bytes) -> list[dict]:
     """Read the GTR1 (2004) 64-byte submesh descriptor grid at 0x194.
 

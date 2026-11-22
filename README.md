@@ -20,6 +20,7 @@ Tools and format documentation for converting ISIMotor-lineage sim content (rFac
 | `docs/reuse-rfactortools.md` | Ready-made patterns mined from `../rfactortools` and third-party tutorials. |
 | `docs/task-plan.md` | Prioritised task plan with completion/blocked status. |
 | `docs/phs-research.md` | Resolved PHS investigation: evidence table, ranked hypotheses, recommendation. |
+| `docs/open-issues-research.md` | Offline research record for the five open issues (experiments, evidence, classification). |
 
 ## Features
 
@@ -74,6 +75,7 @@ python3 -m unittest discover -s tests -v
 - `media_tool.py` - media identification and semantic/lossless round-trip.
 - `text_convert.py` - SCN→TRK rewrite and tree-level rF1→GTR2 conversion (AIW + archives + copies).
 - `corpus_diff.py` - compare same-name files across two corpora (identical vs different counts).
+- `validate_conversion.py` - offline semantic validation of old→new GMT conversion (exact geometry + independent cross-check).
 - `validate_materials.py` - SimBin material-prefix diagnostic (`GRAS`/`GRVL`/`ROAD`).
 - `mts_format.py` / `race_gmt.py` - CUBE MTS 4.10/4.20 geometry/material readers and `RaceGMT\0` stage/channel decoders.
 - `phs_tool.py` - GTL PHS PAR2-style packet scanner (`docs/phs-research.md`).
