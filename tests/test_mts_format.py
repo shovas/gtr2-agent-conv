@@ -256,6 +256,26 @@ class MtsFormatTest(unittest.TestCase):
         self.assertEqual(len(geo["normals"]), 97)
         self.assertEqual(len(geo["indices"]), 0)
 
+    def test_normal_end_field_is_not_an_index_array(self):
+        sample = None
+        for a in glob.glob(str(ROOT.parent / "NascarSimRacing" / "**" / "*"), recursive=True):
+            p = Path(a)
+            if p.is_file() and p.suffix.lower() == ".mas":
+                for e in mas_tool.read_archive(p)[1]:
+                    if e.name == "JACK.MTS" and (e.data or b"")[:13] == b"CUBE_MTS_4.10":
+                        sample = e.data
+                        break
+            if sample:
+                break
+        if sample is None:
+            self.skipTest("JACK.MTS sample not present")
+        table = mf.parse_mesh_table(sample)
+        h = table["header"]
+        self.assertEqual(h[7], h[5] + h[4] * 16)
+        geo = mf.read_geometry(sample)
+        self.assertEqual(geo["indices"], [])
+        self.assertEqual(geo["normal_end"], h[7])
+
     def test_vertex_normal_strides_from_offsets(self):
         checked = 0
         for a in glob.glob(str(ROOT.parent / "NascarSimRacing" / "**" / "*"), recursive=True):

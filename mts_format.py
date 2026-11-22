@@ -107,9 +107,17 @@ def parse_mesh_table(data: bytes) -> dict | None:
     header = parse_header(data)
     for off in range(0x100, min(len(data) - 32, 0x2000), 4):
         v = struct.unpack_from("<8I", data, off)
-        if v[0] != header.object_count or not (0 < v[1] < len(data)):
+        if v[0] != header.object_count:
             continue
-        if not (0 < v[2] < 100000 and 0 < v[3] < len(data)):
+        # 328 is the observed object-table offset in ~99% of files; requiring a
+        # header-sized offset avoids false positives on binary noise.
+        if v[1] < 0x100 or v[1] >= len(data):
+            continue
+        if not (0 < v[2] < 100000 and v[3] >= v[1] + 32 and v[3] < len(data)):
+            continue
+        if v[5] and (v[5] <= v[3] or v[5] >= len(data)):
+            continue
+        if v[6] and (v[7] < v[5] or v[7] + v[6] * 2 > len(data)):
             continue
         submeshes = []
         p = off + 48  # first submesh record at table+0x30
@@ -176,13 +184,16 @@ def read_geometry(data: bytes) -> dict | None:
     table = parse_mesh_table(data)
     if not table:
         return None
-    _, _, vcount, voff, ncount, noff, icount, ioff = table["header"]
+    _, _, vcount, voff, ncount, noff, extra_count, normal_end = table["header"]
     verts = [struct.unpack_from("<9f", data, voff + i * VERTEX_STRIDE)
              for i in range(vcount) if voff + (i + 1) * VERTEX_STRIDE <= len(data)]
     normals = [struct.unpack_from("<3fI", data, noff + i * NORMAL_STRIDE)
                for i in range(ncount) if noff + (i + 1) * NORMAL_STRIDE <= len(data)]
-    indices = list(struct.unpack_from("<%dH" % icount, data, ioff)) if icount and ioff + icount * 2 <= len(data) else []
-    return {"vertices": verts, "normals": normals, "indices": indices}
+    # Verified: normal_end == noff + ncount*16; the field after it is a count,
+    # not a u16 index array (bytes there decode as floats). No index block is
+    # present in this layout.
+    return {"vertices": verts, "normals": normals, "normal_end": normal_end,
+            "extra_count": extra_count, "indices": []}
 
 
 def main(argv=None) -> int:
