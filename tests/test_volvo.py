@@ -42,6 +42,18 @@ class VolvoTest(unittest.TestCase):
                 g = gmt_format.parse_gmt(p.name, dec)
                 self.assertEqual(gmt_format.write_gmt(g), dec)
 
+    def test_volvo_key_decrypts_text_files(self):
+        # Volvo's .gdb/.trk/.scn/.cam files also use JCA with the volvo key.
+        key = jca_crypt.CUSTOM_KEYS["volvo"]
+        for ext, prefix in ((".gdb", b"ApplicationTitle"), (".trk", b"CUBEASF"),
+                            (".cam", b"LocalCam")):
+            paths = [Path(p) for p in glob.glob(str(VOLVO / "**" / "*"), recursive=True)
+                     if os.path.isfile(p) and p.lower().endswith(ext)
+                     and Path(p).read_bytes()[:4] == b"\x0f\xb1\xff\xff"]
+            self.assertGreater(len(paths), 0, ext)
+            dec = jca_crypt.decrypt_bytes(paths[0].read_bytes(), custom_key=key)
+            self.assertTrue(dec.startswith(prefix), (ext, dec[:40]))
+
     def test_animation_magics(self):
         counts = {}
         for ext in ("fxm", "fxa", "lma"):

@@ -2,6 +2,12 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-22 01:00:00 -0500 - Task plan Wave 0: mining + fixtures
+- Add `docs/reuse-rfactortools.md`: ready-made parsers and full conversion pipeline in `../rfactortools`; RacerM/GTL2GTR2 tutorial conversion rules (material prefixes, SCN→TRK rewrites, SkyBoxI, DDS-only).
+- Add `tests/test_fixtures.py`: 57 identical same-name Anderstorp GMTs, new-layout rF1 GMTs, 5 PHS + DETOMASO edge cases.
+- Loose-extension survey documented; verify JCA also encrypts Race07/Volvo `.gdb/.trk/.scn/.cam` (added tests).
+- Document missing GTR (2004) corpus and 6 untested ISI signatures as coverage gaps.
+
 ## 2026-11-22 00:30:00 -0500 - F1 2001: MAS type-6 support
 - Add `../F12001/` as ancestral ISIMotor reference.
 - Extend `mas_tool.py` with MAS type 6 (`CUBEMAS4.00`/`CUBEMAS4.01`): 16-byte header + 256-byte records (type/offset/size/zsize/crc/name[236]); reads/writes all 80 archives (16,720 members) with signature preservation. Add `--type 6`.

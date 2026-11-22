@@ -101,6 +101,17 @@ class Race07Test(unittest.TestCase):
             g = gmt_format.parse_gmt(dec.name, dec.read_bytes())
             self.assertEqual(gmt_format.write_gmt(g), dec.read_bytes())
 
+    def test_jca_encrypted_text_files_decrypt(self):
+        # Race 07 also JCA-encrypts .gdb/.trk/.scn/.cam, not just GMTs.
+        import jca_crypt
+        for ext, prefix in ((".gdb", b"Default"), (".trk", b"CUBEASF"),
+                            (".scn", b"\r\n//"), (".cam", b"StaticCam")):
+            paths = [p for p in _files(ext.lstrip("."))
+                     if p.read_bytes()[:4] == b"\x0f\xb1\xff\xff"]
+            self.assertGreater(len(paths), 0, ext)
+            dec = jca_crypt.decrypt_bytes(paths[0].read_bytes())
+            self.assertTrue(dec.startswith(prefix), (ext, dec[:40]))
+
     def test_fxm_family_extension_magic_mismatches(self):
         # Observed: 195 animation files; extension does not always match magic.
         counts = {}
