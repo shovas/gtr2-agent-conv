@@ -169,6 +169,29 @@ class MtsFormatTest(unittest.TestCase):
         self.assertEqual(len(table["submeshes"]), 5)
         self.assertEqual(table["submeshes"][0], (129, 0, 150, 6448, 150, 13648))
 
+    def test_material_records_are_shared_rig_tables(self):
+        by = {}
+        for a in glob.glob(str(ROOT.parent / "NascarSimRacing" / "**" / "*"), recursive=True):
+            p = Path(a)
+            if not p.is_file() or p.suffix.lower() != ".mas":
+                continue
+            for e in mas_tool.read_archive(p)[1]:
+                d = e.data or b""
+                if d[:13] != b"CUBE_MTS_4.10":
+                    continue
+                sig = mf.rig_table_signature(d)
+                if sig:
+                    by.setdefault(sig, []).append(e.name)
+        if not by:
+            self.skipTest("CUBE MTS 4.10 corpus not present")
+        self.assertLessEqual(len(by), 10)
+        self.assertGreater(sum(len(v) for v in by.values()), 10)
+        # Pit-crew meshes share one table; JET has its own.
+        pit = next((v for v in by.values() if "TIREMANFRONT.MTS" in v), None)
+        self.assertIsNotNone(pit)
+        self.assertIn("PITOFFICIAL.MTS", pit)
+        self.assertNotIn("JET.MTS", pit)
+
     def test_material_ids_have_no_local_name_table(self):
         sample = None
         for a in glob.glob(str(ROOT.parent / "NascarSimRacing" / "**" / "*"), recursive=True):

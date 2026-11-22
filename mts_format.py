@@ -198,6 +198,21 @@ def read_geometry(data: bytes) -> dict | None:
             "extra_count": extra_count, "indices": []}
 
 
+def rig_table_signature(data: bytes) -> str | None:
+    """Return a short digest of a 4.10 file's material-record triple table.
+
+    The 36-byte records are shared across meshes that use the same rig: 22
+    sampled files yield only 4 distinct tables (pit crew, R_ARM/R_TGT, L_ARM,
+    JET).  This identifies rig reuse; it is not a per-mesh material mapping.
+    """
+    import hashlib
+    recs = parse_material_records(data)
+    if not recs:
+        return None
+    triples = tuple(decode_material_numbers(r) for r in recs)
+    return hashlib.sha256(str(triples).encode()).hexdigest()[:10]
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("files", nargs="+")

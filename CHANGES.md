@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 07:00:00 -0500 - Task 4: MTS records are shared rig tables
+- `mts_format.rig_table_signature()` shows the 4.10 36-byte records are shared per rig (4 distinct tables across 22 files: pit crew, R_ARM/R_TGT, L_ARM, JET), revising the earlier "per-asset material ID" interpretation. Add test and document.
+
 ## 2026-11-23 06:30:00 -0500 - Task 4: GTTF frame grid decoded
 - `simbin_events_tool.find_frame_grid()` / `read_frames()` decode 252-byte GTTF frame records (position + monotonic time); validated on 6 files against lap times. Add test, CLI flag and docs.
 
