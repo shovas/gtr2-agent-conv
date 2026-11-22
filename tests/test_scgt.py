@@ -18,7 +18,7 @@ sys.path.insert(0, str(ROOT))
 
 import mas_tool  # noqa: E402
 
-SCGT = ROOT.parent / "SportsCarGTUsa"
+SCGT = ROOT.parent / "SportsCarGtUsa"
 
 
 def _archives():
@@ -35,7 +35,7 @@ class SportsCarGTTest(unittest.TestCase):
         # size, zsize, dummy); 16,070 members total.
         arcs = _archives()
         if not arcs:
-            self.skipTest("SportsCarGTUsa corpus not present")
+            self.skipTest("SportsCarGtUsa corpus not present")
         self.assertEqual(len(arcs), 61)
         counts = {0: 0, 1: 0, 2: 0}
         total = 0
@@ -55,7 +55,7 @@ class SportsCarGTTest(unittest.TestCase):
         # (width, height, flags, 0) followed by a zlib stream of raw pixels.
         arc = SCGT / "Mas/ATLNMAP.MAS"
         if not arc.exists():
-            self.skipTest("SportsCarGTUsa corpus not present")
+            self.skipTest("SportsCarGtUsa corpus not present")
         entries = mas_tool.read_archive(arc)[1]
         target = next(e for e in entries if e.name == "AMBA.BMP")
         self.assertEqual(target.type, 1)
@@ -68,7 +68,7 @@ class SportsCarGTTest(unittest.TestCase):
         # Lossless member-level read/write of a real type-2 archive.
         arc = SCGT / "Mas/ATLNMAP.MAS"
         if not arc.exists():
-            self.skipTest("SportsCarGTUsa corpus not present")
+            self.skipTest("SportsCarGtUsa corpus not present")
         mtype, entries = mas_tool.read_archive(arc)
         with tempfile.TemporaryDirectory() as td:
             out = Path(td) / "out.mas"
@@ -83,7 +83,7 @@ class SportsCarGTTest(unittest.TestCase):
         # Raw (size == zsize) type-2 members, e.g. .vrl track meshes, are copied verbatim.
         arc = SCGT / "Mas/DONI.MAS"
         if not arc.exists():
-            self.skipTest("SportsCarGTUsa corpus not present")
+            self.skipTest("SportsCarGtUsa corpus not present")
         mtype, entries = mas_tool.read_archive(arc)
         self.assertTrue(all(e.type in (0, 2) for e in entries))
         with tempfile.TemporaryDirectory() as td:

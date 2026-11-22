@@ -10,7 +10,7 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 - **Verification**: `tests/test_mas_tool.py`; real GTR2/GTL round-trip tests when reference files present.
 - **Tool**: `mas_tool.py`.
 - **Notes**: Handles observed GMOTORMAS10 layout used by GTR2/GT Legends. Also verified on the 17 `.bmw` archives in `../BMWM3Challenge` (type 0, member-level round-trip in `tests/test_bmw_m3.py`) and the 50 type-1X Petrobras de Marcas `.mas` archives in `../CopaPetrobrasdeMarcas` (type-1 layout with a different 16-byte signature; signature preserved on rewrite via `signature=` / `read_signature()`).
-- **MAS type 2 (Sports Car GT)**: signature-less 8-byte header + 32-byte records; reads/writes all 61 archives in `../SportsCarGTUsa` (`tests/test_scgt.py`). Decodes the 16-byte-header + zlib texture variant; 22 members with an undecoded compression variant are preserved losslessly.
+- **MAS type 2 (Sports Car GT)**: signature-less 8-byte header + 32-byte records; reads/writes all 61 archives in `../SportsCarGtUsa` (`tests/test_scgt.py`). Decodes the 16-byte-header + zlib texture variant; 22 members with an undecoded compression variant are preserved losslessly.
 - **MAS type 3 (F1 2002)**: `CUBEMAS4.10` signature; reads/writes all 63 archives in `../F12002` (`tests/test_f12002.py`).
 
 ## Encryption

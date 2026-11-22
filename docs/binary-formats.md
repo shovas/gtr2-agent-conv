@@ -1,6 +1,6 @@
 # Binary Formats Inventory (GTL/GTR2)
 
-First-pass inventory for GTL (`../GTLSteam/GameData`) and GTR2 (`../GTR2Steam/GameData`), with cross-game observations from BMW M3 Challenge (`../BMWM3Challenge`), rFactor 1 vanilla (`../RF1Vanilla`), Copa Petrobras de Marcas (`../CopaPetrobrasdeMarcas`), Sports Car GT (`../SportsCarGTUsa`), Automobilista (`../Automobilista`), F1 2002 (`../F12002`) and F1 Challenge 99-02 (`../F1C`). Goal: identify, understand, and provide read/write path for every binary file format possible.
+First-pass inventory for GTL (`../GTLSteam/GameData`) and GTR2 (`../GTR2Steam/GameData`), with cross-game observations from BMW M3 Challenge (`../BMWM3Challenge`), rFactor 1 vanilla (`../RF1Vanilla`), Copa Petrobras de Marcas (`../CopaPetrobrasdeMarcas`), Sports Car GT (`../SportsCarGtUsa`), Automobilista (`../Automobilista`), F1 2002 (`../F12002`) and F1 Challenge 99-02 (`../F1C`). Goal: identify, understand, and provide read/write path for every binary file format possible.
 
 **Legend**
 - **R/W**: lossless read/write capability in this repo/tooling, or standard library path.
@@ -58,7 +58,7 @@ These are usually text but may contain null-padded SimBin headers: `.aiw`, `.svm
 - All 91,974 GMTs use the **old-style magic** `...bba8bf90` at 0x1D4 (91,962 GSC-encrypted + 12 plain). Despite being the newest source game here, Automobilista keeps the old rF1-era GMT layout — same structural gap for GTR2 conversion as rF1/Copa.
 - Verification: `tests/test_ams.py`.
 
-### Sports Car GT (1999) cross-corpus observations (evidence only, `../SportsCarGTUsa`)
+### Sports Car GT (1999) cross-corpus observations (evidence only, `../SportsCarGtUsa`)
 - 61 `.mas` archives have no 16-byte magic; they use the MAS type-2 layout from `quickbms_scripts/mas.bms`: 8-byte header `(count, data_size)`, then `count` 32-byte records `(name[16], offset, size, zsize, dummy)`, data starting at `8 + 32*count`. `mas_tool.py` now reads and writes this layout (16,070 members).
 - Member compression variants observed: 13,621 raw (`size == zsize` or `zsize == 0`), 2,427 with a 16-byte texture header `(width, height, flags, 0)` followed by a zlib stream of raw pixels (decoded by `mas_tool.py`), and 22 with an undecoded compression variant (stored losslessly, `Entry.type == 2`).
 - One archive (`WPEDIT.MAS`) has a malformed `zsize` on one member; data is preserved but `zsize` is normalized on rewrite.
