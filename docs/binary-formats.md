@@ -40,9 +40,10 @@ These are usually text but may contain null-padded SimBin headers: `.aiw`, `.svm
 
 ### Copa Petrobras de Marcas cross-corpus observations (evidence only, `../CopaPetrobrasdeMarcas`)
 - 50 `.mas` archives use the MAS type-1X signature `cec3d5c7c0d9e6c9caddd8bebba6bf90` (documented as `MAS_TYPE1X` in `quickbms_scripts/mas.bms`: type-1 layout, first 6 bytes differ). All now read with `mas_tool.py`; signature preserved on rewrite (16,026 members total).
-- 13,679 members carry the Game Stock Car ISI signature `0x4b1dca9f960524e8` (enctype 1). `isi_crypt.decrypt_bytes(data, skip=4)` matches `rfactordec` byte-for-byte on `commonmaps.MAS::STARTBOX.GMT`.
-- Decrypted `STARTBOX.GMT` uses the old rF1-style magic `...bba8bf90` at 0x1D4, confirming this Reiza-era game keeps the old GMT layout.
-- Verification: `tests/test_mas_tool.py` (type-1X); encryption cross-check in this document.
+- 13,679 members carry the Game Stock Car ISI signature `0x4b1dca9f960524e8` (enctype 1): 12,990 `.gmt`, 649 `.dds`, 31 `.tga`, 9 `.bmp`. `isi_crypt.decrypt_bytes(data, skip=4)` matches `rfactordec` byte-for-byte on `commonmaps.MAS::STARTBOX.GMT` (first real-file validation of the enctype-1 path).
+- All 12,990 GMT members are GSC-signature encrypted and, after decryption, use the old rF1-style magic `...bba8bf90` at 0x1D4 — none use the GTR2-style 0x08 layout. This Reiza-era game therefore needs the same old-layout converter as rFactor 1.
+- Note: block-aligned prefix decryption must preserve `(len - 20) % 128` for enctype 1, otherwise the keystream alignment shifts.
+- Verification: `tests/test_mas_tool.py` (type-1X), `tests/test_copa.py` (GSC decryption + all-GMT layout).
 
 ### rFactor 1 vanilla cross-corpus observations (evidence only, `../RF1Vanilla`)
 - 85 `.mas` archives use the MAS type-1 signature (`c8cfd2d8ced8e6c9caddd8bebba6bf90`); all open with `mas_tool.py` (13,075 members).
