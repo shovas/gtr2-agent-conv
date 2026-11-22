@@ -11,6 +11,20 @@ import media_tool  # noqa: E402
 
 
 class MediaToolTest(unittest.TestCase):
+    def test_tgq_identify_and_decode(self):
+        import shutil
+        src = ROOT.parent / "F12000/ANIM/A1RA.TGQ"
+        if not src.is_file():
+            self.skipTest("TGQ sample not present")
+        info = media_tool.identify(src)
+        self.assertEqual(info.format, "tgq")
+        if shutil.which("ffmpeg") is None:
+            self.skipTest("ffmpeg not available")
+        with tempfile.TemporaryDirectory() as td:
+            frames = media_tool.tgq_decode(src, td, frames=2)
+            self.assertEqual(len(frames), 2)
+            self.assertTrue(all(f.stat().st_size > 100 for f in frames))
+
     def test_bink_encode_via_libbink(self):
         import os
         import shutil

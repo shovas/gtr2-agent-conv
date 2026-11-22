@@ -89,7 +89,7 @@ These are usually text but may contain null-padded SimBin headers: `.aiw`, `.svm
 - 118 `.mas` archives use the `CUBEMAS2.50\0` signature (type 5 in `mas_tool.py`): 12-byte magic, u32 count, u32 data_size, then 256-byte records `name[244], size, zsize, 4 padding` starting at 0x14. Data is sequential after the table. 30,909 members total.
 - Member compression variants: 25,392 raw (`size == zsize`), 23,997 plain zlib (`.vrl` meshes), 5,198 16-byte-header + zlib (`.bmp` textures), and 319 tiny textures with an undecoded variant preserved losslessly (`Entry.type == 2`).
 - All 118 archives round-trip at member level with `mas_tool.py`.
-- Other formats: 71 `.scn` (`CUBEASF`), 55 `.aiw`, 26 `.veh`, 22 `.tgq` (`SCHl` header — not decoded). Bounded 2026-11-23 probe: no valid zlib stream at candidate `78 9c/da/01` headers and no ASCII strings in the first 20 KB; only QuickBMS `SCHl` reference targets a different game.
+- Other formats: 71 `.scn` (`CUBEASF`), 55 `.aiw`, 26 `.veh`, 22 `.tgq` (EA `SCHl` header — TQI video + `adpcm_ea` audio, decodable via ffmpeg). `SCHl` is an Electronic Arts audio header: ffmpeg probes all 22 files as TQI video (320x480, 25 fps) + `adpcm_ea` audio and decodes them (`media_tool.py tgq-decode`).
 - Verification: `tests/test_f12000.py`.
 
 ### NASCAR Thunder 2004 (ISI, 2003) cross-corpus observations (evidence only, `../NT2004`)

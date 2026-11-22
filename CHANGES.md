@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 09:30:00 -0500 - Task 4: EA TGQ decoded via ffmpeg
+- User identified `SCHl` as an Electronic Arts audio header; ffmpeg probes all 22 F1 2000 `.TGQ` files as TQI video (320x480, 25 fps) + `adpcm_ea` audio and decodes them. Added `media_tool.identify()` support, `tgq-decode` CLI and test; updated docs.
+
 ## 2026-11-23 09:00:00 -0500 - Docs: PHS keystream test
 - Pairwise XOR of all 5 GTL PHS files retains ~7.99 bits/byte entropy (no shared keystream); no local tool or online source documents the format. PHS remains blocked.
 

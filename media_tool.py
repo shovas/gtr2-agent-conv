@@ -117,6 +117,9 @@ def identify(path: str | Path) -> MediaInfo:
                 details.update({'mpeg_version_bits': ver, 'layer_bits': layer, 'bitrate_index': br_idx, 'samplerate_index': sr_idx})
                 break
         return MediaInfo(str(p), size, "mp3", details)
+    # TGQ (Electronic Arts TQI video + SCHl/ADPCM audio, e.g. F1 2000 ANIM)
+    if head.startswith(b"SCHl") or (ext == ".tgq" and head[:4] == b"SCHl"):
+        return MediaInfo(str(p), size, "tgq", {"container": "EA SCHl", "codecs": "tqi + adpcm_ea"})
     # BIK
     if head.startswith(b"BIKi") or head.startswith(b"KB2i"):
         details = {}
@@ -763,6 +766,27 @@ def bink_decode(src: str | Path, out_dir: str | Path, frames: int = 0) -> list[P
     return sorted(out.glob("frame_*.png"))
 
 
+def tgq_decode(src: str | Path, out_dir: str | Path, frames: int = 0) -> list[Path]:
+    """Decode an EA TGQ (SCHl/TQI) video to PNG frames using ffmpeg.
+
+    All 22 local F1 2000 `.TGQ` files probe as TQI video (320x480, 25 fps)
+    plus `adpcm_ea` audio. Returns written frame paths (empty without ffmpeg).
+    """
+    import shutil
+    import subprocess
+    exe = shutil.which("ffmpeg")
+    if exe is None:
+        return []
+    out = Path(out_dir)
+    out.mkdir(parents=True, exist_ok=True)
+    cmd = [exe, "-v", "error", "-i", str(src), "-vsync", "0"]
+    if frames > 0:
+        cmd += ["-frames:v", str(frames)]
+    cmd += [str(out / "frame_%04d.png")]
+    subprocess.run(cmd, check=True, capture_output=True)
+    return sorted(out.glob("frame_*.png"))
+
+
 def bink_encode(frames_dir: str | Path, dst: str | Path, fps: int = 25,
                 verify: bool = True, exe: str | None = None) -> Path | None:
     """Encode PNG/BMP frames into a Bink-1 BIKi video via external `bink_build`.
@@ -797,6 +821,11 @@ def main(argv=None):
     p.add_argument("out_dir")
     p.add_argument("--frames", type=int, default=0)
     p.set_defaults(func=lambda a: print(len(bink_decode(a.src, a.out_dir, a.frames))))
+    p = sub.add_parser("tgq-decode", help="decode EA TGQ (SCHl/TQI) video to PNG frames")
+    p.add_argument("src")
+    p.add_argument("out_dir")
+    p.add_argument("--frames", type=int, default=0)
+    p.set_defaults(func=lambda a: print(len(tgq_decode(a.src, a.out_dir, a.frames))))
     p = sub.add_parser("bink-encode", help="encode PNG frames to BIKi via bink_build")
     p.add_argument("frames_dir")
     p.add_argument("dst")

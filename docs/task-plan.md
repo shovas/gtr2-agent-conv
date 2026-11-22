@@ -33,7 +33,7 @@ named tests/docs/tools.
 | 13 | In-game validation | Requires running GTR2 with converted content | Converter output validates structurally only |
 | 14 | Bink decode/encode | done (external tools) | ffmpeg decode + LGPL `raynorpat/libbink` encoder via `media_tool.py`; validated round-trip on real BIK |
 | 15 | PHS cipher | No spec; not ISI, not JCA (all keys tried), no standard compression | 5 files, entropy ~7.95, `docs/binary-formats.md` |
-| 16 | GTTF frame records, CUBE MTS material IDs, `.tgq` | Authoritative spec or runtime-validated reference | Observations only in `docs/binary-formats.md`; FXM skeleton/TRS keyframes and GTTF/IRSR metadata framing were decoded (`fxm_tool.py keys`, `simbin_events_tool.py`) |
+| 16 | GTTF remaining frame fields, CUBE MTS material semantics, `.tgq` encoding | Authoritative spec or runtime-validated reference | Observations only in `docs/binary-formats.md`; FXM skeleton/TRS keyframes, GTTF/IRSR metadata + frame grid, and EA TGQ decode were decoded (`fxm_tool.py keys`, `simbin_events_tool.py`, `media_tool.py tgq-decode`) |
 | 17 | GTR (2004) corpus | Not installed locally | `CAPABILITIES.md` coverage gaps |
 
 ## TODO — PHS identity hypothesis

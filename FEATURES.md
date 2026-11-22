@@ -83,6 +83,7 @@ python3 gzip_simbin_tool.py info <file.hat|file.dsi>
 **Commands**:
 ```bash
 python3 media_tool.py bink-decode <file.bik> <out_dir> [--frames N]
+python3 media_tool.py tgq-decode <file.tgq> <out_dir> [--frames N]
 
 python3 fxm_tool.py info <file.fxm|file.fxa|file.lma>
 python3 fxm_tool.py nodes <file.fxm>            # heuristic name extraction
