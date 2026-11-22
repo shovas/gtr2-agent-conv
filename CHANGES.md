@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-22 14:45:00 -0500 - Task 4: RaceGMT interpretation corrected
+- Withdraw "triangle soup" claim: 36-byte grid contains mixed data; ASCII material/stage strings found in all 643 RaceGMT files (e.g. L0DIFFUSET0, PESSOAS_E at 0x30AF). Add test; mark `race_gmt.read_positions()` experimental.
+
 ## 2026-11-22 14:15:00 -0500 - Task 4: MTS table coverage for 4.10
 - Submesh marker differs by version (129 in 4.20, 130 in 4.10); extend `mts_format.parse_mesh_table()` and add corpus test (74/200 sampled 4.10 files parse).
 

@@ -66,10 +66,11 @@ def diff_strides(a: bytes, b: bytes, gap: int = 4) -> dict:
 
 
 def read_positions(data: bytes) -> list[tuple[tuple[float, float, float], ...]]:
-    """Read the leading 36-byte triangle records as 3 position triples each.
+    """Experimental raw-grid reader: decode each 36-byte block as 9 floats.
 
-    Verified on PEOPLE_STAND_01..08 (48 records, 144 vertices); only the
-    position floats vary across same-size files. Returns one 3-tuple per record.
+    WARNING: not a validated triangle decoder — sampled blocks contain mixed
+    position, UV, index and material data (e.g. PEOPLE_STAND_01 has ASCII
+    material strings starting at 0x30AF, inside the nominal grid).
     """
     header = parse_header(data)
     off = 16 + len(header.name.encode("latin-1"))

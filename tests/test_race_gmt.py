@@ -42,6 +42,15 @@ class RaceGmtTest(unittest.TestCase):
         self.assertTrue(all(len(t) == 3 for t in tris))
         self.assertAlmostEqual(tris[0][0][0], 25.1521, places=3)
 
+    def test_material_strings_present_in_payload(self):
+        import re
+        p = ROOT.parent / "Race07Complete/GameData/Locations/Marrakech/Models/PEOPLE_STAND_01.gmt"
+        if not p.is_file():
+            self.skipTest("PEOPLE_STAND sample not present")
+        text = p.read_bytes().decode("latin-1")
+        self.assertIn("L0DIFFUSET0", text)
+        self.assertIn("PESSOAS_E", text)
+
     def test_triangles_share_vertices(self):
         p = ROOT.parent / "Race07Complete/GameData/Locations/Marrakech/Models/PEOPLE_STAND_01.gmt"
         if not p.is_file():
