@@ -9,6 +9,9 @@ Newest-first change log. Timestamps use repository commit dates (ISO 8601, local
 - Parse JPG SOF dimensions/bit depth and MP3 frame header metadata in `media_tool.py`.
 - Add real-file JPG/MP3 metadata tests.
 
+## 2026-11-22 04:05:00 -0500 - Encryption surface audit
+- Document audit result: 0 files in GTR2/GTL installs carry known ISI 16-byte-header signatures; 5 PHS files remain high-entropy/undecrypted with no known ISI signature and no entropy reduction under ISI enctype 0/1.
+
 ## 2026-11-22 03:55:00 -0500 - DSI real-file observation test
 - Add real-file DSI gzip/SimBin header observation test (all 142 DSI files match gMb1.000f header).
 
