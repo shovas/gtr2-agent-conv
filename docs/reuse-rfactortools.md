@@ -59,6 +59,22 @@ Concrete rules for rFactor→SimBin track conversion (GTL and GTR2 share layout)
 `rfactor2gtr2tracks.txt` adds: converted tracks need shadows set to MEDIUM in
 GTR2 or framerate collapses; the supplied GDBs are hand-verified.
 
+## 4. Data-driven GTL→GTR2 same-track diff findings
+
+`corpus_diff.py` on `Anderstorp` (GTL vs GTR2) shows the one same-basename
+`.gdb`, `.trk` and `.aiw` are all different (only 57/507 GMTs are identical).
+Concrete first differences:
+- **GDB**: track id `Anderstorp` → `3Anderstorp`; GTL `Filter Properties =`
+  becomes GTR2 `AI Vehicle Filter = Anderstorp`; schedule keys
+  (`TestDayStart`, `Practice1Start`, `Qualify1Start`, `RaceStart`, `RaceLaps`,
+  `Attrition`) are absent in the GTR2 file.
+- **TRK**: MASFile extensions `.gtl` → `.gtr`; `teammaps.gtl` → `teammaps2.gtr`;
+  an extra `MASFile=Misc.gtr` entry appears in GTR2.
+- **AIW**: hundreds of tiny grid `Pos=` float changes (e.g. `-2.728` → `-2.727`)
+  — track geometry differs slightly, so no simple text rule applies.
+
+These are observations for future rule work, not implemented conversions.
+
 ## Additional scratch references (not yet mined)
 
 `../legacy/` and `../old-tmp-files/` hold ad-hoc probe scripts from a previous

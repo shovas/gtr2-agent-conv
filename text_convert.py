@@ -84,3 +84,19 @@ def convert_tree(source: str | Path, target: str | Path, check: bool = False) ->
                 out.write_bytes(path.read_bytes())
             report["copy"] += 1
     return report
+
+
+def main(argv=None) -> int:
+    import argparse
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("source")
+    ap.add_argument("target", nargs="?")
+    ap.add_argument("--check", action="store_true", help="count conversions without writing")
+    args = ap.parse_args(argv)
+    report = convert_tree(args.source, args.target or "/tmp/unused", args.check)
+    print(report)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
