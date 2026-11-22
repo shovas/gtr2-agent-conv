@@ -58,7 +58,7 @@ python3 gmt_tool.py diff <a.gmt> <b.gmt>
 
 **Limitations**: Does not fully decode material/stage numeric semantics, UV/LOD/shader/flag meanings, encrypted GMTs, or geometry conversion.
 
-## 4. Inspect/round-trip DSI/HAT gzip containers
+## 4. Inspect/round-trip DSI/HAT/GTT gzip containers
 
 **What it does**: Reads gzip-wrapped SimBin `.dsi`/`.hat` files, reports metadata, and round-trips content.
 
@@ -121,7 +121,7 @@ python3 media_tool.py bmp-roundtrip <src.bmp> <dst.bmp>
 
 ## 8. Run tests
 
-**What it does**: Runs the unittest suite covering MAS, GMT, DSI/HAT, and FXM tools.
+**What it does**: Runs the unittest suite covering MAS, GMT, DSI/HAT/GTT, and FXM tools.
 
 **How to ask**:
 - "Run the tests."

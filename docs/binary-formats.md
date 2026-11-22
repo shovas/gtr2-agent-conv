@@ -15,6 +15,7 @@ First-pass inventory for GTL (`../GTLSteam/GameData`) and GTR2 (`../GTR2Steam/Ga
 | `.aiw` | 59 | Text waypoint file (SimBin header has null bytes) | `//[[gMa1.000f...]]` | high (text) | Text read/write; `rfactortools/aiw.py` parses it. Not a binary struct format despite null-padded header |
 | `.dsi` | 142 | Gzip-compressed SimBin text | gzip `1f8b08`, payload `//[[gMb1.000f...]]` | high | `gzip_simbin_tool.py` info/extract/create (deterministic gzip). Content round-trip verified |
 | `.hat` | 34 | Gzip-compressed SimBin text | gzip `1f8b08`, payload `//[[gMb1.000f...]]` | high | `gzip_simbin_tool.py` info/extract/create. Content round-trip verified |
+| `.gtt` | 29 | Gzip-compressed SimBin time-trial/ghost (GTTF payload) | gzip `1f8b08`, payload `//[[gMb1.000f...]]\nGTTF...` | high (container) | `gzip_simbin_tool.py` decompress/compress; content round-trip verified. Internal GTTF record semantics not fully decoded. |
 | `.fxm` | 135 | SimBin 3ds Max animation/export | `FXM ` | medium | `fxm_tool.py` info/nodes/roundtrip; header partially observed (BE fixed-header interpretation can overlap string data), node/bone name strings extractable; internal animation/keyframe semantics not fully decoded |
 | `.fxa` | 4 | SimBin animation (FXM family) | `FXA ` | medium | `fxm_tool.py` info/nodes/roundtrip; same container family observations as FXM |
 | `.lma` | 116 | SimBin animation (FXM magic/variant) | `LMA ` observed in GTR2/GT Legends | medium | `fxm_tool.py` info/nodes/roundtrip; node/bone strings extractable; internal structure unconfirmed |
@@ -37,7 +38,7 @@ These are usually text but may contain null-padded SimBin headers: `.aiw`, `.svm
 
 ### Done / strong
 - **MAS (`.gtr/.gtl/.mas`)**: full read/write in `mas_tool.py`, tested on real GTR2/GTL archives.
-- **DSI/HAT**: gzip container understood; `gzip_simbin_tool.py` extracts/creates deterministic payloads.
+- **DSI/HAT/GTT**: gzip container understood; `gzip_simbin_tool.py` extracts/creates deterministic payloads (GTTF payload for GTT).
 - **FXM/FXA/LMA**: magic identified (`FXM `/`FXA `/`LMA `), lossless round-trip, heuristic node/bone name extraction; BE header interpretation may overlap string data. Two observed layout families: first string at offset 19 (common in LMA driver skeletons, bone names) and offset 30 (common in FXA/FXM pit animations, "3D Studio Max..." source string; all 142 offset-30 files observed with BE[2]==4096, BE[5]==528; most contain a source path string within 300 bytes). In sampled GTR2 LMAs, many Bip01 node names are preceded by a 12-byte LE(u32,u32,u32) prefix where third==1 and second matches BE header u32 at offset 8 (semantics unconfirmed). Internal animation/keyframe/node-record structure not fully decoded.
 
 ### Partial

@@ -27,6 +27,14 @@ class SimbinToolsTest(unittest.TestCase):
         dec = gzip_simbin_tool.decompress(p)
         self.assertTrue(dec.startswith(b"//[[gMb1.000f"))
 
+    def test_real_gtt_if_present(self):
+        p = ROOT.parent / "GTR2Steam/TimeTrial/Anderstorp/Henrik Roos - 0_45_297_AndS_550.GTT"
+        if not p.exists():
+            self.skipTest("GTT not present")
+        dec = gzip_simbin_tool.decompress(p)
+        self.assertTrue(dec.startswith(b"//[[gMb1.000f"))
+        self.assertIn(b"GTTF", dec[:80])
+
     def test_fxm_header(self):
         with tempfile.TemporaryDirectory() as td:
             p = Path(td) / "a.fxm"
