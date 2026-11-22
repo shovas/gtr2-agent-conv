@@ -140,6 +140,7 @@ The `aiw-convert` mode applies the rFactor→GTR2/GTL rules from the AIW Repair 
 
 ```bash
 python3 gmt_layout.py <old.gmt> <new.gmt>
+python3 -c "import gmt_layout,pathlib; pathlib.Path('new.gmt').write_bytes(gmt_layout.old_to_new_semantic(pathlib.Path('old.gmt').read_bytes()))"  # semantic
 python3 rf1_to_gtr2.py <archive.mas> <out.gtr>
 python3 rf1_to_gtr2.py <archive.mas> --check
 ```

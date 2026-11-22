@@ -11,6 +11,7 @@ sys.path.insert(0, str(ROOT))
 
 import gmt_format  # noqa: E402
 import gmt_layout  # noqa: E402
+import gmt_semantic  # noqa: E402
 import isi_crypt  # noqa: E402
 import mas_tool  # noqa: E402
 
@@ -33,6 +34,39 @@ def _old_gmts(limit=6):
 
 
 class GmtLayoutTest(unittest.TestCase):
+    def test_semantic_bridge_preserves_geometry(self):
+        import gmt_semantic as gs
+        ok = 0
+        for _, name, data in _old_gmts(limit=20):
+            if not gmt_layout.is_old(data):
+                continue
+            original = gs.read_gmt(data)
+            if not original["submeshes"]:
+                continue
+            converted = gmt_layout.old_to_new_semantic(data)
+            parsed = gmt_format.parse_gmt(name, converted)
+            decoded = gs.read_gmt(converted)
+            self.assertEqual(parsed.mesh_count, len(original["submeshes"]))
+            self.assertEqual(decoded["vertex_count"], original["vertex_count"])
+            self.assertEqual(decoded["face_count"], original["face_count"])
+            self.assertEqual(gmt_format.write_gmt(parsed), converted)
+            ok += 1
+        if not ok:
+            self.skipTest("no decodable old GMTs")
+        self.assertGreaterEqual(ok, 1)
+
+    def test_semantic_bridge_material_tail(self):
+        import gmt_semantic as gs
+        for _, name, data in _old_gmts(limit=10):
+            if not gmt_layout.is_old(data) or not gs.read_gmt(data)["submeshes"]:
+                continue
+            converted = gmt_layout.old_to_new_semantic(data)
+            parsed = gmt_format.parse_gmt(name, converted)
+            self.assertTrue(parsed.materials)
+            self.assertTrue(any("L0" in s for m in parsed.materials for s in m.strings))
+            return
+        self.skipTest("no decodable old GMTs with materials")
+
     def test_magic_constants(self):
         self.assertEqual(gmt_layout.OLD_MAGIC[13], 0xA8)
         self.assertEqual(gmt_layout.NEW_MAGIC[13], 0xA7)

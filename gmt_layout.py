@@ -80,6 +80,76 @@ def old_to_new(data: bytes) -> bytes:
     return bytes(out)
 
 
+def old_to_new_semantic(data: bytes) -> bytes:
+    """Convert an old-layout GMT to new layout with decoded geometry.
+
+    Unlike `old_to_new()` (which copies old vertex records verbatim), this
+    decodes submeshes via `gmt_semantic` and rebuilds the new-layout vertex,
+    UV and index blocks.  Positions, UVs, triangle indices and the material
+    tail are preserved; the result parses with `gmt_format.parse_gmt()`.
+    """
+    import gmt_semantic
+
+    if not is_old(data):
+        raise ValueError("input is not an old-layout GMT")
+    decoded = gmt_semantic.read_gmt(data)
+    subs = decoded["submeshes"]
+    if not subs:
+        raise ValueError("no decodable submeshes")
+
+    old_obj = struct.unpack_from("<I", data, 0)[0]
+    flags = struct.unpack_from("<I", data, 4)[0]
+    mat_tail = data[old_obj:]
+
+    cursor = FIRST_RECORD + len(subs) * RECORD_SIZE
+    records, blocks = [], bytearray()
+    for sub in subs:
+        vc = len(sub["positions"])
+        indices = [idx for face in sub["faces"] for idx in face]
+        ic = len(indices)
+        vo = cursor
+        cursor += 4 + vc * VERTEX_STRIDE
+        uo = cursor
+        cursor += 4 + vc * VERTEX_STRIDE
+        io = cursor
+        cursor += 4 + ic * 2
+        obj_off = cursor
+
+        rec = [0] * 27
+        rec[1] = 0x20004011
+        rec[3] = vc
+        rec[4] = vo
+        rec[6] = uo
+        rec[10] = ic
+        rec[11] = io
+        records.append(rec)
+
+        blocks += struct.pack("<I", vc)
+        for pos in sub["positions"]:
+            blocks += struct.pack("<3f", *pos) + bytes(VERTEX_STRIDE - 12)
+        blocks += struct.pack("<I", vc)
+        for uv in sub["uvs"]:
+            blocks += bytes(8) + struct.pack("<2f", *uv) + bytes(VERTEX_STRIDE - 16)
+        blocks += struct.pack("<I", ic)
+        blocks += struct.pack("<%dH" % ic, *indices) if ic else b""
+
+    out = bytearray(obj_off + len(mat_tail))
+    out[0x18:MESH_TABLE_OFF] = data[0x18:MESH_TABLE_OFF]
+    struct.pack_into("<II16s", out, 0, obj_off, flags, NEW_MAGIC)
+    first = FIRST_RECORD
+    struct.pack_into("<10I", out, MESH_TABLE_OFF, len(subs), first,
+                     len(subs), first, 0, 0, 0, 0, 0, 0)
+    for i, rec in enumerate(records):
+        struct.pack_into("<27I", out, first + i * RECORD_SIZE, *rec)
+    start = first + len(subs) * RECORD_SIZE
+    out[start:start + len(blocks)] = blocks
+    out[obj_off:] = mat_tail
+    return bytes(out)
+
+
+VERTEX_STRIDE = 32
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("input")

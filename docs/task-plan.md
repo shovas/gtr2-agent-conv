@@ -19,7 +19,7 @@ named tests/docs/tools.
 | 7 | JCA cross-check vs third-party tool | done | `monodis` IL confirms magic/offsets/LE/XOR 0xEB/keys; `docs/reuse-rfactortools.md` |
 | 8 | FXM cross-corpus | done | `tests/test_fxm_crosscorpus.py` (567 files, 54 mismatches) |
 | 9 | 57-pair carry-over test | done | `tests/test_carryover.py` |
-| 10 | GMT layout bridge prototype | done (partial) | `gmt_layout.py`, `tests/test_gmt_layout.py`; semantics unvalidated |
+| 10 | GMT layout bridge | done (partial) | `gmt_layout.py` structural + semantic bridges, `gmt_semantic.py`, `tests/test_gmt_layout.py`, `tests/test_gmt_semantic.py`; geometry preserved structurally, in-game unvalidated |
 
 ## Wave 2 — complete
 | # | Task | Status | Evidence |
