@@ -313,9 +313,12 @@ class MtsFormatTest(unittest.TestCase):
         if sample is None:
             self.skipTest("LIGHTBOX02.MTS sample not present")
         geo = mf.read_geometry(sample)
-        self.assertEqual(len(geo["vertices"]), 118)
-        self.assertEqual(len(geo["normals"]), 97)
-        self.assertEqual(len(geo["indices"]), 0)
+        self.assertFalse(geo["positions_available"])
+        self.assertTrue(geo["descriptors"])
+        # Descriptor streams are float triples (normals/UVs), not positions.
+        for desc in geo["descriptors"][:3]:
+            self.assertTrue(desc["stream_a"])
+            self.assertGreater(len(desc["stream_a"]), 0)
 
     def test_post_normal_block_is_float_data(self):
         sample = None
@@ -354,8 +357,50 @@ class MtsFormatTest(unittest.TestCase):
         h = table["header"]
         self.assertEqual(h[7], h[5] + h[4] * 16)
         geo = mf.read_geometry(sample)
-        self.assertEqual(geo["indices"], [])
-        self.assertEqual(geo["normal_end"], h[7])
+        self.assertFalse(geo["positions_available"])
+        self.assertEqual(h[7], h[5] + h[4] * 16)
+
+    def test_36byte_records_are_not_positions(self):
+        """Regression: the voff records are indices/materials, not float positions."""
+        sample = None
+        for a in glob.glob(str(ROOT.parent / "NascarSimRacing" / "**" / "*"), recursive=True):
+            p = Path(a)
+            if p.is_file() and p.suffix.lower() == ".mas":
+                for e in mas_tool.read_archive(p)[1]:
+                    if e.name == "TIREMANFRONT.MTS" and (e.data or b"")[:13] == b"CUBE_MTS_4.10":
+                        sample = e.data
+                        break
+            if sample:
+                break
+        if sample is None:
+            self.skipTest("TIREMANFRONT.MTS sample not present")
+        h = mf.parse_mesh_table(sample)["header"]
+        voff = h[3]
+        # At least one 36-byte record contains an ASCII material name.
+        block = sample[voff:voff + 36 * 12]
+        self.assertTrue(b"NASCAR_FACE" in block or b"WCPCREW" in block)
+        # read_geometry no longer exposes these as positions.
+        geo = mf.read_geometry(sample)
+        self.assertFalse(geo["positions_available"])
+        self.assertNotIn("vertices", geo)
+
+    def test_rig_table_triangles(self):
+        sample = None
+        for a in glob.glob(str(ROOT.parent / "NascarSimRacing" / "**" / "*"), recursive=True):
+            p = Path(a)
+            if p.is_file() and p.suffix.lower() == ".mas":
+                for e in mas_tool.read_archive(p)[1]:
+                    if e.name == "TIREMANFRONT.MTS" and (e.data or b"")[:13] == b"CUBE_MTS_4.10":
+                        sample = e.data
+                        break
+            if sample:
+                break
+        if sample is None:
+            self.skipTest("TIREMANFRONT.MTS sample not present")
+        report = mf.rig_table_triangles(sample)
+        self.assertGreater(report["valid"], 0)
+        self.assertGreaterEqual(report["valid"] / report["total"], 0.4)
+        self.assertTrue(all(0 < e < 100 for e in report["edges"]))
 
     def test_vertex_normal_strides_from_offsets(self):
         checked = 0

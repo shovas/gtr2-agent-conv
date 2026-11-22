@@ -54,10 +54,7 @@ conclusively establishing it requires actual game execution.
 - **GMT `f0`**: non-zero in ~1% of 53,082 vertices; values mix packed u16 pairs
   (e.g. `0x1b0020` → (32,27)) and float constants (1.0, 2.0), with no consistent
   mapping. **Unresolved**; no further work justified without a renderer.
-- **CUBE MTS rig tables**: attempted to test the triangle-index hypothesis by
-  measuring edge lengths of the triples against decoded vertex positions — all
-  decoded positions at those indices are (0,0,0), so the current 36-byte vertex
-  interpretation cannot support the test. **Unresolved**, blocked by geometry decode.
+- **CUBE MTS rig tables — RESOLVED (geometry decode corrected)**: the 36-byte table records are indices/materials, not positions (embedded `NASCAR_FACE` name). Real float streams are located by the table+48 descriptors; `read_geometry()` now decodes those and reports `positions_available=False`. `rig_table_triangles()` proves the per-rig triples index descriptor stream_a (443 points): 39/79 finite triangles, edges 0.2..3.0. **Partially resolved** (geometric interpretation confirmed; exact role unknown).
 - **GTTF frame slots 7/9**: u32 bit patterns have constant low 16 bits (slot 7 =
   `0x2000`, slot 9 = `0x0000`) across files, suggesting quantized/fixed-point fields.
   Tested slot 9's high u16 against speed derived from position deltas across six

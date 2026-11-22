@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 14:30:00 -0500 - CUBE MTS geometry decode corrected
+- Corrected the wrong position decode: 36-byte table records contain indices/materials (ASCII `NASCAR_FACE`), not float positions. `read_geometry()` now decodes descriptor-driven float streams and reports `positions_available=False`. `rig_table_triangles()` validates per-rig triples as triangles into stream_a (39/79 finite, edges 0.2..3.0). Updated tests/docs.
+
 ## 2026-11-23 14:00:00 -0500 - GTTF slot 9 speed hypothesis excluded
 - Tested GTTF frame slot 9's high u16 against speed derived from position/time deltas across six files: |r| < 0.1, so it is not a speed field. Documented as a negative result.
 

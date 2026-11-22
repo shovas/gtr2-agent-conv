@@ -10,6 +10,7 @@ table (200/200 files), 64-byte marker-based and alternate submesh records,
 from __future__ import annotations
 
 import argparse
+import math
 import struct
 from dataclasses import dataclass
 from pathlib import Path
@@ -177,25 +178,45 @@ NORMAL_STRIDE = 16
 
 
 def read_geometry(data: bytes) -> dict | None:
-    """Decode vertex/normal/index blocks using the validated table offsets.
+    """Decode the descriptor-driven geometry streams of a CUBE MTS file.
 
-    Strides derived from consecutive offsets in 200/200 sampled 4.20 files:
-    vertices 36 bytes (3 x (x,y,z) float triples), normals 16 bytes
-    (3 floats + u32).
+    IMPORTANT: the earlier interpretation of the 36-byte records at the table's
+    vertex offset as positions was WRONG — those records contain u32 indices and
+    material/name fields (e.g. 'NASCAR_FACE'), not position floats. The real
+    float streams are located by the per-submesh descriptor records at table+48:
+
+        (marker, index, count_b, offset_b, count_c, offset_c, 0, 0)
+
+    where offset_b and offset_c point to contiguous float triples (normals/UVs).
+    No standalone vertex-position array has been identified in these meshes —
+    they are skinned assets whose positions may live in external bone data.
+
+    Returns descriptors with their decoded float streams and an explicit
+    `positions_available: False` marker; callers must not use this as a mesh.
     """
     table = parse_mesh_table(data)
     if not table:
         return None
-    _, _, vcount, voff, ncount, noff, extra_count, normal_end = table["header"]
-    verts = [struct.unpack_from("<9f", data, voff + i * VERTEX_STRIDE)
-             for i in range(vcount) if voff + (i + 1) * VERTEX_STRIDE <= len(data)]
-    normals = [struct.unpack_from("<3fI", data, noff + i * NORMAL_STRIDE)
-               for i in range(ncount) if noff + (i + 1) * NORMAL_STRIDE <= len(data)]
-    # Verified: normal_end == noff + ncount*16; the field after it is a count,
-    # not a u16 index array (bytes there decode as floats). No index block is
-    # present in this layout.
-    return {"vertices": verts, "normals": normals, "normal_end": normal_end,
-            "extra_count": extra_count, "indices": []}
+    to = table["table_offset"]
+    out = []
+    for off in range(to + 48, len(data) - 64, 64):
+        marker, index, c1, o1, c2, o2, z1, z2 = struct.unpack_from("<8I", data, off)
+        if not (0 < c1 < 200000 and 0 < o1 < len(data)):
+            break
+        if not (0 <= c2 < 600000 and 0 < o2 < len(data)):
+            break
+        stream1 = [struct.unpack_from("<3f", data, o1 + i * 12)
+                   for i in range(min(c1, 100000))
+                   if o1 + (i + 1) * 12 <= len(data)]
+        stream2 = ([struct.unpack_from("<3f", data, o2 + i * 12)
+                    for i in range(min(c2, 100000))
+                    if o2 + (i + 1) * 12 <= len(data)] if c2 else [])
+        out.append({"offset": off, "marker": marker, "index": index,
+                    "count_a": c1, "offset_a": o1, "stream_a": stream1,
+                    "count_b": c2, "offset_b": o2, "stream_b": stream2})
+    return {"descriptors": out, "positions_available": False,
+            "note": "36-byte table records are indices/materials, not positions; "
+                    "skinned positions not located in-file"}
 
 
 def rig_table_signature(data: bytes) -> str | None:
@@ -211,6 +232,31 @@ def rig_table_signature(data: bytes) -> str | None:
         return None
     triples = tuple(decode_material_numbers(r) for r in recs)
     return hashlib.sha256(str(triples).encode()).hexdigest()[:10]
+
+
+def rig_table_triangles(data: bytes) -> dict:
+    """Interpret 4.10 per-rig triples as triangles into descriptor stream_a.
+
+    The 36-byte material/rig records at 0x1a68 hold triples of u16 values
+    (e.g. 389,392,393). Their range (0..442) matches the count of the first
+    descriptor's stream_a (443), and 39/79 triples index finite points with
+    plausible edge lengths (0.2..3.0). This is the first geometric validation
+    of the per-rig table; exact semantics (collision mesh? skeleton?) unknown.
+    """
+    geo = read_geometry(data)
+    if not geo or not geo["descriptors"]:
+        return {"valid": 0, "total": 0, "edges": []}
+    pts = geo["descriptors"][0]["stream_a"]
+    triples = [decode_material_numbers(r) for r in parse_material_records(data)]
+    edges = []
+    for tri in triples:
+        if max(tri) >= len(pts):
+            continue
+        if any(not all(math.isfinite(x) for x in pts[i]) for i in tri):
+            continue
+        lengths = [math.dist(pts[tri[a]], pts[tri[b]]) for a, b in ((0, 1), (1, 2), (2, 0))]
+        edges.append(max(lengths))
+    return {"valid": len(edges), "total": len(triples), "edges": edges}
 
 
 def main(argv=None) -> int:
@@ -230,9 +276,8 @@ def main(argv=None) -> int:
                           "submeshes=", len(table["submeshes"]))
                 geo = read_geometry(data)
                 if geo:
-                    print("  geometry:", "vertices=", len(geo["vertices"]),
-                          "normals=", len(geo["normals"]),
-                          "normal_end=", geo["normal_end"])
+                    print("  geometry: descriptors=", len(geo["descriptors"]),
+                          "positions_available=", geo["positions_available"])
                 recs = parse_material_records(data)
                 if recs:
                     print("  materials:", len(recs), "first=",
