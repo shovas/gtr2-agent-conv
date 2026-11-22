@@ -2,6 +2,11 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-22 00:15:00 -0500 - NASCAR Thunder 2003 corpus added and reviewed
+- Add `../NT2003/` as ancestral ISIMotor reference.
+- Add `tests/test_nt2003.py`: 179 MAS type-3 archives (19,006 members, 10,397 CUBE MTS meshes), 476 `.hdr`/`.dat` audio pairs, `.veh/.hdv` text, no ISI encryption.
+- Document in `AGENTS.md`, `docs/binary-formats.md`.
+
 ## 2026-11-22 00:00:00 -0500 - F1 2000: MAS type-2.5 support
 - Add `../F12000/` as ancestral ISIMotor reference.
 - Extend `mas_tool.py` with MAS type 5 (`CUBEMAS2.50`): 12-byte magic + 256-byte records; reads/writes all 118 archives (30,909 members), decoding plain-zlib and 16-byte-header+zlib members and preserving 319 undecoded ones losslessly. Add `--type 5`.
