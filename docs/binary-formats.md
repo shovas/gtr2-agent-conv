@@ -1,6 +1,6 @@
 # Binary Formats Inventory (GTL/GTR2)
 
-First-pass inventory for GTL (`../GTLSteam/GameData`) and GTR2 (`../GTR2Steam/GameData`), with cross-game observations from BMW M3 Challenge (`../BMWM3Challenge`), rFactor 1 vanilla (`../RF1Vanilla`), Copa Petrobras de Marcas (`../CopaPetrobrasdeMarcas`), Sports Car GT (`../SportsCarGtUsa`), Automobilista (`../Automobilista`), F1 2002 (`../F12002`), F1 Challenge 99-02 (`../F1C`), Stock Car Extreme (`../StockCarExtreme`) and Race 07 (`../Race07Vanilla`). Goal: identify, understand, and provide read/write path for every binary file format possible.
+First-pass inventory for GTL (`../GTLSteam/GameData`) and GTR2 (`../GTR2Steam/GameData`), with cross-game observations from BMW M3 Challenge, rFactor 1 vanilla, Copa Petrobras de Marcas, Sports Car GT, Automobilista, F1 2002, F1 Challenge 99-02, Stock Car Extreme, Race 07, Volvo, NASCAR Thunder 2004 and a third-party Race 07 decryptor binary. Goal: identify, understand, and provide read/write path for every binary file format possible.
 
 **Legend**
 - **R/W**: lossless read/write capability in this repo/tooling, or standard library path.
@@ -37,6 +37,19 @@ First-pass inventory for GTL (`../GTLSteam/GameData`) and GTR2 (`../GTR2Steam/Ga
 These are usually text but may contain null-padded SimBin headers: `.aiw`, `.svm`, `.ani`, `.ds`, `.dst`, `.gdb`, `.trk`, `.car`, `.hdc`, `.eng`, `.tyr`, `.aud`, `.dmg`, `.sp`, `.grb`, `.hed`, `.cam`, `.grd`, `.rcd`, `.set`, `.txt`, `.cdb`, `.ddb`, `.tec`, `.fxm`? No - `.fxm` is binary FXM. `.cas` is text-like.
 
 ## Game-specific binary formats: status
+
+### Volvo (SimBin, ISIMotor) cross-corpus observations (evidence only, `../VolvoTheGame`)
+- 2,026 loose GMTs all use JCA encryption (`0fb1ffff`) with the non-default **volvo key**. `jca_crypt.decrypt_bytes(data, custom_key=jca_crypt.CUSTOM_KEYS["volvo"])` yields standard GTR2-layout GMTs; 200 sampled files parse and round-trip with `gmt_format.py`.
+- Animations are plain FXM (22), FXA (14), LMA (6) — no extension/magic mismatch here.
+- Verification: `tests/test_volvo.py`.
+
+### NASCAR Thunder 2004 (ISI, 2003) cross-corpus observations (evidence only, `../NT2004`)
+- 136 MAS type-3 archives, 20,414 members; all 14,250 `.mts` meshes have standard `CUBE_MTS_4.10` magic (same family as F1 2002/F1C).
+- 1,286 `.hdr` files are audio headers with `0xffff00XX` first u32; 81 `.skn` are text skins; 14 `.djs` start with MP3 frame sync `ff fb`. No known ISI encryption signature.
+- Verification: `tests/test_nt2004.py`.
+
+### Third-party Race 07 decryptor (reference only, `../Race07Decryptor`)
+- `Race07Decryptor.exe` is a self-contained .NET 8 win-x64 console app (65M) containing `Race07Decryptor.dll`, with Blowfish/OpenSSL decryption identifiers (`TryDecryptWithFallback`, `DecryptBlocks`). No source or format spec shipped; no license file. Reference only — our native `jca_crypt.py` provides the same capability without external binaries.
 
 ### Race 07 (SimBin, 2007) cross-corpus observations (evidence only, `../Race07Vanilla`)
 - 2 small `.gtr` archives (`DevFiles/CamEd/ingame.gtr`, `GameData/Scripts/crew.gtr`) are MAS type 0. The 5 GMTs in `crew.gtr` use the **standard new layout** (magic at 0x08) and parse/round-trip with `gmt_format.py`.
