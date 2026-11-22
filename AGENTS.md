@@ -6,6 +6,7 @@
 
 ## Commands
 - Tests (unittest): `python3 -m unittest discover -s tests -v`
+- Pre-push safety/privacy check: `python3 pre_push_check.py` (must pass before pushing; allowlists `shovas` and its noreply email)
 - Tools: `mas_tool.py`, `gmt_tool.py`/`gmt_format.py`, `gmt_layout.py`, `isi_crypt.py`, `jca_crypt.py`, `rf1_to_gtr2.py`, `simbin_text_tool.py`, `simbin_events_tool.py`, `gzip_simbin_tool.py`, `fxm_tool.py`, `media_tool.py`. See `FEATURES.md` for usage.
 
 ## Key locations
@@ -46,6 +47,6 @@
 - Dependencies in docs/nix: Python 3 + Pillow (`python3-pil`, `python3-pil.imagetk`), tkinter for GUI. README notes Python3.4/Pillow; verify against current environment before relying on old version assumptions.
 
 ## Legacy gotchas
-- Many `legacy/*.py` scripts hardcode `ROOT="/home/matt_ollama/rfactortools"` and `TMPDIR=/home/matt_ollama/tmp`; that path does not exist in this workspace. Update paths to `../rfactortools` or package imports before reuse.
+- Many `legacy/*.py` scripts hardcode absolute home-directory paths (`ROOT="<home>/rfactortools"`, `TMPDIR=<tmpdir>`) that do not exist in a fresh checkout. Update paths to `../rfactortools` or package imports before reuse.
 - Legacy harness/demo scripts import modules/symbols not present in `../rfactortools` as-is (e.g. `rFactorToGTR2`, `Race07ToGTR2`, `gtr2verify`, `convert`, `gmtconvert`). Treat them as evidence of intended API, not working code against current reference repo.
 - Legacy contains large sample binaries/data (`.aiw`, `.tga`, `.dds` in sample dirs) kept for reference; avoid copying generated conversion outputs back into git.

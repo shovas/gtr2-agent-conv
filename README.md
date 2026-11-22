@@ -56,6 +56,7 @@ python3 -m unittest discover -s tests -v
 - "Convert this rFactor `.mas` archive to a GTR2 `.gtr` and validate the GMTs."
 - "Summarise what we know about the GMT mesh table and what is still unknown."
 - "Run the tests and tell me if anything fails."
+- "Run the pre-push safety/privacy check before I push to GitHub."
 
 ## Repository layout
 
@@ -70,8 +71,11 @@ python3 -m unittest discover -s tests -v
 - `gzip_simbin_tool.py` - DSI/HAT/GTT/VCR gzip container tool.
 - `fxm_tool.py` - FXM/FXA/LMA header/node extraction and round-trip.
 - `media_tool.py` - media identification and semantic/lossless round-trip.
+- `pre_push_check.py` - safety/privacy checks (secrets, PII, binary files, identity) before pushing.
 - `docs/`, `tests/` - documentation and unittest suite.
 
 ## License / third-party material
+
+This repository is licensed under **Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)**.
 
 Check individual file headers and external reference repositories before reuse. Some reference material outside this repo has restrictive licenses (e.g. CC BY-NC); this repo treats them as reference only. `jca_crypt.py` and `jca_tables.py` are GPLv2 (derived from Luigi Auriemma's published `wtcced` algorithm/tables); all other modules are unaffected.

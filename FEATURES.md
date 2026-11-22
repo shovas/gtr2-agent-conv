@@ -169,7 +169,17 @@ python3 simbin_events_tool.py <file.gtt|file.vcr>
 - `CAPABILITIES.md`
 - `CHANGES.md`
 
-## 12. Run tests
+## 12. Run pre-push safety/privacy checks
+
+**What it does**: Scans tracked files and commit metadata for secrets, personal home paths/emails, credentials in remote URLs, oversized/game-data files, untracked files, and commit identity mismatches.
+**How to ask**: "Check whether this repo is safe to push to GitHub."
+
+```bash
+python3 pre_push_check.py
+```
+**Notes**: The username `shovas` and its GitHub noreply email are explicitly allowlisted. Editor swap files (`*.swp`) and `__pycache__` are ignored by `.gitignore`.
+
+## 13. Run tests
 
 **What it does**: Runs the unittest suite covering MAS, GMT, DSI/HAT/GTT/VCR, and FXM tools.
 

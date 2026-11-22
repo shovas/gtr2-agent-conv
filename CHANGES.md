@@ -2,6 +2,12 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-22 04:00:00 -0500 - Licence and pre-push safety checks
+- README now states CC BY-NC 4.0 licensing.
+- Add `pre_push_check.py`: scans for secrets, PII (home paths/emails, allowlisting `shovas` + noreply email), credentials in remote URLs, oversized/game-data files, untracked files and commit identity mismatches.
+- Sanitise the personal home path in `AGENTS.md`; ignore editor swap files in `.gitignore`.
+- Add `tests/test_pre_push_check.py`; document in README/AGENTS/FEATURES.
+
 ## 2026-11-22 03:30:00 -0500 - Documentation refresh
 - README: add agent-driven/AI-generated notice near top, documentation map of all MD files, remove Status section, reframe usage around agent requests.
 - Update CAPABILITIES.md, FEATURES.md, DEPENDENCIES.md, AGENTS.md and all `docs/*.md` to match current tools and findings (JCA, layout bridge, prototype pipeline, new corpora, PHS TODO, 166-test verification).
