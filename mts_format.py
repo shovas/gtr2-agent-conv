@@ -126,6 +126,27 @@ def parse_mesh_table(data: bytes) -> dict | None:
     return None
 
 
+def parse_material_records(data: bytes) -> list[dict]:
+    """Parse the 4.10 material-record sequence (marker 128+n, 36-byte stride).
+
+    Observed in TIREMANFRONT.MTS: u32 fields are
+    (128+index, 1.0f, 0, 0, 0, 0, packed, small_int, 0).
+    """
+    out = []
+    for off in range(0x1A0, len(data) - 36, 4):
+        first = struct.unpack_from("<I", data, off)[0]
+        if first != 128 + len(out):
+            continue
+        vals = struct.unpack_from("<9I", data, off)
+        if vals[1] != 0x3F800000 or any(vals[i] != 0 for i in (2, 3, 4, 5, 8)):
+            continue
+        out.append({"offset": off, "index": first - 128,
+                    "packed": vals[6], "small": vals[7]})
+        if len(out) > 256:
+            break
+    return out
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("files", nargs="+")
