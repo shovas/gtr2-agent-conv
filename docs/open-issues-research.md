@@ -26,7 +26,7 @@ conclusively establishing it requires actual game execution.
 - **FXM key_count**: all 148 node records across 91 files have value 3; meaning still unconfirmed (likely a fixed channel/version marker). **Unresolved**.
 - **GMT f7**: ARGB vertex colour — 0xFFFFFFFF in 52,176/53,082 vertices; other values 0xFFA0A0A0 etc. are grey tints. **Resolved**. `f0` remains unconfirmed (zero in ~99%).
 - **CUBE MTS per-rig tables**: 4 distinct shared tables across 22 files (9 pit crew, 8 R_ARM/R_TGT, 4 L_ARM, 1 JET); interpretation as rig/skeleton IDs stands, exact semantics **unresolved**.
-- **PHYSICS.PHS**: 13,064 bytes, no PAR2 magic/packets, no repeated 8-byte blocks (1,632 unique of 1,632), overall entropy 7.986. One slightly-low-entropy 512-byte window at 0x3200 (7.12) but no recognizable structure. Plausibly a truncated PAR2 recovery slice for the same `GTL_Update_0901.exe` set (the other four are PAR2 containers for it); **unresolved**, low value.
+- **PHYSICS.PHS**: 13,064 bytes, no PAR2 magic/packets, no repeated 8-byte blocks (1,632 unique of 1,632), overall entropy 7.986. One slightly-low-entropy 512-byte window at 0x3200 (7.12) but no recognizable structure. XOR entropy vs the other four is ~7.8 over 1,024 bytes (the ~7.1 figure from 256-byte samples was a small-sample artifact) — no shared keystream. Plausibly a truncated PAR2 recovery slice for the same `GTL_Update_0901.exe` set (the other four are PAR2 containers for it); **unresolved**, low value.
 
 ## 4. GTR (2004) corpus
 - **Correction**: `../GTR1Vanilla` **is installed** (3,613 files) — earlier task-plan claim was stale and has been fixed.
@@ -49,7 +49,8 @@ conclusively establishing it requires actual game execution.
 - **FXM `key_count`**: tested 3×28-byte keys (pos+quat) across all 148 node records —
   **0/148** yield unit quaternions, while the established 2×40-byte TRS layout yields
   **148/148**. Both quaternion-first and position-first 3×28 alignments were tested
-  (0/138 either way), so no 3-key layout fits. `key_count==3` is a fixed field (likely
+  (0/138 either way), so no 3-key layout fits. Also tested 3×28 with derived quaternion
+  w (`w=sqrt(1-x²-y²-z²)`) — 0/138 valid. `key_count==3` is a fixed field (likely
   channel/version marker), definitely not a key count. Negative result codified in
   `tests/test_fxm_records.py`. **Unresolved meaning, wrong interpretation excluded**.
 - **GMT `f0` — RESOLVED as marker**: non-zero in only 0.36% of 108,878 vertices,
