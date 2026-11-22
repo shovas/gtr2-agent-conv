@@ -21,6 +21,9 @@ MAS_TYPE1 = b"\xc8\xcf\xd2\xd8\xce\xd8\xe6\xc9\xca\xdd\xd8\xbe\xbb\xa6\xbf\x90"
 MAS_TYPE1X = b"\xce\xc3\xd5\xc7\xc0\xd9\xe6\xc9\xca\xdd\xd8\xbe\xbb\xa6\xbf\x90"
 MAS_TYPE1X_SUFFIX = b"\xca\xdd\xd8\xbe\xbb\xa6\xbf\x90"
 MAS_TYPE3 = b"CUBEMAS4.10\x00\x00\x00\x00\x00"
+# F1 2000 era: 12-byte magic, u32 count, u32 data_size, then 256-byte records
+# of name[244] + size + zsize + 4 padding bytes at offset 0x14.
+MAS_TYPE25 = b"CUBEMAS2.50\x00"
 
 
 @dataclass
@@ -94,7 +97,73 @@ def _mas_type(signature: bytes) -> int:
         return 3
     if signature[8:16] == MAS_TYPE1X_SUFFIX:
         return 1
+    if signature[:12] == MAS_TYPE25:
+        return 5
     raise ValueError(f"unsupported MAS signature: {signature!r}")
+
+
+def _read_type25(data: bytes) -> list[Entry]:
+    count, data_size = struct.unpack_from("<II", data, 12)
+    base = 20 + 256 * count
+    if base > len(data):
+        raise ValueError("MAS type-2.5 file table out of bounds")
+    entries = []
+    offset = 0
+    for i in range(count):
+        raw = data[20 + i * 256:20 + (i + 1) * 256]
+        name, size, zsize = struct.unpack_from("<244sII", raw, 0)
+        blob = data[base + offset:base + offset + zsize]
+        entry = Entry(name=name.split(b"\0", 1)[0].decode("latin-1"),
+                      offset=offset, size=size, zsize=zsize)
+        if size == zsize:
+            entry.data = blob
+        elif blob[:2] in (b"\x78\x9c", b"\x78\xda", b"\x78\x01"):
+            try:
+                entry.data = zlib.decompress(blob)
+            except zlib.error:
+                entry.data, entry.type, entry.orig_size = blob, 2, size
+        elif blob[16:18] in (b"\x78\x9c", b"\x78\xda", b"\x78\x01"):
+            try:
+                entry.data = blob[:16] + zlib.decompress(blob[16:])
+                entry.type = 1
+            except zlib.error:
+                entry.data, entry.type, entry.orig_size = blob, 2, size
+        else:
+            # 319 tiny textures use an undecoded variant; keep the blob losslessly.
+            entry.data, entry.type, entry.orig_size = blob, 2, size
+        entries.append(entry)
+        offset += zsize
+    return entries
+
+
+def _write_type25(path: str | os.PathLike, entries: list[Entry]) -> None:
+    packed = []
+    for e in entries:
+        data = e.data if e.data is not None else b""
+        if e.type == 1 and len(data) >= 16:
+            zipped = data[:16] + zlib.compress(data[16:])
+            size = len(data) - 16
+        elif e.type == 2:
+            zipped = data
+            size = e.orig_size or len(data)
+        elif data[:2] in (b"\x78\x9c", b"\x78\xda", b"\x78\x01"):
+            zipped, size = data, len(data)
+        else:
+            zipped, size = zlib.compress(data), len(data)
+        packed.append((e, zipped, size))
+    with open(path, "wb") as f:
+        f.write(MAS_TYPE25 + struct.pack("<II", len(packed), sum(len(z) for _, z, _ in packed)))
+        f.write(b"\x00" * (256 * len(packed)))
+        offset = 0
+        table = []
+        for e, zipped, size in packed:
+            f.write(zipped)
+            table.append((e, size, len(zipped), offset))
+            offset += len(zipped)
+        f.seek(20)
+        for e, size, zsize, off in table:
+            name = e.name.encode("latin-1", "replace")[:244].ljust(244, b"\0")
+            f.write(struct.pack("<244sII4x", name, size, zsize))
 
 
 def read_signature(path: str | os.PathLike) -> bytes:
@@ -114,6 +183,9 @@ def read_archive(path: str | os.PathLike) -> tuple[int, list[Entry]]:
             if _looks_like_type2(whole):
                 return 2, _read_type2(whole)
             raise
+        if mtype == 5:
+            f.seek(0)
+            return 5, _read_type25(f.read())
         if mtype == 1:
             f.seek(16)
             file_count, _data_size = struct.unpack("<4xll", f.read(12))
@@ -185,6 +257,8 @@ def write_archive(path: str | os.PathLike, entries: list[Entry], mas_type: int =
                   signature: bytes | None = None) -> None:
     if mas_type == 2:
         return _write_type2(path, entries)
+    if mas_type == 5:
+        return _write_type25(path, entries)
     if mas_type == 0:
         sig = MAS_TYPE0
         table_off = 24
@@ -331,7 +405,7 @@ def main(argv: list[str] | None = None) -> int:
     p = sub.add_parser("create", help="create archive from files")
     p.add_argument("archive")
     p.add_argument("files", nargs="+")
-    p.add_argument("-t", "--type", type=int, default=0, choices=[0, 1, 2, 3])
+    p.add_argument("-t", "--type", type=int, default=0, choices=[0, 1, 2, 3, 5])
     p.add_argument("--signature", help="override the 16-byte archive signature (hex), e.g. Petrobras type-1X")
     p.set_defaults(func=cmd_create)
 
