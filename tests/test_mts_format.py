@@ -167,6 +167,22 @@ class MtsFormatTest(unittest.TestCase):
         self.assertEqual(len(table["submeshes"]), 5)
         self.assertEqual(table["submeshes"][0], (129, 0, 150, 6448, 150, 13648))
 
+    def test_material_numbers_stable_across_same_name_files(self):
+        found = {}
+        for a in glob.glob(str(ROOT.parent / "NascarSimRacing" / "**" / "*"), recursive=True):
+            p = Path(a)
+            if p.is_file() and p.suffix.lower() == ".mas":
+                for e in mas_tool.read_archive(p)[1]:
+                    d = e.data or b""
+                    if d[:13] == b"CUBE_MTS_4.10" and e.name in ("TIREMANFRONT.MTS", "TIREMANBACK.MTS"):
+                        found.setdefault(e.name, mf.parse_material_records(d))
+        if len(found) < 2:
+            self.skipTest("TIREMAN pair not present")
+        a, b = found["TIREMANFRONT.MTS"], found["TIREMANBACK.MTS"]
+        self.assertEqual(len(a), len(b))
+        self.assertTrue(all(mf.decode_material_numbers(x) == mf.decode_material_numbers(y)
+                            for x, y in zip(a, b)))
+
     def test_material_numeric_fields_decode(self):
         sample = None
         for a in glob.glob(str(ROOT.parent / "NascarSimRacing" / "**" / "*"), recursive=True):
