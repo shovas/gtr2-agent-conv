@@ -1,7 +1,9 @@
 """Tests for the partial RaceGMT header parser."""
 import glob
+import io
 import sys
 import unittest
+from contextlib import redirect_stdout
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -41,6 +43,20 @@ class RaceGmtTest(unittest.TestCase):
         self.assertEqual(len(tris), 552)
         self.assertTrue(all(len(t) == 3 for t in tris))
         self.assertAlmostEqual(tris[0][0][0], 25.1521, places=3)
+
+    def test_materials_cli(self):
+        p = ROOT.parent / "Race07Complete/GameData/Locations/Marrakech/Models/PEOPLE_STAND_01.gmt"
+        if not p.is_file():
+            self.skipTest("PEOPLE_STAND_01 not present")
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            rc = race_gmt.main(["--materials", str(p)])
+        out = buf.getvalue()
+        self.assertEqual(rc, 0)
+        self.assertIn("RaceGmtHeader(", out)
+        self.assertIn("material@", out)
+        self.assertIn("L0DIFFUSET0(type=1,ch=1)", out)
+        self.assertIn("L2DIFFUSET0(type=0,ch=0)", out)
 
     def test_stage_channel_groups(self):
         groups = 0

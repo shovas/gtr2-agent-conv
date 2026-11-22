@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 01:30:00 -0500 - Task 4: expose RaceGMT materials in CLI
+- `race_gmt.py --materials` prints decoded material groups with per-stage type/channel; add CLI test.
+
 ## 2026-11-23 01:00:00 -0500 - Task 4: FXM node id decoded
 - `fxm_tool.build_node_id_map()` proves size_hint == 84 + trailer (148/148 nodes in 91 files) and that the trailer is a name-stable bone id (all 27 node names have exactly one value). Add test and document.
 

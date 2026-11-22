@@ -154,10 +154,19 @@ def decode_stage_channels(blocks: list[dict]) -> list[dict]:
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("files", nargs="+")
+    ap.add_argument("--materials", action="store_true",
+                    help="print decoded material groups with stage types/channels")
     args = ap.parse_args(argv)
     for f in args.files:
         try:
-            print(f, parse_header(Path(f).read_bytes()))
+            data = Path(f).read_bytes()
+            print(f, parse_header(data))
+            if args.materials:
+                blocks = read_material_blocks(data)
+                for group in decode_stage_channels(blocks):
+                    stages = ", ".join(f"{s['name']}(type={s['type']},ch={s['channel']})"
+                                       for s in group["stages"])
+                    print(f"  material@{group['offset']:#x}: {stages}")
         except ValueError as e:
             print(f, "ERROR", e)
     return 0
