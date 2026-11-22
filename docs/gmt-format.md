@@ -21,7 +21,7 @@ First-pass binary analysis for GTL -> GTR2 conversion. **Not a complete spec**; 
 | 0x00 | u32 | 72138, 69904, 223002 | **Object/material list offset** (points near EOF; `size - offset` is trailing table size, commonly 1152+). Confirmed by ASCII names at offset. |
 | 0x04 | u32 | `0x04000020` (12320), `0x20` (6207), `0x04000000` (6128), `0x0` (2273), `0x02000020` (2) | Header flags (observed across 26930 normal-magic archive GMTs). Semantics not fully proven; bits `0x04000000` and `0x20` dominate. |
 | 0x08 | 16 bytes | `c8 cf d2 d8 ce d8 e6 c3 d6 de d8 be bb a7 bf 90` | ISI obfuscated magic/signature family for normal GTR2/GTL GMTs. |
-| 0x16C | u32, u32 | `count, first_record` | Mesh table header. Validated on 26916/26931 archive GMTs with `0 < count <= 256` and bounds check. |
+| 0x16C | u32, u32 | `count, first_record` | Mesh table header. Validated on 26916/26931 archive GMTs with `0 < count <= 256` and bounds check. Observed `first_record==528` (0x210) in scanned normal-magic GMTs; 0x174..0x210 is a non-zero header/gap region. |
 | `first_record + i*108` | 27*u32 | record | Mesh record. Observed fields: `[1]=flags`, `[3]=vertex_count`, `[4]=vertex_offset`, `[10]=index_count`, `[11]=index_offset`. |
 | vertex | 32 bytes | `u32, xyz floats, normal xyz floats, u32` | Observed by structure probe; consistent with external reference. |
 | indices | 4-byte lead + u16[] | triangle list | Observed `index_offset + 4 + index_count*2` within file. |

@@ -548,6 +548,27 @@ class GmtFormatTest(unittest.TestCase):
                 checked += 1
         self.assertGreater(checked, 0)
 
+    def test_mesh_table_first_offset_observed(self):
+        # Observed in scanned normal-magic GMTs: mesh table first_record is 528 (0x210).
+        import importlib.util, glob, os, struct
+        spec = importlib.util.spec_from_file_location('mas', ROOT.parent / 'rfactortools/rfactortools/mas.py')
+        mas = importlib.util.module_from_spec(spec); spec.loader.exec_module(mas)
+        archives = sorted(glob.glob(str(ROOT.parent / 'GTR2Steam/GameData/**/*.gtr'), recursive=True))[:8]
+        archives += sorted(glob.glob(str(ROOT.parent / 'GTLSteam/GameData/**/*.gtl'), recursive=True))[:4]
+        if not archives:
+            self.skipTest("no archives")
+        checked=0
+        for arc in archives:
+            for name, data in mas.mas_unpack_to_data(arc):
+                if not name.lower().endswith('.gmt') or len(data) < 0x174: continue
+                if data[8:24] != bytes.fromhex('c8cfd2d8ced8e6c3d6ded8bebba7bf90'): continue
+                mc, mf = struct.unpack_from('<II', data, 0x16C)
+                self.assertEqual(mf, 528)
+                self.assertGreater(mc, 0)
+                self.assertLessEqual(mf + mc * 108, len(data))
+                checked += 1
+        self.assertGreater(checked, 0)
+
     def test_mesh_index_bounds_observed(self):
         # Observed: mesh index values are within vertex_count in scanned samples; index_count not always multiple of 3.
         import importlib.util, glob, os, struct
