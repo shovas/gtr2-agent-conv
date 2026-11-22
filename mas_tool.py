@@ -24,6 +24,10 @@ MAS_TYPE3 = b"CUBEMAS4.10\x00\x00\x00\x00\x00"
 # F1 2000 era: 12-byte magic, u32 count, u32 data_size, then 256-byte records
 # of name[244] + size + zsize + 4 padding bytes at offset 0x14.
 MAS_TYPE25 = b"CUBEMAS2.50\x00"
+# F1 2001 era: 16-byte signature, u32 count/data_size, then 256-byte records
+# (u32 type, offset, size, zsize, crc, name[236]) starting at 0x18.
+MAS_TYPE400 = b"CUBEMAS4.00\x00\x00\x00\x00\x00"
+MAS_TYPE401 = b"CUBEMAS4.01\x00\x00\x00\x00\x00"
 
 
 @dataclass
@@ -35,8 +39,10 @@ class Entry:
     type: int = 0
     flags: int = 0
     data: bytes | None = None
-    # Type-2 only: original uncompressed size when the blob is stored undecoded.
+    # Type-2/5/6 only: original uncompressed size when the blob is stored undecoded.
     orig_size: int = 0
+    # Type-6 only: original file-type field (e.g. 17 for MTS).
+    orig_type: int = 0
 
 
 def _looks_like_type2(data: bytes) -> bool:
@@ -99,7 +105,74 @@ def _mas_type(signature: bytes) -> int:
         return 1
     if signature[:12] == MAS_TYPE25:
         return 5
+    if signature in (MAS_TYPE400, MAS_TYPE401):
+        return 6
     raise ValueError(f"unsupported MAS signature: {signature!r}")
+
+
+def _read_type6(data: bytes) -> list[Entry]:
+    count, data_size = struct.unpack_from("<II", data, 16)
+    base = 24 + 256 * count
+    if base > len(data):
+        raise ValueError("MAS type-4.0x file table out of bounds")
+    entries = []
+    offset = 0
+    for i in range(count):
+        raw = data[24 + i * 256:24 + (i + 1) * 256]
+        etype, off, size, zsize, crc, name = struct.unpack_from("<IIIII236s", raw, 0)
+        blob = data[base + offset:base + offset + zsize]
+        entry = Entry(name=name.split(b"\0", 1)[0].decode("latin-1"),
+                      offset=off, size=size, zsize=zsize, type=etype, flags=crc,
+                      orig_type=etype)
+        if size == zsize:
+            entry.data = blob
+        elif blob[:2] in (b"\x78\x9c", b"\x78\xda", b"\x78\x01"):
+            try:
+                entry.data = zlib.decompress(blob)
+            except zlib.error:
+                entry.data, entry.type, entry.orig_size = blob, 2, size
+        elif blob[16:18] in (b"\x78\x9c", b"\x78\xda", b"\x78\x01"):
+            try:
+                entry.data = blob[:16] + zlib.decompress(blob[16:])
+                entry.type = 1
+            except zlib.error:
+                entry.data, entry.type, entry.orig_size = blob, 2, size
+        else:
+            entry.data, entry.type, entry.orig_size = blob, 2, size
+        entries.append(entry)
+        offset += zsize
+    return entries
+
+
+def _write_type6(path: str | os.PathLike, entries: list[Entry], signature: bytes) -> None:
+    packed = []
+    for e in entries:
+        data = e.data if e.data is not None else b""
+        if e.type == 1 and len(data) >= 16:
+            zipped = data[:16] + zlib.compress(data[16:])
+            # Textures (orig_type 2) store the header separately; meshes (1) include it.
+            size = len(data) if e.orig_type == 1 else len(data) - 16
+        elif e.type == 2:
+            zipped = data
+            size = e.orig_size or len(data)
+        elif data[:2] in (b"\x78\x9c", b"\x78\xda", b"\x78\x01"):
+            zipped, size = data, len(data)
+        else:
+            zipped, size = zlib.compress(data), len(data)
+        packed.append((e, zipped, size))
+    with open(path, "wb") as f:
+        f.write(signature + struct.pack("<II", len(packed), sum(len(z) for _, z, _ in packed)))
+        f.write(b"\x00" * (256 * len(packed)))
+        offset = 0
+        table = []
+        for e, zipped, size in packed:
+            f.write(zipped)
+            table.append((e, size, len(zipped), offset))
+            offset += len(zipped)
+        f.seek(24)
+        for e, size, zsize, off in table:
+            name = e.name.encode("latin-1", "replace")[:236].ljust(236, b"\0")
+            f.write(struct.pack("<IIIII236s", e.orig_type, off, size, zsize, e.flags, name))
 
 
 def _read_type25(data: bytes) -> list[Entry]:
@@ -186,6 +259,9 @@ def read_archive(path: str | os.PathLike) -> tuple[int, list[Entry]]:
         if mtype == 5:
             f.seek(0)
             return 5, _read_type25(f.read())
+        if mtype == 6:
+            f.seek(0)
+            return 6, _read_type6(f.read())
         if mtype == 1:
             f.seek(16)
             file_count, _data_size = struct.unpack("<4xll", f.read(12))
@@ -259,6 +335,8 @@ def write_archive(path: str | os.PathLike, entries: list[Entry], mas_type: int =
         return _write_type2(path, entries)
     if mas_type == 5:
         return _write_type25(path, entries)
+    if mas_type == 6:
+        return _write_type6(path, entries, signature or MAS_TYPE401)
     if mas_type == 0:
         sig = MAS_TYPE0
         table_off = 24
@@ -352,7 +430,8 @@ def _upsert(entries: list[Entry], path: str, replace: bool) -> None:
         if e.name.lower() == name.lower():
             if not replace:
                 raise ValueError(f"{name} already exists (use update)")
-            entries[i] = Entry(name=e.name, offset=0, size=0, zsize=0, data=pp.read_bytes(), type=e.type, flags=e.flags)
+            entries[i] = Entry(name=e.name, offset=0, size=0, zsize=0, data=pp.read_bytes(), type=e.type, flags=e.flags,
+                               orig_size=e.orig_size, orig_type=e.orig_type)
             return
     if replace:
         raise ValueError(f"{name} not found for update")
@@ -405,7 +484,7 @@ def main(argv: list[str] | None = None) -> int:
     p = sub.add_parser("create", help="create archive from files")
     p.add_argument("archive")
     p.add_argument("files", nargs="+")
-    p.add_argument("-t", "--type", type=int, default=0, choices=[0, 1, 2, 3, 5])
+    p.add_argument("-t", "--type", type=int, default=0, choices=[0, 1, 2, 3, 5, 6])
     p.add_argument("--signature", help="override the 16-byte archive signature (hex), e.g. Petrobras type-1X")
     p.set_defaults(func=cmd_create)
 

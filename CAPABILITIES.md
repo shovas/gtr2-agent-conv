@@ -13,6 +13,7 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 - **MAS type 2 (Sports Car GT)**: signature-less 8-byte header + 32-byte records; reads/writes all 61 archives in `../SportsCarGtUsa` (`tests/test_scgt.py`). Decodes the 16-byte-header + zlib texture variant; 22 members with an undecoded compression variant are preserved losslessly.
 - **MAS type 3 (F1 2002)**: `CUBEMAS4.10` signature; reads/writes all 63 archives in `../F12002` (`tests/test_f12002.py`).
 - **MAS type 5 (F1 2000)**: `CUBEMAS2.50` signature, 12-byte magic + 256-byte records; reads/writes all 118 archives in `../F12000` (`tests/test_f12000.py`). Decodes plain-zlib and 16-byte-header+zlib members; 319 undecoded-compression members preserved losslessly.
+- **MAS type 6 (F1 2001)**: `CUBEMAS4.00`/`CUBEMAS4.01` signatures, 16-byte header + 256-byte records `(type, offset, size, zsize, crc, name[236])`; reads/writes all 80 archives in `../F12001` with signature preservation (`tests/test_f12001.py`).
 
 ## Encryption
 

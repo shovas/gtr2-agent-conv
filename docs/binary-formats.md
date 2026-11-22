@@ -1,6 +1,6 @@
 # Binary Formats Inventory (GTL/GTR2)
 
-First-pass inventory for GTL (`../GTLSteam/GameData`) and GTR2 (`../GTR2Steam/GameData`), with cross-game observations from BMW M3 Challenge, rFactor 1 vanilla, Copa Petrobras de Marcas, Sports Car GT, Automobilista, F1 2000, F1 2002, F1 Challenge 99-02, Stock Car Extreme, Race 07, Volvo, NASCAR Thunder 2003/2004 and a third-party Race 07 decryptor binary. Goal: identify, understand, and provide read/write path for every binary file format possible.
+First-pass inventory for GTL (`../GTLSteam/GameData`) and GTR2 (`../GTR2Steam/GameData`), with cross-game observations from BMW M3 Challenge, rFactor 1 vanilla, Copa Petrobras de Marcas, Sports Car GT, Automobilista, F1 2000, F1 2001, F1 2002, F1 Challenge 99-02, Stock Car Extreme, Race 07, Volvo, NASCAR Thunder 2003/2004 and a third-party Race 07 decryptor binary. Goal: identify, understand, and provide read/write path for every binary file format possible.
 
 **Legend**
 - **R/W**: lossless read/write capability in this repo/tooling, or standard library path.
@@ -42,6 +42,11 @@ These are usually text but may contain null-padded SimBin headers: `.aiw`, `.svm
 - 2,026 loose GMTs all use JCA encryption (`0fb1ffff`) with the non-default **volvo key**. `jca_crypt.decrypt_bytes(data, custom_key=jca_crypt.CUSTOM_KEYS["volvo"])` yields standard GTR2-layout GMTs; 200 sampled files parse and round-trip with `gmt_format.py`.
 - Animations are plain FXM (22), FXA (14), LMA (6) — no extension/magic mismatch here.
 - Verification: `tests/test_volvo.py`.
+
+### F1 2001 (ISI, 2001) cross-corpus observations (evidence only, `../F12001`)
+- 80 `.mas` archives use MAS type 6 (`CUBEMAS4.01\0...` in 56, `CUBEMAS4.00\0...` in 24): 16-byte signature, u32 count at 0x10, u32 data_size at 0x14, then 256-byte records `(u32 type, offset, size, zsize, crc, name[236])` starting at 0x18. Data sequential after the table; 16,720 members.
+- `mas_tool.py` type 6 reads/writes all 80 archives, preserving the original signature. Decodes plain-zlib and 16-byte-header+zlib members; `size` semantics differ by member type (textures exclude the header, meshes include it).
+- Verification: `tests/test_f12001.py`.
 
 ### NASCAR Thunder 2003 (ISI, 2002) cross-corpus observations (evidence only, `../NT2003`)
 - 179 MAS type-3 archives, 19,006 members; 10,397 `.mts` meshes (10,206 standard `CUBE_MTS_4.10` magic, 191 object-level header variants). No known ISI encryption signatures.
