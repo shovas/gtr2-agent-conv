@@ -228,6 +228,15 @@ class SimbinToolsTest(unittest.TestCase):
                     isi_crypt.decrypt_bytes(data, skip=0)
         self.assertGreater(found, 0)
 
+    def test_aiw_header_observed(self):
+        # Observed: GTR2/GTL .AIW files are uncompressed and start with //[[gMa1.000...
+        p = ROOT.parent / "GTR2Steam/GameData/Locations/Anderstorp/3Anderstorp.AIW"
+        if not p.exists():
+            self.skipTest("AIW not present")
+        b = p.read_bytes()
+        self.assertTrue(b.startswith(b'//[[gMa1.000'))
+        self.assertIn(b'[Features]', b[:4096])
+
 
 if __name__ == "__main__":
     unittest.main()
