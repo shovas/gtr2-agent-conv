@@ -52,7 +52,12 @@ conclusively establishing it requires actual game execution.
   (0/138 either way), so no 3-key layout fits. Also tested 3×28 with derived quaternion
   w (`w=sqrt(1-x²-y²-z²)`) — 0/138 valid. `key_count==3` is a fixed field (likely
   channel/version marker), definitely not a key count. Negative result codified in
-  `tests/test_fxm_records.py`. **Unresolved meaning, wrong interpretation excluded**.
+  `tests/test_fxm_records.py`. Also verified nodes are contiguous: all 57 transitions
+  have zero gap and span exactly `name_len+96` (fixed 84-byte keyframe block), so
+  `key_count` cannot imply variable-length records. The 84 bytes decode as **2 TRS
+  keys** (pos/quat/scale each) + 4-byte trailer; a plausible reading is that `3`
+  counts the TRS *components* per key, but this cannot be confirmed offline.
+  **Unresolved meaning, several wrong interpretations excluded**.
 - **GMT `f0` — RESOLVED as marker**: non-zero in only 0.36% of 108,878 vertices,
   and **all 302 non-zero cases occur at vertex index 0** of a mesh. It is a per-mesh
   first-vertex marker/flag, not a per-vertex attribute. Added test.
