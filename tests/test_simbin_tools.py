@@ -188,7 +188,7 @@ class SimbinToolsTest(unittest.TestCase):
 
 
     def test_fxm_offset19_header_observations(self):
-        # Observed: offset-19 FXA/FXM/LMA files have BE u16[1]==257; BE u32[2] in {1,256}; BE u32[5] in {65,66,67,77}.
+        # Observed: offset-19 FXA/FXM/LMA files have BE u16[1]==257; BE u32[2] in {1,256}; BE u32[3] in {80,184}; BE u32[4]==1; BE u32[5] in {65,66,67,77}.
         import struct, glob, os, re
         paths=[]
         for root in [ROOT.parent / 'GTR2Steam', ROOT.parent / 'GTLSteam']:
@@ -202,6 +202,8 @@ class SimbinToolsTest(unittest.TestCase):
             be = struct.unpack_from('>4sHHIIII', b, 0)
             self.assertEqual(be[1], 257)
             self.assertIn(be[2], (1, 256))
+            self.assertIn(be[3], (80, 184))
+            self.assertEqual(be[4], 1)
             self.assertIn(be[5], (65, 66, 67, 77))
             checked += 1
         self.assertGreater(checked, 0)
