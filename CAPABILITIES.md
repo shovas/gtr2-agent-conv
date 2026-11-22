@@ -51,6 +51,14 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 - **Tool**: `fxm_tool.py`.
 - **Gaps**: internal animation/keyframe/node/bone semantics.
 
+## Other binary formats
+
+### PHS (GTL MAS, 5 files observed)
+- **Read**: Identified (high-entropy binary). Lossless byte copy possible.
+- **Write**: Lossless byte copy possible.
+- **Verification**: `tests/test_simbin_tools.py` (confirms not decryptable by known ISI 16-byte-header scheme).
+- **Gaps**: internal format/encryption undecoded.
+
 ## Media formats
 
 ### WAV

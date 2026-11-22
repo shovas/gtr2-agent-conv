@@ -187,5 +187,24 @@ class SimbinToolsTest(unittest.TestCase):
         self.assertGreaterEqual(haspath, off30 - 10)
 
 
+    def test_phs_files_not_isi_16byte(self):
+        # Observed: 5 .phs files in GTL MAS archives have unknown signatures, not ISI 16-byte-header.
+        import importlib.util
+        spec = importlib.util.spec_from_file_location('mas', ROOT.parent / 'rfactortools/rfactortools/mas.py')
+        mas = importlib.util.module_from_spec(spec); spec.loader.exec_module(mas)
+        arc = ROOT.parent / "GTLSteam/Physics2.gtl"
+        if not arc.exists():
+            self.skipTest("Physics2.gtl not present")
+        found = 0
+        for name, data in mas.mas_unpack_to_data(str(arc)):
+            if name.lower().endswith('.phs'):
+                found += 1
+                import isi_crypt
+                # crypt_info may parse, but decrypt with known scheme should fail on unknown signature
+                with self.assertRaises(Exception):
+                    isi_crypt.decrypt_bytes(data, skip=0)
+        self.assertGreater(found, 0)
+
+
 if __name__ == "__main__":
     unittest.main()
