@@ -65,6 +65,8 @@ No package install is required; tools are runnable as scripts from the repo root
 - `jca_crypt.py` - native SimBin JCA decrypt/encrypt (Race 07 etc.; **GPLv2**, with `jca_tables.py`).
 - `simbin_text_tool.py` - AIW/SCN/TRK semantic reader (waypoints, SearchPath, MASFile).
 - `gmt_layout.py` - prototype structural old→new GMT layout bridge (geometry semantics unvalidated).
+- `rf1_to_gtr2.py` - prototype archive pipeline: unpack → ISI decrypt → layout bridge → repack → validate.
+- `simbin_events_tool.py` - GTTF/IRSR header + filename/string reader (lap/frame semantics undecoded).
 - `gzip_simbin_tool.py` - DSI/HAT/GTT/VCR gzip container tool.
 - `fxm_tool.py` - FXM/FXA/LMA header/node extraction/round-trip tool.
 - `media_tool.py` - Media identification and WAV semantic round-trip.

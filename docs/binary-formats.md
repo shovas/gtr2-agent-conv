@@ -38,6 +38,10 @@ These are usually text but may contain null-padded SimBin headers: `.aiw`, `.svm
 
 ## Game-specific binary formats: status
 
+### Wave 2 tooling (GTTF/IRSR + rF1 pipeline)
+- `simbin_events_tool.py` reads GTTF/IRSR magic, f32 version (1.0 / 1.05), u32-length TRK and AIW filenames, and embedded ASCII strings. Verified across all 29 GTT and 9 VCR files. Lap/frame record semantics remain undecoded.
+- `rf1_to_gtr2.py` implements unpack → ISI decrypt → structural layout bridge → type-0 repack → `gmt_format` validation. A 253-GMT rF1 archive converts and repacks successfully. Geometry semantics of the bridge are unvalidated.
+
 ### Reference-material mining and loose-extension survey (task plan #1/#2/#4)
 - `docs/reuse-rfactortools.md` records ready-made parsers in `../rfactortools` (AIW, SCN, SFX, VEH, full rFactor→GSC2013 conversion pipeline) and the RacerM/GTL2GTR2 tutorial rules: material prefixes `GRAS`/`GRVL`/`ROAD`, SCN→TRK SearchPath/MASFile rewrites, SkyBoxI block replacement, DDS-only textures.
 - JCA is not limited to GMTs: Race 07 has 64 encrypted `.cam`, 47 `.gdb`, 41 `.trk`, 41 `.scn`; Volvo has 11/9/2/1 of the same. All decrypt with `jca_crypt.py` (volvo key for Volvo) to valid text (`CUBEASF`, `StaticCam=`, `ApplicationTitle=`).
