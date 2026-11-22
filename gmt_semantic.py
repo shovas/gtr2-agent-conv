@@ -121,6 +121,41 @@ def read_gmt(data: bytes) -> dict:
             "face_count": sum(len(s["faces"]) for s in subs)}
 
 
+def read_gtr1_object_mesh(data: bytes) -> dict | None:
+    """Decode the GTR1 descriptor-less variant via the object-table streams.
+
+    Files without the 0x194 descriptor grid (e.g. shadow meshes) carry, at the
+    object table (0x11c's object_offset), an rF1-style 8-u32 table whose stream
+    offsets point to:
+      - positions: 30 records of 32 bytes, first 3 floats are (x,y,z)
+      - indices:   u16 triangles after a 4-byte lead
+    Validated on ARMCOSHAD01.GMT: 30 positions, 83 triangles, all indices < 30.
+    """
+    table = read_gtr1_table(data)
+    if table is None:
+        return None
+    obj = table["object_offset"]
+    if obj + 32 > len(data):
+        return None
+    v1, o1, e1, e2 = struct.unpack_from("<4I", data, obj + 12)
+    if not (0 < v1 < 100000 and 0 < o1 < len(data)):
+        return None
+    # Outer 0x11c table: vertex_offset is the 36-byte triangle-record block,
+    # index_offset is the position stream (32-byte records, first 3 floats xyz).
+    tri_off, pos_off = table["vertex_offset"], table["index_offset"]
+    positions = [struct.unpack_from("<3f", data, pos_off + 4 + i * 32)
+                 for i in range(min(v1, 100000))
+                 if pos_off + 4 + (i + 1) * 32 <= len(data)]
+    triangles = []
+    for i in range(min(table["vertex_count"], 100000)):
+        off = tri_off + i * 36 + 4
+        if off + 6 > len(data):
+            break
+        triangles.append(struct.unpack_from("<3H", data, off))
+    return {"positions": positions, "triangles": triangles,
+            "count": v1, "position_offset": pos_off, "triangle_offset": tri_off}
+
+
 def read_gtr1_table(data: bytes) -> dict | None:
     """Read the universal rF1-style 8-u32 table at 0x11c in GTR1 GMTs.
 

@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 16:30:00 -0500 - GTR1 descriptor-less variant decoded
+- `gmt_semantic.read_gtr1_object_mesh()` decodes the 22,287 GTR1 files lacking the 0x194 grid: 36-byte triangle records at vertex_offset (u16 indices), 32-byte position records at index_offset (4-byte lead), true count from the object table. ARMCOSHAD01.GMT yields 30 positions / 28 valid triangles; 200/200 files validate. Add tests and document.
+
 ## 2026-11-23 16:00:00 -0500 - GMT f0 resolved as first-vertex marker
 - Proved that all 302 non-zero f0 values across 108,878 sampled GMT vertices occur at vertex index 0 of a mesh — a per-mesh first-vertex marker, not a per-vertex attribute. Add test and document.
 
