@@ -40,6 +40,38 @@ class MtsFormatTest(unittest.TestCase):
         self.assertIn("4.20", counts)
 
 
+    def test_varying_fields_align_to_48_byte_grid(self):
+        groups = {}
+        for a in glob.glob(str(ROOT.parent / "NascarSimRacing" / "**" / "*"), recursive=True):
+            p = Path(a)
+            if not p.is_file() or p.suffix.lower() != ".mas":
+                continue
+            for e in mas_tool.read_archive(p)[1]:
+                d = e.data or b""
+                if d[:13] != b"CUBE_MTS_4.20":
+                    continue
+                groups.setdefault((e.name.lower(), len(d)), []).append(d)
+        best = 0
+        for v in groups.values():
+            if len(v) < 2:
+                continue
+            diff = [i for i in range(len(v[0])) if v[0][i] != v[1][i]]
+            if not diff:
+                continue
+            runs = []
+            start = prev = diff[0]
+            for i in diff[1:]:
+                if i - prev > 4:
+                    runs.append(start)
+                    start = i
+                prev = i
+            runs.append(start)
+            aligned = sum(1 for s in runs if s % 48 in (36, 44))
+            best = max(best, aligned / len(runs))
+        if best == 0:
+            self.skipTest("no same-size CUBE MTS 4.20 pair present")
+        self.assertGreater(best, 0.5)
+
     def test_48_byte_vertex_stride_from_same_size_pair(self):
         groups = {}
         for a in glob.glob(str(ROOT.parent / "NascarSimRacing" / "**" / "*"), recursive=True):

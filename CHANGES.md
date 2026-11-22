@@ -2,6 +2,10 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-22 08:15:00 -0500 - Task 4: record grid refinements
+- Correct earlier 64-byte-section claim: RaceGMT differences all lie on the 36-byte position grid; 64-byte gaps were alternating records.
+- Verify CUBE MTS 4.20 differing fields cluster at offsets 36/44 of 48-byte records; add test.
+
 ## 2026-11-22 07:45:00 -0500 - Task 4: RaceGMT positions decoded
 - Verify 36-byte records are 3×(x,y,z) position triples; `race_gmt.read_positions()` reads 552 records from PEOPLE_STAND_01.
 - Document in `docs/binary-formats.md`, `CAPABILITIES.md`; add test.

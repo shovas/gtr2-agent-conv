@@ -41,8 +41,9 @@ def diff_strides(a: bytes, b: bytes, gap: int = 4) -> dict:
     """Infer record strides from two same-size files of the same asset.
 
     Runs of differing bytes are grouped; distances between run starts reveal
-    the record stride. Observed on PEOPLE_STAND_01/02: 36-byte (position) and
-    64-byte (4x4 transform) strides.
+    the record stride. Observed on PEOPLE_STAND_01/02: differences lie on a
+    36-byte grid (3 x position triples); occasional 64-byte gaps are simply
+    alternating differing records, not a separate section.
     """
     from collections import Counter
 
