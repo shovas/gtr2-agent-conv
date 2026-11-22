@@ -127,7 +127,9 @@ python3 jca_crypt.py encrypt <file> <out.jca> --version 3
 ```bash
 python3 simbin_text_tool.py aiw <file.aiw>
 python3 simbin_text_tool.py scn <file.trk>
+python3 simbin_text_tool.py aiw-convert <rfactor.aiw>   # prints SimBin-style AIW
 ```
+The `aiw-convert` mode applies the rFactor→GTR2/GTL rules from the AIW Repair Utility: scale `wp_galpha` by 0.45, drop 12 rFactor-only waypoint tags, and replace `wp_cheat` with `wp_event=(1.000,0,0)`.
 
 ## 9. Prototype conversion tools (unvalidated geometry)
 

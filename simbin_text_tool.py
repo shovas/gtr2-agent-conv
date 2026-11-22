@@ -102,6 +102,49 @@ def parse_scn(data: str) -> ScnInfo:
     return info
 
 
+# rFactor -> SimBin AIW conversion rules, documented by the freeware
+# "AIW Repair Utility v1.0" in ../gtr2-tools (idea: petrs73, code: dhaman).
+# SimBin games (GTR2/GTL/GTR Evolution) cap wp_galpha at 0.45 whereas rFactor
+# uses 1.0; rFactor-only waypoint tags must be removed/replaced.
+RFACTOR_ONLY_AIW_TAGS = frozenset({
+    "wp_normal", "wp_vect", "wp_lockedalpha", "wp_test_speed", "wp_cheat",
+    "wp_pathabstractionspeed", "wp_pathabstraction", "wp_wpse",
+    "wp_lockedlats", "wp_multipathlat", "wp_translat", "wp_pitlane",
+})
+AIW_TAG_REPLACEMENTS = {"wp_cheat": "wp_event=(1.000,0,0)"}
+GALPHA_SCALE = 0.45
+_VEC1_RE = re.compile(r"^\s*\(\s*(-?[\d.]+)\s*\)\s*$")
+
+
+def aiw_for_simbin(data: str) -> str:
+    """Convert an rFactor-style AIW to SimBin conventions (text-level rules)."""
+    out = []
+    for line in data.splitlines(keepends=True):
+        stripped = line.strip()
+        m = KEYVALUE_RE.match(stripped)
+        if not m:
+            out.append(line)
+            continue
+        key, value = m.group(1).strip().lower(), m.group(2).strip()
+        if key in AIW_TAG_REPLACEMENTS:
+            indent = line[:len(line) - len(line.lstrip())]
+            out.append(f"{indent}{AIW_TAG_REPLACEMENTS[key]}\n" if line.endswith("\n")
+                       else f"{indent}{AIW_TAG_REPLACEMENTS[key]}")
+            continue
+        if key in RFACTOR_ONLY_AIW_TAGS:
+            continue
+        if key == "wp_galpha":
+            scalar = _VEC1_RE.match(value)
+            if scalar:
+                scaled = float(scalar.group(1)) * GALPHA_SCALE
+                prefix = line[:len(line) - len(stripped)]
+                newline = "\n" if line.endswith("\n") else ""
+                out.append(f"{prefix}wp_galpha=({scaled:.4f}){newline}")
+                continue
+        out.append(line)
+    return "".join(out)
+
+
 def _cmd_aiw(args: argparse.Namespace) -> int:
     aiw = parse_aiw(read_text(args.file))
     print(f"features: {len(aiw.features)}")
@@ -136,6 +179,9 @@ def main(argv=None) -> int:
     p = sub.add_parser("scn")
     p.add_argument("file")
     p.set_defaults(func=_cmd_scn)
+    p = sub.add_parser("aiw-convert", help="apply rFactor->SimBin AIW text rules to stdout")
+    p.add_argument("file")
+    p.set_defaults(func=lambda a: print(aiw_for_simbin(read_text(a.file)), end=""))
     args = ap.parse_args(argv)
     return args.func(args)
 

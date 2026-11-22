@@ -15,7 +15,7 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 - **MAS type 5 (F1 2000)**: `CUBEMAS2.50` signature, 12-byte magic + 256-byte records; reads/writes all 118 archives in `../F12000` (`tests/test_f12000.py`). Decodes plain-zlib and 16-byte-header+zlib members; 319 undecoded-compression members preserved losslessly.
 - **MAS type 6 (F1 2001)**: `CUBEMAS4.00`/`CUBEMAS4.01` signatures, 16-byte header + 256-byte records `(type, offset, size, zsize, crc, name[236])`; reads/writes all 80 archives in `../F12001` with signature preservation (`tests/test_f12001.py`).
 - **rF1→GTR2 prototype pipeline**: `rf1_to_gtr2.py` unpacks, decrypts ISI-signed members, applies the structural GMT layout bridge, repacks as type 0 and validates with `gmt_format.py`. Verified on a 253-GMT archive (`tests/test_rf1_pipeline.py`). Geometry semantics remain unvalidated.
-- **AIW/SCN text**: `simbin_text_tool.py` parses waypoints/features, SearchPath/MASFile/SkyBoxI (`tests/test_simbin_text_tool.py`).
+- **AIW/SCN text**: `simbin_text_tool.py` parses waypoints/features, SearchPath/MASFile/SkyBoxI (`tests/test_simbin_text_tool.py`). `aiw_for_simbin()` applies documented rFactor→SimBin rules (scale `wp_galpha` by 0.45, drop 12 rFactor-only tags, replace `wp_cheat` with `wp_event=(1.000,0,0)`) from the freeware AIW Repair Utility in `../gtr2-tools` (`tests/test_aiw_convert.py`).
 - **GTTF/IRSR**: `simbin_events_tool.py` reads magic/version/TRK/AIW filenames and embedded strings across 29 GTT + 9 VCR files; lap/frame record semantics undecoded.
 
 ## Coverage gaps (documented, not yet addressed)

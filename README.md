@@ -26,7 +26,7 @@ Tools and format documentation for converting ISIMotor-lineage sim content (rFac
 - Inspect and round-trip GMT headers/mesh/material structure (`gmt_tool.py`, `gmt_format.py`); old→new layout bridge prototype (`gmt_layout.py`).
 - Decrypt/encrypt ISI 16-byte-header files (`isi_crypt.py`) and SimBin JCA files (`jca_crypt.py`, GPLv2).
 - Prototype rF1→GTR2 archive pipeline: unpack → decrypt → layout bridge → repack → validate (`rf1_to_gtr2.py`).
-- Read AIW waypoints and SCN/TRK search paths / MASFile references (`simbin_text_tool.py`).
+- Read AIW waypoints and SCN/TRK search paths / MASFile references, and apply documented rFactor→SimBin AIW rules (`simbin_text_tool.py`).
 - Read GTTF/IRSR headers, filenames and embedded strings (`simbin_events_tool.py`).
 - Inspect and round-trip gzip-wrapped DSI/HAT/GTT/VCR files (`gzip_simbin_tool.py`).
 - Inspect, extract node names, and lossless round-trip FXM/FXA/LMA containers (`fxm_tool.py`).

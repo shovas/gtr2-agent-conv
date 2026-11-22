@@ -59,6 +59,25 @@ Concrete rules for rFactor→SimBin track conversion (GTL and GTR2 share layout)
 `rfactor2gtr2tracks.txt` adds: converted tracks need shadows set to MEDIUM in
 GTR2 or framerate collapses; the supplied GDBs are hand-verified.
 
+## 3. `../gtr2-tools` — concrete rFactor→SimBin AIW rules
+
+The freeware **AIW Repair Utility v1.0** (in `GTR2.Tools.Bundle.Vol.1`, idea
+petrs73, programming dhaman) documents rules for converting rFactor AIWs to
+GTR2/GTL/GTR Evolution:
+
+- SimBin caps `wp_galpha` at **0.4500**; rFactor uses **1.0000** as maximum —
+  scale by 0.45.
+- Delete rFactor-only tags: `wp_normal`, `wp_vect`, `wp_lockedalpha`,
+  `wp_test_speed`, `wp_cheat`, `wp_pathabstractionspeed`, `wp_pathabstraction`,
+  `wp_wpse`, `wp_lockedlats`, `wp_multipathlat`, `wp_translat`, `wp_pitlane`.
+- Replace `wp_cheat=(...)` with `wp_event=(1.000,0,0)`.
+
+These rules are implemented in `simbin_text_tool.aiw_for_simbin()` and tested
+in `tests/test_aiw_convert.py`. Other items in `gtr2-tools` are C# runtime
+memory tools (`ccgepmonitor-main`, `gtr2-memory-operations-tool-wpf`) — useful
+for understanding *in-memory* GTR2 state, not on-disk formats; and many
+third-party binaries with unclear licences (reference only).
+
 ## JCA cross-check against the third-party decryptor (task #7)
 
 `Race07Decryptor.exe` is a single-file .NET 8 bundle. The managed assembly was

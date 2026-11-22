@@ -2,6 +2,12 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-22 04:30:00 -0500 - gtr2-tools and Speednuts extractor reviewed
+- Add `../gtr2-tools/` and `../Speednuts_mas_extract/` as reference-only locations in `AGENTS.md`.
+- Mine `AIW Repair Utility v1.0` readme/INI: rFactor→SimBin AIW rules (scale `wp_galpha` 1.0→0.45, delete 12 rFactor-only tags, replace `wp_cheat` with `wp_event=(1.000,0,0)`).
+- Implement `simbin_text_tool.aiw_for_simbin()` + CLI `aiw-convert`, with `tests/test_aiw_convert.py`.
+- Document in `docs/reuse-rfactortools.md`, `CAPABILITIES.md`, `FEATURES.md`, `README.md`.
+
 ## 2026-11-22 04:00:00 -0500 - Licence and pre-push safety checks
 - README now states CC BY-NC 4.0 licensing.
 - Add `pre_push_check.py`: scans for secrets, PII (home paths/emails, allowlisting `shovas` + noreply email), credentials in remote URLs, oversized/game-data files, untracked files and commit identity mismatches.
