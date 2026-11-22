@@ -59,8 +59,9 @@ conclusively establishing it requires actual game execution.
   decoded positions at those indices are (0,0,0), so the current 36-byte vertex
   interpretation cannot support the test. **Unresolved**, blocked by geometry decode.
 - **GTTF frame slots 7/9**: u32 bit patterns have constant low 16 bits (slot 7 =
-  `0x2000`, slot 9 = `0x0000`) across files, suggesting quantized/fixed-point fields;
-  exact meaning **unresolved**.
+  `0x2000`, slot 9 = `0x0000`) across files, suggesting quantized/fixed-point fields.
+  Tested slot 9's high u16 against speed derived from position deltas across six
+  files: correlation |r| < 0.1, so it is **not** a speed field. Exact meaning **unresolved**.
 - **GTR1 extra 16 bytes**: always `[0, f32, f32, 0]`; floats do not correlate with the
   packed UV u16s. **Unresolved structure only**.
 - **GTR1 descriptor variants**: 22,287 GMTs lack the 0x194 grid. Resolved the gap:

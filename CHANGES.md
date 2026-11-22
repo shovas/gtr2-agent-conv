@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 14:00:00 -0500 - GTTF slot 9 speed hypothesis excluded
+- Tested GTTF frame slot 9's high u16 against speed derived from position/time deltas across six files: |r| < 0.1, so it is not a speed field. Documented as a negative result.
+
 ## 2026-11-23 13:30:00 -0500 - Third-party GMT oracle validation
 - Executed the GPLv3 Blender GTR2/rF1 importer's pure parsing functions in /tmp (not committed) against a converted GMT: positions and UVs matched our decoder exactly after accounting for Blender's Y/Z swap and V-flip. Independent confirmation of the semantic bridge. Documented in `docs/open-issues-research.md`.
 
