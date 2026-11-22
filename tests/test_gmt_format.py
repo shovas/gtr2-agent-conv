@@ -247,7 +247,7 @@ class GmtFormatTest(unittest.TestCase):
 
     def test_material_header_observed_invariants(self):
         # Observed across large L0-heuristic GMT sample (semantics unconfirmed):
-        # hdr_u32[32]==1065353216 (1.0f), hdr_u32[36]==0 always in sample.
+        # hdr_u32[6..15]==0, [20..23]==1.0f, [28]==1.0f, [32]==1.0f, [36]==0.
         import importlib.util, struct, glob, os
         spec = importlib.util.spec_from_file_location('mas', ROOT.parent / 'rfactortools/rfactortools/mas.py')
         mas = importlib.util.module_from_spec(spec); spec.loader.exec_module(mas)
@@ -269,6 +269,9 @@ class GmtFormatTest(unittest.TestCase):
                     if not m.stages or not m.stages[0].name.startswith('L0'):
                         continue
                     hdr = struct.unpack_from('<38I', m.header_raw)
+                    self.assertEqual(hdr[6:16], (0,)*10)
+                    self.assertEqual(hdr[20:24], (1065353216,)*4)
+                    self.assertEqual(hdr[28], 1065353216)
                     self.assertEqual(hdr[32], 1065353216)
                     self.assertEqual(hdr[36], 0)
                     checked += 1
