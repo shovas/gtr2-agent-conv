@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 19:15:00 -0500 - GTR1 coverage added as a regression test
+- `tests/test_gtr1_coverage.py` asserts every GTR1-magic GMT in `../GTR1Vanilla` decodes (33,477/33,477); runs in Normal and Full modes.
+
 ## 2026-11-23 19:00:00 -0500 - GTR1 decoder coverage verified at 100%
 - Full scan of `../GTR1Vanilla`: all 33,477 GTR1-magic GMTs decode via the descriptor grid (10,359) or the descriptor-less object-mesh path (23,118); zero undecoded. Task-plan note marked resolved.
 
