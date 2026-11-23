@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 01:40:00 -0500 - Test tiers rebalanced again
+- Moved `test_race07_complete` and `test_volvo` to Full-only; Normal is 157 tests / 279 s within budget, Full still runs all 294 tests.
+
 ## 2026-11-24 01:20:00 -0500 - HDC clutch constant rewrite
 - `clutchengagerate` is 0.6 in all 41 GTL `.hdc` files that define it and 0.8 in all 43 GTR2 files that define it (SafetyCar omits it in both). `rewrite_hdc_clutch()` converts the value, preserving comments; added validator, test and docs.
 

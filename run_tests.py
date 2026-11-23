@@ -35,7 +35,7 @@ QUICK = (
 NORMAL_EXTRA = (
     "test_bmw_m3", "test_f12000", "test_f12001", "test_f12002", "test_f1c",
     "test_nt2003", "test_nt2004", "test_simbin_events_tool",
-    "test_race07_complete", "test_volvo", "test_race07", "test_fixtures",
+    "test_race07", "test_fixtures",
     "test_mas_tool", "test_rf1_pipeline", "test_gmt_layout", "test_phs_tool",
     "test_ams", "test_rf1_vanilla",
     "test_gtr1_coverage", "test_gmt_relayout",
