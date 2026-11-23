@@ -126,8 +126,12 @@ conclusively establishing it requires actual game execution.
   **Offset reconciliation**: in GTT the car-position floats are at marker−24/−20/−16 within the same
   63-byte record (equivalently marker+39/+43/+47 of the preceding record), whereas the reference `.dsi`
   loader reads them at marker+35/+39/+43 — a 4-byte phase shift between the `.dsi` and `.gtt` layouts.
-  Applying the reference offsets to GTT yields nonsensical values (e.g. −514 for x), so the two formats
-  must not be treated as byte-identical.
+  Direct inspection of 180 local `.dsi` files confirms both use 63-byte records with the same marker, but
+  `.dsi` places **four** floats between position and the marker (offsets +12/+16/+20/+24, values
+  approx. {small angle, heading, small angle, time-like}) whereas GTT has **three** (heading at +12,
+  small angle at +16, time at +20). The extra field explains the 4-byte shift. Applying the reference
+  offsets to GTT yields nonsensical values (e.g. −514 for x), so the two formats are structurally
+  related but not byte-identical.
   Slot 9 (+36) shows the same artifact: its float mantissa is effectively constant, so its values are
   exactly `0, ±8.5, ±34, ±136, ±544, ...` (each step x4) — i.e. only the exponent/sign byte at +39 carries
   data (0x43/0xC3 etc., a sign bit plus a ~7-bit magnitude). Both "floats" are really packed-byte fields,
