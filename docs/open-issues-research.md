@@ -154,7 +154,11 @@ patch), but does not identify the exact engine-side use. Further refinement: the
   '  excluded: no correlation with acceleration (r=-0.02), position coordinates (|r|<0.14) or heading (r=-0.01);\n'
   '  not a byte-XOR/sum checksum of position floats (0.3% chance-level matches). Exact meaning **unresolved**.\n'
   '  FXM `key_count`: a fresh child-count hypothesis was excluded (0 children for 47/49 nodes), and an\n'
-  '  unfiltered node scan still found only value 3 (53/53 nodes, size_hint 96).
+  '  unfiltered node scan still found only value 3 (53/53 nodes, size_hint 96). Cross-variant header diff: the\n'
+  '  standard node header triple is `(1, 96, 3)` (second field varies 94–100 across the corpus), while the\n'
+  '  NUL-name variant trailer is `(1, 0x50=80, 1)` in 239/239 nodes. The variants never coexist in one file\n'
+  '  (5 standard-only, 55 NUL-only), and NUL files use `LMA `/`FXA ` magic with mixed header bytes, so the\n'
+  '  third field is consistent with a variant/version tag but its exact semantics remain **unresolved**.
   Slot 9 (+36) shows the same artifact: its float mantissa is effectively constant, so its values are
   exactly `0, ±8.5, ±34, ±136, ±544, ...` (each step x4) — i.e. only the exponent/sign byte at +39 carries
   data (0x43/0xC3 etc., a sign bit plus a ~7-bit magnitude). Both "floats" are really packed-byte fields,
