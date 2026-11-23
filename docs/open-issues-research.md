@@ -81,7 +81,10 @@ per-mesh first-vertex marker (see Second-pass section); this first-pass entry is
 triples form coherent triangle **surfaces** — the shared 79-triangle pit-crew table has 68 vertices,
 146 edges (91 shared twice, 55 boundary), Euler characteristic V-E+F=1 (a disk); larger rig tables have
 chi=31. This rules out arbitrary index triples and supports a geometric surface role (collision/deformable
-patch), but does not identify the exact engine-side use. Codified in `tests/test_mts_format.py`.
+patch), but does not identify the exact engine-side use. Further refinement: the 68 patch vertices are
+  **strictly planar** (all x=0, extent 0 x 3.23 x 1.76 for TIREMANFRONT; 0 x 3.27 x 1.77 for
+  PITOFFICIAL), so these are planar 2D triangulations (silhouette/shadow/collision-profile like) rather
+  than volumetric 3D surfaces. Codified in `tests/test_mts_format.py`.
 - **GTTF frame slots 7/9**: u32 bit patterns have constant low 16 bits (slot 7 =
   `0x2000`, slot 9 = `0x0000`) across files, suggesting quantized/fixed-point fields.
   Correlated slot 7's high byte against speed from position deltas: r=0.34 raw,
