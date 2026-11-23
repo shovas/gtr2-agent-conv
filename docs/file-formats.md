@@ -79,9 +79,9 @@ Notably absent in GTL GameData: rFactor-style `.veh/.scn/.gen/.hdv/.tbc/.sfx` (0
 - **Observed**: present for cars (e.g. `BMW_M3GTR.cas`).
 - **Conversion notes**: copy/validate referenced GMTs/textures/material names. Path/case sensitivity matters.
 
-### `.aud` (text)
+### `.aud` (text or JCA-encrypted)
 - **Intent**: sound event mapping (engine, shifts, backfires, etc.).
-- **Observed**: key=value lines like `VS_INSIDE_COAST_ENGINE_1=Cars\914_idle.wav`.
+- **Observed**: key=value lines like `VS_INSIDE_COAST_ENGINE_1=Cars\914_idle.wav`. A 247-file survey found 86 plain-text files (CRLF, `//` comments), 153 JCA-wrapped files (magic `0f b1 ff ff`, decryptable by `jca_crypt.py`), and 8 others — so `.aud` is not always text.
 - **Conversion notes**: copy/validate WAV paths; path separators/case may need normalization. rfactortools has `sfx` parsing patterns for related ISI sound files; `.aud` is simpler mapping-style.
 
 ## 3. Track / location files
