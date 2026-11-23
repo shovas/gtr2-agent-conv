@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 22:50:00 -0500 - Final verification after .car adaptation
+- `python3 run_tests.py --mode full`: 47 modules / 287 tests / 640.9 s, 0 failures, 2 skips. Normal: 164 tests / 294.5 s, 0 failures. Pre-push check PASS.
+
 ## 2026-11-23 22:35:00 -0500 - .car template adaptation added
 - `gtl_to_gtr2.adapt_car_from_template()` copies the four universal GTR2-only car keys (driver1, driver2, externaldriverposition, steeringwheelaxis) from a template, preserving all other lines. Verified on the 1 same-name corpus pair (`safetycar.car`) and 10 generic-template cases; 2 new tests.
 
