@@ -343,6 +343,21 @@ class MediaToolTest(unittest.TestCase):
             with wave.open(str(dst), "rb") as w:
                 self.assertGreater(w.getnframes(), 0)
 
+    def test_jca_mipmapped_cubemap(self):
+        import jca_crypt
+        src = (ROOT.parent / "Race07Vanilla/GameData/Locations/Vara/TEXTURES/Cube_map.dds")
+        if not src.is_file():
+            self.skipTest("mipmapped encrypted cube map not present")
+        plain = jca_crypt.decrypt_bytes(src.read_bytes())
+        with tempfile.TemporaryDirectory() as td:
+            q = Path(td) / "cube.dds"
+            q.write_bytes(plain)
+            img = media_tool.read_dds(q)
+            self.assertEqual(len(img.cube_face_rgba), 6)
+            self.assertEqual(len(img.cube_face_mips), 6)
+            self.assertTrue(all(img.cube_face_mips))
+            self.assertEqual(img.to_bytes(), plain)
+
     def test_wav_extra_riff_chunks_preserved(self):
         p = ROOT.parent / "GTR2Steam/GameData/Sounds/GTR/GT3RSRex_onhigh.wav"
         if not p.exists():
