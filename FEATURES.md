@@ -261,3 +261,7 @@ python3 gtl_to_gtr2.py --validate <GameData-dir>
 ## JPG / MP3 semantic conversion
 
 `media_tool.py jpg-decode|jpg-encode` (Pillow) and `mp3-decode|mp3-encode` (ffmpeg) convert between compressed media and uncompressed PNG/PCM WAV. **Limitations**: lossy; metadata/tags are not preserved.
+
+## Animation files
+
+`anm_format.py <file.anm>` decodes single-bone ISI animations to TRS keyframes. **Limitations**: multi-bone files are reported as unsupported.

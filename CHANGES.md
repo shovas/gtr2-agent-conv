@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 17:00:00 -0500 - Single-bone ANM decoder
+- `anm_format.py` decodes the 162 single-bone ANM files in the corpus: 12-byte name + version + bone name + 32-byte TRS/time keys from +76 (position, unit quaternion, monotonic time). The 742 multi-bone files are reported as unsupported rather than decoded speculatively. Added CLI, tests and docs.
+
 ## 2026-11-23 16:30:00 -0500 - DXT4 decode and corpus surveys
 - DXT4 DDS now decodes as a DXT5-alpha variant (alpha matches ffmpeg byte-exactly on the local sample). Documented the 2 undecoded SCGT compressed members, the 904-file `.anm` header survey, and corrected stale counts.
 
