@@ -124,7 +124,7 @@ Notably absent in GTL GameData: rFactor-style `.veh/.scn/.gen/.hdv/.tbc/.sfx` (0
 
 ### `.dds`, `.tga`, `.bmp`, `.jpg` (binary textures/images)
 - **Intent**: textures, skins, UI images, maps.
-- **Conversion notes**: mostly copy; watch DDS compression/flags, dimensions, mipmaps, and case-sensitive references. rfactortools has `img.py` for resizing/conversion helpers.
+- **Conversion notes**: mostly copy; watch DDS compression/flags, dimensions, mipmaps, and case-sensitive references. rfactortools has `img.py` for resizing/conversion helpers. `media_tool.py` reads DXT1/3/4/5, BC4/BC5, all BC6H UF16/SF16 and BC7 modes, preserves mip chains and six-face cube maps byte-for-byte, and decrypts JCA-wrapped DDS (88 encrypted cube maps found in Race07 corpora). Write-back is lossless for DXT1/3/5/cube maps but unsupported for BC4–BC7.
 
 ### `.svm` (binary/text-ish in some contexts; observed as team/skin/support asset)
 - **Intent**: SimBin vehicle/material/skin-related asset (observed frequently in Teams).
