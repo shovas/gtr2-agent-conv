@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 11:30:00 -0500 - Test tier adjustment
+- Moved `test_phs_tool` to Full-only; Normal is 167 tests / 294.8 s within the 300 s budget, Full retains all 313 tests.
+
 ## 2026-11-23 11:00:00 -0500 - JCA texture support
 - Survey found 33,351 JCA-encrypted DDS and 4,415 JCA-encrypted TGA files across 7 corpora. Generalized `decrypt_jca_bytes()` with `dds-jca`/`tga-jca` identification and `jca-decrypt` CLI; verified on Race07 samples (DDS 4x4, TGA 512x128 32-bit). Added tests.
 
