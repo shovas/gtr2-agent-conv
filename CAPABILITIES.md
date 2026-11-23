@@ -20,7 +20,7 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 - **Mesh variant headers/tables**: `mts_format.py` parses the CUBE MTS 4.10/4.20 header, geometry table (200/200 sampled files), two submesh-record layouts (198/200 4.20, 200/200 4.10), 36-byte vertices and 16-byte normals (200/200 both variants), and 4.10 material/rig records (4 distinct shared rig tables across 22 files). `race_gmt.py` decodes the `RaceGMT\0` header, stage-type enum at +256 and per-material texture-channel field at +260 (1,535 groups). Remaining: per-rig table semantics, remaining frame/vertex fields.
 
 ## Coverage gaps (documented, not yet addressed)
-- **GTR 2004 corpus available** (`../GTR1Vanilla`) but its GMT magic (`...bba6bf90` at 0x04) is not parsed by `gmt_format.py` — a third layout distinct from GTL/GTR2 and rF1. See `docs/binary-formats.md`.
+- **GTR 2004 corpus** (`../GTR1Vanilla`, third GMT magic `...bba6bf90` at 0x04) is fully decoded by `gmt_semantic.py` (descriptor grid + descriptor-less object-mesh path; 33,477/33,477 files). `gmt_format.py` itself still targets the GTL/GTR2 layout only; use `gmt_semantic.py` for GTR1. See `docs/binary-formats.md`.
 - **Untested ISI signatures**: `isi_crypt.GAMES` supports 8 signatures but real corpora exist only for rFactor and Game Stock Car; ARCA Sim Racing, Simulador Turismo Carretera, Top Race 2009, Superleague Formula, STC 2012 and Formula Truck have no local corpus.
 - See `docs/reuse-rfactortools.md` for reference material that may reduce these gaps.
 
