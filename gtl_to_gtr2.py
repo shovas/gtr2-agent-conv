@@ -181,6 +181,9 @@ def validate_gtr2_tree(root: str | Path,
         if suffix == ".gdb":
             for msg in validate_gdb(p.read_bytes()):
                 problems.append(f"{p}: {msg}")
+        if suffix == ".car":
+            for msg in validate_car(p.read_bytes()):
+                problems.append(f"{p}: {msg}")
         if suffix == ".trk":
             data = p.read_bytes()
             for msg in validate_trk(data):
@@ -215,6 +218,19 @@ def validate_gdb(data: bytes) -> list[str]:
     """Return missing GTR2 session keys for a ``.gdb`` payload (empty = OK)."""
     keys = set(gdb_key_values(data))
     return [f"missing session key: {k}" for k in GTR2_SESSION_KEYS if k not in keys]
+
+
+# Keys present in all 145 local GTR2 .car files; the 96 GTL .car files lack
+# these four. Values are car-specific, so only the presence rule is confirmed.
+GTR2_CAR_ONLY_KEYS = (
+    "driver1", "driver2", "externaldriverposition", "steeringwheelaxis",
+)
+
+
+def validate_car(data: bytes) -> list[str]:
+    """Return missing GTR2-only keys for a ``.car`` payload (empty = OK)."""
+    keys = set(gdb_key_values(data))
+    return [f"missing car key: {k}" for k in GTR2_CAR_ONLY_KEYS if k not in keys]
 
 
 def _set_gdb_key(data: bytes, key: str, value: str) -> bytes:

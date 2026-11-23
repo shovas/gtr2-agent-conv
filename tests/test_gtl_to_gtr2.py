@@ -86,6 +86,17 @@ class GtlToGtr2Test(unittest.TestCase):
         self.assertTrue(all(g.validate_gdb(p.read_bytes()) for p in gtl_g))
         self.assertTrue(all(not g.validate_gdb(p.read_bytes()) for p in gtr_g))
 
+    def test_car_key_rule(self):
+        def cars(root):
+            return [Path(p) for p in glob.glob(
+                str(ROOT.parent / root / "**" / "*"), recursive=True)
+                if p.lower().endswith(".car")]
+        gtl, gtr = cars("GTLSteam"), cars("GTR2Steam")
+        if not gtl or not gtr:
+            self.skipTest("GTL/GTR2 car corpora not present")
+        self.assertTrue(all(g.validate_car(p.read_bytes()) for p in gtl))
+        self.assertTrue(all(not g.validate_car(p.read_bytes()) for p in gtr))
+
     def test_gdb_adapt_from_same_name_template(self):
         def index(root):
             return {Path(p).name.lower(): Path(p) for p in glob.glob(
