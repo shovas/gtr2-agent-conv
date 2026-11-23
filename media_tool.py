@@ -850,6 +850,23 @@ def encode_uncompressed_dds(rgba: bytes, width: int, height: int, rgb_bits=32, r
     return bytes(out)
 
 
+def _dds_top_level_size(width: int, height: int, fourcc: str,
+                        rgb_bits: int = 32) -> int:
+    """Byte size of DDS level 0 (mip chains follow it in the payload)."""
+    if fourcc in ("DXT1", "DXT3", "DXT5"):
+        blocks = max(1, (width + 3) // 4) * max(1, (height + 3) // 4)
+        return blocks * (8 if fourcc == "DXT1" else 16)
+    return width * height * max(1, rgb_bits // 8)
+
+
+def decode_dxt_bytes(payload: bytes, fourcc: str, width: int, height: int) -> bytes:
+    if fourcc == 'DXT1':
+        return decode_dxt1(payload, width, height)
+    if fourcc == 'DXT3':
+        return decode_dxt3(payload, width, height)
+    return decode_dxt5(payload, width, height)
+
+
 @dataclass
 class DdsImage:
     width: int
@@ -858,17 +875,24 @@ class DdsImage:
     fourcc: str
     rgba: bytes  # decoded top-level RGBA
     header: bytes  # original 128-byte header for lossless metadata where possible
+    mip_payload: bytes = b""  # raw bytes of all mip levels below level 0, preserved verbatim
+    level0_payload: bytes = b""  # original level-0 bytes; reused when RGBA is unchanged
 
     def to_bytes(self) -> bytes:
         if self.fourcc in ('DXT1', 'DXT3', 'DXT5'):
-            if self.fourcc == 'DXT1': payload = encode_dxt1(self.rgba, self.width, self.height)
+            # Reuse the original compressed level-0 bytes whenever RGBA has not
+            # been edited. This keeps mipmapped DXT round-trips byte-lossless;
+            # only edited images pay the lossy DXT re-encode.
+            if self.level0_payload and self.header and decode_dxt_bytes(
+                    self.level0_payload, self.fourcc, self.width, self.height) == self.rgba:
+                payload = self.level0_payload
+            elif self.fourcc == 'DXT1': payload = encode_dxt1(self.rgba, self.width, self.height)
             elif self.fourcc == 'DXT3': payload = encode_dxt3(self.rgba, self.width, self.height)
             else: payload = encode_dxt5(self.rgba, self.width, self.height)
             hdr = bytearray(self.header)
             linear = len(payload)
             struct.pack_into('<I', hdr, 0, 0x20534444)  # DDS 
             struct.pack_into('<I', hdr, 4, 124)
-            struct.pack_into('<I', hdr, 8, 0x1007)
             struct.pack_into('<I', hdr, 12, self.height)
             struct.pack_into('<I', hdr, 16, self.width)
             struct.pack_into('<I', hdr, 20, linear)
@@ -876,8 +900,7 @@ class DdsImage:
             struct.pack_into('<I', hdr, 76, 32)
             struct.pack_into('<I', hdr, 80, 0x4)
             hdr[84:88] = self.fourcc.encode('ascii')
-            struct.pack_into('<I', hdr, 108, 0x1000)
-            return bytes(hdr) + payload
+            return bytes(hdr) + payload + self.mip_payload
         if self.fourcc == 'UNCOMPRESSED':
             hdr = bytearray(self.header)
             rgb_bits, rmask, gmask, bmask, amask = struct.unpack_from('<5I', hdr, 88)
@@ -889,7 +912,6 @@ class DdsImage:
             linear = len(payload)
             struct.pack_into('<I', hdr, 0, 0x20534444)
             struct.pack_into('<I', hdr, 4, 124)
-            struct.pack_into('<I', hdr, 8, 0x1007)
             struct.pack_into('<I', hdr, 12, self.height)
             struct.pack_into('<I', hdr, 16, self.width)
             struct.pack_into('<I', hdr, 20, linear)
@@ -898,8 +920,7 @@ class DdsImage:
             struct.pack_into('<I', hdr, 80, pf_flags)
             hdr[84:88] = b'\x00\x00\x00\x00'
             struct.pack_into('<5I', hdr, 88, rgb_bits, rmask, gmask, bmask, amask)
-            struct.pack_into('<I', hdr, 108, 0x1000)
-            return bytes(hdr) + payload
+            return bytes(hdr) + payload + self.mip_payload
         raise ValueError(f'Unsupported DDS fourcc for write: {self.fourcc}')
 
 
@@ -911,6 +932,7 @@ def read_dds(path: str | Path) -> DdsImage:
     hdr_size, flags, height, width, pitch, depth, mipmaps = struct.unpack_from('<7I', b, 4)
     pf_flags, fourcc = struct.unpack_from('<I4s', b, 80)
     fourcc_s = fourcc.decode('latin1','replace').strip('\x00')
+    rgb_bits = struct.unpack_from('<I', b, 88)[0]
     if fourcc_s == 'DXT1':
         rgba = decode_dxt1(b[128:], width, height)
     elif fourcc_s == 'DXT3':
@@ -923,7 +945,11 @@ def read_dds(path: str | Path) -> DdsImage:
         fourcc_s = 'UNCOMPRESSED'
     else:
         raise ValueError(f'Unsupported DDS fourcc for decode: {fourcc_s}')
-    return DdsImage(width=width, height=height, mipmaps=mipmaps or 1, fourcc=fourcc_s, rgba=rgba, header=b[:128])
+    top = _dds_top_level_size(width, height, fourcc_s, rgb_bits)
+    mip_payload = b[128 + top:] if (mipmaps or 1) > 1 else b""
+    return DdsImage(width=width, height=height, mipmaps=mipmaps or 1, fourcc=fourcc_s,
+                    rgba=rgba, header=b[:128], mip_payload=mip_payload,
+                    level0_payload=b[128:128 + top])
 
 
 def dds_roundtrip(src: str | Path, dst: str | Path) -> MediaInfo:

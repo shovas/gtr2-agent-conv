@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 14:00:00 -0500 - Lossless mipmapped DDS round-trip
+- `read_dds()` now preserves the full mip chain and level-0 payload; `to_bytes()` reuses original compressed bytes when RGBA is unchanged. Two mipmapped corpus files (DXT1 12 mips, uncompressed 11 mips) round-trip byte-identically. BC4/5/cube maps confirmed absent from 7,480 local DDS files.
+
 ## 2026-11-23 13:30:00 -0500 - JPG/MP3 semantic decode/encode
 - `media_tool.py jpg-decode|jpg-encode` (Pillow) and `mp3-decode|mp3-encode` (ffmpeg) added with corpus round-trip tests on real GTR2 samples. Both produce valid identifiable output; conversion is lossy.
 

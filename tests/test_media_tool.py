@@ -135,6 +135,27 @@ class MediaToolTest(unittest.TestCase):
                         self.assertEqual(w.getcomptype(), "NONE")
                         self.assertGreater(w.getnframes(), 0)
 
+    def test_mipmapped_dds_roundtrip_preserves_chain(self):
+        import glob
+        import struct
+        samples = [p for p in glob.glob(str(ROOT.parent / "Race07Complete" / "**" / "*"),
+                                        recursive=True)
+                   if p.lower().endswith(".dds") and Path(p).is_file()
+                   and open(p, "rb").read(4) == b"DDS "
+                   and struct.unpack_from("<I", open(p, "rb").read(128), 28)[0] >= 2]
+        if not samples:
+            self.skipTest("mipmapped DDS not present")
+        checked = 0
+        for src in samples[:2]:
+            with self.subTest(src=Path(src).name):
+                img = media_tool.read_dds(src)
+                self.assertGreater(img.mipmaps, 1)
+                self.assertGreater(len(img.mip_payload), 0)
+                out = img.to_bytes()
+                self.assertEqual(out, Path(src).read_bytes())
+                checked += 1
+        self.assertGreater(checked, 0)
+
     def test_jpg_semantic_roundtrip(self):
         import glob
         sample = next((p for p in glob.glob(str(ROOT.parent / "GTR2Steam" / "**" / "*"), recursive=True)

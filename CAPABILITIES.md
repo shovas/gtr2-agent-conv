@@ -97,7 +97,8 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 - **Write**: DXT1/DXT3/DXT5 (lossy) and uncompressed RGB(A) mask-based encode from RGBA + DDS file write; lossless byte copy possible.
 - **Verification**: `tests/test_media_tool.py` (synthetic DXT1, DXT3, DXT5, A8R8G8B8, X8R8G8B8, R8G8B8, R5G6B5 round-trips).
 - **Tool**: `media_tool.py`.
-- **Gaps**: BC4/5/6H/7, mipmaps, cube maps, and some uncompressed layouts not fully implemented.
+- **Mipmaps**: preserved byte-for-byte on DDS round-trip (level-0 bytes reused when RGBA is unchanged); verified on two mipmapped DXT1/uncompressed corpus files.
+- **Gaps**: BC4/5/6H/7 and cube maps not implemented; none occur in the local GTR2/GTL corpus (0/7,480 DDS files).
 
 ### TGA
 - **Read/Write**: Semantic read/write for uncompressed truecolor/grayscale (type 2/3) and RLE truecolor (type 10) via `media_tool.py`. Type 2/3 round-trip is byte-identical; type 10 round-trip is pixel-identical (encoder emits raw packets).
