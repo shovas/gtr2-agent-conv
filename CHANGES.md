@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 02:00:00 -0500 - Final verification after clutch rule
+- `python3 run_tests.py --mode full`: 47 modules / 294 tests / 819.0 s, 0 failures, 2 skips. Normal: 157 tests / 279 s, 0 failures. Quick: 86 tests, 0 failures. Pre-push check PASS.
+
 ## 2026-11-24 01:40:00 -0500 - Test tiers rebalanced again
 - Moved `test_race07_complete` and `test_volvo` to Full-only; Normal is 157 tests / 279 s within budget, Full still runs all 294 tests.
 
