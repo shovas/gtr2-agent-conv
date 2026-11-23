@@ -100,7 +100,12 @@ conclusively establishing it requires actual game execution.
   control value, not a raw angle. Slot 7's high byte takes ~50 distinct values but with a
   median run length of 1 (changes nearly every frame) — not a discrete gear/throttle
   plateau. No 2-byte small-integer fields (gear/flags) found; only time is monotonic.
-  Exact meanings **unresolved**.
+  Focused online search found **no** GTL/GTR2 `.gtt` parser or format spec (results were
+  modern Gran Turismo telemetry, unrelated). The local `gtr2-memory-operations-tool-wpf`
+  `Gtr2VehicleTelemetry` struct documents GTR2 in-memory telemetry (plain-float
+  throttle/steering/RPM, 3x3 orientation matrix) — no authoritative `.gtt` file layout.
+  Tested the 252-byte frame for an orthonormal 3x3 orientation matrix: none found, so the
+  ghost frame is a compact subset, not a raw telemetry dump. Exact meanings **unresolved**.
 - **GTR1 extra 16 bytes — RESOLVED**: always `[0, u, v, 0]` (zero padding + 2D float UV pair),
   confirmed across 2,215 vertices in 100 files. Added as `uv` field in `read_gtr1_vertices()`.
 - **GTR1 descriptor-less variant — RESOLVED**: 22,287 GMTs lack the 0x194 grid. Their
