@@ -23,25 +23,52 @@ import isi_crypt
 import mas_tool
 
 
-def convert_bytes(name: str, data: bytes) -> tuple[bytes, str]:
-    """Return (data, action) for one member."""
+def convert_bytes(name: str, data: bytes, relayout: bool = False,
+                  transform=None, mesh_transform=None) -> tuple[bytes, str]:
+    """Return (data, action) for one member.
+
+    ``relayout`` rebuilds all GMT header/mesh offsets with
+    :func:`gmt_format.relayout_gmt` after the optional ``transform(name, data)``
+    hook. Use it when a transform changes a mesh blob's size; the default path
+    keeps the original offsets and is byte-for-byte unchanged.
+    """
+    action = "copy"
     if len(data) >= 16:
         sign, key = struct.unpack_from("<QQ", data, 0)
         if (sign ^ key) & 0xFFFFFFFFFFFFFFFF in isi_crypt.GAMES:
             data = isi_crypt.decrypt_bytes(data, skip=4)
     if name.lower().endswith(".gmt") and gmt_layout.is_old(data):
-        data = gmt_layout.old_to_new(data)
-        return data, "decrypt+layout"
-    return data, "copy"
+        # The structural bridge only fills the first mesh record of a
+        # multi-object GMT, leaving later records as stale bytes. Relayout
+        # needs coherent records, so use the semantic bridge in that mode.
+        if relayout:
+            data = gmt_layout.old_to_new_semantic(data)
+            action = "decrypt+semantic"
+        else:
+            data = gmt_layout.old_to_new(data)
+            action = "decrypt+layout"
+    if transform is not None:
+        data = transform(name, data)
+        if action == "copy":
+            action = "transformed"
+    if relayout and name.lower().endswith(".gmt") and data[8:24] == gmt_format.GMT_MAGIC:
+        g = gmt_format.parse_gmt(name, data)
+        if mesh_transform is not None:
+            g = mesh_transform(g)
+        data = gmt_format.relayout_gmt(g)
+        action += "+relayout"
+    return data, action
 
 
 def convert_archive(source: str | Path, target: str | Path | None = None,
-                    check: bool = False) -> dict:
+                    check: bool = False, relayout: bool = False,
+                    transform=None, mesh_transform=None) -> dict:
     mtype, entries = mas_tool.read_archive(source)
     actions = {}
     converted = []
     for e in entries:
-        data, action = convert_bytes(e.name, e.data or b"")
+        data, action = convert_bytes(e.name, e.data or b"", relayout, transform,
+                                     mesh_transform)
         actions[action] = actions.get(action, 0) + 1
         out = mas_tool.Entry(name=e.name, offset=0, size=len(data), zsize=0,
                              type=e.type, flags=e.flags, data=data)
@@ -54,7 +81,8 @@ def convert_archive(source: str | Path, target: str | Path | None = None,
         if target is None:
             raise ValueError("target path required unless --check is used")
         mas_tool.write_archive(target, converted, mas_type=0)
-    return {"source_type": mtype, "members": len(converted), "actions": actions}
+    return {"source_type": mtype, "members": len(converted), "actions": actions,
+            "relayout": relayout}
 
 
 def main(argv=None) -> int:
@@ -62,8 +90,10 @@ def main(argv=None) -> int:
     ap.add_argument("source")
     ap.add_argument("target", nargs="?")
     ap.add_argument("--check", action="store_true", help="run conversions and validation without writing")
+    ap.add_argument("--relayout", action="store_true",
+                    help="rebuild GMT offsets (needed if mesh data sizes change)")
     args = ap.parse_args(argv)
-    report = convert_archive(args.source, args.target, args.check)
+    report = convert_archive(args.source, args.target, args.check, args.relayout)
     print(f"source_type={report['source_type']} members={report['members']} actions={report['actions']}")
     return 0
 

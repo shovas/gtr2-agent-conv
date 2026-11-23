@@ -131,9 +131,14 @@ class GmtRelayoutTest(unittest.TestCase):
             self.skipTest("GOALPOST.GMT sample not present")
         data, _ = samples["GOALPOST.GMT"]
         g = gf.parse_gmt("GOALPOST.GMT", data)
-        g.meshes[0].vertex_data += b"\x00" * 8
+        # Undersized blobs are rejected; oversized legacy blobs are preserved.
+        g.meshes[0].vertex_data = g.meshes[0].vertex_data[:-8]
         with self.assertRaises(ValueError):
             gf.relayout_gmt(g)
+        g2 = gf.parse_gmt("GOALPOST.GMT", data)
+        g2.meshes[0].vertex_data += b"\x00" * 8
+        out = gf.relayout_gmt(g2)
+        self.assertGreater(len(out), 0)
 
 
 if __name__ == "__main__":

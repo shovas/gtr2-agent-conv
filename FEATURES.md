@@ -139,7 +139,7 @@ The `aiw-convert` mode applies the rFactor→GTR2/GTL rules from the AIW Repair 
 
 ## 9. Prototype conversion tools (unvalidated geometry)
 
-**What it does**: Structural and semantic old→new GMT bridges (`gmt_semantic.py` decodes positions/UVs/indices) and an archive-level rF1→GTR2 pipeline (unpack → decrypt → convert → repack → validate).
+**What it does**: Structural and semantic old→new GMT bridges (`gmt_semantic.py` decodes positions/UVs/indices) and an archive-level rF1→GTR2 pipeline (unpack → decrypt → convert → repack → validate) with optional offset relayout after mesh edits.
 **How to ask**: "Try converting this rFactor archive to GTR2 and tell me what was validated."
 
 ```bash
@@ -147,6 +147,7 @@ python3 gmt_layout.py <old.gmt> <new.gmt>
 python3 -c "import gmt_layout,pathlib; pathlib.Path('new.gmt').write_bytes(gmt_layout.old_to_new_semantic(pathlib.Path('old.gmt').read_bytes()))"  # semantic
 python3 rf1_to_gtr2.py <archive.mas> <out.gtr>
 python3 rf1_to_gtr2.py <archive.mas> --check
+python3 rf1_to_gtr2.py <archive.mas> <out.gtr> --relayout   # rebuild GMT offsets after mesh edits
 ```
 **Limitations**: Geometry is preserved structurally and validated on 60 real GMTs, but no ground-truth pair exists and in-game behaviour is NOT validated.
 

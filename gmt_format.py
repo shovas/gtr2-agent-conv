@@ -308,8 +308,9 @@ def relayout_gmt(g: GmtFile, align: int = 4) -> bytes:
     mesh blob contents, counts, materials and tail.
 
     Verified invariants (41,899 sampled GTR2 meshes): vertex blob length is
-    ``vertex_count * (48 if extra block else 32)`` and index blob length is
-    ``4 + index_count * 2``; a ValueError is raised if either is violated.
+    at least ``vertex_count * (48 if extra block else 32)`` (legacy rF1
+    conversions may carry a larger extra block, preserved verbatim) and index
+    blob length is ``4 + index_count * 2``; a ValueError is raised otherwise.
     """
     count = len(g.meshes)
     if g.mesh_first < 0x174 or g.mesh_first + count * 108 > len(g.original):
@@ -329,8 +330,12 @@ def relayout_gmt(g: GmtFile, align: int = 4) -> bytes:
         ic = m.record.index_count
         extra = m.record.has_extra_vertex_block
         expect_v = vc * (48 if extra else 32)
-        if len(m.vertex_data) != expect_v:
-            raise ValueError(f"mesh {len(records)}: vertex blob {len(m.vertex_data)} != {expect_v}")
+        # Legacy rF1 conversions can carry an extra block whose record count
+        # differs from vertex_count, so the blob may exceed vc*32. Preserve it
+        # verbatim and mark rec[6] at its actual end; reparse then reads the
+        # same blob (verified in gmt_tool/rf1 pipeline tests).
+        if len(m.vertex_data) < expect_v:
+            raise ValueError(f"mesh {len(records)}: vertex blob {len(m.vertex_data)} < {expect_v}")
         if len(m.index_data) != 4 + ic * 2:
             raise ValueError(f"mesh {len(records)}: index blob {len(m.index_data)} != {4 + ic * 2}")
 
@@ -344,7 +349,8 @@ def relayout_gmt(g: GmtFile, align: int = 4) -> bytes:
         # r6 marks the end of the combined base+extra vertex block. A nonzero
         # r6 is required for streams to be recognised on reparse.
         has_streams = bool(m.stream2_data or m.stream3_data)
-        rec[6] = 0 if (m.record.raw[6] == 0 and not has_streams) else cursor
+        rec[6] = (0 if (m.record.raw[6] == 0 and not has_streams)
+                  else vo + len(m.vertex_data))
 
         if has_streams:
             # raw[7]/raw[8] are END offsets of stream2/stream3 respectively;
