@@ -62,6 +62,7 @@ New angles tried that were not in the first investigation:
 | Entropy of slice bodies vs controls | Slice bodies 7.9996 bits/byte ≈ `os.urandom` 7.9969; compressed BIK 7.73; zlib text 2.67 | Uniformly random, consistent with Reed–Solomon parity data |
 | File length divisibility | 384000-byte slice size; files hold 1–2 full slices plus metadata/partial slices | Consistent with truncated/partial PAR2 sets |
 | `PHYSICS.PHS` entropy | 7.986 (slightly below the other four); no PAR2 packets | Still opaque; could be a partial slice or unrelated blob |
+| ISI crypt forced enctype 0/1, skips 0..64 | best printability 0.427 (from 0.384), entropy still ~7.8 — no valid decrypt | **Excluded** as a simple ISI-crypt payload |
 
 Excluded by this pass: a literal PAR2-aware loader in the GTL binaries; a feasible
 Wine runtime trace in this environment; identical recovery slices across the PHS
