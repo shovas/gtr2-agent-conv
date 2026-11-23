@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 00:30:00 -0500 - FXM zero-node corpus survey
+- Surveyed all 1,115 FXM/FXA/LMA files: 952 decode at least one node (25,432 nodes total), 163 remain zero-node. The remainder is dominated by cockpit-wiper `*_cpitwiper.fxm/.fxa` files with NUL-terminated names and an unresolved frame layout; no speculative decoder was added. Documented as a bounded gap.
+
 ## 2026-11-24 00:00:00 -0500 - FXM rotation-track variant decoded
 - Decoded the marker=2 length-prefixed FXM node variant: `frames` keyframes of `(float time, quaternion xyzw)`, with `size_hint == 8 + 20*frames`. Corpus-verified on 532 tracks / 12,955 keys in 26 GTR2 and Race 07 files (unit quaternions, finite times). `decode_fxm_semantic()` now reports them with `kind="rotation"`; added a regression test. Full v8 on the previous tree: 356 tests, 0 failures.
 
