@@ -267,6 +267,10 @@ def parse_nul_name_nodes(data: bytes) -> list[dict]:
     for m in re.finditer(rb"[A-Za-z][A-Za-z0-9 _\-]{2,40}\x00", data):
         off = m.start()
         # Keyframe offset varies by file: try common positions relative to name.
+        # Several deltas can yield a plausible-looking quaternion. Require
+        # scale components near +/-1 as well (corpus-verified for genuine
+        # nodes), then prefer the candidate with the smallest scale error.
+        # This rejects false name matches inside longer strings.
         found = None
         for delta in (40, 80, 44, 76):
             ks = off + delta
@@ -274,12 +278,17 @@ def parse_nul_name_nodes(data: bytes) -> list[dict]:
                 continue
             f = struct.unpack_from("<10f", data, ks)
             norm = _math.sqrt(sum(x * x for x in f[3:7]))
-            if _math.isfinite(norm) and 0.9 < norm < 1.1:
-                found = (ks, f, norm)
-                break
+            if not (_math.isfinite(norm) and 0.9 < norm < 1.1):
+                continue
+            if not all(_math.isfinite(s) and abs(abs(s) - 1.0) < 0.02
+                       for s in f[7:10]):
+                continue
+            penalty = sum(abs(abs(s) - 1.0) for s in f[7:10])
+            if found is None or penalty < found[3]:
+                found = (ks, f, norm, penalty)
         if found is None:
             continue
-        ks, f, norm = found
+        ks, f, norm, _penalty = found
         out.append({"offset": off, "name": m.group().rstrip(b"\0").decode("latin-1"),
                     "keyframe_offset": ks, "position": f[:3],
                     "quaternion": f[3:7], "scale": f[7:10], "quat_norm": norm})

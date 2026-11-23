@@ -207,6 +207,24 @@ class FxmRecordTest(unittest.TestCase):
             self.assertEqual(d2["variant"], "nul")
             self.assertTrue(all(n["key_count"] == 1 for n in d2["nodes"]))
 
+    def test_nul_parser_rejects_false_name_matches(self):
+        """All NUL-variant nodes from the corpus have +/-1 scale components."""
+        nodes = 0
+        for root in ("GTR2Steam", "Race07Complete"):
+            for p in glob.glob(str(ROOT.parent / root / "**" / "*"), recursive=True):
+                if not Path(p).is_file() or not p.lower().endswith((".lma", ".fxm", ".fxa")):
+                    continue
+                try:
+                    data = Path(p).read_bytes()
+                    found = fxm_tool.parse_nul_name_nodes(data)
+                except Exception:
+                    continue
+                for n in found:
+                    self.assertTrue(all(abs(abs(s) - 1.0) < 0.02 for s in n["scale"]),
+                                    f"{p}:{n['name']}")
+                    nodes += 1
+        self.assertGreater(nodes, 1000)
+
     def test_node_keyframe_invariants_across_corpus(self):
         """148/148 standard nodes: 84-byte keys, unit quats, +/-1 scale, trailer link."""
         checked = 0
