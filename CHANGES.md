@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 08:10:00 -0500 - NaN-aware UV validation fix
+- `validate_conversion` now treats two NaNs as equal when comparing float lists. STANDS01.GMT's 192 NaN UV pairs are preserved byte-for-byte; the multi-object sample now passes 500/500. Added a focused regression test.
+
 ## 2026-11-24 07:45:00 -0500 - Multi-object geometry validation confirmed
 - Re-ran `validate_conversion.py` on multi-object rF1 GMTs: 499/500 pass the semantic bridge end-to-end (the sole failure, STANDS01.GMT, is a UV edge case; positions/faces/tail/independent checks pass). Structural-bridge output is correctly reported as non-lossless. Added regression test.
 

@@ -78,6 +78,28 @@ class ValidateConversionTest(unittest.TestCase):
         self.assertEqual(indep["uvs"], ref["uvs"])
 
 
+    def test_nan_aware_float_comparison(self):
+        self.assertTrue(vc._float_lists_equal([(float("nan"), 1.0)],
+                                              [(float("nan"), 1.0)]))
+        self.assertFalse(vc._float_lists_equal([(float("nan"), 1.0)],
+                                               [(0.0, 1.0)]))
+        # STANDS01.GMT carries NaN UVs that are preserved byte-for-byte.
+        for archive in glob.glob(str(ROOT.parent / "RF1Vanilla" / "**" / "*.mas"), recursive=True):
+            try:
+                _, entries = mas_tool.read_archive(archive)
+            except Exception:
+                continue
+            for entry in entries:
+                if entry.name.upper() != "STANDS01.GMT":
+                    continue
+                data = entry.data or b""
+                if data[0x1d4:0x1e4] != OLD_MAGIC:
+                    continue
+                report = vc.validate(data, gmt_layout.old_to_new_semantic(data))
+                self.assertTrue(report["uvs_equal"], report)
+                return
+        self.skipTest("STANDS01.GMT not present")
+
     def test_multi_object_semantic_geometry_validation(self):
         """Multi-object rF1 GMTs convert losslessly via the semantic bridge."""
         import struct

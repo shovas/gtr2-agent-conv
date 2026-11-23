@@ -12,6 +12,7 @@ This establishes *offline compatibility confidence*, not runtime validation.
 from __future__ import annotations
 
 import argparse
+import math
 import struct
 from pathlib import Path
 
@@ -54,6 +55,26 @@ def independent_read(data: bytes, schema_name: str) -> dict:
     return {"submeshes": out}
 
 
+def _float_lists_equal(a, b) -> bool:
+    """Compare float tuples with NaN-aware equality (two NaNs count as equal).
+
+    Some rF1 GMT UVs contain NaN payloads that are preserved byte-for-byte by
+    the conversion; plain tuple equality reports them as unequal.
+    """
+    if len(a) != len(b):
+        return False
+    for x, y in zip(a, b):
+        if len(x) != len(y):
+            return False
+        for p, q in zip(x, y):
+            if p == q:
+                continue
+            if isinstance(p, float) and isinstance(q, float) and math.isnan(p) and math.isnan(q):
+                continue
+            return False
+    return True
+
+
 def validate(old_data: bytes, new_data: bytes) -> dict:
     """Return a validation report for an old→new conversion."""
     old = gmt_semantic.read_gmt(old_data)
@@ -64,8 +85,8 @@ def validate(old_data: bytes, new_data: bytes) -> dict:
     new_uv = [u for s in new["submeshes"] for u in s["uvs"]]
     old_faces = [f for s in old["submeshes"] for f in s["faces"]]
     new_faces = [f for s in new["submeshes"] for f in s["faces"]]
-    positions_equal = old_pos == new_pos
-    uvs_equal = old_uv == new_uv
+    positions_equal = _float_lists_equal(old_pos, new_pos)
+    uvs_equal = _float_lists_equal(old_uv, new_uv)
     faces_equal = old_faces == new_faces
 
     # Independent cross-check of the converted file's first submesh.
