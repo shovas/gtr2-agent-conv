@@ -136,6 +136,28 @@ class MediaToolTest(unittest.TestCase):
                         self.assertEqual(w.getcomptype(), "NONE")
                         self.assertGreater(w.getnframes(), 0)
 
+    def test_dxt4_corpus_decode(self):
+        import glob
+        import shutil
+        import subprocess
+        sample = next((p for p in glob.glob(str(ROOT.parent / "Race07Complete" / "**" / "*"), recursive=True)
+                       if p.lower().endswith(".dds") and Path(p).is_file()
+                       and open(p, "rb").read(96)[84:88] == b"DXT4"), None)
+        if sample is None:
+            self.skipTest("DXT4 sample not present")
+        img = media_tool.read_dds(sample)
+        self.assertEqual(img.fourcc, "DXT4")
+        self.assertEqual(len(img.rgba), img.width * img.height * 4)
+        if shutil.which("ffmpeg"):
+            with tempfile.TemporaryDirectory() as td:
+                raw = Path(td) / "ref.rgba"
+                subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", sample,
+                                "-f", "rawvideo", "-pix_fmt", "rgba", str(raw)],
+                               capture_output=True)
+                if raw.is_file():
+                    ref = raw.read_bytes()
+                    self.assertEqual(img.rgba[3::4], ref[3::4])
+
     def test_palettized_bmp_corpus_roundtrip(self):
         import glob
         sample = next((p for p in glob.glob(str(ROOT.parent / "RF1Vanilla" / "**" / "*"),

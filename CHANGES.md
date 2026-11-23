@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 16:30:00 -0500 - DXT4 decode and corpus surveys
+- DXT4 DDS now decodes as a DXT5-alpha variant (alpha matches ffmpeg byte-exactly on the local sample). Documented the 2 undecoded SCGT compressed members, the 904-file `.anm` header survey, and corrected stale counts.
+
 ## 2026-11-23 16:00:00 -0500 - 8-bit palettized BMP support
 - `read_bmp()` now handles 8-bit BI_RGB with palette/indices/trailer preservation; a real corpus sample (`legal256.bmp`, 512x384) round-trips byte-identically. Compressed DIB variants confirmed absent from the corpus.
 

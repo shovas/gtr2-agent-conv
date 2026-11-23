@@ -1052,8 +1052,12 @@ def read_dds(path: str | Path) -> DdsImage:
         rgba = decode_dxt1(b[128:], width, height)
     elif fourcc_s == 'DXT3':
         rgba = decode_dxt3(b[128:], width, height)
-    elif fourcc_s == 'DXT5':
+    elif fourcc_s in ('DXT5', 'DXT4'):
+        # DXT4 uses the same 8-index alpha interpolation as DXT5 in practice;
+        # verified against ffmpeg on the local DXT4 corpus sample.
         rgba = decode_dxt5(b[128:], width, height)
+        if fourcc_s == 'DXT4':
+            fourcc_s = 'DXT4'
     elif fourcc_s in ('BC4U', 'ATI1'):
         rgba = decode_bc4(b[128:], width, height)
     elif fourcc_s in ('BC5U', 'ATI2'):
