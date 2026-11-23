@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 04:00:00 -0500 - CAM deactivation invariant
+- Corpus-confirmed the camera deactivation encoding: an FLT_MAX `ActivationLocation` triplet holds exactly when `ActivationRadius=1` (23/23 local cameras, and no other camera has radius 1). The Turbo Basic reference documents a 99999 sentinel that does not occur locally; both are accepted by the new `validate_cam()`. Added a corpus regression test. Also recorded the excluded GTTF shared-memory-header hypothesis.
+
 ## 2026-11-24 03:30:00 -0500 - CAM flags corpus check
 - Extended the CAM parser with Flags1/Flags2, MovementRate, ShakeRate and ShakeMagnitude. Corpus-verified that Flags2 is 0 in all 1,604 cameras, while the documented Flags1 movement/shaking bits only partially correlate with non-zero rates — recorded as observations, not enforced rules. Added a regression test.
 

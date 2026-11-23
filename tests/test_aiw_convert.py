@@ -112,6 +112,23 @@ wp_branchID=(1)
                         cameras += 1
         self.assertGreaterEqual(cameras, 1500)
 
+    def test_cam_deactivation_invariant(self):
+        """FLT_MAX ActivationLocation iff ActivationRadius=1 (23/23 corpus)."""
+        import glob
+        cameras = 0
+        sentinels = 0
+        for corpus in ("GTR2Steam", "GTLSteam", "Race07Complete", "BMWM3Challenge"):
+            for path in glob.glob(str(ROOT.parent / corpus / "**" / "*.cam"), recursive=True):
+                info = stt.parse_cam(stt.read_text(path))
+                self.assertEqual(stt.validate_cam(info), [], path)
+                for cam in info.cameras:
+                    if cam.activation_location and all(x > 1e30 for x in cam.activation_location):
+                        self.assertEqual(cam.activation_radius, 1)
+                        sentinels += 1
+                    cameras += 1
+        self.assertGreaterEqual(cameras, 1100)
+        self.assertGreaterEqual(sentinels, 20)
+
     def test_cam_negation_corpus(self):
         """Negating CAM X/Z brings cameras measurably closer to AIW waypoints."""
         import glob

@@ -189,6 +189,32 @@ def parse_cam(data: str) -> CamInfo:
     return info
 
 
+def validate_cam(info: CamInfo) -> list[str]:
+    """Check corpus-verified CAM invariants; return a list of problems.
+
+    Verified on 1,189 cameras across GTR2/GTL/Race07/BMW: ActivationRadius is
+    never negative, and the "deactivated camera" encoding is an exact
+    biconditional — all 23 cameras whose ActivationLocation is an FLT_MAX
+    triplet have ActivationRadius=1, and no other camera has radius 1. The
+    Turbo Basic reference documents a 99999 sentinel instead; that value does
+    not occur locally, so both encodings are accepted here.
+    """
+    problems: list[str] = []
+    for i, cam in enumerate(info.cameras):
+        radius = cam.activation_radius
+        if radius is not None and radius < 0:
+            problems.append(f"camera {i}: negative ActivationRadius {radius}")
+        location = cam.activation_location
+        if location is None:
+            continue
+        sentinel = all(x > 1e30 for x in location) or all(abs(x - 99999) < 1 for x in location)
+        if sentinel and radius is not None and radius != 1:
+            problems.append(f"camera {i}: deactivated sentinel with ActivationRadius {radius}")
+        if not sentinel and radius == 1:
+            problems.append(f"camera {i}: ActivationRadius=1 without deactivation sentinel")
+    return problems
+
+
 def validate_aiw_waypoints(aiw: AIW) -> list[str]:
     """Check corpus-verified waypoint invariants; return a list of problems.
 
