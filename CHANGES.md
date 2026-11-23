@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 01:00:00 -0500 - Audio sound-path rewrite added
+- All 1,374 sound-path values in 31 GTL `.aud` files use the `Cars\` prefix while all 1,094 in 25 GTR2 files use `GTR\`. `rewrite_aud_sound_paths()` converts 1,488 occurrences across 31/31 GTL files; GTR2 files are unchanged. Added validator, test and docs.
+
 ## 2026-11-24 00:45:00 -0500 - Final verification after race-config validator
 - `python3 run_tests.py --mode full`: 47 modules / 292 tests / 654.5 s, 0 failures, 2 skips. Normal: 164 tests / 254.8 s, 0 failures. Quick: 84 tests, 0 failures. Pre-push check PASS.
 

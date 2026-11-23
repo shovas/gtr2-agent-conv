@@ -75,6 +75,32 @@ class GtlToGtr2Test(unittest.TestCase):
         self.assertEqual(changes["teammaps2"], 1)
         self.assertEqual(g.validate_trk(out), [])
 
+    def test_aud_sound_path_rewrite(self):
+        def files(root):
+            return [Path(p) for p in glob.glob(
+                str(ROOT.parent / root / "**" / "*"), recursive=True)
+                if p.lower().endswith(".aud")]
+        gtl, gtr = files("GTLSteam"), files("GTR2Steam")
+        if not gtl or not gtr:
+            self.skipTest("audio corpora not present")
+        self.assertTrue(all(g.validate_aud_paths(p.read_bytes()) for p in gtl))
+        self.assertTrue(all(not g.validate_aud_paths(p.read_bytes()) for p in gtr))
+        changed = 0
+        for p in gtl:
+            data = p.read_bytes()
+            out, n = g.rewrite_aud_sound_paths(data)
+            self.assertGreater(n, 0, p.name)
+            self.assertEqual(g.validate_aud_paths(out), [])
+            # Nothing except the prefix changes: revert and compare.
+            import re
+            reverted, _ = re.compile(rb"GTR\\").subn(lambda _m: b"Cars\\", out)
+            self.assertEqual(reverted, data)
+            changed += 1
+        self.assertGreater(changed, 0)
+        for p in gtr:
+            out, n = g.rewrite_aud_sound_paths(p.read_bytes())
+            self.assertEqual(n, 0)
+
     def test_rcd_key_rule_and_template(self):
         def files(root):
             return [Path(p) for p in glob.glob(

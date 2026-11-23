@@ -188,7 +188,10 @@ def validate_gtr2_tree(root: str | Path,
             for msg in validate_rcd(p.read_bytes()):
                 problems.append(f"{p}: {msg}")
         if suffix == ".aud":
-            for msg in validate_aud(p.read_bytes()):
+            data = p.read_bytes()
+            for msg in validate_aud(data):
+                problems.append(f"{p}: {msg}")
+            for msg in validate_aud_paths(data):
                 problems.append(f"{p}: {msg}")
         if suffix == ".hdc":
             for msg in validate_hdc(p.read_bytes()):
@@ -264,6 +267,25 @@ def adapt_car_from_template(data: bytes, template: bytes) -> tuple[bytes, dict]:
         out = _set_gdb_key(out, k, tvals[k])
     return out, {"keys_applied": len(GTR2_CAR_ONLY_KEYS),
                  "already_valid": not validate_car(data)}
+
+
+# .aud sound paths: 1,374/1,374 path values in 31 GTL audio files start with
+# "Cars\\", while 1,094/1,094 in 25 GTR2 audio files start with "GTR\\". This
+# prefix is exclusive to .aud in the GTL corpus.
+AUD_OLD_PREFIX = re.compile(rb"(?i)Cars\\")
+AUD_NEW_PREFIX = b"GTR\\"
+
+
+def rewrite_aud_sound_paths(data: bytes) -> tuple[bytes, int]:
+    """Rewrite GTL ``Cars\\`` sound paths to the GTR2 ``GTR\\`` prefix."""
+    out, count = AUD_OLD_PREFIX.subn(lambda _m: AUD_NEW_PREFIX, data)
+    return out, count
+
+
+def validate_aud_paths(data: bytes) -> list[str]:
+    if AUD_OLD_PREFIX.search(data):
+        return ["stale Cars\\ sound path"]
+    return []
 
 
 # .rcd: four keys are present in all 223 GTR2 race-config files and in none of
