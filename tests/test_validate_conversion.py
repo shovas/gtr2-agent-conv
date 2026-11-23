@@ -78,5 +78,33 @@ class ValidateConversionTest(unittest.TestCase):
         self.assertEqual(indep["uvs"], ref["uvs"])
 
 
+    def test_multi_object_semantic_geometry_validation(self):
+        """Multi-object rF1 GMTs convert losslessly via the semantic bridge."""
+        import struct
+        checked = 0
+        for archive in glob.glob(str(ROOT.parent / "RF1Vanilla" / "**" / "*.mas"), recursive=True):
+            try:
+                _, entries = mas_tool.read_archive(archive)
+            except Exception:
+                continue
+            for entry in entries:
+                data = entry.data or b""
+                if data[0x1d4:0x1e4] != OLD_MAGIC:
+                    continue
+                if struct.unpack_from("<I", data, 0x174)[0] < 2:
+                    continue
+                report = vc.validate(data, gmt_layout.old_to_new_semantic(data))
+                self.assertTrue(report["positions_equal"], entry.name)
+                self.assertTrue(report["faces_equal"], entry.name)
+                self.assertTrue(report["independent_cross_check"], entry.name)
+                self.assertTrue(report["material_tail_equal"], entry.name)
+                checked += 1
+                if checked >= 8:
+                    break
+            if checked >= 8:
+                break
+        self.assertGreater(checked, 0)
+
+
 if __name__ == "__main__":
     unittest.main()
