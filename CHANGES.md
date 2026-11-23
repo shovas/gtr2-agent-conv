@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 20:15:00 -0500 - Final Full-suite verification
+- `python3 run_tests.py --mode full`: 45 modules / 268 tests / 593.5 s, 0 failures, 0 errors, 2 skips (external tools absent). Quick: 67 tests / ~10 s. Pre-push check PASS.
+
 ## 2026-11-23 20:00:00 -0500 - GTR2 .dsi instructor-line reader
 - `simbin_events_tool.read_ghost_line()` decodes the 63-byte `.dsi` ghost polyline (marker at record +0, position floats at +35/+39/+43) across all 55 local files; added `--ghost-line` CLI flag and test.
 
