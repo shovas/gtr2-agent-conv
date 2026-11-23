@@ -69,7 +69,10 @@ conclusively establishing it requires actual game execution.
   driver file and **160/160** `LMA `-magic files parse; added tests. Broadened the
   general scan to all file types (exe/bik/dds): every non-3 key_count value was a false
   positive (x86 opcodes, Bink audio header, DDS pixels). No genuine animated node has
-  key_count != 3 across 6,472 candidates.
+  key_count != 3 across 6,472 candidates. Extended to 13 more corpora (Automobilista,
+  F1C, F1 2000/01/02, NascarSimRacing, StockCarExtreme, GameStockCar, NT2003/04,
+  SportsCarGtUsa, Copa, RF1Vanilla): **zero** genuine FXM nodes — they predate FXM;
+  all regex hits were false positives.
 - **GMT `f0` — RESOLVED as marker**: non-zero in only 0.36% of 108,878 vertices,
   and **all 302 non-zero cases occur at vertex index 0** of a mesh. It is a per-mesh
   first-vertex marker/flag, not a per-vertex attribute. Added test.
