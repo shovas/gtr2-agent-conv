@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 00:45:00 -0500 - Final verification after race-config validator
+- `python3 run_tests.py --mode full`: 47 modules / 292 tests / 654.5 s, 0 failures, 2 skips. Normal: 164 tests / 254.8 s, 0 failures. Quick: 84 tests, 0 failures. Pre-push check PASS.
+
 ## 2026-11-24 00:25:00 -0500 - Race-config validator added
 - `validate_rcd()` checks four cold-brain keys universal in all 223 GTR2 `.rcd` files and absent in all 98 GTL ones. Two values are corpus-universal constants (200/120); the other two are supplied via same-name template adaptation (verified on `cunningham.rcd`) or left for manual review. Added test and docs.
 
