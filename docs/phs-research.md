@@ -101,6 +101,7 @@ files. None of these contradict the recovery-container conclusion.
 - **Arbitrary-offset window test**: scanned all 7 recovery slices at 64-byte steps for a 13,064-byte window matching PHYSICS.PHS (sampling every 16th byte): best 12/816 matches — chance level. It is not a window of any slice.
 - **Recovery-slice exponent test**: the 7 `RecvSlic` bodies carry 4-byte PAR2 exponents; PHYSICS.PHS's
   leading u32 (0x6050b465) matches none of them, so it is not a bare recovery-slice body from that set.
+- **Single-byte XOR scan**: all 256 keys give 0.387-0.393 printable fraction on the first 4 KB — random data, not obfuscated text.
 - **Distribution comparison**: PHYSICS.PHS byte entropy 7.986 (chi2 0.993 vs uniform) is statistically
   indistinguishable from the RecvSlic recovery-slice bodies (7.984-7.985, chi2 1.04-1.11), supporting a
   parity/recovery-data classification without proving exact slice identity.
