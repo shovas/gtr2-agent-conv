@@ -37,7 +37,7 @@ NORMAL_EXTRA = (
     "test_nt2003", "test_nt2004", "test_simbin_events_tool",
     "test_race07_complete", "test_volvo", "test_race07", "test_fixtures",
     "test_mas_tool", "test_rf1_pipeline", "test_gmt_layout", "test_phs_tool",
-    "test_copa", "test_ams", "test_stockcar_extreme", "test_rf1_vanilla",
+    "test_ams", "test_rf1_vanilla",
     "test_gtr1_coverage", "test_gmt_relayout",
 )
 

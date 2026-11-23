@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 23:20:00 -0500 - Test tier rebalanced
+- Moved the two expensive corpus surveys (`test_copa`, `test_stockcar_extreme`) to Full-only; Normal is back within its 300 s budget (272 s, 161 tests) while Full retains all 289 tests.
+
 ## 2026-11-23 23:05:00 -0500 - AIW and tire validators added
 - `.aiw`: scrpos/scrori present in all 34 GTR2 AIWs, none of 25 GTL; 6 same-name template adaptations verified. `.tyr`: WetWeather=1 universal across 15 GTR2 files; added to all 26 GTL tire files. Integrated into `validate_gtr2_tree()` with 2 new tests.
 
