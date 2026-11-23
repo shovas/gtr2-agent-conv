@@ -99,6 +99,9 @@ files. None of these contradict the recovery-container conclusion.
   occurs only in DRIVERS.PHS; no EXE or update-named file exists anywhere in the GTL install to compare against.
 - **Recovery-slice exponent test**: the 7 `RecvSlic` bodies carry 4-byte PAR2 exponents; PHYSICS.PHS's
   leading u32 (0x6050b465) matches none of them, so it is not a bare recovery-slice body from that set.
+- **Distribution comparison**: PHYSICS.PHS byte entropy 7.986 (chi2 0.993 vs uniform) is statistically
+  indistinguishable from the RecvSlic recovery-slice bodies (7.984-7.985, chi2 1.04-1.11), supporting a
+  parity/recovery-data classification without proving exact slice identity.
 - **Interpretation**: the UI source-MAS loader likely opens these archives looking for
   UI/localization assets and finds none relevant; the PHS members are not dispatched
   to any physics consumer by name. Strong evidence PHS data is **unused by GTL
