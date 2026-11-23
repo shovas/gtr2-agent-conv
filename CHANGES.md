@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 19:00:00 -0500 - GTR1 decoder coverage verified at 100%
+- Full scan of `../GTR1Vanilla`: all 33,477 GTR1-magic GMTs decode via the descriptor grid (10,359) or the descriptor-less object-mesh path (23,118); zero undecoded. Task-plan note marked resolved.
+
 ## 2026-11-23 18:30:00 -0500 - Test runner gains tier listing and optional coverage
 - `run_tests.py --list` prints Quick/Normal/Full tier membership; `--coverage` adds an optional line-coverage report when the `coverage` package is installed (graceful fallback otherwise). Added a self-test for `--list`.
 

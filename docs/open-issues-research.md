@@ -147,4 +147,4 @@ conclusively establishing it requires actual game execution.
 No issue is fully runtime-resolved without launching GTR2/GTL. The highest-value
 offline work is complete: a reusable offline validator, exact semantic-bridge
 proof, and several decoded residual fields. Defer further PHS/runtime work; pursue
-GTR1 descriptor variants and MTS rig semantics only if new evidence appears.
+GTR1 coverage is now complete: a full `../GTR1Vanilla` scan (33,477 GMTs with the GTR1 magic) is decoded by `read_gtr1_descriptors()` (10,359) or `read_gtr1_object_mesh()` (23,118), with 0 undecoded files. Revisit MTS rig semantics only if new evidence appears.
