@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 14:10:00 -0500 - Full GTL archive survey
+- Ran `convert_config_bytes` over all 497 readable `.gtl` archives (26,455 members): 0 exceptions. Config files are loose in GTL, so no archive members matched the validator-checked extensions.
+
 ## 2026-11-24 13:45:00 -0500 - Shared-folder teammaps rename
 - `convert_tree()` now renames `teammaps.gtl` to `teammaps2.gtr` (matching the GTR2 archive name and the `.trk` MASFile rewrite). The GTL `Locations/shared` folder converts to 7 clean `.gtr` archives with 0 validator problems. Added regression test.
 
