@@ -81,10 +81,16 @@ class GtlToGtr2Test(unittest.TestCase):
         if not src.is_dir() or not target.is_dir():
             self.skipTest("GTL/GTR2 Anderstorp folders not present")
         self.assertTrue(g.validate_gtr2_tree(src))
-        self.assertEqual(g.validate_gtr2_tree(target), [])
+        known = {Path(p).name.lower()
+                 for p in glob.glob(str(ROOT.parent / "GTR2Steam/GameData/**/*"),
+                                    recursive=True)
+                 if p.lower().endswith(".gtr")}
+        self.assertEqual(g.validate_gtr2_tree(target, known), [])
         with tempfile.TemporaryDirectory() as td:
             g.convert_tree(src, td, include_others=False)
-            self.assertEqual(g.validate_gtr2_tree(td), [])
+            local = {Path(p).name.lower() for p in glob.glob(td + "/**/*", recursive=True)
+                     if p.lower().endswith(".gtr")}
+            self.assertEqual(g.validate_gtr2_tree(td, known | local), [])
 
     def test_convert_tree(self):
         src = ROOT.parent / "GTLSteam/GameData/Locations/Anderstorp"

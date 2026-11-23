@@ -159,18 +159,32 @@ def convert_tree(source_root: str | Path, target_root: str | Path | None = None,
     return report
 
 
-def validate_gtr2_tree(root: str | Path) -> list[str]:
-    """Return GTR2-convention problems for a (converted) GameData tree."""
+def validate_gtr2_tree(root: str | Path,
+                       known_archives: set[str] | None = None) -> list[str]:
+    """Return GTR2-convention problems for a (converted) GameData tree.
+
+    ``known_archives`` may supply lowercase archive basenames when validating a
+    subtree whose shared archives live elsewhere (e.g. GameData/Locations/shared).
+    Otherwise archives are discovered under ``root``.
+    """
+    root = Path(root)
+    if known_archives is None:
+        known_archives = {p.name.lower() for p in root.rglob("*")
+                          if p.is_file() and p.suffix.lower() in (".gtr", ".gtl")}
     problems = []
-    for p in sorted(Path(root).rglob("*")):
+    for p in sorted(root.rglob("*")):
         if not p.is_file():
             continue
         suffix = p.suffix.lower()
         if suffix == ".gtl":
             problems.append(f"stale .gtl archive: {p}")
         if suffix == ".trk":
-            for msg in validate_trk(p.read_bytes()):
+            data = p.read_bytes()
+            for msg in validate_trk(data):
                 problems.append(f"{p}: {msg}")
+            for value in masfile_values(data):
+                if value.lower() not in known_archives:
+                    problems.append(f"{p}: unresolved MASFile: {value}")
     return problems
 
 
