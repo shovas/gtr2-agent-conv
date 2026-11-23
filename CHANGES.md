@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 03:00:00 -0500 - CAM file reader and negated-coordinate rule
+- Added `parse_cam()` / `cam` CLI using CAM field names documented in the vendored Turbo Basic source of the guitarmaen editor. Corpus-verified that CAM X/Z are negated relative to AIW waypoint coords on **8/8 paired tracks** (negation reduces mean nearest-waypoint distance by 1.4x-5.7x); exposed as `Camera.aiw_position()`. Added 2 regression tests, including a full corpus check.
+
 ## 2026-11-24 02:30:00 -0500 - AIW waypoint WP_PTRS semantics verified
 - Corpus-verified the `WP_PTRS` waypoint-class rules from the newly added `../guitarmaen-aiw-cam-editor-gtr2-qt` reference: the 4th field buckets into 0=track (22,523), 1=pit (6,505), 2..105=grid (1,212) and ≥106=pitbox (470), and equals `wp_branchID` on **30,710/30,710** waypoints across 26 AIW files. Added `Waypoint.kind()`, `validate_aiw_waypoints()`, CLI output, and 2 regression tests.
 

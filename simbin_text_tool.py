@@ -98,6 +98,79 @@ def parse_aiw(data: str) -> AIW:
     return aiw
 
 
+@dataclass
+class Camera:
+    name: str = ""
+    kind: str = ""
+    position: tuple[float, float, float] | None = None
+    orientation: tuple[float, float, float] | None = None
+    fov: tuple[float, float] | None = None
+    clip_planes: tuple[float, float] | None = None
+    activation_location: tuple[float, float, float] | None = None
+    activation_radius: float | None = None
+    tracking_rate: float | None = None
+
+    def aiw_position(self) -> tuple[float, float, float] | None:
+        """Camera X/Z use the opposite sign convention from AIW waypoints.
+
+        Corpus-verified on 8 paired AIW/CAM tracks (GTL/GTR2/BMW/Race07):
+        negating X and Z brings every camera measurably closer to the track's
+        waypoints (ratios 1.4x-5.7x); the Y axis is unchanged.
+        """
+        if self.position is None:
+            return None
+        return (-self.position[0], self.position[1], -self.position[2])
+
+
+@dataclass
+class CamInfo:
+    cameras: list[Camera] = field(default_factory=list)
+
+
+_FLOAT_RE = re.compile(r"-?[\d.]+")
+
+
+def _floats(value: str, count: int) -> tuple[float, ...] | None:
+    found = _FLOAT_RE.findall(value)
+    return tuple(float(x) for x in found[:count]) if len(found) >= count else None
+
+
+def parse_cam(data: str) -> CamInfo:
+    """Parse a SimBin .CAM file into camera records and their numeric fields."""
+    info = CamInfo()
+    current: Camera | None = None
+    for line in data.splitlines():
+        stripped = line.strip()
+        header = re.match(r"^(StaticCam|TrackingCam|LocalCam)\s*=\s*(.*)$", stripped)
+        if header:
+            current = Camera(name=header.group(2).strip(), kind=header.group(1))
+            info.cameras.append(current)
+            continue
+        if current is None:
+            continue
+        m = KEYVALUE_RE.match(stripped)
+        if not m:
+            continue
+        key, value = m.group(1).strip().lower(), m.group(2).strip()
+        if key == "position":
+            current.position = _floats(value, 3)
+        elif key == "orientation":
+            current.orientation = _floats(value, 3)
+        elif key == "fov":
+            current.fov = _floats(value, 2)
+        elif key == "clipplanes":
+            current.clip_planes = _floats(value, 2)
+        elif key == "activationlocation":
+            current.activation_location = _floats(value, 3)
+        elif key == "activationradius":
+            v = _floats(value, 1)
+            current.activation_radius = v[0] if v else None
+        elif key == "trackingrate":
+            v = _floats(value, 1)
+            current.tracking_rate = v[0] if v else None
+    return info
+
+
 def validate_aiw_waypoints(aiw: AIW) -> list[str]:
     """Check corpus-verified waypoint invariants; return a list of problems.
 
@@ -216,6 +289,19 @@ def _cmd_scn(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_cam(args: argparse.Namespace) -> int:
+    info = parse_cam(read_text(args.file))
+    print(f"cameras: {len(info.cameras)}")
+    kinds: dict[str, int] = {}
+    for cam in info.cameras:
+        kinds[cam.kind] = kinds.get(cam.kind, 0) + 1
+    print(f"kinds: {kinds}")
+    for cam in info.cameras[:args.limit]:
+        print(f"  {cam.name} [{cam.kind}] pos={cam.position} aiw_pos={cam.aiw_position()} "
+              f"fov={cam.fov} clip={cam.clip_planes}")
+    return 0
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -226,6 +312,10 @@ def main(argv=None) -> int:
     p = sub.add_parser("scn")
     p.add_argument("file")
     p.set_defaults(func=_cmd_scn)
+    p = sub.add_parser("cam", help="parse a SimBin .CAM file")
+    p.add_argument("file")
+    p.add_argument("--limit", type=int, default=10)
+    p.set_defaults(func=_cmd_cam)
     p = sub.add_parser("aiw-convert", help="apply rFactor->SimBin AIW text rules to stdout")
     p.add_argument("file")
     p.set_defaults(func=lambda a: print(aiw_for_simbin(read_text(a.file)), end=""))

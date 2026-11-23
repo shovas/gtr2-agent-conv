@@ -87,5 +87,55 @@ wp_branchID=(1)
         self.assertEqual(len(stt.validate_aiw_waypoints(aiw)), 1)
 
 
+    def test_cam_parse_and_negated_position(self):
+        p = ROOT.parent / "GTLSteam/GameData/Locations/Spa/Spa.cam"
+        if not p.is_file():
+            self.skipTest("CAM sample not present")
+        info = stt.parse_cam(stt.read_text(p))
+        self.assertEqual(len(info.cameras), 35)
+        first = info.cameras[0]
+        self.assertEqual(first.kind, "StaticCam")
+        self.assertEqual(first.fov, (60.0, 45.0))
+        self.assertEqual(first.clip_planes, (3.0, 1750.0))
+        self.assertEqual(first.aiw_position(),
+                         (-first.position[0], first.position[1], -first.position[2]))
+
+    def test_cam_negation_corpus(self):
+        """Negating CAM X/Z brings cameras measurably closer to AIW waypoints."""
+        import glob
+        import math
+        import os
+        import re
+        vec = r"\(\s*([-\d.]+)\s*,\s*([-\d.]+)\s*,\s*([-\d.]+)\s*\)"
+        pairs = 0
+        for corpus in ("GTLSteam", "GTR2Steam", "BMWM3Challenge", "Race07Complete"):
+            for aiw in glob.glob(str(ROOT.parent / corpus / "**" / "*.aiw"), recursive=True):
+                cams = glob.glob(os.path.join(os.path.dirname(aiw), "*.cam"))
+                if not cams:
+                    continue
+                text = stt.read_text(aiw)
+                wps = [tuple(float(x) for x in m.groups())
+                       for m in re.finditer(r"wp_pos\s*=" + vec, text)]
+                if len(wps) < 20:
+                    continue
+                positions = []
+                for cam in cams:
+                    for c in stt.parse_cam(stt.read_text(cam)).cameras:
+                        if c.position:
+                            positions.append(c.position)
+                if not positions:
+                    continue
+                def mean_dist(negate):
+                    total = 0.0
+                    for px, py, pz in positions:
+                        x, z = (-px, -pz) if negate else (px, pz)
+                        total += min(math.sqrt((x-wx)**2 + (py-wy)**2 + (z-wz)**2)
+                                     for wx, wy, wz in wps)
+                    return total / len(positions)
+                self.assertLess(mean_dist(True), mean_dist(False), aiw)
+                pairs += 1
+        self.assertGreaterEqual(pairs, 8)
+
+
 if __name__ == "__main__":
     unittest.main()
