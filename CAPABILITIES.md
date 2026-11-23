@@ -60,7 +60,7 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 - **Gaps**: metadata framing (driver/co-driver/team/car) decoded for all four variants and the GTTF frame grid is located; remaining frame fields uninterpreted.
 
 ### FXM/FXA/LMA
-- **Read**: Header identification + lossless container read. Recognizes observed magics `FXM `, `FXA `, `LMA `. Reports LE/BE header field interpretations (BE fixed-header interpretation can overlap string data; semantics unconfirmed). Decoded skeleton-node table (`parse_node_records`) and per-node TRS keyframes (`decode_node_keys`, 2 keys of position/quaternion/scale + trailer) via `fxm_tool.py keys`; heuristic name extraction retained via `nodes`.
+- **Read**: Header identification + lossless container read. Recognizes observed magics `FXM `, `FXA `, `LMA `. Reports LE/BE header field interpretations (BE fixed-header interpretation can overlap string data; semantics unconfirmed). Decoded skeleton-node table (`parse_node_records`) and per-node TRS keyframes (`decode_node_keys`, 2 keys of position/quaternion/scale + trailer) via `fxm_tool.py keys`; heuristic name extraction retained via `nodes`. A third, **length-prefixed** variant (`parse_length_prefixed_nodes`) decodes 22 GTR2 pit-animation FXM files that report zero nodes with the standard anchor: `u32 name_len`, name, marker=1, size_hint, key_count=3, two 40-byte TRS keys.
 - **Write**: Lossless round-trip.
 - **Verification**: `tests/test_simbin_tools.py` (real LMA round-trip, BE-field observation, node-name extraction when present), `tests/test_fxm_records.py` (skeleton table + TRS decode + CLI).
 - **Tool**: `fxm_tool.py`.

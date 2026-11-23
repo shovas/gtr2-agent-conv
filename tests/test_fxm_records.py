@@ -245,5 +245,25 @@ class FxmRecordTest(unittest.TestCase):
         self.assertGreaterEqual(checked, 100)
 
 
+    def test_length_prefixed_fxm_variant(self):
+        """SimBin pit-animation FXM files use length-prefixed bone names."""
+        p = ROOT.parent / ("GTR2Steam/GameData/Animations/Pit/"
+                           "WT01_dropgun01-l.fxm")
+        if not p.is_file():
+            self.skipTest("length-prefixed FXM sample not present")
+        data = p.read_bytes()
+        self.assertEqual(fxm_tool.parse_node_records(data), [])
+        nodes = fxm_tool.parse_length_prefixed_nodes(data)
+        self.assertGreaterEqual(len(nodes), 1)
+        self.assertTrue(any(n["name"] == "Bip01 Pelvis" for n in nodes))
+        for node in nodes:
+            dec = fxm_tool.decode_node_keys(data, node)
+            self.assertEqual(len(dec["keys"]), 2)
+            for key in dec["keys"]:
+                self.assertAlmostEqual(key["quat_norm"], 1.0, delta=0.02)
+        semantic = fxm_tool.decode_fxm_semantic(data)
+        self.assertEqual(semantic["variant"], "length-prefixed")
+
+
 if __name__ == "__main__":
     unittest.main()

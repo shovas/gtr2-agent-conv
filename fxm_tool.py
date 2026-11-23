@@ -145,6 +145,55 @@ def check_node_consistency(b: bytes, node: dict) -> list[str]:
     return problems
 
 
+def parse_length_prefixed_nodes(b: bytes) -> list[dict]:
+    """Decode length-prefixed bone records used by SimBin FXM files.
+
+    Layout: ``u32 name_len, name, u32 marker=1, u32 size_hint, u32 key_count=3,
+    two 40-byte TRS keys``. Unlike the standard variant the name is prefixed by
+    its length and the file's root node may use a different marker, so the
+    ``Bip01\\x01`` anchor in :func:`parse_node_records` finds nothing. Only
+    ``Bip01``-prefixed bone names are accepted: corpus scans show plain
+    length-prefixed strings also occur as 3ds Max metadata and material names.
+    """
+    out: list[dict] = []
+    i = 0
+    while i + 100 <= len(b):
+        name_len = struct.unpack_from("<I", b, i)[0]
+        if not (6 <= name_len <= 64):
+            i += 1
+            continue
+        name_at = i + 4
+        if name_at + name_len + 12 + 80 > len(b):
+            i += 1
+            continue
+        name = b[name_at:name_at + name_len]
+        if not name.startswith(b"Bip01") or not all(32 <= c < 127 for c in name):
+            i += 1
+            continue
+        marker, size_hint, key_count = struct.unpack_from("<III", b, name_at + name_len)
+        if marker != 1 or key_count != 3 or not (0x50 <= size_hint <= 0x80):
+            i += 1
+            continue
+        keys_at = name_at + name_len + 12
+        if not all(_valid_trs_key(b, keys_at + k * 40) for k in range(2)):
+            i += 1
+            continue
+        out.append({"offset": i, "name": name.decode("ascii"),
+                    "size_hint": size_hint, "key_count": key_count,
+                    "keyframe_offset": keys_at, "keyframe_bytes": 84})
+        # The four bytes after the two keys are the next record's name length.
+        i = keys_at + 80
+    return out
+
+
+def _valid_trs_key(b: bytes, off: int) -> bool:
+    if off + 40 > len(b):
+        return False
+    f = struct.unpack_from("<10f", b, off)
+    q = math.sqrt(sum(x * x for x in f[3:7]))
+    return 0.98 < q < 1.02 and all(0.9 < s < 1.1 for s in f[7:10])
+
+
 def decode_fxm_semantic(b: bytes) -> dict:
     """Decode an FXM file into a layout-independent, validated node list.
 
@@ -172,6 +221,21 @@ def decode_fxm_semantic(b: bytes) -> dict:
                           "key_count": len(dec["keys"]),
                           "issues": issues})
         return {"variant": "standard", "nodes": nodes,
+                "stats": {"nodes": len(nodes),
+                          "flagged": sum(1 for n in nodes if n["issues"])}}
+
+    lp = parse_length_prefixed_nodes(b)
+    if lp:
+        nodes = []
+        for node in lp:
+            dec = decode_node_keys(b, node)
+            k0 = dec["keys"][0]
+            issues = [f"key {i}: non-unit quaternion" for i, k in enumerate(dec["keys"])
+                      if abs(k["quat_norm"] - 1.0) > 0.01]
+            nodes.append({"name": node["name"], "position": k0["position"],
+                          "quaternion": k0["quaternion"], "scale": k0["scale"],
+                          "key_count": len(dec["keys"]), "issues": issues})
+        return {"variant": "length-prefixed", "nodes": nodes,
                 "stats": {"nodes": len(nodes),
                           "flagged": sum(1 for n in nodes if n["issues"])}}
 

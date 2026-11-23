@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 23:30:00 -0500 - Third FXM node variant decoded
+- Found a length-prefixed FXM node dialect in 22 GTR2 pit-animation files that the `Bip01\x01` anchor missed entirely (0 nodes decoded). `fxm_tool.parse_length_prefixed_nodes()` now decodes 1–4 TRS nodes per file with validated unit quaternions and identity scale; `decode_fxm_semantic()` reports variant `length-prefixed`. Added a regression test; all 14 existing FXM tests still pass.
+
 ## 2026-11-23 23:00:00 -0500 - MAS-archived cube maps verified
 - Extended the cube-map survey to DDS members inside MAS archives: 40 archives / 1,872 DDS members revealed 27 cube maps (DXT1/DXT5, up to 9 mips) previously missed by loose-file scans. All 27 round-trip byte-identically; added a fast regression test using `showroom.mas`. Also documented that JCA re-encryption is semantically but not byte-exact.
 
