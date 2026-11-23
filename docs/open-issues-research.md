@@ -24,8 +24,9 @@ conclusively establishing it requires actual game execution.
 ## 3. Residual fields
 - **GTTF frame fields**: cross-file analysis of 12 files found slot +12 is heading in radians (-pi..pi in every file) and +16 a small angle. `read_frames()` now exposes both; other slots are zero or uninterpreted. **Partially resolved**.
 - **FXM key_count**: all 148 node records across 91 files have value 3; meaning still unconfirmed (likely a fixed channel/version marker). **Unresolved**.
-- **GMT f7**: ARGB vertex colour — 0xFFFFFFFF in 52,176/53,082 vertices; other values 0xFFA0A0A0 etc. are grey tints. **Resolved**. `f0` remains unconfirmed (zero in ~99%).
-- **CUBE MTS per-rig tables**: 4 distinct shared tables across 22 files (9 pit crew, 8 R_ARM/R_TGT, 4 L_ARM, 1 JET); interpretation as rig/skeleton IDs stands, exact semantics **unresolved**.
+- **GMT f7**: ARGB vertex colour — 0xFFFFFFFF in 52,176/53,082 vertices; other values 0xFFA0A0A0 etc. are grey tints. **Resolved**. `f0` was also resolved later as a
+per-mesh first-vertex marker (see Second-pass section); this first-pass entry is superseded.
+- **CUBE MTS per-rig tables**: 4 distinct shared tables across 22 files (9 pit crew, 8 R_ARM/R_TGT, 4 L_ARM, 1 JET). Later work showed the triples form coherent disk-like triangle surfaces (chi=1), supporting a geometric role; exact semantics **unresolved**.
 - **PHYSICS.PHS**: 13,064 bytes, no PAR2 magic/packets, no repeated 8-byte blocks (1,632 unique of 1,632), overall entropy 7.986. One slightly-low-entropy 512-byte window at 0x3200 (7.12) but no recognizable structure. XOR entropy vs the other four is ~7.8 over 1,024 bytes (the ~7.1 figure from 256-byte samples was a small-sample artifact) — no shared keystream. Tested zlib/raw-deflate/gzip/bz2/lzma at every bit shift (1..7) of the full file with byte offsets 0..127 — no decompression. XOR autocorrelation at periods 2..1024 gives match rates 0.0033..0.0047 (random baseline 0.0039) — no periodic key. Plausibly a truncated PAR2 recovery slice for the same `GTL_Update_0901.exe` set (the other four are PAR2 containers for it); **unresolved**, low value.
 
 ## 4. GTR (2004) corpus
