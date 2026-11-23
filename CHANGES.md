@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 09:00:00 -0500 - Full rF1 validation sweep
+- `validate_conversion.py` over all 8,109 old-layout rF1Vanilla GMTs: semantic bridge passes 8,109/8,109 (4,703 multi-object, 3,406 single-object); structural bridge fails all as expected (geometry not rebuilt). No failures to triage.
+
 ## 2026-11-24 08:35:00 -0500 - Final verification after NaN fix
 - `python3 run_tests.py --mode full`: 47 modules / 303 tests / 702.7 s, 0 failures, 2 skips. Normal: 166 tests / 281.9 s, 0 failures. Quick: 92 tests, 0 failures. Pre-push check PASS.
 
