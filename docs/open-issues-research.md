@@ -83,7 +83,11 @@ conclusively establishing it requires actual game execution.
   heading change |r|<0.19 across 8 files — **excluded**. Across 10 trials, slot 7
   (float16) correlates weakly with speed (mean r=0.14), essentially not at all with
   acceleration (0.005) or curvature (-0.02) across 10 trials — a smoothed speed-like
-  quantity. ISI crypt with all game keys + name-derived keys and skips 0..32 gives
+  quantity. The published rF2 VCR format packs steer/throttle/RPM into u32 bitfields
+  (`rpm=v>>18`, `throttle=(v>>11)&63`, `steer=v&127`); applying that to slot 7 yields
+  "RPM" 2,048–6,016 correlating with speed (r=0.15–0.34 across 6 trials) — plausible
+  engine RPM, but throttle is a constant 4, so the mapping is suggestive, not confirmed.
+  ISI crypt with all game keys + name-derived keys and skips 0..32 gives
   printability 0.375 -> 0.438 (no valid decrypt). Structurally, slot 9's low 16
   bits are zero in 100% of frames across all files (1437/1437), i.e. a float quantized
   to 16-bit granularity (~43 distinct high-16 values, e.g. ±8.5, ±35, ±136) — a coarse
