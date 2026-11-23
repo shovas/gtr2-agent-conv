@@ -3,7 +3,7 @@
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
 ## 2026-11-23 21:45:00 -0500 - GTL->GTR2 container/TRK building block
-- `gtl_to_gtr2.py` rewrites `.trk` MASFile entries to GTR2 conventions and repacks `.gtl` archives as type-0 `.gtr`; corpus-verified on 25 GTL `.trk` (0→25 valid after conversion) and 34 GTR2 `.trk` (34/34 valid, idempotent), with subtree conversion and 5 unittests. Full pipeline still needs geometry/physics/config work.
+- `gtl_to_gtr2.py` rewrites `.trk` MASFile entries to GTR2 conventions and repacks `.gtl` archives as type-0 `.gtr`; corpus-verified on 25 GTL `.trk` (0→25 valid after conversion) and 34 GTR2 `.trk` (34/34 valid, idempotent), with subtree conversion, a `--validate DIR` GTR2-convention checker (0 problems on real GTR2 Anderstorp, 27 on GTL, 0 after conversion), and 6 unittests. Full pipeline still needs geometry/physics/config work.
 
 ## 2026-11-23 21:30:00 -0500 - Final verification after alignment work
 - `python3 run_tests.py --mode full`: 46 modules / 275 tests / 667.3 s, 0 failures, 2 skips. Quick: 67 tests. Pre-push check PASS.

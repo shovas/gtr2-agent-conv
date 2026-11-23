@@ -159,13 +159,38 @@ def convert_tree(source_root: str | Path, target_root: str | Path | None = None,
     return report
 
 
+def validate_gtr2_tree(root: str | Path) -> list[str]:
+    """Return GTR2-convention problems for a (converted) GameData tree."""
+    problems = []
+    for p in sorted(Path(root).rglob("*")):
+        if not p.is_file():
+            continue
+        suffix = p.suffix.lower()
+        if suffix == ".gtl":
+            problems.append(f"stale .gtl archive: {p}")
+        if suffix == ".trk":
+            for msg in validate_trk(p.read_bytes()):
+                problems.append(f"{p}: {msg}")
+    return problems
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("source")
+    ap.add_argument("--validate", metavar="DIR",
+                    help="report GTR2-convention problems in a GameData tree")
+    ap.add_argument("source", nargs="?")
     ap.add_argument("target", nargs="?")
     ap.add_argument("--check", action="store_true",
                     help="validate conversion without writing output")
     args = ap.parse_args(argv)
+    if args.validate:
+        problems = validate_gtr2_tree(args.validate)
+        print(f"validate: {len(problems)} problem(s)")
+        for msg in problems[:20]:
+            print(" ", msg)
+        return 1 if problems else 0
+    if not args.source:
+        ap.error("source required unless --validate is used")
     report = convert_archive(args.source, args.target, args.check)
     print(f"source_type={report['source_type']} members={report['members']} "
           f"trks={report['trks']}")

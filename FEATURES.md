@@ -244,6 +244,7 @@ python3 race_gmt.py --materials <file.gmt>
 ```bash
 python3 gtl_to_gtr2.py <source.gtl> <target.gtr>
 python3 gtl_to_gtr2.py <source.gtl> --check
+python3 gtl_to_gtr2.py --validate <GameData-dir>
 ```
 
 **Limitations**: geometry, physics, vehicle/track config and in-game correctness are not converted or validated.

@@ -128,7 +128,7 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 
 ## Test execution
 - **Tool**: `run_tests.py --mode quick|normal|full` (default `normal`). Deterministic module lists with progressive coverage (`Quick ⊆ Normal ⊆ Full`), end-to-end budget warnings (Quick ≤60 s, Normal ≤300 s), and a timing/result report. `--list` prints tier membership; `--coverage` adds an optional line-coverage report (gracefully skipped when the `coverage` package is absent).
-- **Measured**: Quick 18 modules / 72 tests / ~12 s; Normal 40 modules / 157 tests / ~295 s; Full 47 modules / 280 tests / ~672 s (2 skipped — external tools absent).
+- **Measured**: Quick 18 modules / 73 tests / ~13 s; Normal 40 modules / 158 tests / ~298 s; Full 47 modules / 281 tests / ~675 s (2 skipped — external tools absent).
 - **Plain full suite**: `python3 -m unittest discover -s tests -v` remains available.
 - **Verification**: `tests/test_run_tests_modes.py` checks mode selection invariants; `tests/test_gtr1_coverage.py` asserts 33,477/33,477 GTR1 GMTs decode (Normal/Full); `tests/test_gmt_relayout.py` covers relayout round-trips and growth.
 
@@ -136,7 +136,7 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 
 ### GTL -> GTR2 end-to-end conversion
 - **Status**: Not a complete validated pipeline; the container/`.trk` conversion building block is implemented and corpus-verified.
-- **Container/TRK building block**: `gtl_to_gtr2.py` rewrites `.trk` `MASFile=` entries (`.gtl`→`.gtr`, `teammaps.gtl`→`teammaps2.gtr`, adds `Misc.gtr`), repacks `.gtl` archives as type-0 `.gtr`, and can convert a GameData subtree. Verified on 25 GTL `.trk` (0→25 valid after conversion) and 34 GTR2 `.trk` (34/34 valid, conversion idempotent); `tests/test_gtl_to_gtr2.py`.
+- **Container/TRK building block**: `gtl_to_gtr2.py` rewrites `.trk` `MASFile=` entries (`.gtl`→`.gtr`, `teammaps.gtl`→`teammaps2.gtr`, adds `Misc.gtr`), repacks `.gtl` archives as type-0 `.gtr`, and can convert a GameData subtree; `validate_gtr2_tree()` / `--validate DIR` report GTR2-convention problems. Verified on 25 GTL `.trk` (0→25 valid after conversion) and 34 GTR2 `.trk` (34/34 valid, conversion idempotent); `tests/test_gtl_to_gtr2.py`.
 - **Available building blocks**: MAS read/write (all observed variants), GMT structural inspection/round-trip, old→new layout bridge prototype, ISI + JCA decryption, AIW/SCN and GTTF/IRSR readers, DSI/HAT and FXM/FXA/LMA lossless handling, format docs.
 - **Verified carry-over**: 57 byte-identical same-name GMTs in Anderstorp GTL/GTR2 archives parse and repack correctly (`tests/test_carryover.py`); a prototype rF1→GTR2 archive pipeline converts a 253-GMT archive (`tests/test_rf1_pipeline.py`).
 - **Text-level conversion**: `text_convert.py` applies AIW rules and SCN→TRK SearchPath/MASFile rewrites over a whole rFactor tree; `corpus_diff.py` finds identical/different same-name files across corpora; `validate_materials.py` checks `GRAS`/`GRVL`/`ROAD` prefixes.

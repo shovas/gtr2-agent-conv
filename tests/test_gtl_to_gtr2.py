@@ -75,6 +75,17 @@ class GtlToGtr2Test(unittest.TestCase):
         self.assertEqual(changes["teammaps2"], 1)
         self.assertEqual(g.validate_trk(out), [])
 
+    def test_validate_tree(self):
+        src = ROOT.parent / "GTLSteam/GameData/Locations/Anderstorp"
+        target = ROOT.parent / "GTR2Steam/GameData/Locations/Anderstorp"
+        if not src.is_dir() or not target.is_dir():
+            self.skipTest("GTL/GTR2 Anderstorp folders not present")
+        self.assertTrue(g.validate_gtr2_tree(src))
+        self.assertEqual(g.validate_gtr2_tree(target), [])
+        with tempfile.TemporaryDirectory() as td:
+            g.convert_tree(src, td, include_others=False)
+            self.assertEqual(g.validate_gtr2_tree(td), [])
+
     def test_convert_tree(self):
         src = ROOT.parent / "GTLSteam/GameData/Locations/Anderstorp"
         if not src.is_dir():
