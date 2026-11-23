@@ -109,6 +109,11 @@ class Camera:
     activation_location: tuple[float, float, float] | None = None
     activation_radius: float | None = None
     tracking_rate: float | None = None
+    movement_rate: float | None = None
+    shake_rate: float | None = None
+    shake_magnitude: float | None = None
+    flags1: int | None = None
+    flags2: int | None = None
 
     def aiw_position(self) -> tuple[float, float, float] | None:
         """Camera X/Z use the opposite sign convention from AIW waypoints.
@@ -168,6 +173,19 @@ def parse_cam(data: str) -> CamInfo:
         elif key == "trackingrate":
             v = _floats(value, 1)
             current.tracking_rate = v[0] if v else None
+        elif key == "movementrate":
+            v = _floats(value, 1)
+            current.movement_rate = v[0] if v else None
+        elif key == "shakerate":
+            v = _floats(value, 1)
+            current.shake_rate = v[0] if v else None
+        elif key == "shakemagnitude":
+            v = _floats(value, 1)
+            current.shake_magnitude = v[0] if v else None
+        elif key in ("flags1", "flags2"):
+            v = _floats(value, 1)
+            if v:
+                setattr(current, key, int(v[0]))
     return info
 
 

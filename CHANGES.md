@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 03:30:00 -0500 - CAM flags corpus check
+- Extended the CAM parser with Flags1/Flags2, MovementRate, ShakeRate and ShakeMagnitude. Corpus-verified that Flags2 is 0 in all 1,604 cameras, while the documented Flags1 movement/shaking bits only partially correlate with non-zero rates — recorded as observations, not enforced rules. Added a regression test.
+
 ## 2026-11-24 03:00:00 -0500 - CAM file reader and negated-coordinate rule
 - Added `parse_cam()` / `cam` CLI using CAM field names documented in the vendored Turbo Basic source of the guitarmaen editor. Corpus-verified that CAM X/Z are negated relative to AIW waypoint coords on **8/8 paired tracks** (negation reduces mean nearest-waypoint distance by 1.4x-5.7x); exposed as `Camera.aiw_position()`. Added 2 regression tests, including a full corpus check.
 

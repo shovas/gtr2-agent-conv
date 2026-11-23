@@ -100,6 +100,18 @@ wp_branchID=(1)
         self.assertEqual(first.aiw_position(),
                          (-first.position[0], first.position[1], -first.position[2]))
 
+    def test_cam_flags_corpus(self):
+        """Flags2 is always 0; Flags1 bits 2/4 correlate with movement/shaking but are not strict."""
+        import glob
+        cameras = 0
+        for corpus in ("GTR2Steam", "GTLSteam", "Race07Complete", "BMWM3Challenge"):
+            for path in glob.glob(str(ROOT.parent / corpus / "**" / "*.cam"), recursive=True):
+                for cam in stt.parse_cam(stt.read_text(path)).cameras:
+                    if cam.flags2 is not None:
+                        self.assertEqual(cam.flags2, 0, path)
+                        cameras += 1
+        self.assertGreaterEqual(cameras, 1500)
+
     def test_cam_negation_corpus(self):
         """Negating CAM X/Z brings cameras measurably closer to AIW waypoints."""
         import glob
