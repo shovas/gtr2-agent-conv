@@ -131,6 +131,7 @@ patch), but does not identify the exact engine-side use. Further refinement: the
   Independently, the reference-only `gtr2-agent-tools/gtr2-accel-challenge.py` documents 63-byte ghost
   records marked by `01 00 00 34 00 20 00 40` at 20 Hz; in GTT the marker is at +24 with a varying
   trailing byte (0x3F-0x41), and its 7-byte prefix count matches the parser frame count 29/29.
+  **Shared-memory-header hypothesis (excluded)**: the newly added `../rFactorSharedMemoryMap`/`../rF2SharedMemoryMapPlugin` headers document runtime units (RPM, throttle 0..1, steering −1..1, gear −1/0/1+, yaw/pitch/roll rad, speed m/s). Using these as a guide, all unknown GTT frame slots (+24..+60, 4-byte floats) were correlated against position-derived longitudinal acceleration, lateral acceleration and speed across 12 GTT files. No slot shows a consistent correlation (best |r| values 0.0–0.27 and varying sign between files), so the headers provide no new field mapping for the ghost-frame format. Note: frame slots +0/+4/+8 are the car XYZ position and +12/+16/+20 are heading/pitch/time — only +24 onward are unknown.
   **Offset reconciliation**: in GTT the car-position floats are at marker−24/−20/−16 within the same
   63-byte record (equivalently marker+39/+43/+47 of the preceding record), whereas the reference `.dsi`
   loader reads them at marker+35/+39/+43 — a 4-byte phase shift between the `.dsi` and `.gtt` layouts.
