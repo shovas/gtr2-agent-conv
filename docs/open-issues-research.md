@@ -120,7 +120,11 @@ conclusively establishing it requires actual game execution.
   Independently, the reference-only `gtr2-agent-tools/gtr2-accel-challenge.py` documents 63-byte ghost
   records marked by `01 00 00 34 00 20 00 40` at 20 Hz; in GTT the marker is at +24 with a varying
   trailing byte (0x3F-0x41), and its 7-byte prefix count matches the parser frame count 29/29.
-  Exact slot 7/9 meanings **unresolved**.
+  Slot 9 (+36) shows the same artifact: its float mantissa is effectively constant, so its values are
+  exactly `0, ±8.5, ±34, ±136, ±544, ...` (each step x4) — i.e. only the exponent/sign byte at +39 carries
+  data (0x43/0xC3 etc., a sign bit plus a ~7-bit magnitude). Both "floats" are really packed-byte fields,
+  not physical measurements; this refines the earlier "16-bit-quantized float" description. Headings and
+  speed correlations for these bytes remain weak/inconsistent. Exact slot 7/9 meanings **unresolved**.
 - **GTR1 extra 16 bytes — RESOLVED**: always `[0, u, v, 0]` (zero padding + 2D float UV pair),
   confirmed across 2,215 vertices in 100 files. Added as `uv` field in `read_gtr1_vertices()`.
 - **GTR1 descriptor-less variant — RESOLVED**: 22,287 GMTs lack the 0x194 grid. Their
