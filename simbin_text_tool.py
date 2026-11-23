@@ -8,6 +8,7 @@ read as latin-1 with CRLF preserved; writers keep the original bytes.
 from __future__ import annotations
 
 import argparse
+import math
 import re
 import sys
 from dataclasses import dataclass, field
@@ -26,6 +27,7 @@ class Waypoint:
     branch_id: int | None = None
     ptrs: tuple[int, int, int, int] | None = None
     score_checkpoint: int | None = None
+    perp: tuple[float, float, float] | None = None
 
     def wp_class(self) -> int | None:
         """WP_PTRS class field (index 3): 0=track, 1=pit, 2..105=grid, >=106=pitbox."""
@@ -92,6 +94,10 @@ def parse_aiw(data: str) -> AIW:
                     match = INT1_RE.match(value)
                     if match:
                         waypoint.branch_id = int(match.group(1))
+                elif key == "wp_perp":
+                    match = VEC3_RE.match(value)
+                    if match:
+                        waypoint.perp = tuple(float(match.group(i)) for i in (1, 2, 3))
                 elif key == "wp_ptrs":
                     match = PTR4_RE.match(value)
                     if match:
@@ -253,6 +259,10 @@ def validate_aiw_waypoints(aiw: AIW) -> list[str]:
         if wp.score_checkpoint is not None and wp.score_checkpoint not in (0, 1, 2):
             problems.append(f"waypoint {i}: wp_score checkpoint {wp.score_checkpoint} "
                             "outside 0..2")
+        if wp.perp is not None and wp.ptrs[3] in (0, 1):
+            norm = math.sqrt(sum(x * x for x in wp.perp))
+            if abs(norm - 1.0) > 0.01:
+                problems.append(f"waypoint {i}: track/pit wp_perp norm {norm:.4f} != 1")
     return problems
 
 

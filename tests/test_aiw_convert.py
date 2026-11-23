@@ -63,6 +63,10 @@ class AiwConvertTest(unittest.TestCase):
                 for wp in aiw.waypoints:
                     self.assertEqual(len(wp.ptrs), 4)
                     self.assertIn(wp.score_checkpoint, (0, 1, 2))
+                    self.assertIsNotNone(wp.perp)
+                    if wp.kind() in ("track", "pit"):
+                        self.assertAlmostEqual(
+                            sum(x*x for x in wp.perp) ** 0.5, 1.0, delta=0.01)
                     k = wp.kind()
                     self.assertIn(k, ("track", "pit", "grid", "pitbox"))
                     kinds.add(k)

@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 05:30:00 -0500 - AIW wp_perp unit-vector rule verified
+- Corpus-verified another Turbo Basic hint: `wp_perp` is a normalized, track-parallel vector. All 29,028 track/pit waypoints across 6 corpora have unit norm within 1%; grid/pitbox waypoints carry a zero vector in 1,591/1,682 cases. Added `perp` parsing, a validator rule, and corpus assertions; all 9 AIW/CAM tests pass.
+
 ## 2026-11-24 05:00:00 -0500 - AIW wp_score checkpoint rule verified
 - Corpus-verified from the Turbo Basic source hints that `wp_score`'s first field is a checkpoint in 0..2 on all 30,710 local waypoints (10,983 / 9,135 / 10,592); added it to `validate_aiw_waypoints()`. `wp_event` showed no strict rule (first field 1.0 or 1.1 only) and was not promoted.
 
