@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 03:50:00 -0500 - Animation file validator added
+- `.ani` motion blocks: all 8 blocks present in 34/34 GTR2 and 24/26 GTL files (two special variant/pitcrew files). `validate_ani()` and `adapt_ani_from_template()` added with 6 same-name corpus pairs; FXM/GTTF cross-variant and heading-correlation experiments documented as negative.
+
 ## 2026-11-24 03:30:00 -0500 - Final verification after damage constants
 - `python3 run_tests.py --mode full`: 47 modules / 296 tests / 768.1 s, 0 failures, 2 skips. Normal: 159 tests / 283.7 s, 0 failures. Quick: 88 tests, 0 failures. Pre-push check PASS.
 
