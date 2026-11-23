@@ -93,6 +93,19 @@ class GmtRelayoutTest(unittest.TestCase):
         self.assertEqual(g2.tail, g.tail)
         self.assertEqual(gf.write_gmt(g2), out)
 
+    def test_relayout_streams_force_nonzero_vertex_end(self):
+        samples = _samples()
+        if "GOALPOST.GMT" not in samples:
+            self.skipTest("GOALPOST.GMT sample not present")
+        data, _ = samples["GOALPOST.GMT"]
+        g = gf.parse_gmt("GOALPOST.GMT", data)
+        g.meshes[0].record.raw[6] = 0
+        g.meshes[0].stream2_data = b"\xab" * 16
+        out = gf.relayout_gmt(g)
+        g2 = gf.parse_gmt("GOALPOST.GMT", out)
+        self.assertEqual(g2.meshes[0].stream2_data, b"\xab" * 16)
+        self.assertNotEqual(g2.meshes[0].record.raw[6], 0)
+
     def test_relayout_cli(self):
         samples = _samples()
         if "GOALPOST.GMT" not in samples:
