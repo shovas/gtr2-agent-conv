@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 05:05:00 -0500 - Final verification after pipeline relayout
+- `python3 run_tests.py --mode full`: 47 modules / 299 tests / 754.3 s, 0 failures, 2 skips. Normal: 162 tests / 283.7 s, 0 failures. Quick: 89 tests, 0 failures. Pre-push check PASS.
+
 ## 2026-11-24 04:40:00 -0500 - GMT relayout integrated into rF1 pipeline
 - `rf1_to_gtr2.py --relayout` rebuilds GMT offsets after mesh edits; uses the semantic bridge for multi-object GMTs (the structural bridge only fills the first of N mesh records) and supports `transform`/`mesh_transform` hooks. `relayout_gmt()` now preserves legacy oversized vertex blobs. 3 pipeline tests + updated relayout tests pass.
 
