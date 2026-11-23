@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 08:35:00 -0500 - Final verification after NaN fix
+- `python3 run_tests.py --mode full`: 47 modules / 303 tests / 702.7 s, 0 failures, 2 skips. Normal: 166 tests / 281.9 s, 0 failures. Quick: 92 tests, 0 failures. Pre-push check PASS.
+
 ## 2026-11-24 08:10:00 -0500 - NaN-aware UV validation fix
 - `validate_conversion` now treats two NaNs as equal when comparing float lists. STANDS01.GMT's 192 NaN UV pairs are preserved byte-for-byte; the multi-object sample now passes 500/500. Added a focused regression test.
 
