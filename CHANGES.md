@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 09:30:00 -0500 - FXM keyframe invariants codified
+- `fxm_tool.check_node_consistency()` validates 148/148 standard FXM nodes across 5 corpora: 84-byte keyframe blocks, unit quaternions, +/-1 scale components, and trailer == size_hint-84. Added corpus regression test.
+
 ## 2026-11-24 09:00:00 -0500 - Full rF1 validation sweep
 - `validate_conversion.py` over all 8,109 old-layout rF1Vanilla GMTs: semantic bridge passes 8,109/8,109 (4,703 multi-object, 3,406 single-object); structural bridge fails all as expected (geometry not rebuilt). No failures to triage.
 

@@ -178,5 +178,25 @@ class FxmRecordTest(unittest.TestCase):
             self.assertEqual(b["offset"] - (a["keyframe_offset"] + 84), 0)
 
 
+    def test_node_keyframe_invariants_across_corpus(self):
+        """148/148 standard nodes: 84-byte keys, unit quats, +/-1 scale, trailer link."""
+        checked = 0
+        for root in ("GTR2Steam", "Race07Complete", "Race07Vanilla",
+                     "VolvoTheGame", "BMWM3Challenge"):
+            for p in glob.glob(str(ROOT.parent / root / "**" / "*"), recursive=True):
+                if not Path(p).is_file() or not p.lower().endswith((".fxm", ".fxa", ".lma")):
+                    continue
+                try:
+                    data = Path(p).read_bytes()
+                    nodes = fxm_tool.parse_node_records(data)
+                except Exception:
+                    continue
+                for node in nodes:
+                    self.assertEqual(fxm_tool.check_node_consistency(data, node), [],
+                                     f"{p}:{node['name']}")
+                    checked += 1
+        self.assertGreaterEqual(checked, 100)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -155,7 +155,7 @@ patch), but does not identify the exact engine-side use. Further refinement: the
   not a byte-XOR/sum checksum of position floats (0.3% chance-level matches). A 17,392-frame test
   appeared to show within-file slot-9/pitch correlation r=0.687, but that is an artifact: the byte is 0
   in ~all frames with only 1-2 exceptions at 64, which drive the correlation. Exact meaning **unresolved**.
-  FXM `key_count`: a fresh child-count hypothesis was excluded (0 children for 47/49 nodes), and an
+  FXM keyframe-field survey (148 nodes across 5 corpora): quaternions are exactly unit, scale components are all +/-1 (one mirrored bone), and the 4-byte trailer equals `size_hint - 84` in 148/148 nodes — a new corpus-confirmed structural invariant via `fxm_tool.check_node_consistency()`. FXM `key_count`: a fresh child-count hypothesis was excluded (0 children for 47/49 nodes), and an
   unfiltered node scan still found only value 3 (53/53 nodes, size_hint 96). Cross-variant header diff: the
   standard node header triple is `(1, 96, 3)` (second field varies 94–100 across the corpus), while the
   NUL-name variant trailer is `(1, 0x50=80, 1)` in 239/239 nodes. The variants never coexist in one file

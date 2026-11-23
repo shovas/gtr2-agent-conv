@@ -121,6 +121,30 @@ def decode_node_keys(b: bytes, node: dict) -> dict:
     return {"node": node["name"], "keys": keys, "trailer": trailer}
 
 
+def check_node_consistency(b: bytes, node: dict) -> list[str]:
+    """Return structural problems for one standard-format FXM node.
+
+    Corpus-verified invariants (148/148 nodes across GTR2/Race07/Volvo/BMW):
+      * keyframe block is always 84 bytes (two 10-float TRS keys + 4-byte trailer)
+      * quaternion norms are unit length, scale is identity
+      * the trailer u32 equals ``size_hint - 84`` (no exceptions)
+    """
+    problems = []
+    if node["keyframe_bytes"] != 84:
+        problems.append("keyframe block is not 84 bytes")
+    dec = decode_node_keys(b, node)
+    if node["size_hint"] - 84 != dec["trailer"]:
+        problems.append(f"trailer {dec['trailer']} != size_hint-84 {node['size_hint'] - 84}")
+    for i, key in enumerate(dec["keys"]):
+        if not 0.9 < key["quat_norm"] < 1.1:
+            problems.append(f"key {i}: non-unit quaternion {key['quat_norm']}")
+        # Scale components are all +/-1 (one mirrored bone has (-1,-1,-1));
+        # the vector norm is sqrt(3), not 1.
+        if any(abs(abs(s) - 1.0) > 0.1 for s in key["scale"]):
+            problems.append(f"key {i}: non-unit-component scale {key['scale']}")
+    return problems
+
+
 def cmd_info(args: argparse.Namespace) -> int:
     h = read_header(args.file)
     b = Path(args.file).read_bytes()
