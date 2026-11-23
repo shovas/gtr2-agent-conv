@@ -1,6 +1,7 @@
 """Tests for structured FXM node/keyframe records."""
 import glob
 import io
+import math
 import os
 import struct
 import sys
@@ -263,6 +264,28 @@ class FxmRecordTest(unittest.TestCase):
                 self.assertAlmostEqual(key["quat_norm"], 1.0, delta=0.02)
         semantic = fxm_tool.decode_fxm_semantic(data)
         self.assertEqual(semantic["variant"], "length-prefixed")
+
+
+    def test_marker2_rotation_track_variant(self):
+        """marker=2 length-prefixed nodes are (time, quaternion) tracks."""
+        p = ROOT.parent / ("GTR2Steam/GameData/Animations/Pit/"
+                           "WT01_dropgun01-l.fxm")
+        if not p.is_file():
+            self.skipTest("rotation-track FXM sample not present")
+        data = p.read_bytes()
+        tracks = fxm_tool.parse_rotation_track_nodes(data)
+        self.assertGreaterEqual(len(tracks), 10)
+        for track in tracks:
+            self.assertEqual(track["size_hint"], 8 + 20 * track["frames"])
+            self.assertEqual(len(track["times"]), track["frames"])
+            self.assertEqual(len(track["quaternions"]), track["frames"])
+            for t, q in zip(track["times"], track["quaternions"]):
+                self.assertTrue(math.isfinite(t))
+                self.assertAlmostEqual(math.sqrt(sum(x*x for x in q)), 1.0, delta=0.02)
+        semantic = fxm_tool.decode_fxm_semantic(data)
+        self.assertGreater(semantic["stats"]["rotation_tracks"], 0)
+        rot = [n for n in semantic["nodes"] if n.get("kind") == "rotation"]
+        self.assertEqual(len(rot), len(tracks))
 
 
 if __name__ == "__main__":

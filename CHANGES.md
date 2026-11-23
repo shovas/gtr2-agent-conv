@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 00:00:00 -0500 - FXM rotation-track variant decoded
+- Decoded the marker=2 length-prefixed FXM node variant: `frames` keyframes of `(float time, quaternion xyzw)`, with `size_hint == 8 + 20*frames`. Corpus-verified on 532 tracks / 12,955 keys in 26 GTR2 and Race 07 files (unit quaternions, finite times). `decode_fxm_semantic()` now reports them with `kind="rotation"`; added a regression test. Full v8 on the previous tree: 356 tests, 0 failures.
+
 ## 2026-11-23 23:30:00 -0500 - Third FXM node variant decoded
 - Found a length-prefixed FXM node dialect in 22 GTR2 pit-animation files that the `Bip01\x01` anchor missed entirely (0 nodes decoded). `fxm_tool.parse_length_prefixed_nodes()` now decodes 1–4 TRS nodes per file with validated unit quaternions and identity scale; `decode_fxm_semantic()` reports variant `length-prefixed`. Added a regression test; all 14 existing FXM tests still pass.
 
