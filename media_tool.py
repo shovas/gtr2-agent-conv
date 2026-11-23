@@ -248,6 +248,66 @@ def wav_decode(src: str | Path, dst: str | Path,
         return False
 
 
+def jpg_decode(src: str | Path, dst: str | Path) -> tuple[int, int] | None:
+    """Decode JPG to PNG via Pillow. Returns (width, height) or None."""
+    try:
+        from PIL import Image
+        with Image.open(src) as im:
+            im.load()
+            size = im.size
+            im.convert("RGB").save(dst, format="PNG")
+            return size
+    except Exception:
+        return None
+
+
+def jpg_encode(src: str | Path, dst: str | Path, quality: int = 90) -> bool:
+    """Encode an image (PNG/JPG/etc.) to baseline JPG via Pillow."""
+    try:
+        from PIL import Image
+        with Image.open(src) as im:
+            im.convert("RGB").save(dst, format="JPEG", quality=quality)
+        return Path(dst).read_bytes()[:2] == b"\xff\xd8"
+    except Exception:
+        return False
+
+
+def mp3_decode(src: str | Path, dst: str | Path,
+               ffmpeg_exe: str | None = None) -> bool:
+    """Decode MP3 to PCM WAV via ffmpeg."""
+    import shutil
+    import subprocess
+    exe = ffmpeg_exe or shutil.which("ffmpeg")
+    if exe is None:
+        return False
+    r = subprocess.run([exe, "-y", "-loglevel", "error", "-i", str(src),
+                        "-c:a", "pcm_s16le", str(dst)], capture_output=True)
+    if r.returncode != 0 or not Path(dst).is_file():
+        return False
+    try:
+        with wave.open(str(dst), "rb") as w:
+            return w.getcomptype() == "NONE" and w.getnframes() > 0
+    except Exception:
+        return False
+
+
+def mp3_encode(src: str | Path, dst: str | Path, bitrate: int = 192000,
+               ffmpeg_exe: str | None = None) -> bool:
+    """Encode PCM WAV (or any ffmpeg-decodable audio) to MP3 via ffmpeg."""
+    import shutil
+    import subprocess
+    exe = ffmpeg_exe or shutil.which("ffmpeg")
+    if exe is None:
+        return False
+    r = subprocess.run([exe, "-y", "-loglevel", "error", "-i", str(src),
+                        "-c:a", "libmp3lame", "-b:a", str(bitrate), str(dst)],
+                       capture_output=True)
+    if r.returncode != 0 or not Path(dst).is_file():
+        return False
+    with open(dst, "rb") as f:
+        return f.read(3) in (b"ID3", b"\xff\xfb", b"\xff\xf3", b"\xff\xf2")
+
+
 def wav_encode_compressed(src: str | Path, dst: str | Path,
                           codec: str = "adpcm_ima_wav",
                           ffmpeg_exe: str | None = None) -> bool:
@@ -965,6 +1025,18 @@ def main(argv=None):
     p.add_argument("src")
     p.add_argument("dst")
     p.set_defaults(func=lambda a: print(asdict(wav_roundtrip(a.src, a.dst))) or 0)
+    p = sub.add_parser("jpg-decode", help="decode JPG to PNG via Pillow")
+    p.add_argument("src"); p.add_argument("dst")
+    p.set_defaults(func=lambda a: print(jpg_decode(a.src, a.dst) or "failed") or 0)
+    p = sub.add_parser("jpg-encode", help="encode image to JPG via Pillow")
+    p.add_argument("src"); p.add_argument("dst")
+    p.set_defaults(func=lambda a: print("ok" if jpg_encode(a.src, a.dst) else "failed") or 0)
+    p = sub.add_parser("mp3-decode", help="decode MP3 to PCM WAV via ffmpeg")
+    p.add_argument("src"); p.add_argument("dst")
+    p.set_defaults(func=lambda a: print("ok" if mp3_decode(a.src, a.dst) else "failed") or 0)
+    p = sub.add_parser("mp3-encode", help="encode audio to MP3 via ffmpeg")
+    p.add_argument("src"); p.add_argument("dst")
+    p.set_defaults(func=lambda a: print("ok" if mp3_encode(a.src, a.dst) else "failed") or 0)
     p = sub.add_parser("wav-encode", help="encode PCM WAV to compressed WAV via ffmpeg")
     p.add_argument("src")
     p.add_argument("dst")

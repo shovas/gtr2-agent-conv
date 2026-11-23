@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 13:30:00 -0500 - JPG/MP3 semantic decode/encode
+- `media_tool.py jpg-decode|jpg-encode` (Pillow) and `mp3-decode|mp3-encode` (ffmpeg) added with corpus round-trip tests on real GTR2 samples. Both produce valid identifiable output; conversion is lossy.
+
 ## 2026-11-23 13:00:00 -0500 - Final verification after WAV encoding
 - `python3 run_tests.py --mode full`: 47 modules / 315 tests / 761.8 s, 0 failures, 2 skips. Normal: 167 tests / 289.4 s, 0 failures. Quick: 96 tests, 0 failures. Pre-push check PASS.
 

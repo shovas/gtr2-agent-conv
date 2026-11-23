@@ -135,6 +135,40 @@ class MediaToolTest(unittest.TestCase):
                         self.assertEqual(w.getcomptype(), "NONE")
                         self.assertGreater(w.getnframes(), 0)
 
+    def test_jpg_semantic_roundtrip(self):
+        import glob
+        sample = next((p for p in glob.glob(str(ROOT.parent / "GTR2Steam" / "**" / "*"), recursive=True)
+                       if p.lower().endswith(".jpg") and Path(p).is_file()
+                       and open(p, "rb").read(3) == b"\xff\xd8\xff"), None)
+        if sample is None:
+            self.skipTest("JPG sample not present")
+        with tempfile.TemporaryDirectory() as td:
+            png = Path(td) / "decoded.png"
+            size = media_tool.jpg_decode(sample, png)
+            self.assertIsNotNone(size)
+            self.assertGreater(size[0], 0)
+            reenc = Path(td) / "reenc.jpg"
+            self.assertTrue(media_tool.jpg_encode(png, reenc))
+            info = media_tool.identify(reenc)
+            self.assertEqual(info.format, "jpg")
+            self.assertEqual((info.details["width"], info.details["height"]), size)
+
+    def test_mp3_semantic_roundtrip(self):
+        import glob
+        import shutil
+        if not shutil.which("ffmpeg"):
+            self.skipTest("ffmpeg not present")
+        sample = next((p for p in glob.glob(str(ROOT.parent / "GTR2Steam" / "**" / "*"), recursive=True)
+                       if p.lower().endswith(".mp3") and Path(p).is_file()), None)
+        if sample is None:
+            self.skipTest("MP3 sample not present")
+        with tempfile.TemporaryDirectory() as td:
+            wav = Path(td) / "decoded.wav"
+            self.assertTrue(media_tool.mp3_decode(sample, wav))
+            reenc = Path(td) / "reenc.mp3"
+            self.assertTrue(media_tool.mp3_encode(wav, reenc))
+            self.assertEqual(media_tool.identify(reenc).format, "mp3")
+
     def test_compressed_wav_encode_roundtrip(self):
         import glob
         import shutil

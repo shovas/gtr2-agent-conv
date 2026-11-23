@@ -257,3 +257,7 @@ python3 gtl_to_gtr2.py --validate <GameData-dir>
 ## JCA-encrypted audio
 
 `media_tool.py jca-decrypt <src> <dst> [--key NAME]` decrypts any JCA-wrapped payload (WAV/DDS/TGA); `wav-decrypt` is an alias for WAV. It decrypts SimBin JCA-wrapped WAV files to plain RIFF/WAVE; `media_tool.py wav-decode <src.wav> <dst.wav>` converts ADPCM/MP3-in-WAV payloads to PCM and `wav-encode` encodes back; JCA keys auto-detected. **Limitations**: compressed (MP3/ADPCM) WAV payloads still round-trip losslessly rather than being transcoded.
+
+## JPG / MP3 semantic conversion
+
+`media_tool.py jpg-decode|jpg-encode` (Pillow) and `mp3-decode|mp3-encode` (ffmpeg) convert between compressed media and uncompressed PNG/PCM WAV. **Limitations**: lossy; metadata/tags are not preserved.
