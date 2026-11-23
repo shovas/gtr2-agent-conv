@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 19:45:00 -0500 - CUBE MTS rig triples shown to form surface patches
+- The per-rig u16 triples decode as coherent triangle surfaces (shared table: 79 faces, 68 vertices, 91/146 edges shared twice, Euler chi=1), ruling out arbitrary indices. Exact engine-side role still unknown; added test.
+
 ## 2026-11-23 19:30:00 -0500 - FXM variable-record-length hypothesis excluded
 - `tests/test_fxm_records.py` proves `size_hint` (94-100) does not encode a variable keyframe length: in a mixed-hint file all nodes retain fixed 84-byte keyframes with zero gaps.
 

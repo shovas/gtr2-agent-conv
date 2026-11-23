@@ -76,7 +76,11 @@ conclusively establishing it requires actual game execution.
 - **GMT `f0` — RESOLVED as marker**: non-zero in only 0.36% of 108,878 vertices,
   and **all 302 non-zero cases occur at vertex index 0** of a mesh. It is a per-mesh
   first-vertex marker/flag, not a per-vertex attribute. Added test.
-- **CUBE MTS rig tables — RESOLVED (geometry decode corrected)**: the 36-byte table records are indices/materials, not positions (embedded `NASCAR_FACE` name). Real float streams are located by the table+48 descriptors; `read_geometry()` now decodes those as 64-byte-strided records and restores the `vertices` field (1,561 points). `rig_table_triangles()` proves all 79/79 per-rig triples index descriptor 0 with edge median 0.657. **Partially resolved** (geometry decoded and validated; exact semantic role unknown).
+- **CUBE MTS rig tables — RESOLVED (geometry decode corrected)**: the 36-byte table records are indices/materials, not positions (embedded `NASCAR_FACE` name). Real float streams are located by the table+48 descriptors; `read_geometry()` now decodes those as 64-byte-strided records and restores the `vertices` field (1,561 points). `rig_table_triangles()` proves all 79/79 per-rig triples index descriptor 0 with edge median 0.657. **Partially resolved** (geometry decoded and validated; exact semantic role unknown). New evidence: the
+triples form coherent triangle **surfaces** — the shared 79-triangle pit-crew table has 68 vertices,
+146 edges (91 shared twice, 55 boundary), Euler characteristic V-E+F=1 (a disk); larger rig tables have
+chi=31. This rules out arbitrary index triples and supports a geometric surface role (collision/deformable
+patch), but does not identify the exact engine-side use. Codified in `tests/test_mts_format.py`.
 - **GTTF frame slots 7/9**: u32 bit patterns have constant low 16 bits (slot 7 =
   `0x2000`, slot 9 = `0x0000`) across files, suggesting quantized/fixed-point fields.
   Correlated slot 7's high byte against speed from position deltas: r=0.34 raw,

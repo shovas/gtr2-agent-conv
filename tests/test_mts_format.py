@@ -612,5 +612,38 @@ class MtsFormatTest(unittest.TestCase):
         self.assertGreater(best, 10)
 
 
+    def test_rig_triples_form_coherent_surface_patch(self):
+        """Per-rig triples are a disk-like triangle surface, not arbitrary indices."""
+        sample = None
+        for a in glob.glob(str(ROOT.parent / "NascarSimRacing" / "**" / "*"), recursive=True):
+            p = Path(a)
+            if not p.is_file() or p.suffix.lower() != ".mas":
+                continue
+            for e in mas_tool.read_archive(p)[1]:
+                if e.name == "TIREMANFRONT.MTS":
+                    sample = e.data
+                    break
+            if sample:
+                break
+        if sample is None:
+            self.skipTest("TIREMANFRONT.MTS sample not present")
+        geo = mf.read_geometry(sample)
+        if not geo or not geo.get("descriptors"):
+            self.skipTest("geometry unavailable")
+        points = geo["descriptors"][0]["vertices"]
+        triples = [mf.decode_material_numbers(r) for r in mf.parse_material_records(sample)]
+        valid = [t for t in triples if max(t) < len(points)]
+        self.assertGreaterEqual(len(valid), 50)
+        edges = Counter()
+        for t in valid:
+            for a, b in ((0, 1), (1, 2), (2, 0)):
+                edges[tuple(sorted((t[a], t[b])))] += 1
+        # Most edges are shared by exactly two adjacent triangles; the patch
+        # has a boundary and Euler characteristic V-E+F == 1 (a disk).
+        self.assertGreater(sum(1 for n in edges.values() if n == 2), len(edges) // 2)
+        verts = len({i for t in valid for i in t})
+        self.assertEqual(verts - len(edges) + len(valid), 1)
+
+
 if __name__ == "__main__":
     unittest.main()
