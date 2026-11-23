@@ -157,7 +157,7 @@ python3 rf1_to_gtr2.py <archive.mas> --check
 ```bash
 python3 simbin_events_tool.py <file.gtt|file.vcr>
 ```
-**Decoded**: GTTF metadata, GTL-IRSR, GTR2-IRSR and rF1-IRSR framing, plus the 252-byte GTTF frame grid (position + timestamp; `--frames`). **Limitations**: remaining frame fields are uninterpreted.
+**Decoded**: GTTF metadata, GTL-IRSR, GTR2-IRSR and rF1-IRSR framing, plus the 63-byte GTTF frame grid (position + timestamp; `--frames`). **Limitations**: remaining frame fields are uninterpreted.
 
 ## 11. Consult format documentation
 

@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 18:00:00 -0500 - GTTF frame stride corrected (252 -> 63 bytes)
+- Fixed `simbin_events_tool.find_frame_grid()`: ghost frames are 63 bytes apart, not 252. The old stride grouped four consecutive samples into one; the corrected reader yields 4x as many frames with smooth per-frame position/time deltas (verified across 12 GTT files, ~4.0x frame counts). Updated docs and tests.
+
 ## 2026-11-23 17:30:00 -0500 - NUL-name FXM variant generalized
 - `parse_nul_name_nodes()` now tries keyframe offsets (40,80,44,76), covering windshield-wiper files (keyframe at name+80, trailer `(0,0xb8,1)`). All 160/160 LMA files now parse; added test.
 

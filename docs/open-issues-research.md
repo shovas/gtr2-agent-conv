@@ -92,7 +92,7 @@ conclusively establishing it requires actual game execution.
   excluded**: across 1,500 samples steer is always 0 and throttle always 4 (artifacts
   of the constant low-16 bits `0x2000`), so the rF2 bitfield layout does not transfer.
   Also tested slots 6-18 as X/Y/Z rotation triples: no unit-norm triples, so the rF2
-  driver-event layout does not map onto GTL's 252-byte ghost frames.
+  driver-event layout does not map onto GTL's 63-byte ghost frames.
   ISI crypt with all game keys + name-derived keys and skips 0..32 gives
   printability 0.375 -> 0.438 (no valid decrypt). Structurally, slot 9's low 16
   bits are zero in 100% of frames across all files (1437/1437), i.e. a float quantized
@@ -104,7 +104,7 @@ conclusively establishing it requires actual game execution.
   modern Gran Turismo telemetry, unrelated). The local `gtr2-memory-operations-tool-wpf`
   `Gtr2VehicleTelemetry` struct documents GTR2 in-memory telemetry (plain-float
   throttle/steering/RPM, 3x3 orientation matrix) — no authoritative `.gtt` file layout.
-  Tested the 252-byte frame for an orthonormal 3x3 orientation matrix: none found, so the
+  Tested the 63-byte frame for an orthonormal 3x3 orientation matrix: none found, so the
   ghost frame is a compact subset, not a raw telemetry dump. However, the recorded slot-12
   heading is **cross-validated**: heading derived from consecutive position deltas
   (1.608 rad) matches the frame's heading values (1.583/1.615 rad). The local

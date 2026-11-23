@@ -25,7 +25,7 @@ named tests/docs/tools.
 | # | Task | Status | Evidence |
 |---:|---|---|---|
 | 11 | rF1→GTR2 pipeline | done (prototype) | `rf1_to_gtr2.py`, `tests/test_rf1_pipeline.py` (253 GMTs) |
-| 12 | GTTF/VCR reader | done (partial) | `simbin_events_tool.py`, `tests/test_simbin_events_tool.py`; metadata framing (all 4 variants) + 252-byte frame grid decoded |
+| 12 | GTTF/VCR reader | done (partial) | `simbin_events_tool.py`, `tests/test_simbin_events_tool.py`; metadata framing (all 4 variants) + 63-byte frame grid decoded |
 | 13 | Bink decode/encode | done (external tools) | ffmpeg decode + LGPL `raynorpat/libbink` encoder via `media_tool.py`; validated round-trip on real BIK |
 | 14 | PHS identity | done (resolved) | PAR2-style recovery containers for `GTL_Update_0901.exe`; `phs_tool.py`, `docs/phs-research.md` |
 | 15 | EA TGQ decode | done (external tool) | ffmpeg decodes all 22 `.TGQ` files (TQI video + `adpcm_ea`); `media_tool.py tgq-decode` |
