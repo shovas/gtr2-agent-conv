@@ -66,7 +66,10 @@ conclusively establishing it requires actual game execution.
   decodes it: `name\0`, 40-byte header, single 40-byte TRS key (pos/quat/scale), 12-byte
   trailer `(1,0x50,1)`; the parser now tries keyframe offsets (40,80,44,76) to also
   handle wiper files (offset 80, trailer `(0,0xb8,1)`). Validated on 69/79 nodes in the
-  driver file and **160/160** `LMA `-magic files parse; added tests.
+  driver file and **160/160** `LMA `-magic files parse; added tests. Broadened the
+  general scan to all file types (exe/bik/dds): every non-3 key_count value was a false
+  positive (x86 opcodes, Bink audio header, DDS pixels). No genuine animated node has
+  key_count != 3 across 6,472 candidates.
 - **GMT `f0` — RESOLVED as marker**: non-zero in only 0.36% of 108,878 vertices,
   and **all 302 non-zero cases occur at vertex index 0** of a mesh. It is a per-mesh
   first-vertex marker/flag, not a per-vertex attribute. Added test.
@@ -77,7 +80,11 @@ conclusively establishing it requires actual game execution.
   r=0.40 if the high u16 is interpreted as float16 (0.01..256 range). The value
   *lags* speed — a smoothed/delayed quantity, not direct speed. Slot 9 shows no
   speed correlation (|r|<0.1). Tested as a steering field: correlation with per-frame
-  heading change |r|<0.19 across 8 files — **excluded**. Structurally, slot 9's low 16
+  heading change |r|<0.19 across 8 files — **excluded**. Across 10 trials, slot 7
+  (float16) correlates weakly with speed (mean r=0.14), essentially not at all with
+  acceleration (0.005) or curvature (-0.02) across 10 trials — a smoothed speed-like
+  quantity. ISI crypt with all game keys + name-derived keys and skips 0..32 gives
+  printability 0.375 -> 0.438 (no valid decrypt). Structurally, slot 9's low 16
   bits are zero in 100% of frames across all files (1437/1437), i.e. a float quantized
   to 16-bit granularity (~43 distinct high-16 values, e.g. ±8.5, ±35, ±136) — a coarse
   control value, not a raw angle. No 2-byte small-integer fields (gear/flags) found; only
