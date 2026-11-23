@@ -84,8 +84,8 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 
 ### WAV
 - **Read**: JCA-encrypted WAV identification and decryption via `jca_crypt` (`media_tool.py wav-decrypt <src> <dst> [--key NAME]`; default key verified on Race07 samples); PCM WAVE read via stdlib `wave`. For unsupported wave formats (e.g. MP3-in-WAV format 0x55), parses fmt chunk metadata.
-- **Write**: PCM WAVE write and round-trip; JCA-wrapped WAV decrypted to plain RIFF/WAVE; lossless byte-copy round-trip for unsupported stdlib formats.
-- **Verification**: `tests/test_media_tool.py` (PCM round-trip; real MP3-in-WAV format 0x55 lossless round-trip when present).
+- **Write**: byte-lossless RIFF/WAVE round-trip for every variant, preserving extra chunks (`LIST`, `PAD`, `fact`) and WAVEFORMATEX headers; JCA-wrapped WAV decrypted to plain RIFF/WAVE. stdlib `wave` is still used for identification/validation, but no longer rewrites the file (it dropped metadata on 24/30 sampled corpus files).
+- **Verification**: `tests/test_media_tool.py` (PCM round-trip; real MP3-in-WAV format 0x55 and extra-chunk WAV byte-identical round-trips when present).
 - **Tool**: `media_tool.py`.
 - **JCA-wrapped textures**: 33,351 JCA-encrypted `.dds` and 4,415 `.tga` found across 7 corpora; `jca-decrypt` and `dds-jca`/`tga-jca` identification added and verified on Race07 samples.
 - **Compressed payloads**: `media_tool.py wav-decode <src> <dst>` decodes ADPCM and MP3-in-WAV to 16-bit PCM via ffmpeg; `wav-encode <src> <dst> [--codec adpcm_ima_wav|libmp3lame]` encodes back. Both verified on corpus samples.

@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 20:00:00 -0500 - Byte-lossless WAV round-trip
+- `wav_roundtrip()` no longer rewrites WAV files through stdlib `wave`, which silently dropped `LIST`/`PAD`/`fact` chunks and rewrote WAVEFORMATEX headers. All 30 sampled corpus files (24 with extra chunks) now round-trip byte-identically. Added a regression test.
+
 ## 2026-11-23 19:30:00 -0500 - Preserve TGA v2.0 footer
 - `read_tga()`/`write_tga()` now preserve the optional 26-byte `TRUEVISION-XFILE.` footer instead of silently dropping it. 2,311 corpus TGA files carry one; a real 92 KB sample now round-trips byte-identically. Added a regression test.
 

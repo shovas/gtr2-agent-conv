@@ -343,6 +343,15 @@ class MediaToolTest(unittest.TestCase):
             with wave.open(str(dst), "rb") as w:
                 self.assertGreater(w.getnframes(), 0)
 
+    def test_wav_extra_riff_chunks_preserved(self):
+        p = ROOT.parent / "GTR2Steam/GameData/Sounds/GTR/GT3RSRex_onhigh.wav"
+        if not p.exists():
+            self.skipTest("WAV with extra chunks not present")
+        with tempfile.TemporaryDirectory() as td:
+            dst = Path(td) / "out.wav"
+            media_tool.wav_roundtrip(p, dst)
+            self.assertEqual(dst.read_bytes(), p.read_bytes())
+
     def test_wav_mp3_format_lossless_roundtrip(self):
         p = ROOT.parent / "GTR2Steam/GameData/Sounds/PIT/bleep.wav"
         if not p.exists():

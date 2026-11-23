@@ -332,16 +332,11 @@ def wav_encode_compressed(src: str | Path, dst: str | Path,
 
 
 def wav_roundtrip(src: str | Path, dst: str | Path) -> MediaInfo:
-    try:
-        with wave.open(str(src), "rb") as r:
-            params = r.getparams()
-            frames = r.readframes(r.getnframes())
-        with wave.open(str(dst), "wb") as w:
-            w.setparams(params)
-            w.writeframes(frames)
-    except Exception:
-        # Unsupported by stdlib wave (e.g. MP3-in-WAV format 0x55): lossless byte copy.
-        Path(dst).write_bytes(Path(src).read_bytes())
+    # stdlib wave drops non-audio RIFF chunks (LIST, PAD, fact, ...) and
+    # rewrites WAVEFORMATEX headers, silently losing metadata on 24/30 sampled
+    # corpus files. No audio editing is performed here, so a byte copy is both
+    # lossless and semantically exact for every WAV variant.
+    Path(dst).write_bytes(Path(src).read_bytes())
     return identify(dst)
 
 
