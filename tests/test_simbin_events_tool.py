@@ -125,6 +125,15 @@ class SimbinEventsToolTest(unittest.TestCase):
                     self.assertEqual(pts[i], expected)
                 checked += 1
         self.assertGreaterEqual(checked, 1)
+        # Reference fixture from gtr2-agent-tools: Anderstorp A1_Level 4 starts
+        # near x=-251.2 and ends near x=210.
+        fixture = next((p for p in files if p.name.lower() == "a1_level 4.dsi"), None)
+        if fixture is not None:
+            raw = fixture.read_bytes()
+            data = gzip.decompress(raw) if raw[:2] == b"\x1f\x8b" else raw
+            pts = setool.read_ghost_line(data)
+            self.assertAlmostEqual(pts[0][0], -251.2, delta=0.5)
+            self.assertAlmostEqual(pts[-1][0], 210.0, delta=0.5)
 
     def test_gtt_metadata_framing(self):
         files = _files(".gtt")
