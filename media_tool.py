@@ -1060,6 +1060,23 @@ def decode_dxt_bytes(payload: bytes, fourcc: str, width: int, height: int) -> by
     return decode_dxt5(payload, width, height)
 
 
+def _decode_bc_level0(img: "DdsImage") -> bytes:
+    """Re-decode original block payload to verify RGBA was not edited."""
+    payload = img.level0_payload
+    if img.fourcc in ("BC4U", "ATI1"):
+        return decode_bc4(payload, img.width, img.height)
+    if img.fourcc in ("BC5U", "ATI2"):
+        return decode_bc5(payload, img.width, img.height)
+    if img.fourcc in ("BC6H_UF16", "BC6H_SF16"):
+        import bc6h_format
+        out = bc6h_format.decode_bc6h(payload, img.width, img.height,
+                                      signed=(img.fourcc == "BC6H_SF16"))
+    else:
+        import bc7_format
+        out = bc7_format.decode_bc7(payload, img.width, img.height)
+    return out or b""
+
+
 @dataclass
 class DdsImage:
     width: int
@@ -1074,6 +1091,7 @@ class DdsImage:
     cube_face_rgba: list[bytes] = field(default_factory=list)  # decoded RGBA per cube face
     cube_face_level0: list[bytes] = field(default_factory=list)  # original level-0 bytes per face
     cube_face_mips: list[bytes] = field(default_factory=list)  # raw mip bytes per face
+    dx10_header: bytes = b""  # original 20-byte DX10 header, preserved losslessly
 
     def to_bytes(self) -> bytes:
         if self.cube_face_rgba:
@@ -1084,9 +1102,10 @@ class DdsImage:
                 face = DdsImage(width=self.width, height=self.height, mipmaps=self.mipmaps,
                                 fourcc=self.fourcc, rgba=rgba, header=self.header,
                                 mip_payload=mips, level0_payload=level0,
-                                payload_start=self.payload_start)
+                                payload_start=self.payload_start,
+                                dx10_header=self.dx10_header)
                 chunks.append(face.to_bytes()[self.payload_start:])
-            return bytes(self.header) + b"".join(chunks)
+            return bytes(self.header) + self.dx10_header + b"".join(chunks)
         if self.fourcc in ('DXT1', 'DXT3', 'DXT5'):
             # Reuse the original compressed level-0 bytes whenever RGBA has not
             # been edited. This keeps mipmapped DXT round-trips byte-lossless;
@@ -1131,6 +1150,14 @@ class DdsImage:
             hdr[84:88] = b'\x00\x00\x00\x00'
             struct.pack_into('<5I', hdr, 88, rgb_bits, rmask, gmask, bmask, amask)
             return bytes(hdr) + payload + self.mip_payload
+        if self.fourcc in ('BC4U', 'ATI1', 'BC5U', 'ATI2',
+                           'BC6H_UF16', 'BC6H_SF16', 'BC7_UNORM'):
+            if self.level0_payload and self.header:
+                if _decode_bc_level0(self) == self.rgba:
+                    return (bytes(self.header) + self.dx10_header +
+                            self.level0_payload + self.mip_payload)
+            raise ValueError(f'DDS write of edited {self.fourcc} needs an encoder '
+                             '(not implemented)')
         raise ValueError(f'Unsupported DDS fourcc for write: {self.fourcc}')
 
 
@@ -1145,11 +1172,13 @@ def read_dds(path: str | Path) -> DdsImage:
     masks = struct.unpack_from('<5I', b, 88)
     rgb_bits = masks[0]
     payload_start = 128
+    dx10_header = b""
     if fourcc_s == 'DX10':
         # DDS_DX10 extended header (20 bytes) follows the legacy 128-byte header.
         if len(b) < 148:
             raise ValueError('Truncated DDS DX10 header')
         dxgi, dimension, misc_flag, array_size, misc_flags2 = struct.unpack_from('<5I', b, 128)
+        dx10_header = b[128:148]
         payload_start = 148
         if dxgi == 95:  # DXGI_FORMAT_BC6H_UF16
             fourcc_s = 'BC6H_UF16'
@@ -1191,7 +1220,7 @@ def read_dds(path: str | Path) -> DdsImage:
                     rgba=rgba, header=b[:128], mip_payload=mip_payload,
                     level0_payload=level0_payload, payload_start=payload_start,
                     cube_face_rgba=face_rgba, cube_face_level0=face_l0,
-                    cube_face_mips=face_mips)
+                    cube_face_mips=face_mips, dx10_header=dx10_header)
 
 
 def dds_roundtrip(src: str | Path, dst: str | Path) -> MediaInfo:

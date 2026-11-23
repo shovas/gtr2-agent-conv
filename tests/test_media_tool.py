@@ -742,6 +742,36 @@ class MediaToolTest(unittest.TestCase):
                 self.assertGreaterEqual(a.rgba[i+2], 200)
                 self.assertTrue(50 <= a.rgba[i+3] <= 80)
 
+    def test_dds_bc_synthetic_roundtrip(self):
+        """BC4/BC5/BC6H/BC7 blocks round-trip byte-exactly when unedited."""
+        import struct
+
+        def make(fourcc, dxgi, payload):
+            hdr = bytearray(128)
+            struct.pack_into("<I", hdr, 0, 0x20534444)
+            struct.pack_into("<I", hdr, 4, 124)
+            struct.pack_into("<II", hdr, 12, 4, 4)
+            struct.pack_into("<I", hdr, 80, 32)
+            hdr[84:88] = fourcc.encode() if dxgi is None else b"DX10"
+            dx = struct.pack("<5I", dxgi, 3, 0, 1, 0) if dxgi else b""
+            return bytes(hdr) + dx + payload
+
+        cases = [("BC4U", None, bytes(8)), ("ATI1", None, bytes(8)),
+                 ("BC5U", None, bytes(16)), ("ATI2", None, bytes(16)),
+                 ("BC6H_UF16", 95, bytes(16)), ("BC6H_SF16", 96, bytes(16)),
+                 ("BC7_UNORM", 98, bytes(16))]
+        for fourcc, dxgi, payload in cases:
+            with self.subTest(fourcc=fourcc):
+                data = make(fourcc, dxgi, payload)
+                with tempfile.TemporaryDirectory() as td:
+                    p = Path(td) / "x.dds"
+                    p.write_bytes(data)
+                    img = media_tool.read_dds(p)
+                    self.assertEqual(img.fourcc, fourcc)
+                    self.assertEqual(img.to_bytes(), data)
+                    if dxgi is not None:
+                        self.assertEqual(len(img.dx10_header), 20)
+
     def test_dds_uncompressed_synthetic_roundtrip(self):
         with tempfile.TemporaryDirectory() as td:
             src = Path(td) / "a.dds"

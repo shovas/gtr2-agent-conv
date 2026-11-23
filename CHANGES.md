@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 08:30:00 -0500 - Byte-exact BC DDS write-back
+- `DdsImage.to_bytes()` now round-trips BC4/BC5/BC6H/BC7 DDS files byte-exactly by reusing original level-0 blocks, mip chains and the 20-byte DX10 header when RGBA is unchanged; edited images are rejected rather than silently mis-encoded. Added a 7-format synthetic regression test; all 50 media tests pass. Full v18 on the prior tree: 368 tests, 0 failures.
+
 ## 2026-11-24 08:00:00 -0500 - GDB invariant re-verified on encrypted corpus
 - The existing `validate_gdb_times()` session invariant (racetime == racetimescaled) holds on all 89 decrypted JCA `.gdb` files (80 Race07Complete + 9 Volvo) as well as plain GTL/GTR2 files; 4 plain Race07 files differ legitimately via later event sections. Added a corpus regression test. All 29 converter tests pass.
 
