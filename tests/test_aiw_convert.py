@@ -44,5 +44,48 @@ class AiwConvertTest(unittest.TestCase):
         self.assertEqual(stt.aiw_for_simbin(once), once)
 
 
+    def test_waypoint_ptrs_class_corpus(self):
+        """WP_PTRS[3] buckets and branchID equality hold corpus-wide."""
+        import glob
+        files = []
+        for corpus in ("GTLSteam", "GTR2Steam", "Race07Complete", "BMWM3Challenge",
+                       "F12002", "GTR1Vanilla"):
+            files += glob.glob(str(ROOT.parent / corpus / "**" / "*.aiw"), recursive=True)
+        if not files:
+            self.skipTest("no AIW corpus present")
+        checked = 0
+        kinds = set()
+        for path in files:
+            with self.subTest(path=path):
+                aiw = stt.parse_aiw(stt.read_text(path))
+                self.assertGreater(len(aiw.waypoints), 0)
+                self.assertEqual(stt.validate_aiw_waypoints(aiw), [])
+                for wp in aiw.waypoints:
+                    self.assertEqual(len(wp.ptrs), 4)
+                    k = wp.kind()
+                    self.assertIn(k, ("track", "pit", "grid", "pitbox"))
+                    kinds.add(k)
+                    checked += 1
+        self.assertGreaterEqual(checked, 30000)
+        self.assertEqual(kinds, {"track", "pit", "grid", "pitbox"})
+
+    def test_waypoint_ptrs_parse_and_validation(self):
+        sample = """[Waypoint]
+wp_pos=(1.0,2.0,3.0)
+WP_PTRS=(10,2,-1,0)
+wp_branchID=(0)
+wp_pos=(4.0,5.0,6.0)
+WP_PTRS=(0,3,-1,1)
+wp_branchID=(1)
+"""
+        aiw = stt.parse_aiw(sample)
+        self.assertEqual(aiw.waypoints[0].ptrs, (10, 2, -1, 0))
+        self.assertEqual(aiw.waypoints[0].kind(), "track")
+        self.assertEqual(aiw.waypoints[1].kind(), "pit")
+        self.assertEqual(stt.validate_aiw_waypoints(aiw), [])
+        aiw.waypoints[1].branch_id = 7
+        self.assertEqual(len(stt.validate_aiw_waypoints(aiw)), 1)
+
+
 if __name__ == "__main__":
     unittest.main()

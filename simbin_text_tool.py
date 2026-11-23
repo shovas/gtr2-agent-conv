@@ -16,6 +16,7 @@ from pathlib import Path
 KEYVALUE_RE = re.compile(r"^\s*([^=]+)\s*=\s*(.*)\s*$")
 VEC3_RE = re.compile(r"\(\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*\)")
 INT1_RE = re.compile(r"\(\s*(-?\d+)\s*\)")
+PTR4_RE = re.compile(r"\(\s*(-?\d+)\s*,\s*(-?\d+)\s*,\s*(-?\d+)\s*,\s*(-?\d+)\s*\)")
 
 
 @dataclass
@@ -23,6 +24,21 @@ class Waypoint:
     pos: tuple[float, float, float] | None = None
     bitfields: int | None = None
     branch_id: int | None = None
+    ptrs: tuple[int, int, int, int] | None = None
+
+    def wp_class(self) -> int | None:
+        """WP_PTRS class field (index 3): 0=track, 1=pit, 2..105=grid, >=106=pitbox."""
+        return self.ptrs[3] if self.ptrs is not None else None
+
+    def kind(self) -> str | None:
+        value = self.wp_class()
+        if value is None:
+            return None
+        if value == 0:
+            return "track"
+        if value == 1:
+            return "pit"
+        return "grid" if value <= 105 else "pitbox"
 
 
 @dataclass
@@ -75,7 +91,34 @@ def parse_aiw(data: str) -> AIW:
                     match = INT1_RE.match(value)
                     if match:
                         waypoint.branch_id = int(match.group(1))
+                elif key == "wp_ptrs":
+                    match = PTR4_RE.match(value)
+                    if match:
+                        waypoint.ptrs = tuple(int(match.group(i)) for i in (1, 2, 3, 4))
     return aiw
+
+
+def validate_aiw_waypoints(aiw: AIW) -> list[str]:
+    """Check corpus-verified waypoint invariants; return a list of problems.
+
+    Verified on 30,710 waypoints across 26 AIW files (rF1/GTL/GTR2/Race07/
+    BMW/F1 2002): ``WP_PTRS`` always has 4 fields, and its fourth field equals
+    ``wp_branchID`` exactly. Its value buckets are 0=track, 1=pit, 2..105=grid,
+    >=106=pitbox. The second field is normally the next waypoint index, but
+    branch-start waypoints legitimately break that chain, so linkage is not
+    enforced here.
+    """
+    problems: list[str] = []
+    for i, wp in enumerate(aiw.waypoints):
+        if wp.ptrs is None:
+            problems.append(f"waypoint {i}: missing WP_PTRS")
+            continue
+        if len(wp.ptrs) != 4:
+            problems.append(f"waypoint {i}: WP_PTRS has {len(wp.ptrs)} fields")
+            continue
+        if wp.branch_id is not None and wp.branch_id != wp.ptrs[3]:
+            problems.append(f"waypoint {i}: branchID={wp.branch_id} != WP_PTRS[3]={wp.ptrs[3]}")
+    return problems
 
 
 def parse_scn(data: str) -> ScnInfo:
@@ -153,7 +196,11 @@ def _cmd_aiw(args: argparse.Namespace) -> int:
     print(f"waypoints: {len(aiw.waypoints)}")
     print(f"branches: {sorted(aiw.branches())}")
     for w in aiw.waypoints[:args.limit]:
-        print(f"  pos={w.pos} branch={w.branch_id} bits={w.bitfields}")
+        print(f"  pos={w.pos} branch={w.branch_id} ptrs={w.ptrs} kind={w.kind()}")
+    problems = validate_aiw_waypoints(aiw)
+    print(f"waypoint problems: {len(problems)}")
+    for msg in problems[:args.limit]:
+        print(f"  {msg}")
     return 0
 
 

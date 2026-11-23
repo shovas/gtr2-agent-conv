@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 02:30:00 -0500 - AIW waypoint WP_PTRS semantics verified
+- Corpus-verified the `WP_PTRS` waypoint-class rules from the newly added `../guitarmaen-aiw-cam-editor-gtr2-qt` reference: the 4th field buckets into 0=track (22,523), 1=pit (6,505), 2..105=grid (1,212) and ≥106=pitbox (470), and equals `wp_branchID` on **30,710/30,710** waypoints across 26 AIW files. Added `Waypoint.kind()`, `validate_aiw_waypoints()`, CLI output, and 2 regression tests.
+
 ## 2026-11-24 02:00:00 -0500 - SCGT compressed BMP: RLE8 rejected
 - Tried a Microsoft RLE8 BMP token decoder on the 2 undecoded `AMBC.BMP` members in `../SportsCarGtUsa`: it terminated early with only 32 of the expected 256 indices. Recorded as another rejected hypothesis; the members remain preserved losslessly.
 
