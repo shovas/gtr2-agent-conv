@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 03:30:00 -0500 - Final verification after damage constants
+- `python3 run_tests.py --mode full`: 47 modules / 296 tests / 768.1 s, 0 failures, 2 skips. Normal: 159 tests / 283.7 s, 0 failures. Quick: 88 tests, 0 failures. Pre-push check PASS.
+
 ## 2026-11-24 03:00:00 -0500 - Damage-model universal constants implemented
 - Ten `.dmg` values are single-valued across all 29 GTL and 26 GTR2 files (wheeldetach 20000→18000, front/rear-wing and part collision params, aero min/div, wall skid threshold, wheel params). `rewrite_dmg_constants()` applies 290 replacements across 29/29 GTL files; GTR2 unchanged. Added validator, tests and docs.
 
