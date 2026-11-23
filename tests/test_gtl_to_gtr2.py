@@ -75,6 +75,31 @@ class GtlToGtr2Test(unittest.TestCase):
         self.assertEqual(changes["teammaps2"], 1)
         self.assertEqual(g.validate_trk(out), [])
 
+    def test_rcd_key_rule_and_template(self):
+        def files(root):
+            return [Path(p) for p in glob.glob(
+                str(ROOT.parent / root / "**" / "*"), recursive=True)
+                if p.lower().endswith(".rcd")]
+        gtl, gtr = files("GTLSteam"), files("GTR2Steam")
+        if not gtl or not gtr:
+            self.skipTest("race-config corpora not present")
+        self.assertTrue(all(g.validate_rcd(p.read_bytes()) for p in gtl))
+        self.assertTrue(all(not g.validate_rcd(p.read_bytes()) for p in gtr))
+        src = next((p for p in gtl if p.name.lower() == "cunningham.rcd"), None)
+        tmpl = next((p for p in gtr if p.name.lower() == "cunningham.rcd"), None)
+        if src and tmpl:
+            out, rep = g.adapt_rcd_from_template(src.read_bytes(), tmpl.read_bytes())
+            self.assertEqual(g.validate_rcd(out), [])
+            self.assertEqual(rep["keys_applied"], 4)
+            # Constants are universal in GTR2: verify against every GTR2 file.
+            for p in gtr[:20]:
+                vals = g.gdb_key_values(p.read_bytes())
+                for k, v in g.GTR2_RCD_CONSTANTS.items():
+                    self.assertEqual(vals.get(k), v)
+            out2, rep2 = g.add_rcd_gtr2_constants(src.read_bytes())
+            self.assertEqual(rep2["constants_added"], 2)
+            self.assertEqual(len(g.validate_rcd(out2)), 2)
+
     def test_aud_key_rule_and_template(self):
         def files(root):
             return [Path(p) for p in glob.glob(

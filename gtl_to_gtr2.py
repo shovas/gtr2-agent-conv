@@ -184,6 +184,9 @@ def validate_gtr2_tree(root: str | Path,
         if suffix == ".car":
             for msg in validate_car(p.read_bytes()):
                 problems.append(f"{p}: {msg}")
+        if suffix == ".rcd":
+            for msg in validate_rcd(p.read_bytes()):
+                problems.append(f"{p}: {msg}")
         if suffix == ".aud":
             for msg in validate_aud(p.read_bytes()):
                 problems.append(f"{p}: {msg}")
@@ -261,6 +264,47 @@ def adapt_car_from_template(data: bytes, template: bytes) -> tuple[bytes, dict]:
         out = _set_gdb_key(out, k, tvals[k])
     return out, {"keys_applied": len(GTR2_CAR_ONLY_KEYS),
                  "already_valid": not validate_car(data)}
+
+
+# .rcd: four keys are present in all 223 GTR2 race-config files and in none of
+# the 98 GTL ones. Two values are universal constants (qualcoldbraintime=200,
+# racecoldbraintime=120); the two "min" values are car-specific.
+GTR2_RCD_KEYS = (
+    "qualcoldbrainmin", "qualcoldbraintime",
+    "racecoldbrainmin", "racecoldbraintime",
+)
+GTR2_RCD_CONSTANTS = {"qualcoldbraintime": "200", "racecoldbraintime": "120"}
+
+
+def validate_rcd(data: bytes) -> list[str]:
+    keys = set(gdb_key_values(data))
+    return [f"missing rcd key: {k}" for k in GTR2_RCD_KEYS if k not in keys]
+
+
+def adapt_rcd_from_template(data: bytes, template: bytes) -> tuple[bytes, dict]:
+    tvals = gdb_key_values(template)
+    missing = [k for k in GTR2_RCD_KEYS if k not in tvals]
+    if missing:
+        raise ValueError(f"template lacks rcd keys: {missing}")
+    out = data
+    for k in GTR2_RCD_KEYS:
+        out = _set_gdb_key(out, k, tvals[k])
+    return out, {"keys_applied": len(GTR2_RCD_KEYS),
+                 "already_valid": not validate_rcd(data)}
+
+
+def add_rcd_gtr2_constants(data: bytes) -> tuple[bytes, dict]:
+    """Add only the two corpus-universal constant keys to a GTL ``.rcd``."""
+    vals = gdb_key_values(data)
+    out = data
+    added = 0
+    for k, v in GTR2_RCD_CONSTANTS.items():
+        if k not in vals:
+            out = _set_gdb_key(out, k, v)
+            added += 1
+    return out, {"constants_added": added,
+                 "remaining_manual": [k for k in GTR2_RCD_KEYS
+                                      if k not in GTR2_RCD_CONSTANTS and k not in vals]}
 
 
 # .aud: 17 keys are present in all 25 GTR2 audio files; 15 of 31 GTL audio
