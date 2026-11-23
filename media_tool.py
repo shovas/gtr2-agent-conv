@@ -873,10 +873,57 @@ def encode_uncompressed_dds(rgba: bytes, width: int, height: int, rgb_bits=32, r
 def _dds_top_level_size(width: int, height: int, fourcc: str,
                         rgb_bits: int = 32) -> int:
     """Byte size of DDS level 0 (mip chains follow it in the payload)."""
-    if fourcc in ("DXT1", "DXT3", "DXT5"):
+    if fourcc in ("DXT1", "DXT3", "DXT5", "BC4U", "ATI1", "BC5U", "ATI2"):
         blocks = max(1, (width + 3) // 4) * max(1, (height + 3) // 4)
-        return blocks * (8 if fourcc == "DXT1" else 16)
+        if fourcc in ("DXT1", "BC4U", "ATI1"):
+            return blocks * 8
+        return blocks * 16
     return width * height * max(1, rgb_bits // 8)
+
+
+def _bc4_interpolate(a0: int, a1: int) -> list[int]:
+    if a0 > a1:
+        return [(a0 * (7 - i) + a1 * i + 3) // 7 for i in range(8)]
+    vals = [(a0 * (5 - i) + a1 * i + 2) // 5 for i in range(6)]
+    return vals + [0, 255]
+
+
+def decode_bc4_block(block: bytes) -> list[int]:
+    """Decode one 8-byte BC4 block to 16 unsigned byte values."""
+    a0, a1 = block[0], block[1]
+    palette = _bc4_interpolate(a0, a1)
+    bits = int.from_bytes(block[2:8], "little")
+    return [palette[(bits >> (3 * i)) & 7] for i in range(16)]
+
+
+def decode_bc4(data: bytes, width: int, height: int) -> bytes:
+    """Decode a BC4U/ATI1 DDS payload to greyscale RGBA."""
+    out = bytearray()
+    bw, bh = max(1, (width + 3) // 4), max(1, (height + 3) // 4)
+    for by in range(bh):
+        for bx in range(bw):
+            vals = decode_bc4_block(data[(by * bw + bx) * 8:(by * bw + bx + 1) * 8])
+            for y in range(4):
+                for x in range(4):
+                    v = vals[y * 4 + x]
+                    out.extend((v, v, v, 255))
+    return bytes(out[:width * height * 4])
+
+
+def decode_bc5(data: bytes, width: int, height: int) -> bytes:
+    """Decode a BC5U/ATI2 DDS payload (two BC4 channels) to RGBA."""
+    out = bytearray()
+    bw, bh = max(1, (width + 3) // 4), max(1, (height + 3) // 4)
+    for by in range(bh):
+        for bx in range(bw):
+            base = (by * bw + bx) * 16
+            r = decode_bc4_block(data[base:base + 8])
+            g = decode_bc4_block(data[base + 8:base + 16])
+            for y in range(4):
+                for x in range(4):
+                    i = y * 4 + x
+                    out.extend((r[i], g[i], 0, 255))
+    return bytes(out[:width * height * 4])
 
 
 def decode_dxt_bytes(payload: bytes, fourcc: str, width: int, height: int) -> bytes:
@@ -959,6 +1006,10 @@ def read_dds(path: str | Path) -> DdsImage:
         rgba = decode_dxt3(b[128:], width, height)
     elif fourcc_s == 'DXT5':
         rgba = decode_dxt5(b[128:], width, height)
+    elif fourcc_s in ('BC4U', 'ATI1'):
+        rgba = decode_bc4(b[128:], width, height)
+    elif fourcc_s in ('BC5U', 'ATI2'):
+        rgba = decode_bc5(b[128:], width, height)
     elif fourcc_s == '' and (pf_flags & 0x40):  # DDPF_RGB (optional alpha)
         rgb_bits, rmask, gmask, bmask, amask = struct.unpack_from('<5I', b, 88)
         rgba = decode_uncompressed_dds(b[128:], width, height, rgb_bits, rmask, gmask, bmask, amask)

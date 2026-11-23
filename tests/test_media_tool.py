@@ -136,6 +136,38 @@ class MediaToolTest(unittest.TestCase):
                         self.assertEqual(w.getcomptype(), "NONE")
                         self.assertGreater(w.getnframes(), 0)
 
+    def test_bc4_bc5_synthetic_decode(self):
+        def mkdds(fourcc, w, h, payload):
+            hdr = bytearray(128)
+            struct.pack_into("<I", hdr, 0, 0x20534444)
+            struct.pack_into("<I", hdr, 4, 124)
+            struct.pack_into("<I", hdr, 8, 0x1007)
+            struct.pack_into("<II", hdr, 12, h, w)
+            struct.pack_into("<I", hdr, 20, len(payload))
+            struct.pack_into("<I", hdr, 76, 32)
+            struct.pack_into("<I", hdr, 80, 0x4)
+            hdr[84:88] = fourcc
+            struct.pack_into("<I", hdr, 108, 0x1000)
+            return bytes(hdr) + payload
+
+        # endpoints 255,0 -> exact 8-level palette; indices 0..7 then reverse
+        blk = bytes([255, 0]) + bytes([0b00011011, 0b11100100, 0, 0, 0, 0])
+        self.assertEqual(media_tool._bc4_interpolate(255, 0),
+                         [255, 219, 182, 146, 109, 73, 36, 0])
+        with tempfile.TemporaryDirectory() as td:
+            for fourcc, payload, expect in (
+                    (b"BC4U", blk, (146, 146, 146)),
+                    (b"ATI1", blk, (146, 146, 146)),
+                    (b"BC5U", blk + blk, (146, 146, 0)),
+                    (b"ATI2", blk + blk, (146, 146, 0))):
+                with self.subTest(fourcc=fourcc):
+                    f = Path(td) / (fourcc.decode() + ".dds")
+                    f.write_bytes(mkdds(fourcc, 4, 4, payload))
+                    img = media_tool.read_dds(f)
+                    self.assertEqual((img.width, img.height), (4, 4))
+                    self.assertEqual(tuple(img.rgba[:3]), expect)
+                    self.assertEqual(img.rgba[3], 255)
+
     def test_mipmapped_dds_roundtrip_preserves_chain(self):
         import glob
         import struct
