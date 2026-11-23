@@ -25,6 +25,7 @@ class Waypoint:
     bitfields: int | None = None
     branch_id: int | None = None
     ptrs: tuple[int, int, int, int] | None = None
+    score_checkpoint: int | None = None
 
     def wp_class(self) -> int | None:
         """WP_PTRS class field (index 3): 0=track, 1=pit, 2..105=grid, >=106=pitbox."""
@@ -95,6 +96,13 @@ def parse_aiw(data: str) -> AIW:
                     match = PTR4_RE.match(value)
                     if match:
                         waypoint.ptrs = tuple(int(match.group(i)) for i in (1, 2, 3, 4))
+                elif key == "wp_score":
+                    parts = value.split(",")
+                    if parts:
+                        try:
+                            waypoint.score_checkpoint = int(float(parts[0].strip("() ")))
+                        except ValueError:
+                            pass
     return aiw
 
 
@@ -222,7 +230,8 @@ def validate_aiw_waypoints(aiw: AIW) -> list[str]:
     BMW/F1 2002): ``WP_PTRS`` always has 4 fields, and its fourth field equals
     ``wp_branchID`` exactly. Its value buckets are 0=track, 1=pit, 2..105=grid,
     >=106=pitbox. ``wp_bitfields`` is 0 for track/pit and 1 for all other
-    classes (30,710/30,710). The second field is normally the next waypoint
+    classes (30,710/30,710), and the first field of ``wp_score`` is a checkpoint
+    in 0..2 (30,710/30,710). The second field is normally the next waypoint
     index, but branch-start waypoints legitimately break that chain, so linkage
     is not enforced here.
     """
@@ -241,6 +250,9 @@ def validate_aiw_waypoints(aiw: AIW) -> list[str]:
             if wp.bitfields != expected:
                 problems.append(f"waypoint {i}: bitfields={wp.bitfields} != {expected} "
                                 f"for class {wp.ptrs[3]}")
+        if wp.score_checkpoint is not None and wp.score_checkpoint not in (0, 1, 2):
+            problems.append(f"waypoint {i}: wp_score checkpoint {wp.score_checkpoint} "
+                            "outside 0..2")
     return problems
 
 

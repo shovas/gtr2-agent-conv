@@ -62,6 +62,7 @@ class AiwConvertTest(unittest.TestCase):
                 self.assertEqual(stt.validate_aiw_waypoints(aiw), [])
                 for wp in aiw.waypoints:
                     self.assertEqual(len(wp.ptrs), 4)
+                    self.assertIn(wp.score_checkpoint, (0, 1, 2))
                     k = wp.kind()
                     self.assertIn(k, ("track", "pit", "grid", "pitbox"))
                     kinds.add(k)

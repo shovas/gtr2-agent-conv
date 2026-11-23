@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 05:00:00 -0500 - AIW wp_score checkpoint rule verified
+- Corpus-verified from the Turbo Basic source hints that `wp_score`'s first field is a checkpoint in 0..2 on all 30,710 local waypoints (10,983 / 9,135 / 10,592); added it to `validate_aiw_waypoints()`. `wp_event` showed no strict rule (first field 1.0 or 1.1 only) and was not promoted.
+
 ## 2026-11-24 04:30:00 -0500 - AIW wp_bitfields rule verified
 - Corpus-verified a second waypoint rule from the Turbo Basic source hints: `wp_bitfields` is 0 for track/pit waypoints and 1 for grid/pitbox waypoints, holding on all 30,710 local waypoints with zero exceptions. Added it to `validate_aiw_waypoints()` and extended the regression tests.
 
