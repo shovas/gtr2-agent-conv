@@ -54,7 +54,7 @@ was blocked by a missing `MFC42.DLL`.
 ```
 python3 run_tests.py --mode quick    -> 89 tests, ~22 s, 0 failures
 python3 run_tests.py --mode normal   -> 166 tests, ~285 s, 0 failures
-python3 run_tests.py --mode full     -> 310 tests, ~740 s, 0 failures (2 skipped)
+python3 run_tests.py --mode full     -> 310 tests, ~744 s, 0 failures (2 skipped)
 python3 pre_push_check.py            -> PASS
 git status --short                    -> clean
 ```
