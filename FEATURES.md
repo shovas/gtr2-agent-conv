@@ -238,7 +238,7 @@ python3 race_gmt.py --materials <file.gmt>
 
 ## GTL -> GTR2 conversion (building block)
 
-**What it does**: Converts the GTL container layer to GTR2 conventions — rewrites `.trk` `MASFile=` entries (`.gtl`→`.gtr`, teammaps2, `Misc.gtr`) and repacks `.gtl` archives as `.gtr`.
+**What it does**: Converts the GTL container layer to GTR2 conventions — rewrites `.trk` `MASFile=` entries (`.gtl`→`.gtr`, teammaps2, `Misc.gtr`) and repacks `.gtl` archives as `.gtr`, and can copy GTR2 session keys into GTL `.gdb` files from a same-track GTR2 template.
 
 **Commands**:
 ```bash

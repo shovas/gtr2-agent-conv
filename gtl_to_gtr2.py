@@ -178,6 +178,9 @@ def validate_gtr2_tree(root: str | Path,
         suffix = p.suffix.lower()
         if suffix == ".gtl":
             problems.append(f"stale .gtl archive: {p}")
+        if suffix == ".gdb":
+            for msg in validate_gdb(p.read_bytes()):
+                problems.append(f"{p}: {msg}")
         if suffix == ".trk":
             data = p.read_bytes()
             for msg in validate_trk(data):
@@ -186,6 +189,68 @@ def validate_gtr2_tree(root: str | Path,
                 if value.lower() not in known_archives:
                     problems.append(f"{p}: unresolved MASFile: {value}")
     return problems
+
+
+# Session keys present in all 85 local GTR2 .gdb files; only 3 of them are
+# present in all 53 local GTL .gdb files (qualify1start, racelaps, racestart).
+# Their *values* vary by track, so only the presence rule is corpus-confirmed.
+GTR2_SESSION_KEYS = (
+    "practice1day", "practice1start", "practice2day",
+    "practice2start", "qualify1day", "qualify1start", "qualify2day",
+    "qualify2start", "warmupday", "warmupstart", "raceday", "racestart",
+    "racelaps", "racetime", "racetimescaled",
+)
+
+
+def gdb_key_values(data: bytes) -> dict[str, str]:
+    """Return lowercase GDB key -> value from a decoded ``.gdb`` payload."""
+    text = data.decode("latin-1")
+    # Use horizontal whitespace only: `\s*` would consume CRLF after an empty
+    # value (e.g. "Filter Properties =") and swallow the following key line.
+    return {m.group(1).strip().lower(): m.group(2).strip()
+            for m in re.finditer(r"(?m)^[ \t]*([A-Za-z][A-Za-z0-9 ]*?)[ \t]*=[ \t]*([^\r\n]*)", text)}
+
+
+def validate_gdb(data: bytes) -> list[str]:
+    """Return missing GTR2 session keys for a ``.gdb`` payload (empty = OK)."""
+    keys = set(gdb_key_values(data))
+    return [f"missing session key: {k}" for k in GTR2_SESSION_KEYS if k not in keys]
+
+
+def _set_gdb_key(data: bytes, key: str, value: str) -> bytes:
+    """Replace or insert one GDB key line, preserving all other bytes."""
+    lines = data.splitlines(keepends=True)
+    pat = re.compile(rb"(?i)^\s*" + re.escape(key.encode()) + rb"\s*=\s*[^\r\n]*")
+    session = re.compile(rb"(?i)^\s*(?:test|practice|qualify|warmup|race)[a-z0-9 ]*\s*=")
+    last = 1 if lines and lines[0].strip() else 0
+    for i, line in enumerate(lines):
+        if pat.match(line):
+            lines[i] = pat.sub(key.encode() + b" = " + value.encode(), line, count=1)
+            return b"".join(lines)
+        if session.match(line):
+            last = i + 1
+    ending = b"\r\n" if any(b"\r\n" in ln for ln in lines[:5]) else b"\n"
+    lines.insert(last, key.encode() + b" = " + value.encode() + ending)
+    return b"".join(lines)
+
+
+def adapt_gdb_from_template(data: bytes, template: bytes) -> tuple[bytes, dict]:
+    """Apply a GTR2 ``.gdb`` template's session keys to a GTL ``.gdb``.
+
+    Only the 16 session keys are touched; all other lines (names, metadata,
+    lighting, filters) are preserved byte-for-byte. Values come from the
+    template, so this is only meaningful when the template is the GTR2 version
+    of the same track. For tracks without a counterpart, values are unverified.
+    """
+    tvals = gdb_key_values(template)
+    missing = [k for k in GTR2_SESSION_KEYS if k not in tvals]
+    if missing:
+        raise ValueError(f"template lacks session keys: {missing}")
+    out = data
+    for k in GTR2_SESSION_KEYS:
+        out = _set_gdb_key(out, k, tvals[k])
+    return out, {"keys_applied": len(GTR2_SESSION_KEYS),
+                 "already_valid": not validate_gdb(data)}
 
 
 def main(argv=None) -> int:

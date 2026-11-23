@@ -75,6 +75,43 @@ class GtlToGtr2Test(unittest.TestCase):
         self.assertEqual(changes["teammaps2"], 1)
         self.assertEqual(g.validate_trk(out), [])
 
+    def test_gdb_session_key_rule(self):
+        gtl, gtr = _trks("GTLSteam"), _trks("GTR2Steam")
+        gdbs = lambda root: [Path(p) for p in glob.glob(
+            str(ROOT.parent / root / "**" / "*"), recursive=True)
+            if p.lower().endswith(".gdb")]
+        gtl_g, gtr_g = gdbs("GTLSteam"), gdbs("GTR2Steam")
+        if not gtl_g or not gtr_g:
+            self.skipTest("GTL/GTR2 GDB corpora not present")
+        self.assertTrue(all(g.validate_gdb(p.read_bytes()) for p in gtl_g))
+        self.assertTrue(all(not g.validate_gdb(p.read_bytes()) for p in gtr_g))
+
+    def test_gdb_adapt_from_same_name_template(self):
+        def index(root):
+            return {Path(p).name.lower(): Path(p) for p in glob.glob(
+                str(ROOT.parent / root / "**" / "*"), recursive=True)
+                if p.lower().endswith(".gdb")}
+        gtl, gtr = index("GTLSteam"), index("GTR2Steam")
+        common = sorted(set(gtl) & set(gtr))
+        if not common:
+            self.skipTest("no same-name GTL/GTR2 GDB pair present")
+        for name in common:
+            with self.subTest(name=name):
+                src = gtl[name].read_bytes()
+                template = gtr[name].read_bytes()
+                self.assertTrue(g.validate_gdb(src))
+                out, report = g.adapt_gdb_from_template(src, template)
+                self.assertEqual(g.validate_gdb(out), [])
+                self.assertTrue(report["keys_applied"] >= 15)
+                tv, ov = g.gdb_key_values(template), g.gdb_key_values(out)
+                for key in g.GTR2_SESSION_KEYS:
+                    self.assertEqual(ov.get(key), tv[key])
+                # Non-session lines are preserved verbatim.
+                strip = lambda d: [ln for ln in d.split(b"\n")
+                                   if not any(ln.lower().lstrip().startswith(k.encode())
+                                              for k in g.GTR2_SESSION_KEYS)]
+                self.assertEqual(strip(src), strip(out))
+
     def test_validate_tree(self):
         src = ROOT.parent / "GTLSteam/GameData/Locations/Anderstorp"
         target = ROOT.parent / "GTR2Steam/GameData/Locations/Anderstorp"
