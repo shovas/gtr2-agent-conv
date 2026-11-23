@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 10:00:00 -0500 - JCA-encrypted WAV support
+- Survey found 2,781 `.wav` files with the JCA `0fb1ffff` header across 5 corpora. Added `media_tool.decrypt_jca_wav()`, `wav-jca` identification, and `wav-decrypt` CLI; default key decrypts Race07 samples to valid 48 kHz 16-bit PCM WAV. Added regression test.
+
 ## 2026-11-24 15:35:00 -0500 - Final verification after format surveys
 - `python3 run_tests.py --mode full`: 47 modules / 310 tests / 712.0 s, 0 failures, 2 skips. Normal: 170 tests / 287.2 s, 0 failures. Quick: 96 tests, 0 failures. Pre-push check PASS.
 

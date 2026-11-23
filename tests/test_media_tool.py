@@ -76,6 +76,31 @@ class MediaToolTest(unittest.TestCase):
                 self.assertEqual(a.getparams(), b.getparams())
                 self.assertEqual(a.readframes(a.getnframes()), b.readframes(b.getnframes()))
 
+    def test_jca_encrypted_wav_decrypt(self):
+        import glob
+        def jca_wav(p):
+            if not Path(p).is_file():
+                return False
+            with open(p, "rb") as f:
+                return p.lower().endswith(".wav") and f.read(4) == b"\x0f\xb1\xff\xff"
+        sample = next((p for p in glob.glob(str(ROOT.parent / "Race07Vanilla" / "**" / "*"), recursive=True)
+                       if jca_wav(p)), None)
+        if sample is None:
+            self.skipTest("JCA-encrypted WAV sample not present")
+        info = media_tool.identify(sample)
+        self.assertEqual(info.format, "wav-jca")
+        self.assertTrue(info.details["jca_encrypted"])
+        self.assertIn("audio_format", info.details)
+        plain = media_tool.decrypt_jca_wav(Path(sample).read_bytes())
+        self.assertEqual(plain[:4], b"RIFF")
+        self.assertEqual(plain[8:12], b"WAVE")
+        with tempfile.TemporaryDirectory() as td:
+            dst = Path(td) / "plain.wav"
+            dst.write_bytes(plain)
+            self.assertEqual(media_tool.identify(dst).format, "wav")
+            with wave.open(str(dst), "rb") as w:
+                self.assertGreater(w.getnframes(), 0)
+
     def test_wav_mp3_format_lossless_roundtrip(self):
         p = ROOT.parent / "GTR2Steam/GameData/Sounds/PIT/bleep.wav"
         if not p.exists():

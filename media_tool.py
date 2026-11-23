@@ -21,12 +21,49 @@ class MediaInfo:
     details: dict
 
 
+JCA_MAGIC = b"\x0f\xb1\xff\xff"
+
+
+def decrypt_jca_wav(data: bytes, key_name: str | None = None) -> bytes:
+    """Decrypt a JCA-wrapped WAV to plain RIFF/WAVE bytes.
+
+    ``key_name`` selects a non-default JCA key (e.g. ``volvo``); ``None`` uses
+    the game default. Raises on bad magic or wrong key.
+    """
+    import jca_crypt
+    if data[:4] != JCA_MAGIC:
+        raise ValueError("not a JCA-encrypted file")
+    custom = jca_crypt.CUSTOM_KEYS.get(key_name) if key_name else None
+    out = jca_crypt.decrypt_bytes(data, custom)
+    if out[:4] != b"RIFF" or out[8:12] != b"WAVE":
+        raise ValueError("JCA payload is not a WAVE file")
+    return out
+
+
 def identify(path: str | Path) -> MediaInfo:
     p = Path(path)
     b = p.read_bytes()
     size = len(b)
     head = b[:64]
     ext = p.suffix.lower()
+    # JCA-encrypted WAV (SimBin audio archives)
+    if head.startswith(JCA_MAGIC):
+        details = {"jca_encrypted": True}
+        try:
+            plain = decrypt_jca_wav(b)
+            details["decrypted_size"] = len(plain)
+            off = 12
+            while off + 8 <= len(plain):
+                cid = plain[off:off+4]; csz = struct.unpack_from('<I', plain, off+4)[0]
+                if cid == b'fmt ' and csz >= 16:
+                    af, ch, sr, br, ba, bits = struct.unpack_from('<HHIIHH', plain, off+8)
+                    details.update({"audio_format": af, "channels": ch, "framerate": sr,
+                                    "bits_per_sample": bits, "byte_rate": br, "block_align": ba})
+                    break
+                off += 8 + csz + (csz & 1)
+        except Exception as e:
+            details["error"] = str(e)
+        return MediaInfo(str(p), size, "wav-jca", details)
     # WAV
     if head.startswith(b"RIFF") and b[8:12] == b"WAVE":
         fmt = "wav"
@@ -837,6 +874,12 @@ def main(argv=None):
     p.add_argument("src")
     p.add_argument("dst")
     p.set_defaults(func=lambda a: print(asdict(wav_roundtrip(a.src, a.dst))) or 0)
+    p = sub.add_parser("wav-decrypt", help="decrypt a JCA-wrapped WAV to plain RIFF/WAVE")
+    p.add_argument("src")
+    p.add_argument("dst")
+    p.add_argument("--key", choices=sorted(__import__("jca_crypt").CUSTOM_KEYS), default=None)
+    p.set_defaults(func=lambda a: (Path(a.dst).write_bytes(
+        decrypt_jca_wav(Path(a.src).read_bytes(), a.key)), print(a.dst))[1] or 0)
     p = sub.add_parser("tga-roundtrip")
     p.add_argument("src")
     p.add_argument("dst")

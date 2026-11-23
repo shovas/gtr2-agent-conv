@@ -253,3 +253,7 @@ python3 gtl_to_gtr2.py --validate <GameData-dir>
 ## FXM semantic decoding
 
 `fxm_tool.py semantic <file>` decodes and validates FXM skeleton nodes from both file variants. **Limitations**: key_count semantics and animation-to-mesh binding remain unresolved.
+
+## JCA-encrypted audio
+
+`media_tool.py wav-decrypt <src.wav> <dst.wav> [--key NAME]` decrypts SimBin JCA-wrapped WAV files to plain RIFF/WAVE. **Limitations**: compressed (MP3/ADPCM) WAV payloads still round-trip losslessly rather than being transcoded.

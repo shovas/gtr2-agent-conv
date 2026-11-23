@@ -83,11 +83,11 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 ## Media formats
 
 ### WAV
-- **Read**: PCM WAVE read via stdlib `wave`; header/params/frames accessible. For unsupported wave formats (e.g. MP3-in-WAV format 0x55), parses fmt chunk metadata.
-- **Write**: PCM WAVE write and round-trip; lossless byte-copy round-trip for unsupported stdlib formats.
+- **Read**: JCA-encrypted WAV identification and decryption via `jca_crypt` (`media_tool.py wav-decrypt <src> <dst> [--key NAME]`; default key verified on Race07 samples); PCM WAVE read via stdlib `wave`. For unsupported wave formats (e.g. MP3-in-WAV format 0x55), parses fmt chunk metadata.
+- **Write**: PCM WAVE write and round-trip; JCA-wrapped WAV decrypted to plain RIFF/WAVE; lossless byte-copy round-trip for unsupported stdlib formats.
 - **Verification**: `tests/test_media_tool.py` (PCM round-trip; real MP3-in-WAV format 0x55 lossless round-trip when present).
 - **Tool**: `media_tool.py`.
-- **Gaps**: full semantic decode/encode of compressed WAV payloads (MP3/ADPCM) not implemented.
+- **Gaps**: full semantic decode/encode of compressed WAV payloads (MP3/ADPCM) not implemented; non-default JCA keys handled only via `--key`.
 
 ### DDS
 - **Read**: Identify + DDS header/pixel-format/caps semantic parse; DXT1 (BC1), DXT3 (BC2), DXT5 (BC3), and uncompressed RGB(A) mask-based pixel decode to RGBA.
