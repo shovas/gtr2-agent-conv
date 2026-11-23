@@ -99,6 +99,33 @@ class SimbinEventsToolTest(unittest.TestCase):
             checked += 1
         self.assertGreaterEqual(checked, 1)
 
+    def test_dsi_ghost_line(self):
+        """Read every local Driving School instructor polyline."""
+        import math
+        import struct
+        files = [p for p in (Path(x) for x in glob.glob(
+                     str(ROOT.parent / "GTR2Steam" / "**" / "*"), recursive=True))
+                 if p.is_file() and p.suffix.lower() == ".dsi"]
+        if not files:
+            self.skipTest("GTR2 DSI files not present")
+        checked = 0
+        for p in files:
+            with self.subTest(path=p.name):
+                raw = p.read_bytes()
+                data = gzip.decompress(raw) if raw[:2] == b"\x1f\x8b" else raw
+                pts = setool.read_ghost_line(data)
+                self.assertGreater(len(pts), 10)
+                self.assertTrue(all(math.isfinite(v) and abs(v) < 1e5
+                                    for pt in pts for v in pt))
+                # Marker sits at record +0; position floats at +35/+39/+43.
+                start = data.find(setool.GHOST_MARKER)
+                for i in (0, 1, min(4, len(pts) - 1)):
+                    off = start + i * setool.FRAME_STRIDE
+                    expected = struct.unpack_from("<3f", data, off + 35)
+                    self.assertEqual(pts[i], expected)
+                checked += 1
+        self.assertGreaterEqual(checked, 1)
+
     def test_gtt_metadata_framing(self):
         files = _files(".gtt")
         if not files:

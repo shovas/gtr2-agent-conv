@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 20:00:00 -0500 - GTR2 .dsi instructor-line reader
+- `simbin_events_tool.read_ghost_line()` decodes the 63-byte `.dsi` ghost polyline (marker at record +0, position floats at +35/+39/+43) across all 55 local files; added `--ghost-line` CLI flag and test.
+
 ## 2026-11-23 19:45:00 -0500 - CUBE MTS rig triples shown to form surface patches
 - The per-rig u16 triples decode as coherent triangle surfaces (shared table: 79 faces, 68 vertices, 91/146 edges shared twice, Euler chi=1), ruling out arbitrary indices. Exact engine-side role still unknown; added test.
 

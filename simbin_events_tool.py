@@ -244,13 +244,52 @@ def read_frames(data: bytes, grid: dict) -> list[dict]:
     return out
 
 
+# GTR2 Driving School `.dsi` instructor lines use the same 63-byte record and
+# marker as GTTF ghost frames, but place four floats between position and the
+# marker (GTTF has three), so the marker sits at record +0 and the position at
+# +35/+39/+43. The reference-only gtr2-agent-tools ghost loader documents this.
+GHOST_MARKER = b"\x01\x00\x00\x34\x00\x20\x00"
+GHOST_POS_OFF = (35, 39, 43)
+
+
+def read_ghost_line(data: bytes) -> list[tuple[float, float, float]]:
+    """Read the (x, y, z) polyline from a decompressed GTR2 ``.dsi`` payload.
+
+    Records are 63 bytes apart. Walking by stride (rather than re-searching for
+    the marker) avoids false positives in the surrounding metadata.
+    """
+    start = data.find(GHOST_MARKER)
+    if start < 0:
+        return []
+    points = []
+    off = start
+    while off + GHOST_POS_OFF[2] + 4 <= len(data):
+        if data[off:off + len(GHOST_MARKER)] != GHOST_MARKER:
+            break
+        xyz = struct.unpack_from("<3f", data, off + GHOST_POS_OFF[0])
+        if not all(math.isfinite(x) and abs(x) < 1e5 for x in xyz):
+            break
+        points.append(xyz)
+        off += FRAME_STRIDE
+    return points
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("file")
     ap.add_argument("--strings", type=int, default=12)
     ap.add_argument("--frames", action="store_true", help="report the GTTF frame grid")
+    ap.add_argument("--ghost-line", action="store_true", help="report a .dsi instructor polyline")
     args = ap.parse_args(argv)
-    e = parse_file(args.file)
+    raw = Path(args.file).read_bytes()
+    if raw[:2] == b"\x1f\x8b":
+        raw = gzip.decompress(raw)
+    if args.ghost_line:
+        pts = read_ghost_line(raw)
+        print(f"ghost_points={len(pts)} first={pts[0] if pts else None} "
+              f"last={pts[-1] if pts else None}")
+        return 0
+    e = parse_payload(raw)
     print(f"kind={e.kind} version={e.version} trk={e.trk!r} aiw={e.aiw!r}")
     if e.driver:
         print(f"driver={e.driver!r} co_driver={e.co_driver!r} team={e.team!r} "
@@ -259,9 +298,6 @@ def main(argv=None) -> int:
     for off, s in e.strings[:args.strings]:
         print(f"  {off}: {s[:80]}")
     if args.frames:
-        raw = Path(args.file).read_bytes()
-        if raw[:2] == b"\x1f\x8b":
-            raw = gzip.decompress(raw)
         grid = find_frame_grid(raw)
         if grid:
             frames = read_frames(raw, grid)
