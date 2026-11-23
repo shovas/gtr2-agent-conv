@@ -103,6 +103,11 @@ class GmtLayoutTest(unittest.TestCase):
             new = gmt_layout.old_to_new(old)
             g = gmt_format.parse_gmt(name, new)
             self.assertEqual(g.mesh_count, obj_count)
+            # Record 0 must come from submesh 0, not the stale 8-u32 table.
+            import gmt_semantic
+            subs = gmt_semantic.find_submeshes(old)
+            self.assertEqual(g.meshes[0].record.vertex_count, subs[0]["v_count"])
+            self.assertEqual(g.meshes[0].record.index_count, subs[0]["i_count"])
             for m in g.meshes:
                 r = m.record
                 stride = 48 if r.has_extra_vertex_block else 32

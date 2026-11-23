@@ -75,14 +75,15 @@ def old_to_new(data: bytes) -> bytes:
     rec[11] = ioff
     out[FIRST_RECORD:FIRST_RECORD + RECORD_SIZE] = struct.pack("<27I", *rec)
 
-    # The 8-u32 table at 0x174 describes only one object. For multi-object
-    # rF1 GMTs, fill records 1..N-1 from the submesh headers found by
-    # gmt_semantic (one per object, verified on the rF1Vanilla corpus).
-    # Record 0 is left as above to preserve the existing bridge's behavior.
+    # The 8-u32 table at 0x174 does not describe object 0 of multi-object rF1
+    # GMTs (e.g. BUILDING43: table vc=313/ic=0 vs submesh 0 vc=753/ic=753).
+    # Use the N submesh headers found by gmt_semantic for all N records;
+    # validated on 4,703/4,703 multi-object rF1 GMTs (parse + round-trip +
+    # relayout). Single-object GMTs keep the original table-based record.
     if obj_count > 1:
         import gmt_semantic
         subs = gmt_semantic.find_submeshes(data)
-        for i in range(1, min(obj_count, len(subs))):
+        for i in range(min(obj_count, len(subs))):
             sub = subs[i]
             extra = [0] * 27
             extra[1] = 0x20

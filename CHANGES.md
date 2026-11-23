@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 07:00:00 -0500 - Multi-object GMT record 0 corrected
+- Record 0 of multi-object rF1 GMTs now also comes from submesh 0 (e.g. BUILDING43: vc 313→753, ic 0→753) rather than the misleading 8-u32 table. Validated on 4,703/4,703 multi-object GMTs; regression test strengthened.
+
 ## 2026-11-24 06:35:00 -0500 - Final verification after multi-object fix
 - `python3 run_tests.py --mode full`: 47 modules / 301 tests / 725.0 s, 0 failures, 2 skips. Normal: 164 tests / 269.9 s, 0 failures. Quick: 90 tests, 0 failures. Pre-push check PASS.
 
