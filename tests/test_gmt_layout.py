@@ -90,6 +90,31 @@ class GmtLayoutTest(unittest.TestCase):
                 self.assertTrue(any(len(m.base_vertices) > 0 for m in g.meshes))
                 self.assertEqual(gmt_format.write_gmt(g), new)
 
+    def test_multi_object_records_are_coherent(self):
+        """All N mesh records of a multi-object old GMT must be usable."""
+        samples = _old_gmts()
+        if not samples:
+            self.skipTest("RF1Vanilla corpus not present")
+        checked = 0
+        for _path, name, old in samples:
+            obj_count = struct.unpack_from("<I", old, 0x174)[0]
+            if obj_count < 2:
+                continue
+            new = gmt_layout.old_to_new(old)
+            g = gmt_format.parse_gmt(name, new)
+            self.assertEqual(g.mesh_count, obj_count)
+            for m in g.meshes:
+                r = m.record
+                stride = 48 if r.has_extra_vertex_block else 32
+                self.assertGreaterEqual(len(m.vertex_data), r.vertex_count * stride)
+                self.assertEqual(len(m.index_data), 4 + r.index_count * 2)
+            # Coherent records also permit a full relayout.
+            self.assertGreater(len(gmt_format.relayout_gmt(g)), 0)
+            checked += 1
+            if checked >= 12:
+                break
+        self.assertGreater(checked, 0)
+
     def test_rejects_new_layout_input(self):
         sample = next(((a, e) for a in glob.glob(str(ROOT.parent / "GTR2Steam" / "**" / "*"), recursive=True)
                        if os.path.isfile(a) and a.lower().endswith(".gtr")
