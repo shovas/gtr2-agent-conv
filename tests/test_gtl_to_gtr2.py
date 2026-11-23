@@ -384,6 +384,20 @@ class GtlToGtr2Test(unittest.TestCase):
         if broken != data:
             self.assertTrue(g.validate_gdb_times(broken))
 
+    def test_gdb_racetime_invariant_jca(self):
+        """The session racetime invariant also holds on decrypted JCA GDBs."""
+        import media_tool
+        checked = 0
+        for root in ("Race07Complete", "VolvoTheGame"):
+            for path in glob.glob(str(ROOT.parent / root / "**" / "*.gdb"), recursive=True):
+                data = Path(path).read_bytes()
+                if data[:4] != b"\x0f\xb1\xff\xff":
+                    continue
+                plain = media_tool.decrypt_jca_text(data)
+                self.assertEqual(g.validate_gdb_times(plain), [], path)
+                checked += 1
+        self.assertGreaterEqual(checked, 80)
+
     def test_car_key_rule(self):
         def cars(root):
             return [Path(p) for p in glob.glob(

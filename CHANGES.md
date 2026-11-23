@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 08:00:00 -0500 - GDB invariant re-verified on encrypted corpus
+- The existing `validate_gdb_times()` session invariant (racetime == racetimescaled) holds on all 89 decrypted JCA `.gdb` files (80 Race07Complete + 9 Volvo) as well as plain GTL/GTR2 files; 4 plain Race07 files differ legitimately via later event sections. Added a corpus regression test. All 29 converter tests pass.
+
 ## 2026-11-24 07:30:00 -0500 - JCA-wrapped text configs across the corpus
 - Surveyed all text config formats: JCA-encrypted variants are common in Race07/Volvo (`.car` 68.7%, `.cam` 64.9%, `.aud` 62.4%, `.gdb` 44%, `.scn` 92.5%, plus `.hdc/.eng/.tyr/.trk/.dmg/.hed/.grb`), while `.aiw/.rcd/.txt/.ini/.svm` are always plain. Added `media_tool.decrypt_jca_text()` (key trial + text validation) and wired it into `text_convert.py` for `.aiw`/`.scn`; `gtl_to_gtr2.aud_plain()` now reuses it. Added a corpus regression test for encrypted `.scn`; all 32 text/converter tests pass.
 
