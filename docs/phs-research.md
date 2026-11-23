@@ -67,6 +67,20 @@ Excluded by this pass: a literal PAR2-aware loader in the GTL binaries; a feasib
 Wine runtime trace in this environment; identical recovery slices across the PHS
 files. None of these contradict the recovery-container conclusion.
 
+## Static consumer analysis (2026-11-23, second pass)
+
+- **No game-code references**: `GTL.exe`, `GTLDedicated.exe`, all DLLs contain **no**
+  `.phs`, `Physics2.gtl`, `AIStrat.gtl`, `LiveTrack2.gtl`, `PHYSICS.PHS` or `CARS.PHS`
+  strings. The only references are in `UIData/gtlui.mnu` as `Source_MAS` entries
+  (lines 25-27), alongside UI archives (`GTLOptions1/2.gtl`, `UIAssets.gtl`).
+- **Archives contain only PHS**: `Physics2.gtl` = DRIVERS/PHYSICS/CARS.PHS,
+  `AIStrat.gtl` = AI.PHS, `LiveTrack2.gtl` = TRACKS.PHS — no UI assets at all.
+- **Interpretation**: the UI source-MAS loader likely opens these archives looking for
+  UI/localization assets and finds none relevant; the PHS members are not dispatched
+  to any physics consumer by name. Strong evidence PHS data is **unused by GTL
+  gameplay** — consistent with leftover update/recovery artifacts bundled in the
+  install. This is a resource-identification result, not a decoded consumer routine.
+
 ## Recommendation
 
 **Defer further decoding.** The recovery-data hypothesis is structurally validated;
