@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 13:45:00 -0500 - Shared-folder teammaps rename
+- `convert_tree()` now renames `teammaps.gtl` to `teammaps2.gtr` (matching the GTR2 archive name and the `.trk` MASFile rewrite). The GTL `Locations/shared` folder converts to 7 clean `.gtr` archives with 0 validator problems. Added regression test.
+
 ## 2026-11-24 13:20:00 -0500 - Final verification after multi-track validation
 - `python3 run_tests.py --mode full`: 47 modules / 309 tests / 735.2 s, 0 failures, 2 skips. Normal: 169 tests / 284.2 s, 0 failures. Quick: 95 tests, 0 failures. Pre-push check PASS.
 

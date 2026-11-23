@@ -196,6 +196,10 @@ def convert_tree(source_root: str | Path, target_root: str | Path | None = None,
                 mas_tool.write_archive(tmp.name, converted, mas_type=0)
                 out = Path(tmp.name).read_bytes()
             out_name = rel.with_suffix(".gtr")
+            # GTR2's .trk MASFile rewrite points at teammaps2.gtr, not
+            # teammaps.gtr (1 GTL teammaps.gtl vs 1 GTR2 teammaps2.gtr).
+            if p.name.lower() == "teammaps.gtl":
+                out_name = rel.with_name("teammaps2.gtr")
             report["archives"] += 1
         elif suffix in (".trk", ".aud", ".hdc", ".tyr", ".dmg", ".gdb", ".car",
                         ".aiw", ".rcd", ".ani"):

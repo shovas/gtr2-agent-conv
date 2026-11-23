@@ -510,6 +510,18 @@ class GtlToGtr2Test(unittest.TestCase):
                     break
         self.assertGreaterEqual(checked, 4)
 
+    def test_shared_folder_teammaps_rename(self):
+        src = ROOT.parent / "GTLSteam/GameData/Locations/shared"
+        if not src.is_dir():
+            self.skipTest("GTL shared folder not present")
+        with tempfile.TemporaryDirectory() as td:
+            report = g.convert_tree(src, td, include_others=False)
+            self.assertEqual(report["archives"], 7)
+            names = {p.name.lower() for p in Path(td).iterdir()}
+            self.assertIn("teammaps2.gtr", names)
+            self.assertNotIn("teammaps.gtr", names)
+            self.assertEqual(g.validate_gtr2_tree(td), [])
+
     def test_validate_tree(self):
         src = ROOT.parent / "GTLSteam/GameData/Locations/Anderstorp"
         target = ROOT.parent / "GTR2Steam/GameData/Locations/Anderstorp"
