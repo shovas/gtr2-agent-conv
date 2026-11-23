@@ -180,6 +180,30 @@ def identify(path: str | Path) -> MediaInfo:
     return MediaInfo(str(p), size, "unknown", {"ext": ext})
 
 
+def wav_decode(src: str | Path, dst: str | Path,
+               ffmpeg_exe: str | None = None) -> bool:
+    """Decode a compressed WAV (ADPCM, MP3-in-WAV) to PCM WAV via ffmpeg.
+
+    Returns True on success, False when ffmpeg is unavailable or decoding
+    fails.  The caller's source is never modified.
+    """
+    import shutil
+    import subprocess
+    exe = ffmpeg_exe or shutil.which("ffmpeg")
+    if exe is None:
+        return False
+    cmd = [exe, "-y", "-loglevel", "error", "-i", str(src),
+           "-c:a", "pcm_s16le", str(dst)]
+    result = subprocess.run(cmd, capture_output=True)
+    if result.returncode != 0 or not Path(dst).is_file():
+        return False
+    try:
+        with wave.open(str(dst), "rb") as w:
+            return w.getcomptype() == "NONE" and w.getnframes() > 0
+    except Exception:
+        return False
+
+
 def wav_roundtrip(src: str | Path, dst: str | Path) -> MediaInfo:
     try:
         with wave.open(str(src), "rb") as r:
@@ -880,6 +904,11 @@ def main(argv=None):
     p.add_argument("--key", choices=sorted(__import__("jca_crypt").CUSTOM_KEYS), default=None)
     p.set_defaults(func=lambda a: (Path(a.dst).write_bytes(
         decrypt_jca_wav(Path(a.src).read_bytes(), a.key)), print(a.dst))[1] or 0)
+    p = sub.add_parser("wav-decode", help="decode compressed WAV (ADPCM/MP3) to PCM via ffmpeg")
+    p.add_argument("src")
+    p.add_argument("dst")
+    p.set_defaults(func=lambda a: print("ok" if wav_decode(a.src, a.dst)
+                                        else "ffmpeg unavailable or decode failed") or 0)
     p = sub.add_parser("tga-roundtrip")
     p.add_argument("src")
     p.add_argument("dst")

@@ -1,3 +1,4 @@
+import struct
 import sys
 import tempfile
 import unittest
@@ -75,6 +76,33 @@ class MediaToolTest(unittest.TestCase):
             with wave.open(str(src), "rb") as a, wave.open(str(dst), "rb") as b:
                 self.assertEqual(a.getparams(), b.getparams())
                 self.assertEqual(a.readframes(a.getnframes()), b.readframes(b.getnframes()))
+
+    def test_compressed_wav_decode_via_ffmpeg(self):
+        import glob
+        import shutil
+        if not shutil.which("ffmpeg"):
+            self.skipTest("ffmpeg not present")
+        samples = []
+        for root, tag in (("RF1Vanilla", 17), ("GTR2Steam", 85)):
+            for p in glob.glob(str(ROOT.parent / root / "**" / "*"), recursive=True):
+                if not Path(p).is_file() or not p.lower().endswith(".wav"):
+                    continue
+                with open(p, "rb") as f:
+                    head = f.read(64)
+                if head[:4] != b"RIFF" or len(head) < 22:
+                    continue
+                if struct.unpack_from("<H", head, 20)[0] == tag:
+                    samples.append(p)
+                    break
+        self.assertEqual(len(samples), 2, "ADPCM and MP3-in-WAV samples expected")
+        for src in samples:
+            with self.subTest(src=src):
+                with tempfile.TemporaryDirectory() as td:
+                    dst = Path(td) / "pcm.wav"
+                    self.assertTrue(media_tool.wav_decode(src, dst))
+                    with wave.open(str(dst), "rb") as w:
+                        self.assertEqual(w.getcomptype(), "NONE")
+                        self.assertGreater(w.getnframes(), 0)
 
     def test_jca_encrypted_wav_decrypt(self):
         import glob
