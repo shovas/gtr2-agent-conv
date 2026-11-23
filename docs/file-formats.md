@@ -178,6 +178,8 @@ Notably absent in GTL GameData: rFactor-style `.veh/.scn/.gen/.hdv/.tbc/.sfx` (0
 
 **Surveyed but no confirmed rule**: `.cam` and `.eng` have identical universal key sets in both corpora (no adaptation needed); `.grd` GTL-only keys (`camera`, `iterations`, `probability`) are present in 33/34 real GTR2 files, so removal is not justified; `.cas` (`projector`) and `.dmg` (part3 keys) each flag only 1/57 and 1/29 GTL files, too weak for a corpus-wide rule. No validators were added for these.
 
+**Value-scale candidates examined but NOT promoted**: median GTL→GTR2 numeric shifts exist for `.hdc` `bumpstopspring` (250000→125000), `bumpstopdamper` (2000→1050), `forwardgears` (4/5→6), `brakepressuresetting` (10→20), `diffcoastsetting` (2→8), `.eng` `enginebrakingmapsetting` (4→2) and `.tyr` `optimumpressurebase` (60/100→90). None is universal in both corpora (e.g. 12 GTR2 files retain the GTL `bumpstopspring` value), so applying them would be speculative; only `clutchengagerate` (0.6→0.8, universal where present) and the `.aud` path prefix were promoted.
+
 ## Confidence / gaps
 
 - **High confidence**: MAS container identification; `.car/.gdb/.trk/.aud/.hdc/.eng/.dmg/.hed/.cam/.grd/.rcd` general purpose from samples.
