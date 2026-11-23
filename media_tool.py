@@ -360,6 +360,7 @@ class TgaImage:
     image_id: bytes
     cmap_data: bytes
     pixels: bytes  # raw uncompressed pixel bytes in file order
+    footer: bytes = b""  # optional 26-byte TGA v2.0 footer
 
     def header_bytes(self) -> bytes:
         return struct.pack('<BBB5sHHHHBB', self.id_len, self.cmap_type, self.image_type,
@@ -372,6 +373,9 @@ def read_tga(path: str | Path) -> TgaImage:
     b = p.read_bytes()
     if len(b) < 18:
         raise ValueError('TGA too small')
+    footer = b""
+    if len(b) >= 26 + 18 and b[-18:-1] == b'TRUEVISION-XFILE.' and b[-1] == 0:
+        footer = b[-26:]
     id_len, cmap_type, image_type = struct.unpack_from('<BBB', b, 0)
     cmap_spec = b[3:8]
     x_origin, y_origin, width, height = struct.unpack_from('<HHHH', b, 8)
@@ -394,7 +398,7 @@ def read_tga(path: str | Path) -> TgaImage:
         pixels = _decode_tga_rle(b[pos:], pixel_count, bytespp)
     else:
         raise ValueError(f'Unsupported TGA image type {image_type}')
-    return TgaImage(id_len, cmap_type, image_type, cmap_spec, x_origin, y_origin, width, height, bpp, descriptor, image_id, cmap_data, pixels)
+    return TgaImage(id_len, cmap_type, image_type, cmap_spec, x_origin, y_origin, width, height, bpp, descriptor, image_id, cmap_data, pixels, footer)
 
 
 def _decode_tga_rle(data: bytes, pixel_count: int, bytespp: int) -> bytes:
@@ -455,6 +459,7 @@ def write_tga(img: TgaImage) -> bytes:
         out.extend(_encode_tga_rle(img.pixels, img.width * img.height, (img.bpp + 7) // 8))
     else:
         raise ValueError(f'Unsupported TGA image type {img.image_type}')
+    out.extend(img.footer)
     return bytes(out)
 
 

@@ -581,6 +581,16 @@ class MediaToolTest(unittest.TestCase):
             # type 2 should be byte-identical
             self.assertEqual(p.read_bytes(), dst.read_bytes())
 
+    def test_tga_v2_footer_preserved(self):
+        p = (ROOT.parent / "GTR2Steam/GameData/Championships/Custom/"
+             "001_Pan Euro RS 2003 Rookie Cup_Icon.tga")
+        if not p.exists():
+            self.skipTest("footer-bearing TGA not present")
+        img = media_tool.read_tga(p)
+        self.assertEqual(len(img.footer), 26)
+        self.assertEqual(img.footer[-18:-1], b"TRUEVISION-XFILE.")
+        self.assertEqual(media_tool.write_tga(img), p.read_bytes())
+
     def test_tga_type10_rle_semantic_roundtrip(self):
         import struct
         with tempfile.TemporaryDirectory() as td:

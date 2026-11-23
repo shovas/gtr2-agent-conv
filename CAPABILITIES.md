@@ -105,7 +105,7 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 - **Gaps**: the 12 delta-transformed BC6H modes and BC7 are not implemented; none occur in the local corpus. Cube-map faces are decoded but not exposed as a separate image format to other tools.
 
 ### TGA
-- **Read/Write**: Semantic read/write for uncompressed truecolor/grayscale (type 2/3) and RLE truecolor (type 10) via `media_tool.py`. Type 2/3 round-trip is byte-identical; type 10 round-trip is pixel-identical (encoder emits raw packets).
+- **Read/Write**: Semantic read/write for uncompressed truecolor/grayscale (type 2/3) and RLE truecolor (type 10) via `media_tool.py`. Type 2/3 round-trip is byte-identical; type 10 round-trip is pixel-identical (encoder emits raw packets). The optional 26-byte TGA v2.0 footer (`TRUEVISION-XFILE.`) is preserved; 2,311 corpus files carry one.
 - **Verification**: `tests/test_media_tool.py` (synthetic type 2 byte round-trip, synthetic type 10 pixel round-trip, real type 2 when present).
 - **RLE encoding**: TGA type 10 round-trips now emit true RLE runs (verified on a 666x400 corpus image; 532,356 vs 534,231 original bytes) instead of raw packets; decoded pixels are identical.
 - **Gaps**: color-mapped TGA and other rarer types not implemented (none found in the corpus).

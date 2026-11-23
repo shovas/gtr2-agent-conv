@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 19:30:00 -0500 - Preserve TGA v2.0 footer
+- `read_tga()`/`write_tga()` now preserve the optional 26-byte `TRUEVISION-XFILE.` footer instead of silently dropping it. 2,311 corpus TGA files carry one; a real 92 KB sample now round-trips byte-identically. Added a regression test.
+
 ## 2026-11-23 19:00:00 -0500 - Signed BC6H (SF16) decode
 - `bc6h_format.py` now decodes signed BC6H (DXGI `BC6H_SF16`) alongside UF16 for the same two non-transformed modes; `media_tool.py` reads DXGI 96 DDS files. Fixed a Python sign-extension bug found during verification. Matched a corrected independent spec reference on 4,000/4,000 random signed blocks; 3 new tests.
 
