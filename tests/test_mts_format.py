@@ -641,8 +641,12 @@ class MtsFormatTest(unittest.TestCase):
         # Most edges are shared by exactly two adjacent triangles; the patch
         # has a boundary and Euler characteristic V-E+F == 1 (a disk).
         self.assertGreater(sum(1 for n in edges.values() if n == 2), len(edges) // 2)
-        verts = len({i for t in valid for i in t})
+        used = {i for t in valid for i in t}
+        verts = len(used)
         self.assertEqual(verts - len(edges) + len(valid), 1)
+        # The shared pit-crew patch is planar (all x equal), i.e. a 2D
+        # triangulation rather than a volumetric collision mesh.
+        self.assertEqual(len({points[i][0] for i in used}), 1)
 
 
 if __name__ == "__main__":
