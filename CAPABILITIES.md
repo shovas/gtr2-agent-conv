@@ -93,7 +93,7 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 - **Gaps**: ADPCM/MP3 re-encoding is lossy (74.8% sample-exact on the round-trip); no in-repo MP3/ADPCM codec.
 
 ### DDS
-- **Read**: Identify + DDS header/pixel-format/caps semantic parse; DXT1 (BC1), DXT3 (BC2), DXT5 (BC3), and uncompressed RGB(A) mask-based pixel decode to RGBA.
+- **Read**: Identify + DDS header/pixel-format/caps semantic parse; DXT1 (BC1), DXT3 (BC2), DXT5 (BC3), and uncompressed RGB(A) mask-based pixel decode to RGBA. Cube maps (6 faces, with optional mip chains per face) decode each face separately.
 - **Write**: DXT1/DXT3/DXT5 (lossy) and uncompressed RGB(A) mask-based encode from RGBA + DDS file write; lossless byte copy possible.
 - **Verification**: `tests/test_media_tool.py` (synthetic DXT1, DXT3, DXT5, A8R8G8B8, X8R8G8B8, R8G8B8, R5G6B5 round-trips).
 - **Tool**: `media_tool.py`.
@@ -101,7 +101,8 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 - **DXT4**: decoded as DXT5-alpha variant; alpha channel matches ffmpeg byte-exactly on the local corpus sample (RGB differences are ffmpeg color-management, also seen for DXT5).
 - **BC4/BC5**: native decode implemented (`BC4U`/`ATI1`/`BC5U`/`ATI2`) with synthetic-block fixtures; no local corpus samples to validate against.
 - **BC6H UF16**: `bc6h_format.py` decodes the two non-transformed modes (stored codes 30 and 3) from spec-derived Khronos BPTC tables; DX10 `BC6H_UF16` DDS files are read by `media_tool.py`. Verified against 4,000 synthetic random blocks using an independent spec-table port. A 48,459-file loose-DDS corpus scan found no DX10 headers, so no BC6H/BC7 samples exist locally. Write-back is unsupported (no encoder).
-- **Gaps**: the 12 delta-transformed BC6H modes, signed SF16, BC7 and cube maps are not implemented; none occur in the local corpus.
+- **Cube maps**: all 24 plain corpus cube-map DDS files (Race 07 Complete, DXT1 128²/256²) decode six distinct faces and round-trip byte-identically; 3 additional JCA-encrypted cube maps (including one DXT5) verify after decryption; face order is +X/-X/+Y/-Y/+Z/-Z.
+- **Gaps**: the 12 delta-transformed BC6H modes, signed SF16 and BC7 are not implemented; none occur in the local corpus. Cube-map faces are decoded but not exposed as a separate image format to other tools.
 
 ### TGA
 - **Read/Write**: Semantic read/write for uncompressed truecolor/grayscale (type 2/3) and RLE truecolor (type 10) via `media_tool.py`. Type 2/3 round-trip is byte-identical; type 10 round-trip is pixel-identical (encoder emits raw packets).

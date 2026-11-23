@@ -9,7 +9,7 @@ from __future__ import annotations
 import argparse
 import struct
 import wave
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, field
 from pathlib import Path
 
 
@@ -921,12 +921,45 @@ def encode_uncompressed_dds(rgba: bytes, width: int, height: int, rgb_bits=32, r
 def _dds_top_level_size(width: int, height: int, fourcc: str,
                         rgb_bits: int = 32) -> int:
     """Byte size of DDS level 0 (mip chains follow it in the payload)."""
-    if fourcc in ("DXT1", "DXT3", "DXT5", "BC4U", "ATI1", "BC5U", "ATI2", "BC6H_UF16"):
+    if fourcc in ("DXT1", "DXT3", "DXT5", "DXT4", "BC4U", "ATI1", "BC5U", "ATI2", "BC6H_UF16"):
         blocks = max(1, (width + 3) // 4) * max(1, (height + 3) // 4)
         if fourcc in ("DXT1", "BC4U", "ATI1"):
             return blocks * 8
         return blocks * 16
     return width * height * max(1, rgb_bits // 8)
+
+
+def _dds_face_payload_size(width: int, height: int, fourcc: str, levels: int,
+                           rgb_bits: int = 32) -> int:
+    """Total byte size of one cube face including its mip chain."""
+    return sum(_dds_top_level_size(max(1, width >> i), max(1, height >> i),
+                                   fourcc, rgb_bits) for i in range(levels))
+
+
+def _decode_dds_payload(payload: bytes, fourcc_s: str, width: int, height: int,
+                        pf_flags: int, masks: tuple[int, int, int, int, int]) -> bytes:
+    """Decode one DDS payload (level 0 of an image or cube face) to RGBA."""
+    rgb_bits, rmask, gmask, bmask, amask = masks
+    if fourcc_s == 'DXT1':
+        return decode_dxt1(payload, width, height)
+    if fourcc_s == 'DXT3':
+        return decode_dxt3(payload, width, height)
+    if fourcc_s in ('DXT5', 'DXT4'):
+        return decode_dxt5(payload, width, height)
+    if fourcc_s in ('BC4U', 'ATI1'):
+        return decode_bc4(payload, width, height)
+    if fourcc_s in ('BC5U', 'ATI2'):
+        return decode_bc5(payload, width, height)
+    if fourcc_s == 'BC6H_UF16':
+        import bc6h_format
+        rgba = bc6h_format.decode_bc6h(payload, width, height)
+        if rgba is None:
+            raise ValueError('Unsupported BC6H block mode in DX10 DDS')
+        return rgba
+    if fourcc_s == 'UNCOMPRESSED':
+        return decode_uncompressed_dds(payload, width, height, rgb_bits,
+                                       rmask, gmask, bmask, amask)
+    raise ValueError(f'Unsupported DDS fourcc for decode: {fourcc_s}')
 
 
 def _bc4_interpolate(a0: int, a1: int) -> list[int]:
@@ -992,8 +1025,23 @@ class DdsImage:
     header: bytes  # original 128-byte header for lossless metadata where possible
     mip_payload: bytes = b""  # raw bytes of all mip levels below level 0, preserved verbatim
     level0_payload: bytes = b""  # original level-0 bytes; reused when RGBA is unchanged
+    payload_start: int = 128  # 128 for legacy DDS, 148 for DX10
+    cube_face_rgba: list[bytes] = field(default_factory=list)  # decoded RGBA per cube face
+    cube_face_level0: list[bytes] = field(default_factory=list)  # original level-0 bytes per face
+    cube_face_mips: list[bytes] = field(default_factory=list)  # raw mip bytes per face
 
     def to_bytes(self) -> bytes:
+        if self.cube_face_rgba:
+            chunks = []
+            for rgba, level0, mips in zip(self.cube_face_rgba,
+                                          self.cube_face_level0,
+                                          self.cube_face_mips):
+                face = DdsImage(width=self.width, height=self.height, mipmaps=self.mipmaps,
+                                fourcc=self.fourcc, rgba=rgba, header=self.header,
+                                mip_payload=mips, level0_payload=level0,
+                                payload_start=self.payload_start)
+                chunks.append(face.to_bytes()[self.payload_start:])
+            return bytes(self.header) + b"".join(chunks)
         if self.fourcc in ('DXT1', 'DXT3', 'DXT5'):
             # Reuse the original compressed level-0 bytes whenever RGBA has not
             # been edited. This keeps mipmapped DXT round-trips byte-lossless;
@@ -1047,7 +1095,8 @@ def read_dds(path: str | Path) -> DdsImage:
     hdr_size, flags, height, width, pitch, depth, mipmaps = struct.unpack_from('<7I', b, 4)
     pf_flags, fourcc = struct.unpack_from('<I4s', b, 80)
     fourcc_s = fourcc.decode('latin1','replace').strip('\x00')
-    rgb_bits = struct.unpack_from('<I', b, 88)[0]
+    masks = struct.unpack_from('<5I', b, 88)
+    rgb_bits = masks[0]
     payload_start = 128
     if fourcc_s == 'DX10':
         # DDS_DX10 extended header (20 bytes) follows the legacy 128-byte header.
@@ -1056,38 +1105,42 @@ def read_dds(path: str | Path) -> DdsImage:
         dxgi, dimension, misc_flag, array_size, misc_flags2 = struct.unpack_from('<5I', b, 128)
         payload_start = 148
         if dxgi == 95:  # DXGI_FORMAT_BC6H_UF16
-            import bc6h_format
-            rgba = bc6h_format.decode_bc6h(b[148:], width, height)
-            if rgba is None:
-                raise ValueError('Unsupported BC6H block mode in DX10 DDS')
             fourcc_s = 'BC6H_UF16'
         else:
             raise ValueError(f'Unsupported DX10 DDS DXGI format: {dxgi}')
-    elif fourcc_s == 'DXT1':
-        rgba = decode_dxt1(b[128:], width, height)
-    elif fourcc_s == 'DXT3':
-        rgba = decode_dxt3(b[128:], width, height)
-    elif fourcc_s in ('DXT5', 'DXT4'):
-        # DXT4 uses the same 8-index alpha interpolation as DXT5 in practice;
-        # verified against ffmpeg on the local DXT4 corpus sample.
-        rgba = decode_dxt5(b[128:], width, height)
-        if fourcc_s == 'DXT4':
-            fourcc_s = 'DXT4'
-    elif fourcc_s in ('BC4U', 'ATI1'):
-        rgba = decode_bc4(b[128:], width, height)
-    elif fourcc_s in ('BC5U', 'ATI2'):
-        rgba = decode_bc5(b[128:], width, height)
     elif fourcc_s == '' and (pf_flags & 0x40):  # DDPF_RGB (optional alpha)
-        rgb_bits, rmask, gmask, bmask, amask = struct.unpack_from('<5I', b, 88)
-        rgba = decode_uncompressed_dds(b[128:], width, height, rgb_bits, rmask, gmask, bmask, amask)
         fourcc_s = 'UNCOMPRESSED'
-    else:
-        raise ValueError(f'Unsupported DDS fourcc for decode: {fourcc_s}')
+
+    levels = mipmaps or 1
     top = _dds_top_level_size(width, height, fourcc_s, rgb_bits)
-    mip_payload = b[payload_start + top:] if (mipmaps or 1) > 1 else b""
-    return DdsImage(width=width, height=height, mipmaps=mipmaps or 1, fourcc=fourcc_s,
+    caps2 = struct.unpack_from('<I', b, 112)[0]
+    face_rgba: list[bytes] = []
+    face_l0: list[bytes] = []
+    face_mips: list[bytes] = []
+    if caps2 & 0xFE00:  # DDSCAPS2_CUBEMAP (all six faces in the local corpus)
+        face_stride = _dds_face_payload_size(width, height, fourcc_s, levels, rgb_bits)
+        for i in range(6):
+            off = payload_start + i * face_stride
+            level0 = b[off:off + top]
+            if len(level0) < top:
+                raise ValueError(f'Truncated DDS cube face {i}')
+            face_rgba.append(_decode_dds_payload(level0, fourcc_s, width, height,
+                                                 pf_flags, masks))
+            face_l0.append(level0)
+            face_mips.append(b[off + top:off + face_stride] if levels > 1 else b'')
+        rgba = face_rgba[0]
+        mip_payload = b''
+        level0_payload = face_l0[0]
+    else:
+        payload = b[payload_start:]
+        rgba = _decode_dds_payload(payload[:top], fourcc_s, width, height, pf_flags, masks)
+        mip_payload = payload[top:] if levels > 1 else b''
+        level0_payload = payload[:top]
+    return DdsImage(width=width, height=height, mipmaps=levels, fourcc=fourcc_s,
                     rgba=rgba, header=b[:128], mip_payload=mip_payload,
-                    level0_payload=b[payload_start:payload_start + top])
+                    level0_payload=level0_payload, payload_start=payload_start,
+                    cube_face_rgba=face_rgba, cube_face_level0=face_l0,
+                    cube_face_mips=face_mips)
 
 
 def dds_roundtrip(src: str | Path, dst: str | Path) -> MediaInfo:

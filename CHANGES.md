@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 18:30:00 -0500 - Cube-map DDS round-trip
+- `media_tool.py` now detects `DDSCAPS2_CUBEMAP`, decodes all six faces separately and reassembles them on write. All 24 plain local cube-map DDS files (previously silently downgraded to a single face) round-trip byte-identically, as do 3 JCA-encrypted cube maps including a DXT5 sample. Also fixed level-0 size accounting for DXT4. Added corpus regression tests.
+
 ## 2026-11-23 18:00:00 -0500 - BC6H UF16 DDS decode
 - Added `bc6h_format.py`, decoding the two non-transformed BC6H UF16 modes (two-subset 6-bit and one-subset 10-bit) from spec-derived Khronos BPTC tables. `media_tool.py` now reads DX10 `BC6H_UF16` DDS files; write-back is intentionally unsupported. Verification: 4,000/4,000 random blocks match an independent spec-table reference, plus 8 synthetic-fixture tests. A 48,459-file loose-DDS scan confirmed no DX10 samples exist locally.
 

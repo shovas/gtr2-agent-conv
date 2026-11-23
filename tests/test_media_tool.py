@@ -226,6 +226,41 @@ class MediaToolTest(unittest.TestCase):
                 checked += 1
         self.assertGreater(checked, 0)
 
+    def test_cubemap_dds_roundtrip_preserves_six_faces(self):
+        import glob
+        samples = [p for p in glob.glob(str(ROOT.parent / "Race07Complete" / "**" / "*"),
+                                        recursive=True)
+                   if p.lower().endswith(".dds") and Path(p).is_file()
+                   and open(p, "rb").read(4) == b"DDS "
+                   and struct.unpack_from("<I", open(p, "rb").read(128), 112)[0] & 0xFE00]
+        if not samples:
+            self.skipTest("cube-map DDS not present")
+        checked = 0
+        for src in samples:
+            with self.subTest(src=Path(src).name):
+                img = media_tool.read_dds(src)
+                self.assertEqual(len(img.cube_face_rgba), 6)
+                self.assertEqual(len({f for f in img.cube_face_rgba}), 6)
+                self.assertEqual(img.to_bytes(), Path(src).read_bytes())
+                checked += 1
+        self.assertEqual(checked, len(samples))
+
+    def test_jca_encrypted_dxt5_cubemap(self):
+        import jca_crypt
+        src = (ROOT.parent / "Race07Complete/GameData/Locations/Brands_Hatch_2007/"
+               "TEXTURES/EMAP_GLASS.DDS")
+        if not src.is_file():
+            self.skipTest("encrypted cube-map sample not present")
+        plain = jca_crypt.decrypt_bytes(src.read_bytes())
+        with tempfile.TemporaryDirectory() as td:
+            q = Path(td) / "emap.dds"
+            q.write_bytes(plain)
+            img = media_tool.read_dds(q)
+            self.assertEqual(img.fourcc, "DXT5")
+            self.assertEqual(len(img.cube_face_rgba), 6)
+            self.assertEqual(len({f for f in img.cube_face_rgba}), 6)
+            self.assertEqual(img.to_bytes(), plain)
+
     def test_jpg_semantic_roundtrip(self):
         import glob
         sample = next((p for p in glob.glob(str(ROOT.parent / "GTR2Steam" / "**" / "*"), recursive=True)
