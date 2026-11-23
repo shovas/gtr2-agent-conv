@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 07:00:00 -0500 - JCA-encrypted .aud conversion support
+- Found 153 JCA-wrapped `.aud` files (Race07/Volvo) whose decrypted key sets are a strict subset of plain-text audio maps. `gtl_to_gtr2.aud_plain()` now decrypts them transparently before the sound-path, road-noise and key rules run, converting them to plain GTR2 text. Added a corpus regression test; all 28 converter tests pass. Full v17 on the prior tree: 367 tests, 0 failures.
+
 ## 2026-11-24 06:30:00 -0500 - FXM key_count semantics resolved
 - Corpus-verified that FXM `key_count` encodes the keyframe component count: **3** for every TRS node (46,242 across standard/length-prefixed/trailing-name/single-key layouts) and **1** for marker=2 rotation tracks (10,596), i.e. position/quaternion/scale vs quaternion alone. NUL-named nodes have no key_count field. Added `file_key_count` to the semantic output and a corpus regression test; all 17 FXM tests pass. Full v16 on the prior tree: 366 tests, 0 failures.
 

@@ -389,13 +389,38 @@ AUD_OLD_PREFIX = re.compile(rb"(?i)Cars\\")
 AUD_NEW_PREFIX = b"GTR\\"
 
 
+def aud_plain(data: bytes) -> bytes:
+    """Return plain-text .aud bytes, decrypting JCA-wrapped Race07/Volvo files.
+
+    Corpus-verified: 101/137 Race07Complete and 43/43 Race07Vanilla .aud files
+    are JCA-wrapped; their decrypted key sets are a strict subset of the plain
+    text files. GTL/GTR2/BMW .aud files are always plain text. Plain input is
+    returned unchanged, and undecryptable input is preserved rather than lost.
+    """
+    if data[:4] != b"\x0f\xb1\xff\xff":
+        return data
+    import jca_crypt
+    for name in [None] + sorted(jca_crypt.CUSTOM_KEYS):
+        try:
+            out = jca_crypt.decrypt_bytes(data, jca_crypt.CUSTOM_KEYS.get(name))
+        except Exception:
+            continue
+        sample = out[:4096]
+        if b"=" in sample and sum(32 <= c < 127 or c in (9, 10, 13)
+                                  for c in sample) > 0.9 * len(sample):
+            return out
+    return data
+
+
 def rewrite_aud_sound_paths(data: bytes) -> tuple[bytes, int]:
     """Rewrite GTL ``Cars\\`` sound paths to the GTR2 ``GTR\\`` prefix."""
+    data = aud_plain(data)
     out, count = AUD_OLD_PREFIX.subn(lambda _m: AUD_NEW_PREFIX, data)
     return out, count
 
 
 def validate_aud_paths(data: bytes) -> list[str]:
+    data = aud_plain(data)
     if AUD_OLD_PREFIX.search(data):
         return ["stale Cars\\ sound path"]
     return []
@@ -484,11 +509,13 @@ AUD_ROADNOISE_RE = re.compile(
 
 
 def rewrite_aud_roadnoise(data: bytes) -> tuple[bytes, int]:
+    data = aud_plain(data)
     out, count = AUD_ROADNOISE_RE.subn(rb"\g<1>road_roll_int.wav", data)
     return out, count
 
 
 def validate_aud_roadnoise(data: bytes) -> list[str]:
+    data = aud_plain(data)
     if AUD_ROADNOISE_RE.search(data):
         return ["stale GTL road-noise sample"]
     return []
@@ -552,11 +579,13 @@ GTR2_AUD_ONLY_KEYS = (
 
 
 def validate_aud(data: bytes) -> list[str]:
+    data = aud_plain(data)
     keys = set(gdb_key_values(data))
     return [f"missing aud key: {k}" for k in GTR2_AUD_ONLY_KEYS if k not in keys]
 
 
 def adapt_aud_from_template(data: bytes, template: bytes) -> tuple[bytes, dict]:
+    data = aud_plain(data)
     tvals = gdb_key_values(template)
     missing = [k for k in GTR2_AUD_ONLY_KEYS if k not in tvals]
     if missing:

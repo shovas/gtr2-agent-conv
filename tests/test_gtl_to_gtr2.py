@@ -166,6 +166,27 @@ class GtlToGtr2Test(unittest.TestCase):
             self.assertEqual(n2, 0)
             self.assertEqual(out2, out)
 
+    def test_jca_encrypted_aud_decrypt_and_rewrite(self):
+        """Race07/Volvo .aud files are JCA-wrapped; rules must see plain text."""
+        enc = [Path(p) for p in glob.glob(
+            str(ROOT.parent / "Race07Complete" / "**" / "*.aud"), recursive=True)]
+        if not enc:
+            self.skipTest("Race07 audio corpus not present")
+        checked = 0
+        for p in enc:
+            data = p.read_bytes()
+            if data[:4] != b"\x0f\xb1\xff\xff":
+                continue
+            plain = g.aud_plain(data)
+            self.assertNotEqual(plain[:4], b"\x0f\xb1\xff\xff", p.name)
+            self.assertIn(b"=", plain[:4096], p.name)
+            out, n = g.rewrite_aud_sound_paths(data)
+            self.assertEqual(g.validate_aud_paths(out), [], p.name)
+            if n:
+                self.assertNotEqual(out[:4], b"\x0f\xb1\xff\xff", p.name)
+            checked += 1
+        self.assertGreater(checked, 50)
+
     def test_aud_roadnoise_rewrite(self):
         def files(root):
             return [Path(p) for p in glob.glob(
