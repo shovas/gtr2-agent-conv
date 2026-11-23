@@ -153,5 +153,30 @@ class FxmRecordTest(unittest.TestCase):
         self.assertGreater(parsed, 0)
 
 
+    def test_size_hint_not_a_variable_record_length(self):
+        """Nodes with differing size_hint still have fixed 84-byte keyframes."""
+        files = []
+        for root in ("GTR2Steam", "Race07Complete", "Race07Vanilla",
+                     "VolvoTheGame", "BMWM3Challenge"):
+            files.extend(glob.glob(str(ROOT.parent / root / "**" / "*"), recursive=True))
+        target = None
+        for p in files:
+            if not Path(p).is_file():
+                continue
+            try:
+                data = Path(p).read_bytes()
+                nodes = fxm_tool.parse_node_records(data)
+            except Exception:
+                continue
+            if len(nodes) >= 4 and len({n["size_hint"] for n in nodes}) > 1:
+                target = (p, nodes)
+                break
+        if target is None:
+            self.skipTest("no mixed-size_hint FXM file present")
+        _, nodes = target
+        for a, b in zip(nodes, nodes[1:]):
+            self.assertEqual(b["offset"] - (a["keyframe_offset"] + 84), 0)
+
+
 if __name__ == "__main__":
     unittest.main()

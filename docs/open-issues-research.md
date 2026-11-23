@@ -100,6 +100,9 @@ conclusively establishing it requires actual game execution.
   control value, not a raw angle. Slot 7's high byte takes ~50 distinct values but with a
   median run length of 1 (changes nearly every frame) — not a discrete gear/throttle
   plateau. No 2-byte small-integer fields (gear/flags) found; only time is monotonic.
+  FXM `size_hint` (94-100, mostly 96) was tested as a variable keyframe-record length: in a file with
+  six different hints, all 22 nodes still have fixed 84-byte keyframes with zero inter-node gaps, so it
+  is not a length field. Codified in `tests/test_fxm_records.py`.
   Focused online search found **no** GTL/GTR2 `.gtt` parser or format spec (results were
   modern Gran Turismo telemetry, unrelated). The local `gtr2-memory-operations-tool-wpf`
   `Gtr2VehicleTelemetry` struct documents GTR2 in-memory telemetry (plain-float

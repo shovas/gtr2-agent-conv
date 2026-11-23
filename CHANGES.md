@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 19:30:00 -0500 - FXM variable-record-length hypothesis excluded
+- `tests/test_fxm_records.py` proves `size_hint` (94-100) does not encode a variable keyframe length: in a mixed-hint file all nodes retain fixed 84-byte keyframes with zero gaps.
+
 ## 2026-11-23 19:15:00 -0500 - GTR1 coverage added as a regression test
 - `tests/test_gtr1_coverage.py` asserts every GTR1-magic GMT in `../GTR1Vanilla` decodes (33,477/33,477); runs in Normal and Full modes.
 
