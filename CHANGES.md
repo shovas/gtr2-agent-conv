@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 15:35:00 -0500 - Final verification after format surveys
+- `python3 run_tests.py --mode full`: 47 modules / 310 tests / 712.0 s, 0 failures, 2 skips. Normal: 170 tests / 287.2 s, 0 failures. Quick: 96 tests, 0 failures. Pre-push check PASS.
+
 ## 2026-11-24 15:05:00 -0500 - Final verification after unresolved-field experiments
 - `python3 run_tests.py --mode full`: 47 modules / 310 tests / 719.2 s, 0 failures, 2 skips. Normal: 170 tests / 285.5 s, 0 failures. Quick: 96 tests, 0 failures. Pre-push check PASS.
 
