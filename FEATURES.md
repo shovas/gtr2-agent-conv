@@ -264,4 +264,4 @@ python3 gtl_to_gtr2.py --validate <GameData-dir>
 
 ## Animation files
 
-`anm_format.py <file.anm>` decodes single-bone ISI animations to TRS keyframes. **Limitations**: multi-bone files are reported as unsupported.
+`anm_format.py <file.anm>` decodes ISIMotor animations (single- and multi-bone) to TRS keyframes. **Limitations**: keyframe semantics in-game are unvalidated.

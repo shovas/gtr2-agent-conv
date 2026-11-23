@@ -49,17 +49,23 @@ class AnmFormatTest(unittest.TestCase):
                     break
         self.assertGreater(checked, 0)
 
-    def test_multi_bone_reported_unsupported(self):
-        sample = None
+    def test_multi_bone_corpus(self):
+        checked = 0
         for name, data in _anm_samples("NT2003", 200):
-            if struct.unpack_from("<I", data, 28)[0] > 1:
-                sample = (name, data)
-                break
-        if sample is None:
-            self.skipTest("multi-bone ANM not present")
-        with self.assertRaises(ValueError) as ctx:
-            anm_format.read_anm(sample[1])
-        self.assertIn("multi-bone", str(ctx.exception))
+            if struct.unpack_from("<I", data, 28)[0] <= 1:
+                continue
+            with self.subTest(name=name):
+                anm = anm_format.read_anm(data)
+                self.assertGreater(len(anm.bones), 1)
+                self.assertGreater(sum(len(b.keys) for b in anm.bones), 0)
+                for b in anm.bones:
+                    self.assertTrue(b.name)
+                    self.assertTrue(all(b.keys[i].time < b.keys[i+1].time
+                                        for i in range(len(b.keys)-1)))
+                checked += 1
+                if checked >= 5:
+                    break
+        self.assertGreater(checked, 0)
 
     def test_cli(self):
         sample = next(((n, d) for n, d in _anm_samples("F1C", 200)

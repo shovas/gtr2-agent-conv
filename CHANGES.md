@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 17:30:00 -0500 - Multi-bone ANM decoding
+- Extended `anm_format.py` to the corpus-verified multi-bone layout: 40-byte per-bone headers + TRS/time keys (32-byte stride), with time=0 sentinel handling. All 904 archived ANM files decode; tests updated.
+
 ## 2026-11-23 17:00:00 -0500 - Single-bone ANM decoder
 - `anm_format.py` decodes the 162 single-bone ANM files in the corpus: 12-byte name + version + bone name + 32-byte TRS/time keys from +76 (position, unit quaternion, monotonic time). The 742 multi-bone files are reported as unsupported rather than decoded speculatively. Added CLI, tests and docs.
 

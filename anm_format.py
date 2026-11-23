@@ -26,6 +26,12 @@ class AnmKey:
 
 
 @dataclass
+class AnmBone:
+    name: str
+    keys: list[AnmKey]
+
+
+@dataclass
 class AnmFile:
     name: str
     bone: str
@@ -33,7 +39,8 @@ class AnmFile:
     duration: float
     rate: float
     bone_count: int
-    keys: list[AnmKey]
+    keys: list[AnmKey]  # first bone's keys (backward-compatible flat view)
+    bones: list[AnmBone]
 
 
 def read_anm(data: bytes) -> AnmFile:
@@ -45,24 +52,38 @@ def read_anm(data: bytes) -> AnmFile:
         raise ValueError(f"unsupported ANM version {version}")
     bone = data[32:40].split(b"\0", 1)[0].decode("latin-1", "replace")
     declared = struct.unpack_from("<I", data, 68)[0]
-    if bone_count != 1 or declared == 0:
-        raise ValueError(f"unsupported multi-bone ANM (bones={bone_count}, keys={declared})")
-    # The count field is one high on corpus samples (236 declared vs 235 keys
-    # with a 28-byte trailer). Derive the usable count from file length and
-    # validate each key rather than trusting the declared field.
-    key_count = min(declared, (len(data) - 76) // 32)
-    if key_count == 0:
+    if declared == 0 or bone_count == 0:
         raise ValueError("ANM has no keyframes")
-    keys = []
-    for i in range(key_count):
-        f = struct.unpack_from("<8f", data, 76 + i * 32)
-        qn = math.sqrt(sum(x * x for x in f[3:7]))
-        if not (0.9 < qn < 1.1 and math.isfinite(f[7])):
-            raise ValueError(f"invalid key {i}: quaternion norm {qn}")
-        keys.append(AnmKey(f[:3], f[3:7], f[7]))
-    if any(b.time < a.time for a, b in zip(keys, keys[1:])):
-        raise ValueError("non-monotonic key times")
-    return AnmFile(name, bone, version, duration, rate, bone_count, keys)
+    # Corpus-verified multi-bone layout: each bone occupies a 40-byte header
+    # followed by `declared` 32-byte TRS/time keys. The first header starts at
+    # +36 (the 8-byte bone name is at its beginning), so the first key is at +76.
+    stride = 40 + declared * 32
+    if stride < 32:
+        raise ValueError("invalid ANM stride")
+    bones = []
+    for bi in range(bone_count):
+        header = 36 + bi * stride
+        key_start = header + 40
+        if key_start + 32 > len(data):
+            break
+        bone_name = data[header:header + 12].split(b"\0", 1)[0].decode("latin-1", "replace")
+        count = min(declared, (len(data) - key_start) // 32)
+        keys = []
+        for i in range(count):
+            f = struct.unpack_from("<8f", data, key_start + i * 32)
+            qn = math.sqrt(sum(x * x for x in f[3:7]))
+            if not (0.9 < qn < 1.1 and math.isfinite(f[7])):
+                raise ValueError(f"bone {bi} key {i}: quaternion norm {qn}")
+            # Some files carry a trailing time=0 sentinel key; stop there.
+            if keys and f[7] <= keys[-1].time:
+                break
+            keys.append(AnmKey(f[:3], f[3:7], f[7]))
+        if keys:
+            bones.append(AnmBone(bone_name, keys))
+    if not bones:
+        raise ValueError("ANM has no decodable bones")
+    return AnmFile(name, bone, version, duration, rate, bone_count,
+                   bones[0].keys, bones)
 
 
 def main(argv=None) -> int:
@@ -75,7 +96,8 @@ def main(argv=None) -> int:
         print(f"unsupported: {e}")
         return 1
     print(f"name={anm.name!r} bone={anm.bone!r} version={anm.version} "
-          f"duration={anm.duration} rate={anm.rate} keys={len(anm.keys)} "
+          f"duration={anm.duration} rate={anm.rate} bones={len(anm.bones)} "
+          f"keys={sum(len(b.keys) for b in anm.bones)} "
           f"first_time={anm.keys[0].time} last_time={anm.keys[-1].time}")
     return 0
 
