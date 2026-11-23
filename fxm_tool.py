@@ -255,6 +255,35 @@ def parse_rotation_track_nodes(b: bytes) -> list[dict]:
     return out
 
 
+def parse_trailing_name_nodes(b: bytes) -> list[dict]:
+    """Decode FXM nodes whose name follows the keyframe block.
+
+    Layout: ``u32 marker=1, u32 size_hint, u32 key_count=3, two 40-byte TRS
+    keys, u32 name_len, name``. The standard parser anchors on ``name + marker``
+    and misses these; they occur in cockpit-wiper and driver animation files.
+    Corpus-verified: recovers 90 previously zero-node files / 472 nodes with
+    unit quaternion keys and printable names.
+    """
+    out: list[dict] = []
+    for i in range(len(b) - 100):
+        marker, size_hint, key_count = struct.unpack_from("<III", b, i)
+        if marker != 1 or key_count != 3 or not (0x50 <= size_hint <= 0x80):
+            continue
+        keys_at = i + 12
+        if not all(_valid_trs_key(b, keys_at + k * 40) for k in range(2)):
+            continue
+        name_len = struct.unpack_from("<I", b, keys_at + 80)[0]
+        if not (3 <= name_len <= 64) or keys_at + 84 + name_len > len(b):
+            continue
+        name = b[keys_at + 84:keys_at + 84 + name_len]
+        if not all(32 <= c < 127 for c in name) or name[:1].isdigit():
+            continue
+        out.append({"offset": i, "name": name.decode("latin-1"),
+                    "size_hint": size_hint, "key_count": key_count,
+                    "keyframe_offset": keys_at, "keyframe_bytes": 84})
+    return out
+
+
 def decode_fxm_semantic(b: bytes) -> dict:
     """Decode an FXM file into a layout-independent, validated node list.
 
@@ -306,6 +335,24 @@ def decode_fxm_semantic(b: bytes) -> dict:
         return {"variant": "length-prefixed", "nodes": nodes,
                 "stats": {"nodes": len(nodes),
                           "rotation_tracks": sum(1 for n in nodes if n.get("kind") == "rotation"),
+                          "flagged": sum(1 for n in nodes if n["issues"])}}
+
+    trailing = parse_trailing_name_nodes(b)
+    if trailing:
+        nodes = []
+        for node in trailing:
+            dec = decode_node_keys(b, node)
+            k0 = dec["keys"][0]
+            issues = [f"key {i}: non-unit quaternion" for i, k in enumerate(dec["keys"])
+                      if abs(k["quat_norm"] - 1.0) > 0.01]
+            for i, k in enumerate(dec["keys"]):
+                if any(abs(abs(s) - 1.0) > 0.02 for s in k["scale"]):
+                    issues.append(f"key {i}: non-unit scale")
+            nodes.append({"name": node["name"], "position": k0["position"],
+                          "quaternion": k0["quaternion"], "scale": k0["scale"],
+                          "key_count": len(dec["keys"]), "issues": issues})
+        return {"variant": "trailing-name", "nodes": nodes,
+                "stats": {"nodes": len(nodes),
                           "flagged": sum(1 for n in nodes if n["issues"])}}
 
     nul = parse_nul_name_nodes(b)

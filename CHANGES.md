@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 01:00:00 -0500 - Fourth FXM variant: trailing names
+- Decoded the trailing-name FXM layout (`marker=1, size_hint, key_count=3, 2 TRS keys, name_len, name`) used by cockpit-wiper and driver animation files where the name follows the keyframes. Strict unit-quaternion/scale validation recovers 44 files (previously zero-node); 119 files remain unresolved, mostly `.fxa` wipers with non-unit scale keys. Added a regression test; all 15 FXM tests pass.
+
 ## 2026-11-24 00:30:00 -0500 - FXM zero-node corpus survey
 - Surveyed all 1,115 FXM/FXA/LMA files: 952 decode at least one node (25,432 nodes total), 163 remain zero-node. The remainder is dominated by cockpit-wiper `*_cpitwiper.fxm/.fxa` files with NUL-terminated names and an unresolved frame layout; no speculative decoder was added. Documented as a bounded gap.
 

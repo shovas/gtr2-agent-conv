@@ -288,5 +288,24 @@ class FxmRecordTest(unittest.TestCase):
         self.assertEqual(len(rot), len(tracks))
 
 
+    def test_trailing_name_fxm_variant(self):
+        """Cockpit-wiper FXM files place the node name after the keyframes."""
+        p = ROOT.parent / ("Race07Complete/GameData/Teams/Camaro/"
+                           "Chevrolet_CPITWIPER.FXM")
+        if not p.is_file():
+            self.skipTest("trailing-name FXM sample not present")
+        data = p.read_bytes()
+        nodes = fxm_tool.parse_trailing_name_nodes(data)
+        self.assertGreaterEqual(len(nodes), 1)
+        self.assertTrue(any("CPITWIPER" in n["name"].upper() for n in nodes))
+        for node in nodes:
+            dec = fxm_tool.decode_node_keys(data, node)
+            self.assertEqual(len(dec["keys"]), 2)
+            for key in dec["keys"]:
+                self.assertAlmostEqual(key["quat_norm"], 1.0, delta=0.02)
+        self.assertEqual(fxm_tool.decode_fxm_semantic(data)["variant"],
+                         "trailing-name")
+
+
 if __name__ == "__main__":
     unittest.main()
