@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 02:00:00 -0500 - SCGT compressed BMP: RLE8 rejected
+- Tried a Microsoft RLE8 BMP token decoder on the 2 undecoded `AMBC.BMP` members in `../SportsCarGtUsa`: it terminated early with only 32 of the expected 256 indices. Recorded as another rejected hypothesis; the members remain preserved losslessly.
+
 ## 2026-11-24 01:30:00 -0500 - Fifth FXM variant: single-key wipers
 - Decoded the final large FXM gap: marker=0 (FXA, 28-byte tail) and marker=1 (FXM, 40-byte tail) single-validated-key nodes with trailing names. Recovers 115 files / 280 nodes; 1,111 of 1,115 files now decode (28,422 nodes total), leaving 4 BMW E30 wiper files. Added a regression test; all 16 FXM tests pass.
 
