@@ -184,6 +184,9 @@ def validate_gtr2_tree(root: str | Path,
         if suffix == ".car":
             for msg in validate_car(p.read_bytes()):
                 problems.append(f"{p}: {msg}")
+        if suffix == ".ani":
+            for msg in validate_ani(p.read_bytes()):
+                problems.append(f"{p}: {msg}")
         if suffix == ".dmg":
             for msg in validate_dmg_constants(p.read_bytes()):
                 problems.append(f"{p}: {msg}")
@@ -310,6 +313,45 @@ def validate_aud_paths(data: bytes) -> list[str]:
     if AUD_OLD_PREFIX.search(data):
         return ["stale Cars\\ sound path"]
     return []
+
+
+# .ani: all 8 motion blocks are present in all 34 GTR2 animation files; 24/26
+# GTL files also have them (exceptions are special-purpose variant/pitcrew files).
+GTR2_ANI_BLOCKS = (
+    "FLAGMOTIONS", "CROWDMOTIONSIDLE1", "CROWDMOTIONSCHEER1",
+    "CROWDMOTIONSCHEER2", "CROWDMOTIONSCHEER3",
+    "CAMMOTIONS1", "CAMMOTIONS2", "CAMMOTIONS3",
+)
+_ANI_BLOCK_RE = re.compile(
+    rb"(?ims)^[ \t]*Motions[ \t]*=[ \t]*([^\r\n]+?)\r?\n[ \t]*\{(.*?)\r?\n[ \t]*\}")
+
+
+def ani_blocks(data: bytes) -> dict[str, bytes]:
+    return {m.group(1).decode("latin-1").strip().upper(): m.group(2)
+            for m in _ANI_BLOCK_RE.finditer(data)}
+
+
+def validate_ani(data: bytes) -> list[str]:
+    blocks = set(ani_blocks(data))
+    return [f"missing ani block: {b}" for b in GTR2_ANI_BLOCKS if b not in blocks]
+
+
+def adapt_ani_from_template(data: bytes, template: bytes) -> tuple[bytes, dict]:
+    """Append motion blocks missing from ``data`` using a GTR2 template."""
+    tblocks = ani_blocks(template)
+    missing = [b for b in GTR2_ANI_BLOCKS if b not in tblocks]
+    if missing:
+        raise ValueError(f"template lacks ani blocks: {missing}")
+    present = set(ani_blocks(data))
+    add = [b for b in GTR2_ANI_BLOCKS if b not in present]
+    ending = b"\r\n" if b"\r\n" in data[:200] else b"\n"
+    out = data
+    if add and not out.endswith((b"\n", b"\r")):
+        out += ending
+    for b in add:
+        out += (b"Motions=" + b.encode() + ending + b"{" + ending +
+                tblocks[b].strip(b"\r\n") + ending + b"}" + ending)
+    return out, {"blocks_added": len(add)}
 
 
 # .dmg damage constants: each of these key values is single-valued across all

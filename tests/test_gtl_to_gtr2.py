@@ -123,6 +123,29 @@ class GtlToGtr2Test(unittest.TestCase):
             out, n = g.rewrite_aud_sound_paths(p.read_bytes())
             self.assertEqual(n, 0)
 
+    def test_ani_motion_blocks(self):
+        def idx(root):
+            return {Path(p).name.lower(): Path(p) for p in glob.glob(
+                str(ROOT.parent / root / "**" / "*"), recursive=True)
+                if p.lower().endswith(".ani")}
+        gtl, gtr = idx("GTLSteam"), idx("GTR2Steam")
+        if not gtl or not gtr:
+            self.skipTest("animation corpora not present")
+        self.assertTrue(all(not g.validate_ani(p.read_bytes()) for p in gtr.values()))
+        flagged = [p for p in gtl.values() if g.validate_ani(p.read_bytes())]
+        self.assertEqual(len(flagged), 2)  # special variant/pitcrew files
+        tmpl = next((p for p in gtr.values() if p.name.lower() == "3anderstorp.ani"), None)
+        if tmpl is not None:
+            src = gtl.get("nanderstorp.ani")
+            if src is not None:
+                out, rep = g.adapt_ani_from_template(src.read_bytes(), tmpl.read_bytes())
+                self.assertEqual(g.validate_ani(out), [])
+                self.assertEqual(rep["blocks_added"], 7)
+                self.assertTrue(out.startswith(src.read_bytes().rstrip(b"\r\n")))
+        for p in gtr.values():
+            out, rep = g.adapt_ani_from_template(p.read_bytes(), tmpl.read_bytes() if tmpl else p.read_bytes())
+            self.assertEqual(rep["blocks_added"], 0)
+
     def test_dmg_universal_constants(self):
         def files(root):
             return [Path(p) for p in glob.glob(
@@ -383,7 +406,8 @@ class GtlToGtr2Test(unittest.TestCase):
             # No stale .gtl, and every problem is a known GDB/shared-archive gap.
             self.assertFalse(any("stale .gtl" in p for p in probs))
             self.assertTrue(all(any(k in p for k in ("missing session key", "unresolved MASFile",
-                                                      "missing aiw key", "missing tyr key"))
+                                                      "missing aiw key", "missing tyr key",
+                                                      "missing ani block", "missing car key"))
                                 for p in probs))
             # Same-name templates close the GDB and AIW gaps for SAnderstorp.
             for name, adapt, check in (("sanderstorp.gdb", g.adapt_gdb_from_template,
