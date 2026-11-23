@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 12:00:00 -0500 - Final verification after media capabilities
+- `python3 run_tests.py --mode full`: 47 modules / 313 tests / 840.4 s, 0 failures, 2 skips. Normal: 167 tests / 294.8 s, 0 failures. Quick: 96 tests, 0 failures. Pre-push check PASS.
+
 ## 2026-11-23 11:30:00 -0500 - Test tier adjustment
 - Moved `test_phs_tool` to Full-only; Normal is 167 tests / 294.8 s within the 300 s budget, Full retains all 313 tests.
 
