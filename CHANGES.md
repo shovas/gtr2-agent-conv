@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 06:00:00 -0500 - SCGT AMBC.BMP decoded
+- Solved the 2 long-standing undecoded Sports Car GT members: they are not LZSS-compressed but a 16-byte header (32x8) plus 768 bytes of raw RGB. Their archive records store 5 bytes fewer than declared, with the remainder in the inter-member gap; `reconstruct_type2_member()` recovers the full 784 bytes and `scgt_raw_texture_to_bmp()` emits a valid, coherent 822-byte BMP. Added a corpus regression test; all 5 SCGT tests pass.
+
 ## 2026-11-24 05:30:00 -0500 - AIW wp_perp unit-vector rule verified
 - Corpus-verified another Turbo Basic hint: `wp_perp` is a normalized, track-parallel vector. All 29,028 track/pit waypoints across 6 corpora have unit norm within 1%; grid/pitbox waypoints carry a zero vector in 1,591/1,682 cases. Added `perp` parsing, a validator rule, and corpus assertions; all 9 AIW/CAM tests pass.
 

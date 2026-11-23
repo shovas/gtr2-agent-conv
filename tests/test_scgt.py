@@ -94,5 +94,33 @@ class SportsCarGTTest(unittest.TestCase):
             self.assertEqual((a.name, a.data), (b.name, b.data))
 
 
+    def test_ambc_raw_texture_decoding(self):
+        """The 2 undecoded AMBC.BMP members are 16-byte header + raw 32x8 RGB."""
+        found = 0
+        for arc in _archives():
+            if arc.name.lower() not in ("hckamap.mas", "octamap.mas"):
+                continue
+            entries = mas_tool.read_archive(arc)[1]
+            target = next((e for e in entries if e.name == "AMBC.BMP"), None)
+            if target is None:
+                continue
+            full = mas_tool.reconstruct_type2_member(arc, target)
+            self.assertEqual(len(full), target.size)
+            self.assertEqual(struct.unpack_from("<IIII", full, 0), (32, 8, 0, 0))
+            bmp = mas_tool.scgt_raw_texture_to_bmp(full)
+            self.assertIsNotNone(bmp)
+            self.assertEqual(bmp[:2], b"BM")
+            self.assertEqual(len(bmp), 54 + 768)
+            self.assertEqual(struct.unpack_from("<ii", bmp, 18), (32, 8))
+            # Coherence: adjacent pixels differ far less than random RGB noise.
+            px = full[16:]
+            triples = [px[i:i+3] for i in range(0, 768, 3)]
+            diffs = [sum(abs(a-b) for a, b in zip(triples[i], triples[i+1]))
+                     for i in range(len(triples)-1)]
+            self.assertLess(sum(diffs) / len(diffs), 100)
+            found += 1
+        self.assertEqual(found, 2)
+
+
 if __name__ == "__main__":
     unittest.main()

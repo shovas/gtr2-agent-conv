@@ -94,6 +94,55 @@ def _read_type2(data: bytes) -> list[Entry]:
     return entries
 
 
+def reconstruct_type2_member(archive: str | Path, entry: Entry) -> bytes:
+    """Return the full on-disk bytes of a MAS type-2 member.
+
+    A few Sports Car GT members store fewer bytes than their declared ``size``
+    in the archive; the remainder sits in the gap before the next member. The
+    normal reader keeps the short blob for lossless round-tripping, so this
+    helper reads the raw archive separately.
+    """
+    data = Path(archive).read_bytes()
+    count, _dsize = struct.unpack_from("<II", data, 0)
+    base = 8 + 32 * count
+    next_offset = len(data) - base
+    for i in range(count):
+        name, off, _size, _zsize, _dummy = struct.unpack_from("<16sIIII", data, 8 + i * 32)
+        if name.split(b"\0", 1)[0].decode("latin-1") == entry.name:
+            start = base + off
+            # The next record's offset marks the end of this member's storage.
+            for j in range(i + 1, count):
+                _n, noff, _s, _z, _d = struct.unpack_from("<16sIIII", data, 8 + j * 32)
+                if noff > off:
+                    next_offset = noff
+                    break
+            break
+    else:
+        raise ValueError(f"member {entry.name!r} not in {archive}")
+    return data[start:base + next_offset]
+
+
+def scgt_raw_texture_to_bmp(data: bytes) -> bytes | None:
+    """Decode a Sports Car GT 16-byte-header raw-RGB texture to a 24-bit BMP.
+
+    Corpus-verified on the two AMBC.BMP members in ``Hckamap.mas`` and
+    ``Octamap.mas`` (32x8, 16-byte header + 768 raw RGB bytes). Returns ``None``
+    when the header does not describe an exact raw-RGB payload.
+    """
+    if len(data) < 16:
+        return None
+    width, height, _flags, _zero = struct.unpack_from("<IIII", data, 0)
+    if width <= 0 or height <= 0 or 16 + width * height * 3 != len(data):
+        return None
+    pixels = data[16:]
+    rows = b"".join(pixels[y * width * 3:(y + 1) * width * 3]
+                    for y in range(height - 1, -1, -1))
+    header = b"BM" + struct.pack("<IHHI", 54 + len(rows), 0, 0, 54)
+    header += struct.pack("<IiiHHIIiiII", 40, width, height, 1, 24, 0,
+                          len(rows), 2835, 2835, 0, 0)
+    return header + rows
+
+
 def _mas_type(signature: bytes) -> int:
     if signature == MAS_TYPE0:
         return 0
