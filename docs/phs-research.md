@@ -97,6 +97,8 @@ files. None of these contradict the recovery-container conclusion.
   substring, and the best XOR combination of all 7 slices gives 69/13,064 (chance ≈51). It is therefore
   not a truncated slice from this PAR2 set, nor an XOR of its slices. The `GTL_Update_0901.exe` string
   occurs only in DRIVERS.PHS; no EXE or update-named file exists anywhere in the GTL install to compare against.
+- **Recovery-slice exponent test**: the 7 `RecvSlic` bodies carry 4-byte PAR2 exponents; PHYSICS.PHS's
+  leading u32 (0x6050b465) matches none of them, so it is not a bare recovery-slice body from that set.
 - **Interpretation**: the UI source-MAS loader likely opens these archives looking for
   UI/localization assets and finds none relevant; the PHS members are not dispatched
   to any physics consumer by name. Strong evidence PHS data is **unused by GTL
