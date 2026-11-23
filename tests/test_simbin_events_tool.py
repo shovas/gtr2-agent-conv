@@ -1,5 +1,6 @@
 """Tests for the GTTF/IRSR structural reader (29 GTT + 13 VCR files)."""
 import glob
+import gzip
 import math
 import os
 import sys
@@ -78,6 +79,24 @@ class SimbinEventsToolTest(unittest.TestCase):
             checked += 1
         if not checked:
             self.skipTest("no GTTF frame grids detected")
+        self.assertGreaterEqual(checked, 1)
+
+    def test_gttf_frame_count_matches_record_marker(self):
+        """The 63-byte record marker independently validates the frame grid."""
+        files = _files(".gtt")
+        if not files:
+            self.skipTest("GTR2 GTT files not present")
+        # Documented by the (reference-only) gtr2-agent-tools ghost loader:
+        # 63-byte records marked by this 7-byte prefix; the trailing byte varies.
+        mark = b"\x01\x00\x00\x34\x00\x20\x00"
+        checked = 0
+        for p in files:
+            data = gzip.decompress(p.read_bytes())
+            grid = setool.find_frame_grid(data)
+            if not grid:
+                continue
+            self.assertLessEqual(abs(data.count(mark) - grid["count"]), 2, p.name)
+            checked += 1
         self.assertGreaterEqual(checked, 1)
 
     def test_gtt_metadata_framing(self):
