@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 01:20:00 -0500 - HDC clutch constant rewrite
+- `clutchengagerate` is 0.6 in all 41 GTL `.hdc` files that define it and 0.8 in all 43 GTR2 files that define it (SafetyCar omits it in both). `rewrite_hdc_clutch()` converts the value, preserving comments; added validator, test and docs.
+
 ## 2026-11-24 01:00:00 -0500 - Audio sound-path rewrite added
 - All 1,374 sound-path values in 31 GTL `.aud` files use the `Cars\` prefix while all 1,094 in 25 GTR2 files use `GTR\`. `rewrite_aud_sound_paths()` converts 1,488 occurrences across 31/31 GTL files; GTR2 files are unchanged. Added validator, test and docs.
 

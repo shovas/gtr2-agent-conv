@@ -194,7 +194,10 @@ def validate_gtr2_tree(root: str | Path,
             for msg in validate_aud_paths(data):
                 problems.append(f"{p}: {msg}")
         if suffix == ".hdc":
-            for msg in validate_hdc(p.read_bytes()):
+            data = p.read_bytes()
+            for msg in validate_hdc(data):
+                problems.append(f"{p}: {msg}")
+            for msg in validate_hdc_clutch(data):
                 problems.append(f"{p}: {msg}")
         if suffix == ".aiw":
             for msg in validate_aiw(p.read_bytes()):
@@ -267,6 +270,22 @@ def adapt_car_from_template(data: bytes, template: bytes) -> tuple[bytes, dict]:
         out = _set_gdb_key(out, k, tvals[k])
     return out, {"keys_applied": len(GTR2_CAR_ONLY_KEYS),
                  "already_valid": not validate_car(data)}
+
+
+# .hdc: where present, clutchengagerate=0.6 in 41/41 GTL handling files and
+# 0.8 in 43/43 GTR2 ones; SafetyCar.hdc omits it in both corpora.
+HDC_CLUTCH_RE = re.compile(rb"(?im)^([ \t]*clutchengagerate[ \t]*=[ \t]*)0\.6\b")
+
+
+def rewrite_hdc_clutch(data: bytes) -> tuple[bytes, int]:
+    out, count = HDC_CLUTCH_RE.subn(rb"\g<1>0.8", data)
+    return out, count
+
+
+def validate_hdc_clutch(data: bytes) -> list[str]:
+    if HDC_CLUTCH_RE.search(data):
+        return ["stale clutchengagerate=0.6"]
+    return []
 
 
 # .aud sound paths: 1,374/1,374 path values in 31 GTL audio files start with

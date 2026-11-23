@@ -75,6 +75,28 @@ class GtlToGtr2Test(unittest.TestCase):
         self.assertEqual(changes["teammaps2"], 1)
         self.assertEqual(g.validate_trk(out), [])
 
+    def test_hdc_clutch_constant_rewrite(self):
+        def files(root):
+            return [Path(p) for p in glob.glob(
+                str(ROOT.parent / root / "**" / "*"), recursive=True)
+                if p.lower().endswith(".hdc")]
+        gtl, gtr = files("GTLSteam"), files("GTR2Steam")
+        if not gtl or not gtr:
+            self.skipTest("HDC corpora not present")
+        self.assertTrue(all(not g.validate_hdc_clutch(p.read_bytes()) for p in gtr))
+        changed = 0
+        for p in gtl:
+            data = p.read_bytes()
+            out, n = g.rewrite_hdc_clutch(data)
+            self.assertEqual(g.validate_hdc_clutch(out), [])
+            if n:
+                changed += 1
+                # Only the numeric literal changes.
+                reverted = __import__('re').compile(rb"(?im)^([ \t]*clutchengagerate[ \t]*=[ \t]*)0\.8\b").subn(
+                    rb"\g<1>0.6", out)[0]
+                self.assertEqual(reverted, data)
+        self.assertGreater(changed, 30)
+
     def test_aud_sound_path_rewrite(self):
         def files(root):
             return [Path(p) for p in glob.glob(
