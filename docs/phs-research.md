@@ -83,6 +83,9 @@ files. None of these contradict the recovery-container conclusion.
   across 8 corpora (entropy 4.95, 100% printable) vs PHYSICS.PHS (entropy 7.986, 38%
   printable, all 256 byte values) — zero of 4,787 extracted tokens appear in PHS.
   **No structural match**; PHS is not a simple encoding of known physics text.
+- **Full zlib scan**: scanned all 13,064 byte offsets — one `0x78 0x9c/da/01/5e`-like
+  header, but no valid zlib decompression anywhere. Combined with the earlier bit-shift
+  and skip scans, standard DEFLATE is excluded at any alignment.
 - **Truncated-slice test**: PHYSICS.PHS's 13,064 bytes share no 64-byte chunk with any of
   the four PAR2 containers' recovery slices at any alignment, and its length is not a
   simple fraction of the 384,000-byte slice size from their Main packet. So it is not a
