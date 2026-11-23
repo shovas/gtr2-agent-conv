@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 12:25:00 -0500 - Full rewrite integration in convert_tree
+- `gtl_to_gtr2.convert_tree()` now applies every corpus-confirmed rewrite (audio paths/road-noise, HDC clutch, tire default, damage constants, plus template-driven key additions) to loose files and archive members. An end-to-end converted Anderstorp subtree with templates validates with 0 problems; 2 new tests.
+
 ## 2026-11-24 12:00:00 -0500 - Final verification after NUL parser fix
 - `python3 run_tests.py --mode full`: 47 modules / 306 tests / 698.2 s, 0 failures, 2 skips. Normal: 166 tests / 272.0 s, 0 failures. Quick: 92 tests, 0 failures. Pre-push check PASS.
 

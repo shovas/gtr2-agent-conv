@@ -18,6 +18,7 @@ material names and in-game behaviour are NOT converted or validated here.
 from __future__ import annotations
 
 import argparse
+import collections
 import re
 import sys
 from pathlib import Path
@@ -109,31 +110,83 @@ def convert_archive(source: str | Path, target: str | Path | None = None,
     return {"source_type": mtype, "members": len(converted), "trks": trk_count}
 
 
+def convert_config_bytes(name: str, data: bytes, template: bytes | None = None) -> tuple[bytes, dict]:
+    """Apply every corpus-confirmed GTL→GTR2 rewrite for one loose file.
+
+    Template-free rewrites (audio paths/road-noise, HDC clutch, tire default,
+    damage constants) always run. When ``template`` is the GTR2 version of the
+    same file, key-addition rules for ``.gdb``/``.car``/``.aiw``/``.rcd``/``.hdc``
+    are applied too. ``.trk`` uses :func:`convert_trk_bytes`.
+    """
+    suffix = Path(name).suffix.lower()
+    changes = {}
+    if suffix == ".trk":
+        out, changes = convert_trk_bytes(data)
+        return out, {"trk": changes}
+    if suffix == ".aud":
+        out, n = rewrite_aud_sound_paths(data)
+        changes["aud_paths"] = n
+        out, n2 = rewrite_aud_roadnoise(out)
+        changes["aud_roadnoise"] = n2
+        data = out
+    elif suffix == ".hdc":
+        out, n = rewrite_hdc_clutch(data)
+        changes["hdc_clutch"] = n
+        data = out
+    elif suffix == ".tyr":
+        out, rep = add_tyr_gtr2_defaults(data)
+        changes["tyr_defaults"] = rep["keys_added"]
+        data = out
+    elif suffix == ".dmg":
+        out, n = rewrite_dmg_constants(data)
+        changes["dmg_constants"] = n
+        data = out
+
+    if template is not None:
+        adapters = {".gdb": (adapt_gdb_from_template, "gdb_keys"),
+                    ".car": (adapt_car_from_template, "car_keys"),
+                    ".aiw": (adapt_aiw_from_template, "aiw_keys"),
+                    ".rcd": (adapt_rcd_from_template, "rcd_keys"),
+                    ".hdc": (adapt_hdc_from_template, "hdc_keys"),
+                    ".aud": (adapt_aud_from_template, "aud_keys"),
+                    ".ani": (adapt_ani_from_template, "ani_blocks")}
+        if suffix in adapters:
+            fn, key = adapters[suffix]
+            data, rep = fn(data, template)
+            changes[key] = rep
+    return data, changes
+
+
 def convert_tree(source_root: str | Path, target_root: str | Path | None = None,
-                 check: bool = False, include_others: bool = True) -> dict:
+                 check: bool = False, include_others: bool = True,
+                 templates: dict[str, Path | bytes] | None = None) -> dict:
     """Convert a GTL GameData subtree into GTR2 layout.
 
-    Loose ``.trk`` files are rewritten in place (logically); ``.gtl`` archives
-    are repacked as ``.gtr`` with any ``.trk`` members converted too. Other
-    files are copied byte-for-byte unless ``include_others`` is false (useful
-    for fast validation of only the conversion-relevant files).
+    Applies every corpus-confirmed rewrite via :func:`convert_config_bytes`.
+    ``.gtl`` archives are repacked as type-0 ``.gtr`` with their members
+    converted too. ``templates`` optionally maps lowercase basenames to GTR2
+    template files (or raw bytes) for the key-addition rules that need one.
     """
     src = Path(source_root)
-    report = {"trk": 0, "archives": 0, "other": 0, "files": 0}
+    templates = templates or {}
+    tvals = {}
+    for key, value in templates.items():
+        tvals[key.lower()] = Path(value).read_bytes() if isinstance(value, (str, Path)) else value
+
+    report = {"trk": 0, "config": 0, "archives": 0, "other": 0, "files": 0,
+              "changes": collections.Counter()}
     for p in sorted(src.rglob("*")):
         if not p.is_file():
             continue
         rel = p.relative_to(src)
         suffix = p.suffix.lower()
         out_name = rel
-        if suffix == ".trk":
-            out = convert_trk_bytes(p.read_bytes())[0]
-            report["trk"] += 1
-        elif suffix == ".gtl":
+        if suffix == ".gtl":
             _, entries = mas_tool.read_archive(p)
             converted = []
             for e in entries:
-                data = convert_bytes(e.name, e.data or b"")[0]
+                data = convert_config_bytes(e.name, e.data or b"",
+                                            tvals.get(e.name.lower()))[0]
                 converted.append(mas_tool.Entry(name=e.name, offset=0,
                                                 size=len(data), zsize=0,
                                                 type=e.type, flags=e.flags,
@@ -144,6 +197,13 @@ def convert_tree(source_root: str | Path, target_root: str | Path | None = None,
                 out = Path(tmp.name).read_bytes()
             out_name = rel.with_suffix(".gtr")
             report["archives"] += 1
+        elif suffix in (".trk", ".aud", ".hdc", ".tyr", ".dmg", ".gdb", ".car",
+                        ".aiw", ".rcd", ".ani"):
+            data = p.read_bytes()
+            out, changes = convert_config_bytes(p.name, data, tvals.get(p.name.lower()))
+            for k, v in changes.items():
+                report["changes"][k] += (v if isinstance(v, int) else 1)
+            report["trk" if suffix == ".trk" else "config"] += 1
         else:
             if not include_others:
                 continue
@@ -156,6 +216,7 @@ def convert_tree(source_root: str | Path, target_root: str | Path | None = None,
             dest = Path(target_root) / out_name
             dest.parent.mkdir(parents=True, exist_ok=True)
             dest.write_bytes(out)
+    report["changes"] = dict(report["changes"])
     return report
 
 

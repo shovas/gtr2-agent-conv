@@ -433,6 +433,50 @@ class GtlToGtr2Test(unittest.TestCase):
                     out, _ = adapt(tgt.read_bytes(), template.read_bytes())
                     self.assertEqual(check(out), [])
 
+    def test_convert_config_bytes_all_rewrites(self):
+        def sample(ext):
+            return next((Path(p) for p in glob.glob(
+                str(ROOT.parent / "GTLSteam" / "**" / "*"), recursive=True)
+                if p.lower().endswith(ext)), None)
+        checks = ((".aud", "aud_paths"), (".hdc", "hdc_clutch"),
+                  (".dmg", "dmg_constants"), (".tyr", "tyr_defaults"))
+        for ext, key in checks:
+            p = sample(ext)
+            if p is None:
+                continue
+            with self.subTest(ext=ext):
+                out, changes = g.convert_config_bytes(p.name, p.read_bytes())
+                self.assertGreater(changes.get(key, 0), 0, ext)
+
+    def test_convert_tree_end_to_end(self):
+        src = ROOT.parent / "GTLSteam/GameData/Locations/Anderstorp"
+        gtr = ROOT.parent / "GTR2Steam/GameData/Locations/Anderstorp"
+        if not src.is_dir() or not gtr.is_dir():
+            self.skipTest("Anderstorp folders not present")
+        tpl = {Path(p).name.lower(): p for p in glob.glob(str(gtr / "*"))
+               if Path(p).is_file() and Path(p).suffix.lower() in
+               (".gdb", ".car", ".aiw", ".rcd", ".hdc", ".aud", ".ani")}
+        for p in glob.glob(str(src / "*")):
+            n = Path(p).name.lower()
+            if n in tpl:
+                continue
+            for ext, substitute in ((".aiw", "3Anderstorp.AIW"),
+                                    (".gdb", "3Anderstorp.gdb"),
+                                    (".ani", "3Anderstorp.ani")):
+                if n.endswith(ext) and (gtr / substitute).is_file():
+                    tpl[n] = gtr / substitute
+        known = {Path(p).name.lower() for p in glob.glob(
+            str(ROOT.parent / "GTR2Steam/GameData/**/*"), recursive=True)
+            if p.lower().endswith(".gtr")}
+        with tempfile.TemporaryDirectory() as td:
+            report = g.convert_tree(src, td, include_others=False, templates=tpl)
+            self.assertGreater(report["trk"], 0)
+            self.assertGreater(report["config"], 0)
+            self.assertGreater(report["archives"], 0)
+            local = {Path(p).name.lower() for p in glob.glob(td + "/**/*", recursive=True)
+                     if p.lower().endswith(".gtr")}
+            self.assertEqual(g.validate_gtr2_tree(td, known | local), [])
+
     def test_validate_tree(self):
         src = ROOT.parent / "GTLSteam/GameData/Locations/Anderstorp"
         target = ROOT.parent / "GTR2Steam/GameData/Locations/Anderstorp"
@@ -444,8 +488,20 @@ class GtlToGtr2Test(unittest.TestCase):
                                     recursive=True)
                  if p.lower().endswith(".gtr")}
         self.assertEqual(g.validate_gtr2_tree(target, known), [])
+        tpl = {Path(p).name.lower(): p for p in glob.glob(str(target / "*"))
+               if Path(p).is_file() and Path(p).suffix.lower() in
+               (".gdb", ".car", ".aiw", ".rcd", ".hdc", ".aud", ".ani")}
+        for p in glob.glob(str(src / "*")):
+            n = Path(p).name.lower()
+            if n in tpl:
+                continue
+            for ext, substitute in ((".aiw", "3Anderstorp.AIW"),
+                                    (".gdb", "3Anderstorp.gdb"),
+                                    (".ani", "3Anderstorp.ani")):
+                if n.endswith(ext) and (target / substitute).is_file():
+                    tpl[n] = target / substitute
         with tempfile.TemporaryDirectory() as td:
-            g.convert_tree(src, td, include_others=False)
+            g.convert_tree(src, td, include_others=False, templates=tpl)
             local = {Path(p).name.lower() for p in glob.glob(td + "/**/*", recursive=True)
                      if p.lower().endswith(".gtr")}
             self.assertEqual(g.validate_gtr2_tree(td, known | local), [])
