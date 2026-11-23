@@ -184,6 +184,9 @@ def validate_gtr2_tree(root: str | Path,
         if suffix == ".car":
             for msg in validate_car(p.read_bytes()):
                 problems.append(f"{p}: {msg}")
+        if suffix == ".hdc":
+            for msg in validate_hdc(p.read_bytes()):
+                problems.append(f"{p}: {msg}")
         if suffix == ".aiw":
             for msg in validate_aiw(p.read_bytes()):
                 problems.append(f"{p}: {msg}")
@@ -255,6 +258,36 @@ def adapt_car_from_template(data: bytes, template: bytes) -> tuple[bytes, dict]:
         out = _set_gdb_key(out, k, tvals[k])
     return out, {"keys_applied": len(GTR2_CAR_ONLY_KEYS),
                  "already_valid": not validate_car(data)}
+
+
+# .hdc: 30 keys are present in all 44 GTR2 handling files and none of the 42
+# GTL ones (mostly front/rear wheel aerodynamic and gear-5 parameters). Values
+# are car-specific; only a same-name GTR2 template can supply them.
+GTR2_HDC_ONLY_KEYS = (
+    "fwaft", "fwcenter", "fwdown", "fwdragparams", "fwfore", "fwleft",
+    "fwliftheight", "fwliftparams", "fwliftsideways", "fwmaxheight",
+    "fwrange", "fwright", "fwrot", "fwsetting", "fwup", "gear5setting",
+    "rwaft", "rwcenter", "rwdown", "rwdragparams", "rwfore", "rwleft",
+    "rwliftparams", "rwliftsideways", "rwpeakyaw", "rwrange", "rwright",
+    "rwrot", "rwsetting", "rwup",
+)
+
+
+def validate_hdc(data: bytes) -> list[str]:
+    keys = set(gdb_key_values(data))
+    return [f"missing hdc key: {k}" for k in GTR2_HDC_ONLY_KEYS if k not in keys]
+
+
+def adapt_hdc_from_template(data: bytes, template: bytes) -> tuple[bytes, dict]:
+    tvals = gdb_key_values(template)
+    missing = [k for k in GTR2_HDC_ONLY_KEYS if k not in tvals]
+    if missing:
+        raise ValueError(f"template lacks hdc keys: {missing}")
+    out = data
+    for k in GTR2_HDC_ONLY_KEYS:
+        out = _set_gdb_key(out, k, tvals[k])
+    return out, {"keys_applied": len(GTR2_HDC_ONLY_KEYS),
+                 "already_valid": not validate_hdc(data)}
 
 
 # .aiw: these two keys are present in all 34 GTR2 AIWs and none of the 25 GTL

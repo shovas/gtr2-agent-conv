@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 23:35:00 -0500 - HDC key validator added
+- `validate_hdc()` checks 30 wheel/gear keys universal in all 44 GTR2 `.hdc` files (34/42 GTL flagged); `adapt_hdc_from_template()` copies them from a same-name GTR2 template. Added test and docs.
+
 ## 2026-11-23 23:20:00 -0500 - Test tier rebalanced
 - Moved the two expensive corpus surveys (`test_copa`, `test_stockcar_extreme`) to Full-only; Normal is back within its 300 s budget (272 s, 161 tests) while Full retains all 289 tests.
 
