@@ -180,6 +180,8 @@ Notably absent in GTL GameData: rFactor-style `.veh/.scn/.gen/.hdv/.tbc/.sfx` (0
 
 **Archive-level survey (31 same-name GTL/GTR2 archives)**: member sets differ per track (content was genuinely changed between games), with 36 same-basename `.tga`→`.dds` texture pairs in 5 archives but 13 GTL TGAs without counterparts and 76 loose `.tga` files still shipped in GTR2 — so neither a blanket extension rewrite nor a "no TGA" rule is justified. No archive-member rule was added.
 
+**`.trk` key survey**: all 16 universal keys are identical in GTL and GTR2 (no new rules beyond the MASFile rewrites).
+
 **Pairwise value-invariant survey** (`.gdb`/`.car`/`.hdc`): no new clean GTR2-only invariants beyond the session-block `racetime == racetimescaled` rule; apparent `.hdc` hits are both-keys-absent-in-GTL artifacts, not real relationships.
 
 **Value-scale candidates examined but NOT promoted**: median GTL→GTR2 numeric shifts exist for `.hdc` `bumpstopspring` (250000→125000), `bumpstopdamper` (2000→1050), `forwardgears` (4/5→6), `brakepressuresetting` (10→20), `diffcoastsetting` (2→8), `.eng` `enginebrakingmapsetting` (4→2) and `.tyr` `optimumpressurebase` (60/100→90). None is universal in both corpora (e.g. 3 GTR2 `.hdc` files retain GTL `bumpstopspring`/`bumpstopdamper`, 3 retain GTL `upshiftdelay`/`downshiftdelay`, 2 retain GTL `brakepressuresetting`), so applying them would be speculative; only `clutchengagerate` (0.6→0.8, universal where present) and the `.aud` path prefixes were promoted. A strict universal constant-difference sweep over 16 text formats found no further rules.

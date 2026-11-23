@@ -155,7 +155,7 @@ patch), but does not identify the exact engine-side use. Further refinement: the
   not a byte-XOR/sum checksum of position floats (0.3% chance-level matches). A 17,392-frame test
   appeared to show within-file slot-9/pitch correlation r=0.687, but that is an artifact: the byte is 0
  Slot 7 (marker+7) autocorrelation decays smoothly from r=0.995 at lag 1 with a +0.176/frame trend (not a periodic counter); its exact physical meaning remains **unresolved**.
-  in ~all frames with only 1-2 exceptions at 64, which drive the correlation. With corrected 63-byte alignment,
+ A lattice search over 15 scales x 3 biases against DSI heading/pitch/time found no exact fixed-point quantization for any packed byte (best 52%, driven by constant values).  in ~all frames with only 1-2 exceptions at 64, which drive the correlation. With corrected 63-byte alignment,
   those exceptions occur only at the **first or last frame** of each file (e.g. index 0 or n−1), and their larger
   dt/step values are boundary artifacts — slot 9 is effectively constant-zero padding. Exact meaning **unresolved**.
   FXM keyframe-field survey (148 nodes across 5 corpora): quaternions are exactly unit, scale components are all +/-1 (one mirrored bone), and the 4-byte trailer equals `size_hint - 84` in 148/148 nodes — a new corpus-confirmed structural invariant via `fxm_tool.check_node_consistency()`. FXM `key_count`: a fresh child-count hypothesis was excluded (0 children for 47/49 nodes), and an
