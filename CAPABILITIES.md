@@ -38,6 +38,7 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 ### GMT (`.gmt`)
 - **Read**: Structural/lossless. Parses header (obj_list_offset, flags, 16-byte magic), mesh table at 0x16C, 108-byte mesh records (27*u32), vertex/index blobs, material tail, 4x264-byte stage blocks, ASCII strings.
 - **Write**: Lossless structural round-trip. Preserves original bytes for unknown/gap regions; writes known structural fields and data at original offsets.
+- **Relayout**: `gmt_format.relayout_gmt()` rebuilds all mesh-record and header offsets after a mesh blob changes size (e.g. vertices added). Packs vertex/extra/stream/index blobs and material tail contiguously, preserving blob bytes exactly; unknown inter-blob gap bytes are not retained (use `write_gmt` for in-place lossless edits). Validated on 400/400 real GTR2 GMTs plus growth/negative tests.
 - **Decoded/verified fields**:
   - Header: `obj_list_offset`, `flags`, magic.
   - Mesh: count/first, `rec[1]` flags, `rec[2]` material index, `rec[3]` vertex count, `rec[4]` vertex offset, `rec[5]` extra block/stream boundary, `rec[6]` vertex end/stream boundary, `rec[7]` stream2 end, `rec[8]` stream3 end, `rec[10]` index count, `rec[11]` index offset.
@@ -127,9 +128,9 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 
 ## Test execution
 - **Tool**: `run_tests.py --mode quick|normal|full` (default `normal`). Deterministic module lists with progressive coverage (`Quick ⊆ Normal ⊆ Full`), end-to-end budget warnings (Quick ≤60 s, Normal ≤300 s), and a timing/result report. `--list` prints tier membership; `--coverage` adds an optional line-coverage report (gracefully skipped when the `coverage` package is absent).
-- **Measured**: Quick 17 modules / 67 tests / ~9 s; Normal 38 modules / 145 tests / ~280 s; Full 45 modules / 268 tests / ~594 s (2 skipped — external tools absent).
+- **Measured**: Quick 17 modules / 67 tests / ~9 s; Normal 39 modules / 148 tests / ~295 s; Full 46 modules / 271 tests / ~610 s (2 skipped — external tools absent).
 - **Plain full suite**: `python3 -m unittest discover -s tests -v` remains available.
-- **Verification**: `tests/test_run_tests_modes.py` checks mode selection invariants; `tests/test_gtr1_coverage.py` asserts 33,477/33,477 GTR1 GMTs decode (Normal/Full).
+- **Verification**: `tests/test_run_tests_modes.py` checks mode selection invariants; `tests/test_gtr1_coverage.py` asserts 33,477/33,477 GTR1 GMTs decode (Normal/Full); `tests/test_gmt_relayout.py` covers relayout round-trips and growth.
 
 ## Conversion pipeline
 

@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 20:30:00 -0500 - GMT relayout implemented and verified
+- `gmt_format.relayout_gmt()` rebuilds header/mesh-record offsets after mesh data changes size, packing vertex/extra/stream/index blobs and the material tail contiguously. Self-consistency tests cover all four structural variants, vertex/index growth, and invalid blobs; verified on 400/400 real GTR2 GMTs. Added to Normal/Full tiers.
+
 ## 2026-11-23 20:15:00 -0500 - Final Full-suite verification
 - `python3 run_tests.py --mode full`: 45 modules / 268 tests / 593.5 s, 0 failures, 0 errors, 2 skips (external tools absent). Quick: 67 tests / ~10 s. Pre-push check PASS.
 
