@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 12:30:00 -0500 - WAV encoding and JCA key auto-detection
+- `wav-encode` converts PCM to ADPCM/MP3 via ffmpeg (round-trip verified); `detect_jca_key()` auto-detects the `default` and `volvo` JCA keys from payload magic (12 sampled files across 2 corpora). Added tests.
+
 ## 2026-11-23 12:00:00 -0500 - Final verification after media capabilities
 - `python3 run_tests.py --mode full`: 47 modules / 313 tests / 840.4 s, 0 failures, 2 skips. Normal: 167 tests / 294.8 s, 0 failures. Quick: 96 tests, 0 failures. Pre-push check PASS.
 

@@ -88,8 +88,9 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 - **Verification**: `tests/test_media_tool.py` (PCM round-trip; real MP3-in-WAV format 0x55 lossless round-trip when present).
 - **Tool**: `media_tool.py`.
 - **JCA-wrapped textures**: 33,351 JCA-encrypted `.dds` and 4,415 `.tga` found across 7 corpora; `jca-decrypt` and `dds-jca`/`tga-jca` identification added and verified on Race07 samples.
-- **Compressed payloads**: `media_tool.py wav-decode <src> <dst>` decodes ADPCM (WAVE_FORMAT_IMA_ADPCM) and MP3-in-WAV to 16-bit PCM via ffmpeg; verified on both local corpus samples.
-- **Gaps**: encoding compressed WAV payloads not implemented; non-default JCA keys handled only via `--key`.
+- **Compressed payloads**: `media_tool.py wav-decode <src> <dst>` decodes ADPCM and MP3-in-WAV to 16-bit PCM via ffmpeg; `wav-encode <src> <dst> [--codec adpcm_ima_wav|libmp3lame]` encodes back. Both verified on corpus samples.
+- **JCA keys**: `detect_jca_key()` auto-detects `default` (Race07/Copa) vs `volvo` from decrypted-payload magic; `jca-decrypt --key auto` is the CLI default, verified on both corpora.
+- **Gaps**: ADPCM/MP3 re-encoding is lossy (74.8% sample-exact on the round-trip); no in-repo MP3/ADPCM codec.
 
 ### DDS
 - **Read**: Identify + DDS header/pixel-format/caps semantic parse; DXT1 (BC1), DXT3 (BC2), DXT5 (BC3), and uncompressed RGB(A) mask-based pixel decode to RGBA.

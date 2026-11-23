@@ -77,6 +77,18 @@ class MediaToolTest(unittest.TestCase):
                 self.assertEqual(a.getparams(), b.getparams())
                 self.assertEqual(a.readframes(a.getnframes()), b.readframes(b.getnframes()))
 
+    def test_jca_key_autodetection(self):
+        import glob
+        for root, expected in (("Race07Complete", "default"), ("VolvoTheGame", "volvo")):
+            sample = next((p for p in glob.glob(str(ROOT.parent / root / "**" / "*"), recursive=True)
+                           if Path(p).is_file() and p.lower().endswith((".dds", ".tga", ".wav"))
+                           and open(p, "rb").read(4) == b"\x0f\xb1\xff\xff"), None)
+            if sample is None:
+                continue
+            with self.subTest(root=root):
+                self.assertEqual(media_tool.detect_jca_key(Path(sample).read_bytes()), expected)
+                self.assertEqual(media_tool.identify(sample).details["jca_key"], expected)
+
     def test_jca_encrypted_textures(self):
         import glob
         for ext, magic in ((".dds", b"DDS "), (".tga", None)):
@@ -121,6 +133,29 @@ class MediaToolTest(unittest.TestCase):
                     self.assertTrue(media_tool.wav_decode(src, dst))
                     with wave.open(str(dst), "rb") as w:
                         self.assertEqual(w.getcomptype(), "NONE")
+                        self.assertGreater(w.getnframes(), 0)
+
+    def test_compressed_wav_encode_roundtrip(self):
+        import glob
+        import shutil
+        if not shutil.which("ffmpeg"):
+            self.skipTest("ffmpeg not present")
+        sample = next((p for p in glob.glob(str(ROOT.parent / "RF1Vanilla" / "**" / "*"), recursive=True)
+                       if Path(p).is_file() and p.lower().endswith(".wav")
+                       and open(p, "rb").read(4) == b"RIFF"), None)
+        self.assertIsNotNone(sample)
+        with tempfile.TemporaryDirectory() as td:
+            pcm = Path(td) / "pcm.wav"
+            self.assertTrue(media_tool.wav_decode(sample, pcm))
+            for codec in ("adpcm_ima_wav", "libmp3lame"):
+                with self.subTest(codec=codec):
+                    enc = Path(td) / (codec + ".wav")
+                    self.assertTrue(media_tool.wav_encode_compressed(pcm, enc, codec))
+                    info = media_tool.identify(enc)
+                    self.assertEqual(info.format, "wav")
+                    dec = Path(td) / (codec + "_dec.wav")
+                    self.assertTrue(media_tool.wav_decode(enc, dec))
+                    with wave.open(str(dec), "rb") as w:
                         self.assertGreater(w.getnframes(), 0)
 
     def test_jca_encrypted_wav_decrypt(self):

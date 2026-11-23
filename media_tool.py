@@ -24,6 +24,28 @@ class MediaInfo:
 JCA_MAGIC = b"\x0f\xb1\xff\xff"
 
 
+def _looks_like_media(data: bytes) -> bool:
+    return (data[:4] in (b"DDS ", b"RIFF") or
+            (len(data) >= 18 and data[1] == 0 and data[2] in (2, 3, 10)))
+
+
+def detect_jca_key(data: bytes) -> str | None:
+    """Try each known JCA key and return the name that yields a valid payload.
+
+    Corpus-verified: Race07/GTL/Volvo default vs Volvo's custom key. Returns
+    ``None`` if no key produces a recognisable DDS/WAV/TGA payload.
+    """
+    import jca_crypt
+    for name in [None] + sorted(jca_crypt.CUSTOM_KEYS):
+        try:
+            out = jca_crypt.decrypt_bytes(data, jca_crypt.CUSTOM_KEYS.get(name))
+            if _looks_like_media(out):
+                return name or "default"
+        except Exception:
+            continue
+    return None
+
+
 def decrypt_jca_bytes(data: bytes, key_name: str | None = None) -> bytes:
     """Decrypt a JCA-wrapped payload (WAV, DDS, TGA) with the given JCA key."""
     import jca_crypt
@@ -59,7 +81,9 @@ def identify(path: str | Path) -> MediaInfo:
     if head.startswith(JCA_MAGIC):
         details = {"jca_encrypted": True}
         try:
-            plain = decrypt_jca_bytes(b)
+            key = detect_jca_key(b)
+            plain = decrypt_jca_bytes(b, key)
+            details["jca_key"] = key
             details["decrypted_size"] = len(plain)
             if plain[:4] == b"DDS " and len(plain) >= 128:
                 w, h = struct.unpack_from("<II", plain, 12)
@@ -222,6 +246,29 @@ def wav_decode(src: str | Path, dst: str | Path,
             return w.getcomptype() == "NONE" and w.getnframes() > 0
     except Exception:
         return False
+
+
+def wav_encode_compressed(src: str | Path, dst: str | Path,
+                          codec: str = "adpcm_ima_wav",
+                          ffmpeg_exe: str | None = None) -> bool:
+    """Encode a PCM WAV to a compressed WAV via ffmpeg.
+
+    ``codec`` is an ffmpeg ADPCM/MP3 encoder name (default ``adpcm_ima_wav``;
+    ``libmp3lame`` produces MP3-in-WAV). Returns True on success.
+    """
+    import shutil
+    import subprocess
+    exe = ffmpeg_exe or shutil.which("ffmpeg")
+    if exe is None or codec not in ("adpcm_ima_wav", "libmp3lame"):
+        return False
+    cmd = [exe, "-y", "-loglevel", "error", "-i", str(src),
+           "-c:a", codec, str(dst)]
+    result = subprocess.run(cmd, capture_output=True)
+    if result.returncode != 0 or not Path(dst).is_file():
+        return False
+    with open(dst, "rb") as f:
+        head = f.read(12)
+    return head[:4] == b"RIFF" and head[8:12] == b"WAVE"
 
 
 def wav_roundtrip(src: str | Path, dst: str | Path) -> MediaInfo:
@@ -918,12 +965,31 @@ def main(argv=None):
     p.add_argument("src")
     p.add_argument("dst")
     p.set_defaults(func=lambda a: print(asdict(wav_roundtrip(a.src, a.dst))) or 0)
+    p = sub.add_parser("wav-encode", help="encode PCM WAV to compressed WAV via ffmpeg")
+    p.add_argument("src")
+    p.add_argument("dst")
+    p.add_argument("--codec", choices=("adpcm_ima_wav", "libmp3lame"), default="adpcm_ima_wav")
+    p.set_defaults(func=lambda a: print("ok" if wav_encode_compressed(a.src, a.dst, a.codec)
+                                        else "ffmpeg unavailable or encode failed") or 0)
     p = sub.add_parser("jca-decrypt", help="decrypt any JCA-wrapped payload (WAV/DDS/TGA)")
     p.add_argument("src")
     p.add_argument("dst")
-    p.add_argument("--key", choices=sorted(__import__("jca_crypt").CUSTOM_KEYS), default=None)
-    p.set_defaults(func=lambda a: (Path(a.dst).write_bytes(
-        decrypt_jca_bytes(Path(a.src).read_bytes(), a.key)), print(a.dst))[1] or 0)
+    p.add_argument("--key", choices=["auto", "default"] + sorted(__import__("jca_crypt").CUSTOM_KEYS),
+                   default="auto")
+    def _jca_cli(a):
+        import jca_crypt
+        raw = Path(a.src).read_bytes()
+        if a.key in (None, "auto"):
+            name = detect_jca_key(raw)
+            if name is None:
+                print("no known JCA key matched")
+                return 1
+        else:
+            name = a.key
+        Path(a.dst).write_bytes(decrypt_jca_bytes(raw, name))
+        print(f"{a.dst} (key={name})")
+        return 0
+    p.set_defaults(func=_jca_cli)
     p = sub.add_parser("wav-decrypt", help="decrypt a JCA-wrapped WAV to plain RIFF/WAVE")
     p.add_argument("src")
     p.add_argument("dst")
