@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 01:30:00 -0500 - Fifth FXM variant: single-key wipers
+- Decoded the final large FXM gap: marker=0 (FXA, 28-byte tail) and marker=1 (FXM, 40-byte tail) single-validated-key nodes with trailing names. Recovers 115 files / 280 nodes; 1,111 of 1,115 files now decode (28,422 nodes total), leaving 4 BMW E30 wiper files. Added a regression test; all 16 FXM tests pass.
+
 ## 2026-11-24 01:00:00 -0500 - Fourth FXM variant: trailing names
 - Decoded the trailing-name FXM layout (`marker=1, size_hint, key_count=3, 2 TRS keys, name_len, name`) used by cockpit-wiper and driver animation files where the name follows the keyframes. Strict unit-quaternion/scale validation recovers 44 files (previously zero-node); 119 files remain unresolved, mostly `.fxa` wipers with non-unit scale keys. Added a regression test; all 15 FXM tests pass.
 

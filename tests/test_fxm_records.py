@@ -307,5 +307,23 @@ class FxmRecordTest(unittest.TestCase):
                          "trailing-name")
 
 
+    def test_single_key_fxa_variant(self):
+        """FXA wipers use marker=0 with one key and a 28-byte tail."""
+        p = ROOT.parent / ("Race07Complete/GameData/Teams/BMW_CSL/"
+                           "Bmw_CPITWIPER.FXA")
+        if not p.is_file():
+            self.skipTest("single-key FXA sample not present")
+        data = p.read_bytes()
+        nodes = fxm_tool.parse_single_key_nodes(data)
+        self.assertGreaterEqual(len(nodes), 1)
+        for node in nodes:
+            self.assertEqual(node["marker"], 0)
+            self.assertEqual(len(node["tail"]), 28)
+            self.assertAlmostEqual(math.sqrt(sum(x*x for x in node["quaternion"])),
+                                   1.0, delta=0.02)
+        self.assertEqual(fxm_tool.decode_fxm_semantic(data)["variant"],
+                         "single-key")
+
+
 if __name__ == "__main__":
     unittest.main()

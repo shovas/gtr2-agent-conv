@@ -284,6 +284,46 @@ def parse_trailing_name_nodes(b: bytes) -> list[dict]:
     return out
 
 
+def parse_single_key_nodes(b: bytes) -> list[dict]:
+    """Decode FXM nodes with one validated key and a marker-dependent tail.
+
+    Layout: ``u32 marker, u32 size_hint, u32 key_count=3, 40-byte TRS key,
+    tail, u32 name_len, name``. Corpus-verified tail sizes are exactly 28 bytes
+    for marker=0 (`.fxa` wipers) and 40 bytes for marker=1 (`.fxm` wipers whose
+    second key has non-unit scale). Recovers 115 of 119 otherwise zero-node
+    files / 280 nodes. The trailing floats are retained verbatim as ``tail``;
+    their semantics are not claimed.
+    """
+    out: list[dict] = []
+    for i in range(len(b) - 100):
+        marker, size_hint, key_count = struct.unpack_from("<III", b, i)
+        if key_count != 3 or not (60 <= size_hint <= 200):
+            continue
+        gap = 28 if marker == 0 else 40 if marker == 1 else -1
+        if gap < 0:
+            continue
+        keys_at = i + 12
+        if keys_at + 40 + gap + 4 > len(b):
+            continue
+        f = struct.unpack_from("<10f", b, keys_at)
+        q = math.sqrt(sum(x * x for x in f[3:7]))
+        if not (0.98 < q < 1.02) or not all(math.isfinite(x) for x in f):
+            continue
+        name_len_at = keys_at + 40 + gap
+        name_len = struct.unpack_from("<I", b, name_len_at)[0]
+        if not (3 <= name_len <= 64) or name_len_at + 4 + name_len > len(b):
+            continue
+        name = b[name_len_at + 4:name_len_at + 4 + name_len]
+        if not all(32 <= c < 127 for c in name) or name[:1].isdigit():
+            continue
+        out.append({"offset": i, "name": name.decode("latin-1"), "marker": marker,
+                    "size_hint": size_hint, "key_count": key_count,
+                    "keyframe_offset": keys_at,
+                    "tail": b[keys_at + 40:name_len_at],
+                    "position": f[:3], "quaternion": f[3:7], "scale": f[7:10]})
+    return out
+
+
 def decode_fxm_semantic(b: bytes) -> dict:
     """Decode an FXM file into a layout-independent, validated node list.
 
@@ -352,6 +392,20 @@ def decode_fxm_semantic(b: bytes) -> dict:
                           "quaternion": k0["quaternion"], "scale": k0["scale"],
                           "key_count": len(dec["keys"]), "issues": issues})
         return {"variant": "trailing-name", "nodes": nodes,
+                "stats": {"nodes": len(nodes),
+                          "flagged": sum(1 for n in nodes if n["issues"])}}
+
+    single = parse_single_key_nodes(b)
+    if single:
+        nodes = []
+        for n in single:
+            issues = []
+            if any(abs(abs(s) - 1.0) > 0.02 for s in n["scale"]):
+                issues.append("non-unit scale")
+            nodes.append({"name": n["name"], "position": n["position"],
+                          "quaternion": n["quaternion"], "scale": n["scale"],
+                          "key_count": 1, "issues": issues})
+        return {"variant": "single-key", "nodes": nodes,
                 "stats": {"nodes": len(nodes),
                           "flagged": sum(1 for n in nodes if n["issues"])}}
 

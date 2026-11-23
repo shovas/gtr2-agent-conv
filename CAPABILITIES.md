@@ -64,7 +64,7 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 - **Write**: Lossless round-trip.
 - **Verification**: `tests/test_simbin_tools.py` (real LMA round-trip, BE-field observation, node-name extraction when present), `tests/test_fxm_records.py` (skeleton table + TRS decode + CLI).
 - **Tool**: `fxm_tool.py`.
-- **Survey (1,115 FXM/FXA/LMA files)**: 996 decode at least one node (25,764 nodes total); 119 remain zero-node. A fourth **trailing-name** variant (`parse_trailing_name_nodes`) recovers 44 files: `u32 marker=1, size_hint, key_count=3, two TRS keys, u32 name_len, name` (name after keys), used by cockpit-wiper and driver files. The remaining zero-node files are mostly `*_cpitwiper.fxa` with NUL-terminated names and non-unit scale keys; their semantics are not confident enough to decode, so no speculative parser was added.
+- **Survey (1,115 FXM/FXA/LMA files)**: 1,111 decode at least one node (**28,422 nodes** total); **4** remain zero-node (BMW E30 wiper pairs). Five node layouts are recognised: standard, NUL-named, length-prefixed (with marker=1 TRS and marker=2 rotation tracks), trailing-name, and **single-key** (`parse_single_key_nodes`: `marker, size_hint, key_count=3, 40-byte TRS key, tail, name_len, name`; tail is exactly 28 bytes for marker=0 FXA and 40 bytes for marker=1 FXM). Trailing float semantics beyond the validated position/quaternion are not claimed.
 - **Gaps**: `size_hint == 84 + bone_id` (name-stable id, 27 names) and `key_count==3` are verified; bone-id meaning and animation playback semantics unconfirmed; writing/modifying animation data unsupported.
 
 ### JCA (SimBin Race 07 / GTR Evolution / Race Room)
