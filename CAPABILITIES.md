@@ -110,7 +110,8 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 ### BMP
 - **Read/Write**: Semantic read/write for uncompressed BI_RGB 24/32-bit BMP via `media_tool.py` (top-down memory representation, bottom-up file write).
 - **Verification**: `tests/test_media_tool.py` (synthetic 24-bit round-trip).
-- **Gaps**: compressed/other DIB variants not implemented; BMP-as-TGA quirk detected but routed separately.
+- **Palettized BMP**: 8-bit BI_RGB files (7 corpus samples) decode with palette/indices preserved; verified byte-identical on `legal256.bmp` (512x384, 1024-byte palette).
+- **Gaps**: compressed DIB variants (RLE8/RLE4) are absent from the corpus; BMP-as-TGA quirk detected but routed separately.
 
 ### JPG/MP3
 - **Read**: Identify; JPG SOF dimension/bit-depth metadata parsed; MP3 frame header fields parsed (version/layer/bitrate/samplerate index, ID3 tag presence).

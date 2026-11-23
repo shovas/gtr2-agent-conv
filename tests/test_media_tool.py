@@ -136,6 +136,21 @@ class MediaToolTest(unittest.TestCase):
                         self.assertEqual(w.getcomptype(), "NONE")
                         self.assertGreater(w.getnframes(), 0)
 
+    def test_palettized_bmp_corpus_roundtrip(self):
+        import glob
+        sample = next((p for p in glob.glob(str(ROOT.parent / "RF1Vanilla" / "**" / "*"),
+                                            recursive=True)
+                       if p.lower().endswith(".bmp") and Path(p).is_file()
+                       and open(p, "rb").read(2) == b"BM"
+                       and struct.unpack_from("<H", open(p, "rb").read(64), 28)[0] == 8), None)
+        if sample is None:
+            self.skipTest("8-bit BMP sample not present")
+        img = media_tool.read_bmp(sample)
+        self.assertEqual(img.bpp, 8)
+        self.assertGreater(len(img.palette), 0)
+        self.assertEqual(len(img.indices), img.width * img.height)
+        self.assertEqual(img.to_bytes(), Path(sample).read_bytes())
+
     def test_bc4_bc5_synthetic_decode(self):
         def mkdds(fourcc, w, h, payload):
             hdr = bytearray(128)

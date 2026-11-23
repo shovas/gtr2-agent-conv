@@ -471,8 +471,32 @@ class BmpImage:
     bpp: int
     compression: int
     pixels_bgra: bytes  # top-down, no row padding, bpp/8 bytes per pixel
+    palette: bytes = b""  # raw palette entries (BGRA) for <=8 bpp
+    indices: bytes = b""  # raw top-down index rows (unpadded) for <=8 bpp
+    trailer: bytes = b""  # bytes after the pixel array in the source file
+    source_header: bytes = b""  # original 54-byte header, reused for lossless round-trip
 
     def to_bytes(self) -> bytes:
+        if self.palette:
+            bytespp = 1
+            row_raw = self.width
+            row_padded = (row_raw + 3) & ~3
+            pad = b"\x00" * (row_padded - row_raw)
+            pixel_data = bytearray()
+            for y in range(self.height - 1, -1, -1):
+                off = y * row_raw
+                pixel_data.extend(self.indices[off:off + row_raw])
+                pixel_data.extend(pad)
+            pixel_offset = 14 + 40 + len(self.palette)
+            file_size = pixel_offset + len(pixel_data) + len(self.trailer)
+            if self.source_header and len(self.source_header) >= 54:
+                hdr = bytearray(self.source_header[:54])
+                struct.pack_into('<I', hdr, 2, file_size)
+                return bytes(hdr + self.palette + pixel_data + self.trailer)
+            hdr = struct.pack('<2sIHHI', b'BM', file_size, 0, 0, pixel_offset)
+            dib = struct.pack('<IiiHHIIiiII', 40, self.width, self.height, 1, self.bpp, 0,
+                              len(pixel_data), 2835, 2835, 0, 0)
+            return bytes(hdr + dib + self.palette + pixel_data + self.trailer)
         bytespp = self.bpp // 8
         row_raw = self.width * bytespp
         row_padded = (row_raw + 3) & ~3
@@ -501,8 +525,32 @@ def read_bmp(path: str | Path) -> BmpImage:
     if dib < 40:
         raise ValueError(f'Unsupported BMP DIB size {dib}')
     w, h, planes, bpp, comp = struct.unpack_from('<iiHHI', b, 18)
-    if comp != 0 or bpp not in (24, 32):
+    if comp != 0 or bpp not in (8, 24, 32):
         raise ValueError(f'Unsupported BMP compression/bpp {comp}/{bpp}')
+    if bpp == 8:
+        colors = struct.unpack_from('<I', b, 46)[0] or 256
+        pal_off = 54
+        pal_size = colors * 4
+        palette = b[pal_off:pal_off + pal_size]
+        bytespp = 1
+        row_raw = w
+        row_padded = (row_raw + 3) & ~3
+        height8 = abs(h)
+        top_down8 = h < 0
+        indices = bytearray(w * height8)
+        expanded = bytearray(w * height8 * 4)
+        for row in range(height8):
+            src_y = row if top_down8 else (height8 - 1 - row)
+            src_off = pixel_offset + src_y * row_padded
+            indices[row * w:(row + 1) * w] = b[src_off:src_off + w]
+            for x in range(w):
+                idx = indices[row * w + x]
+                expanded[(row * w + x) * 4:(row * w + x + 1) * 4] = palette[idx*4:idx*4+4]
+        used = pixel_offset + height8 * row_padded
+        return BmpImage(width=w, height=height8, bpp=8, compression=0,
+                        pixels_bgra=bytes(expanded), palette=palette,
+                        indices=bytes(indices), trailer=b[used:],
+                        source_header=b[:54])
     height = abs(h)
     top_down = h < 0
     bytespp = bpp // 8
