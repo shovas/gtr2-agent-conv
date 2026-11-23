@@ -161,6 +161,10 @@ patch), but does not identify the exact engine-side use. Further refinement: the
   NUL-name variant trailer is `(1, 0x50=80, 1)` in 239/239 nodes. The variants never coexist in one file
   (5 standard-only, 55 NUL-only), and NUL files use `LMA `/`FXA ` magic with mixed header bytes, so the
   third field is consistent with a variant/version tag but its exact semantics remain **unresolved**.
+  A follow-up checked all FXM header u32 fields for a value of 3 or the node count: none matched, so
+  `key_count` is not derived from a header animation-frame count. For GTTF, testing the packed bytes as
+  fixed-point wheel-speed/steering against DSI-derived speed (3,722 samples with a proper DSI time field)
+  gave |r|<0.11 for all u16/u32 readings — no fixed-point speed relationship.
   Slot 9 (+36) shows the same artifact: its float mantissa is effectively constant, so its values are
   exactly `0, ±8.5, ±34, ±136, ±544, ...` (each step x4) — i.e. only the exponent/sign byte at +39 carries
   data (0x43/0xC3 etc., a sign bit plus a ~7-bit magnitude). Both "floats" are really packed-byte fields,
