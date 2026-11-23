@@ -154,6 +154,7 @@ patch), but does not identify the exact engine-side use. Further refinement: the
   excluded: no correlation with acceleration (r=-0.02), position coordinates (|r|<0.14) or heading (r=-0.01);
   not a byte-XOR/sum checksum of position floats (0.3% chance-level matches). A 17,392-frame test
   appeared to show within-file slot-9/pitch correlation r=0.687, but that is an artifact: the byte is 0
+ Slot 7 (marker+7) autocorrelation decays smoothly from r=0.995 at lag 1 with a +0.176/frame trend (not a periodic counter); its exact physical meaning remains **unresolved**.
   in ~all frames with only 1-2 exceptions at 64, which drive the correlation. With corrected 63-byte alignment,
   those exceptions occur only at the **first or last frame** of each file (e.g. index 0 or n−1), and their larger
   dt/step values are boundary artifacts — slot 9 is effectively constant-zero padding. Exact meaning **unresolved**.
