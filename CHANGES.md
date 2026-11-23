@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 10:20:00 -0500 - FXM semantic decoder added
+- `decode_fxm_semantic()` / `fxm_tool.py semantic` normalise both FXM variants into validated node records. Corpus finding: all 148 standard nodes are static (two identical TRS keys); NUL nodes carry one key and suspect records are flagged rather than dropped. Added regression test.
+
 ## 2026-11-24 09:55:00 -0500 - Final verification after FXM invariants
 - `python3 run_tests.py --mode full`: 47 modules / 304 tests / 704.4 s, 0 failures, 2 skips. Normal: 166 tests / 271.6 s, 0 failures. Quick: 92 tests, 0 failures. Pre-push check PASS.
 

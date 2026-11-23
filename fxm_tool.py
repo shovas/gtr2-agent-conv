@@ -145,6 +145,52 @@ def check_node_consistency(b: bytes, node: dict) -> list[str]:
     return problems
 
 
+def decode_fxm_semantic(b: bytes) -> dict:
+    """Decode an FXM file into a layout-independent, validated node list.
+
+    Both on-disk variants are normalised to the same representation:
+      ``{variant, nodes: [{name, position, quaternion, scale, issues}], stats}``
+    ``issues`` is empty for well-formed nodes; suspect nodes (e.g. NUL-variant
+    records whose parser-selected keyframe offset yields non-unit scale) are
+    retained but flagged instead of silently discarded.
+    """
+    std = parse_node_records(b)
+    if std:
+        nodes = []
+        for node in std:
+            dec = decode_node_keys(b, node)
+            issues = [f"key {i}: non-unit quaternion" for i, k in enumerate(dec["keys"])
+                      if abs(k["quat_norm"] - 1.0) > 0.01]
+            for i, k in enumerate(dec["keys"]):
+                if any(abs(abs(s) - 1.0) > 0.02 for s in k["scale"]):
+                    issues.append(f"key {i}: non-unit scale")
+            k0 = dec["keys"][0]
+            nodes.append({"name": node["name"],
+                          "position": k0["position"],
+                          "quaternion": k0["quaternion"],
+                          "scale": k0["scale"],
+                          "key_count": len(dec["keys"]),
+                          "issues": issues})
+        return {"variant": "standard", "nodes": nodes,
+                "stats": {"nodes": len(nodes),
+                          "flagged": sum(1 for n in nodes if n["issues"])}}
+
+    nul = parse_nul_name_nodes(b)
+    nodes = []
+    for n in nul:
+        issues = []
+        if abs(math.sqrt(sum(x * x for x in n["quaternion"])) - 1.0) > 0.01:
+            issues.append("non-unit quaternion")
+        if any(abs(abs(s) - 1.0) > 0.02 for s in n["scale"]):
+            issues.append("non-unit scale")
+        nodes.append({"name": n["name"], "position": n["position"],
+                      "quaternion": n["quaternion"], "scale": n["scale"],
+                      "key_count": 1, "issues": issues})
+    return {"variant": "nul", "nodes": nodes,
+            "stats": {"nodes": len(nodes),
+                      "flagged": sum(1 for n in nodes if n["issues"])}}
+
+
 def cmd_info(args: argparse.Namespace) -> int:
     h = read_header(args.file)
     b = Path(args.file).read_bytes()
@@ -259,6 +305,17 @@ def cmd_roundtrip(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_semantic(args: argparse.Namespace) -> int:
+    b = Path(args.file).read_bytes()
+    doc = decode_fxm_semantic(b)
+    print(f"variant={doc['variant']} nodes={doc['stats']['nodes']} "
+          f"flagged={doc['stats']['flagged']}")
+    for n in doc["nodes"][:args.limit]:
+        issues = (" issues=" + ",".join(n["issues"])) if n["issues"] else ""
+        print(f"  {n['name'][:32]:33s} keys={n['key_count']}{issues}")
+    return 0
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -276,6 +333,10 @@ def main(argv=None) -> int:
     p.add_argument("file")
     p.add_argument("out")
     p.set_defaults(func=cmd_roundtrip)
+    p = sub.add_parser("semantic", help="decode and validate FXM node semantics")
+    p.add_argument("file")
+    p.add_argument("--limit", type=int, default=20)
+    p.set_defaults(func=cmd_semantic)
     args = ap.parse_args(argv)
     return args.func(args)
 

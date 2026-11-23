@@ -178,6 +178,35 @@ class FxmRecordTest(unittest.TestCase):
             self.assertEqual(b["offset"] - (a["keyframe_offset"] + 84), 0)
 
 
+    def test_semantic_decoder(self):
+        std = next((p for p in glob.glob(str(ROOT.parent / "GTR2Steam" / "**" / "*"),
+                                         recursive=True)
+                    if p.lower().endswith(".fxm") and fxm_tool.parse_node_records(
+                        Path(p).read_bytes())), None)
+        if std is None:
+            self.skipTest("standard FXM sample not present")
+        doc = fxm_tool.decode_fxm_semantic(Path(std).read_bytes())
+        self.assertEqual(doc["variant"], "standard")
+        self.assertGreaterEqual(doc["stats"]["nodes"], 1)
+        self.assertEqual(doc["stats"]["flagged"], 0)
+        for n in doc["nodes"]:
+            self.assertEqual(n["key_count"], 2)
+            self.assertEqual(n["issues"], [])
+        # Standard nodes are static: both TRS keys are identical (148/148 corpus).
+        keys = fxm_tool.decode_node_keys(Path(std).read_bytes(),
+                                         fxm_tool.parse_node_records(Path(std).read_bytes())[0])["keys"]
+        for f in ("position", "quaternion", "scale"):
+            self.assertEqual(keys[0][f], keys[1][f])
+
+        nul = next((p for p in glob.glob(str(ROOT.parent / "GTR2Steam" / "**" / "*"),
+                                         recursive=True)
+                    if p.lower().endswith(".lma") and fxm_tool.parse_nul_name_nodes(
+                        Path(p).read_bytes())), None)
+        if nul is not None:
+            d2 = fxm_tool.decode_fxm_semantic(Path(nul).read_bytes())
+            self.assertEqual(d2["variant"], "nul")
+            self.assertTrue(all(n["key_count"] == 1 for n in d2["nodes"]))
+
     def test_node_keyframe_invariants_across_corpus(self):
         """148/148 standard nodes: 84-byte keys, unit quats, +/-1 scale, trailer link."""
         checked = 0

@@ -249,3 +249,7 @@ python3 gtl_to_gtr2.py --validate <GameData-dir>
 ```
 
 **Limitations**: geometry, physics, vehicle/track config and in-game correctness are not converted or validated.
+
+## FXM semantic decoding
+
+`fxm_tool.py semantic <file>` decodes and validates FXM skeleton nodes from both file variants. **Limitations**: key_count semantics and animation-to-mesh binding remain unresolved.
