@@ -244,25 +244,25 @@ def validate_gtr2_tree(root: str | Path,
         if suffix == ".gtl":
             problems.append(f"stale .gtl archive: {p}")
         if suffix == ".gdb":
-            data = p.read_bytes()
+            data = aud_plain(p.read_bytes())
             for msg in validate_gdb(data):
                 problems.append(f"{p}: {msg}")
             for msg in validate_gdb_times(data):
                 problems.append(f"{p}: {msg}")
         if suffix == ".car":
-            for msg in validate_car(p.read_bytes()):
+            for msg in validate_car(aud_plain(p.read_bytes())):
                 problems.append(f"{p}: {msg}")
         if suffix == ".ani":
-            for msg in validate_ani(p.read_bytes()):
+            for msg in validate_ani(aud_plain(p.read_bytes())):
                 problems.append(f"{p}: {msg}")
         if suffix == ".dmg":
-            for msg in validate_dmg_constants(p.read_bytes()):
+            for msg in validate_dmg_constants(aud_plain(p.read_bytes())):
                 problems.append(f"{p}: {msg}")
         if suffix == ".rcd":
-            for msg in validate_rcd(p.read_bytes()):
+            for msg in validate_rcd(aud_plain(p.read_bytes())):
                 problems.append(f"{p}: {msg}")
         if suffix == ".aud":
-            data = p.read_bytes()
+            data = aud_plain(p.read_bytes())
             for msg in validate_aud(data):
                 problems.append(f"{p}: {msg}")
             for msg in validate_aud_paths(data):
@@ -270,19 +270,19 @@ def validate_gtr2_tree(root: str | Path,
             for msg in validate_aud_roadnoise(data):
                 problems.append(f"{p}: {msg}")
         if suffix == ".hdc":
-            data = p.read_bytes()
+            data = aud_plain(p.read_bytes())
             for msg in validate_hdc(data):
                 problems.append(f"{p}: {msg}")
             for msg in validate_hdc_clutch(data):
                 problems.append(f"{p}: {msg}")
         if suffix == ".aiw":
-            for msg in validate_aiw(p.read_bytes()):
+            for msg in validate_aiw(aud_plain(p.read_bytes())):
                 problems.append(f"{p}: {msg}")
         if suffix == ".tyr":
-            for msg in validate_tyr(p.read_bytes()):
+            for msg in validate_tyr(aud_plain(p.read_bytes())):
                 problems.append(f"{p}: {msg}")
         if suffix == ".trk":
-            data = p.read_bytes()
+            data = aud_plain(p.read_bytes())
             for msg in validate_trk(data):
                 problems.append(f"{p}: {msg}")
             for value in masfile_values(data):

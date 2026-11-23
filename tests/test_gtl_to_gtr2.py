@@ -384,6 +384,25 @@ class GtlToGtr2Test(unittest.TestCase):
         if broken != data:
             self.assertTrue(g.validate_gdb_times(broken))
 
+    def test_tree_validator_decrypts_jca_configs(self):
+        """validate_gtr2_tree must see inside JCA-wrapped config files."""
+        import media_tool
+        samples = [Path(p) for p in glob.glob(
+            str(ROOT.parent / "Race07Complete" / "**" / "*.dmg"), recursive=True)
+            if open(p, "rb").read(4) == b"\x0f\xb1\xff\xff"]
+        if not samples:
+            self.skipTest("encrypted DMG corpus not present")
+        detected = 0
+        for path in samples:
+            raw = path.read_bytes()
+            plain = media_tool.decrypt_jca_text(raw)
+            # Raw encrypted bytes cannot be validated; decrypted values can.
+            self.assertEqual(g.validate_dmg_constants(raw), [])
+            problems = g.validate_dmg_constants(plain)
+            if problems:
+                detected += 1
+        self.assertGreater(detected, 5)
+
     def test_gdb_racetime_invariant_jca(self):
         """The session racetime invariant also holds on decrypted JCA GDBs."""
         import media_tool

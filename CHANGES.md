@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 10:00:00 -0500 - Tree validator decrypts JCA configs
+- `validate_gtr2_tree()` now decrypts JCA-wrapped config files before applying all per-format validators. On a Race07 subtree this removed 9 false validation problems and exposed genuine GTL-style DMG values in encrypted files. Added a corpus regression test; all 30 converter tests pass.
+
 ## 2026-11-24 09:30:00 -0500 - Conversion-rule scoping on encrypted configs
 - Corpus-verified that the HDC clutch rewrite (0.6→0.8) is GTL-specific: decrypted JCA Race07/Volvo HDCs use 0.9/1.2, so applying it there would be wrong. TYR `WetWeather=1` is universal across all corpora including decrypted JCA files. Documented as rule-scoping evidence (no code change).
 
