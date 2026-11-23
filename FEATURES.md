@@ -54,6 +54,7 @@ python3 isi_crypt.py -e -s 4b1dca9f960524e8 <in> <out>  # encrypt
 python3 gmt_tool.py info <file.gmt>
 python3 gmt_tool.py scan <dir>
 python3 gmt_tool.py diff <a.gmt> <b.gmt>
+python3 gmt_tool.py relayout <input.gmt> <output.gmt>   # rebuild offsets after mesh data grows
 ```
 
 **Limitations**: Stage type (+256) and texture channel (+260) are decoded, but UV/LOD/shader/flag meanings, encrypted GMTs, and in-game geometry correctness remain unresolved.
