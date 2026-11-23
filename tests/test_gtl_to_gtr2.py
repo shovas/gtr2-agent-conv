@@ -123,6 +123,34 @@ class GtlToGtr2Test(unittest.TestCase):
                                               for k in g.GTR2_SESSION_KEYS)]
                 self.assertEqual(strip(src), strip(out))
 
+    def test_full_subtree_gap_inventory(self):
+        """Converting a single track folder leaves only documented shared/GDB gaps."""
+        src = ROOT.parent / "GTLSteam/GameData/Locations/Anderstorp"
+        gtr_dir = ROOT.parent / "GTR2Steam/GameData/Locations/Anderstorp"
+        if not src.is_dir() or not gtr_dir.is_dir():
+            self.skipTest("Anderstorp folders not present")
+        known = {Path(p).name.lower()
+                 for p in glob.glob(str(ROOT.parent / "GTR2Steam/GameData/**/*"),
+                                    recursive=True)
+                 if p.lower().endswith(".gtr")}
+        with tempfile.TemporaryDirectory() as td:
+            g.convert_tree(src, td, include_others=True)
+            local = {Path(p).name.lower() for p in glob.glob(td + "/**/*", recursive=True)
+                     if p.lower().endswith(".gtr")}
+            probs = g.validate_gtr2_tree(td, known | local)
+            self.assertTrue(probs)
+            # No stale .gtl, and every problem is a known GDB/shared-archive gap.
+            self.assertFalse(any("stale .gtl" in p for p in probs))
+            self.assertTrue(all("missing session key" in p or "unresolved MASFile" in p
+                                for p in probs))
+            # The one same-name GDB template can close its own gap.
+            name = "sanderstorp.gdb"
+            tgt = Path(td) / name
+            template = gtr_dir / name
+            if tgt.is_file() and template.is_file():
+                out, _ = g.adapt_gdb_from_template(tgt.read_bytes(), template.read_bytes())
+                self.assertEqual(g.validate_gdb(out), [])
+
     def test_validate_tree(self):
         src = ROOT.parent / "GTLSteam/GameData/Locations/Anderstorp"
         target = ROOT.parent / "GTR2Steam/GameData/Locations/Anderstorp"

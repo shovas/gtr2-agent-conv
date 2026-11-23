@@ -52,9 +52,9 @@ was blocked by a missing `MFC42.DLL`.
 
 ## Final verification
 ```
-python3 run_tests.py --mode quick    -> 76 tests, ~14 s, 0 failures
-python3 run_tests.py --mode normal   -> 161 tests, ~302 s, 0 failures
-python3 run_tests.py --mode full     -> 284 tests, ~684 s, 0 failures (2 skipped)
+python3 run_tests.py --mode quick    -> 77 tests, ~15 s, 0 failures
+python3 run_tests.py --mode normal   -> 162 tests, ~305 s, 0 failures
+python3 run_tests.py --mode full     -> 285 tests, ~690 s, 0 failures (2 skipped)
 python3 pre_push_check.py            -> PASS
 git status --short                    -> clean
 ```

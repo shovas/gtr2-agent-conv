@@ -3,7 +3,8 @@
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
 ## 2026-11-23 22:00:00 -0500 - GDB session-key validation and template adaptation
-- Corpus comparison: all 85 GTR2 `.gdb` files contain 15 universal session keys, none of the 53 GTL files do. `gtl_to_gtr2.py` validates this and can copy the keys from a same-name GTR2 template (6 corpus pairs: 11 missing keys -> 0, all other lines byte-identical). Fixed a CRLF-swallowing regex bug. Also added a `.car` key validator: all 145 GTR2 cars carry four universal keys absent from all 96 GTL cars; values are car-specific so only presence is enforced.
+- Corpus comparison: all 85 GTR2 `.gdb` files contain 15 universal session keys, none of the 53 GTL files do. `gtl_to_gtr2.py` validates this and can copy the keys from a same-name GTR2 template (6 corpus pairs: 11 missing keys -> 0, all other lines byte-identical). Fixed a CRLF-swallowing regex bug. Also added a `.car` key validator: all 145 GTR2 cars carry four universal keys absent from all 96 GTL cars; values are car-specific so only presence is enforced. A full-subtree test inventories the remaining gaps (shared archives outside the subtree and unmatched GDB templates).
+
 
 ## 2026-11-23 21:45:00 -0500 - GTL->GTR2 container/TRK building block
 - `gtl_to_gtr2.py` rewrites `.trk` MASFile entries to GTR2 conventions and repacks `.gtl` archives as type-0 `.gtr`; corpus-verified on 25 GTL `.trk` (0→25 valid after conversion) and 34 GTR2 `.trk` (34/34 valid, idempotent), with subtree conversion, a `--validate DIR` GTR2-convention checker (0 problems on real GTR2 GameData, 646 on GTL; MASFile-reference resolution verified 187/187 GTR2 and 106/106 GTL), and 6 unittests. Full pipeline still needs geometry/physics/config work.
