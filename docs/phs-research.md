@@ -63,6 +63,8 @@ New angles tried that were not in the first investigation:
 | File length divisibility | 384000-byte slice size; files hold 1–2 full slices plus metadata/partial slices | Consistent with truncated/partial PAR2 sets |
 | `PHYSICS.PHS` entropy | 7.986 (slightly below the other four); no PAR2 packets | Still opaque; could be a partial slice or unrelated blob |
 | ISI crypt forced enctype 0/1, skips 0..64 | best printability 0.427 (from 0.384), entropy still ~7.8 — no valid decrypt | **Excluded** as a simple ISI-crypt payload |
+| PAR2 slice reconstruction: search all four sibling PHS files for PHYSICS.PHS's first 64 bytes | no match; PHYSICS.PHS also lacks the PAR2 set id and `PAR2\0PKT` magic; the `GTL_Update_0901.exe` target is not present locally | **Unverifiable offline** — needs the update executable or a full slice set |
+| 256/512-byte record stride on PHYSICS.PHS (13,064 bytes) | no repeating header prefix; 8-/264-byte tails | **No structure found** |
 
 Excluded by this pass: a literal PAR2-aware loader in the GTL binaries; a feasible
 Wine runtime trace in this environment; identical recovery slices across the PHS
