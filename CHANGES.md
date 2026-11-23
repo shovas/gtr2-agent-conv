@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 12:50:00 -0500 - Multi-track end-to-end validation
+- Extended `convert_tree` validation to all 7 GTL track folders with GTR2 counterparts (Anderstorp, Donington, Hockenheim, Imola, Magny-Cours, Monza, Spa): every converted subtree validates with 0 problems using same-extension templates. Added regression test; no new failures to triage.
+
 ## 2026-11-24 12:25:00 -0500 - Full rewrite integration in convert_tree
 - `gtl_to_gtr2.convert_tree()` now applies every corpus-confirmed rewrite (audio paths/road-noise, HDC clutch, tire default, damage constants, plus template-driven key additions) to loose files and archive members. An end-to-end converted Anderstorp subtree with templates validates with 0 problems; 2 new tests.
 
