@@ -156,7 +156,7 @@ patch), but does not identify the exact engine-side use. Further refinement: the
   smoothly from r=0.995 at lag 1 with a +0.176/frame trend (a continuous signal, not a periodic counter);
   correlation with heading curvature (13,528 samples) is r=-0.012. A lattice search over 15 scales x 3 biases
   against DSI heading/pitch/time found no exact fixed-point quantization for any packed byte (best 52%, driven
- A lagged cross-correlation with speed (10,527 samples, lags -10..+10) peaks at only |r|=0.137, so slot 7 is not a delayed speed signal.  by constant values). Its exact meaning remains **unresolved**.
+ A lagged cross-correlation with speed (10,527 samples, lags -10..+10) peaks at only |r|=0.137, so slot 7 is not a delayed speed signal. Frame-to-frame deltas of slot 7 also show no correlation with acceleration (r=0.003) or heading-rate (r≈0, 9,011 samples).  by constant values). Its exact meaning remains **unresolved**.
   A 17,392-frame test appeared to show within-file slot-9/pitch correlation r=0.687, but that is an artifact:
   the byte is 0 in ~all frames with only 1-2 exceptions at 64, which drive the correlation. With corrected
   63-byte alignment, those exceptions occur only at the **first or last frame** of each file (e.g. index 0 or
