@@ -190,6 +190,8 @@ Notably absent in GTL GameData: rFactor-style `.veh/.scn/.gen/.hdv/.tbc/.sfx` (0
 
 **Pairwise value-invariant survey** (`.gdb`/`.car`/`.hdc`): no new clean GTR2-only invariants beyond the session-block `racetime == racetimescaled` rule; apparent `.hdc` hits are both-keys-absent-in-GTL artifacts, not real relationships.
 
+**Rule scoping re-verified on decrypted JCA configs (2026-11-24)**: the HDC `clutchengagerate` rewrite (0.6→0.8) is genuinely GTL-specific — plain GTL uses 0.6 (41/42), GTR2 0.8 (43/44), while Race07 uses 0.9/1.2 and decrypted JCA Race07/Volvo files use 0.9/1.2 (only 3 JCA files have 0.6), so the rule must not be applied to Race07 sources. The TYR `WetWeather=1` key is universal (GTR2 45/15, decrypted JCA Race07 68/60, Volvo 8/8, plain Race07 25/25, GTL 3/26), so it is a presence rule rather than a GTR2-only marker.
+
 **Value-scale candidates examined but NOT promoted**: median GTL→GTR2 numeric shifts exist for `.hdc` `bumpstopspring` (250000→125000), `bumpstopdamper` (2000→1050), `forwardgears` (4/5→6), `brakepressuresetting` (10→20), `diffcoastsetting` (2→8), `.eng` `enginebrakingmapsetting` (4→2) and `.tyr` `optimumpressurebase` (60/100→90). None is universal in both corpora (e.g. 3 GTR2 `.hdc` files retain GTL `bumpstopspring`/`bumpstopdamper`, 3 retain GTL `upshiftdelay`/`downshiftdelay`, 2 retain GTL `brakepressuresetting`), so applying them would be speculative; only `clutchengagerate` (0.6→0.8, universal where present) and the `.aud` path prefixes were promoted. A strict universal constant-difference sweep over 16 text formats found no further rules.
 
 ## Confidence / gaps

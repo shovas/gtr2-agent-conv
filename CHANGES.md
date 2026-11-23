@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 09:30:00 -0500 - Conversion-rule scoping on encrypted configs
+- Corpus-verified that the HDC clutch rewrite (0.6→0.8) is GTL-specific: decrypted JCA Race07/Volvo HDCs use 0.9/1.2, so applying it there would be wrong. TYR `WetWeather=1` is universal across all corpora including decrypted JCA files. Documented as rule-scoping evidence (no code change).
+
 ## 2026-11-24 09:00:00 -0500 - Identify JCA-wrapped text configs
 - `media_tool.identify()` now recognises JCA-wrapped text configs (`.car/.gdb/.cam/.scn/.aud/...`) as `text-jca` with line counts, instead of the generic `jca` label; media payloads still report `dds-jca`/`wav-jca`/`tga-jca`. Added a corpus regression test; all 51 media tests pass.
 
