@@ -103,7 +103,8 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 ### TGA
 - **Read/Write**: Semantic read/write for uncompressed truecolor/grayscale (type 2/3) and RLE truecolor (type 10) via `media_tool.py`. Type 2/3 round-trip is byte-identical; type 10 round-trip is pixel-identical (encoder emits raw packets).
 - **Verification**: `tests/test_media_tool.py` (synthetic type 2 byte round-trip, synthetic type 10 pixel round-trip, real type 2 when present).
-- **Gaps**: other TGA types/color maps not fully implemented.
+- **RLE encoding**: TGA type 10 round-trips now emit true RLE runs (verified on a 666x400 corpus image; 532,356 vs 534,231 original bytes) instead of raw packets; decoded pixels are identical.
+- **Gaps**: color-mapped TGA and other rarer types not implemented (none found in the corpus).
 
 ### BMP
 - **Read/Write**: Semantic read/write for uncompressed BI_RGB 24/32-bit BMP via `media_tool.py` (top-down memory representation, bottom-up file write).

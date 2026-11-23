@@ -413,15 +413,35 @@ def _decode_tga_rle(data: bytes, pixel_count: int, bytespp: int) -> bytes:
 
 
 def _encode_tga_rle(pixels: bytes, pixel_count: int, bytespp: int) -> bytes:
-    # Simple RLE encoder: emit raw packets (no compression) for correctness.
-    # Semantic round-trip is guaranteed by decode(encode(decode(x)))==decode(x).
+    """Encode pixels as TGA run-length packets (RLE + raw)."""
     out = bytearray()
     i = 0
     while i < pixel_count:
-        chunk = min(128, pixel_count - i)
-        out.append(chunk - 1)  # raw packet
-        out.extend(pixels[i*bytespp:(i+chunk)*bytespp])
-        i += chunk
+        run = 1
+        px = pixels[i*bytespp:(i+1)*bytespp]
+        while (run < 128 and i + run < pixel_count and
+               pixels[(i+run)*bytespp:(i+run+1)*bytespp] == px):
+            run += 1
+        if run >= 2:
+            out.append(0x80 | (run - 1))
+            out.extend(px)
+            i += run
+            continue
+        # raw packet: gather up to 128 pixels until the next repeat run
+        raw_end = i + 1
+        while raw_end < pixel_count and raw_end - i < 128:
+            nxt = pixels[raw_end*bytespp:(raw_end+1)*bytespp]
+            nrun = 1
+            while (nrun < 2 and raw_end + nrun < pixel_count and
+                   pixels[(raw_end+nrun)*bytespp:(raw_end+nrun+1)*bytespp] == nxt):
+                nrun += 1
+            if nrun >= 2:
+                break
+            raw_end += 1
+        count = raw_end - i
+        out.append(count - 1)
+        out.extend(pixels[i*bytespp:raw_end*bytespp])
+        i = raw_end
     return bytes(out)
 
 

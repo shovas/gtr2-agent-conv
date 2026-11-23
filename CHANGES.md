@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 14:30:00 -0500 - TGA RLE encoder improved
+- `_encode_tga_rle()` now emits real run packets instead of raw-only packets; a corpus RLE TGA round-trips to 532,356 bytes (original 534,231) with identical decoded pixels. Added regression test.
+
 ## 2026-11-23 14:00:00 -0500 - Lossless mipmapped DDS round-trip
 - `read_dds()` now preserves the full mip chain and level-0 payload; `to_bytes()` reuses original compressed bytes when RGBA is unchanged. Two mipmapped corpus files (DXT1 12 mips, uncompressed 11 mips) round-trip byte-identically. BC4/5/cube maps confirmed absent from 7,480 local DDS files.
 

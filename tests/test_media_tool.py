@@ -1,3 +1,4 @@
+import os
 import struct
 import sys
 import tempfile
@@ -447,6 +448,23 @@ class MediaToolTest(unittest.TestCase):
             info = media_tool.tga_roundtrip(src, dst)
             self.assertEqual(info.format, "tga")
             self.assertEqual(src.read_bytes(), dst.read_bytes())
+
+    def test_tga_rle_corpus_roundtrip(self):
+        import glob
+        sample = next((p for p in glob.glob(str(ROOT.parent / "GTR2Steam" / "**" / "*"), recursive=True)
+                       if p.lower().endswith(".tga") and Path(p).is_file()
+                       and open(p, "rb").read(18)[2] == 10), None)
+        if sample is None:
+            self.skipTest("RLE TGA sample not present")
+        img = media_tool.read_tga(sample)
+        self.assertEqual(img.image_type, 10)
+        out = media_tool.write_tga(img)
+        self.assertLess(len(out), os.path.getsize(sample) * 2)
+        # decoded pixels are identical after re-encode
+        with tempfile.TemporaryDirectory() as td:
+            dst = Path(td) / "rle.tga"
+            dst.write_bytes(out)
+            self.assertEqual(media_tool.read_tga(dst).pixels, img.pixels)
 
     def test_tga_real_type2_if_present(self):
         p = ROOT.parent / "GTR2Steam/GameData/SpecialEvent/001_Pan Euro RS 2003 Rookie Cup_Icon.tga"
