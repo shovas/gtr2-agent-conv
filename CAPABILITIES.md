@@ -38,7 +38,7 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 ### GMT (`.gmt`)
 - **Read**: Structural/lossless. Parses header (obj_list_offset, flags, 16-byte magic), mesh table at 0x16C, 108-byte mesh records (27*u32), vertex/index blobs, material tail, 4x264-byte stage blocks, ASCII strings.
 - **Write**: Lossless structural round-trip. Preserves original bytes for unknown/gap regions; writes known structural fields and data at original offsets.
-- **Relayout**: `gmt_format.relayout_gmt()` rebuilds all mesh-record and header offsets after a mesh blob changes size (e.g. vertices added). Packs vertex/extra/stream/index blobs and material tail contiguously, preserving blob bytes exactly; unknown inter-blob gap bytes are not retained (use `write_gmt` for in-place lossless edits). Validated on 400/400 real GTR2 GMTs plus growth/negative tests.
+- **Relayout**: `gmt_format.relayout_gmt()` rebuilds all mesh-record and header offsets after a mesh blob changes size (e.g. vertices added). Packs vertex/extra/stream/index blobs and material tail contiguously, preserving blob bytes exactly; unknown inter-blob gap bytes are not retained (use `write_gmt` for in-place lossless edits). Validated on 400/400 real GTR2 GMTs and 300/300 GTL GMTs plus growth/negative tests.
 - **Decoded/verified fields**:
   - Header: `obj_list_offset`, `flags`, magic.
   - Mesh: count/first, `rec[1]` flags, `rec[2]` material index, `rec[3]` vertex count, `rec[4]` vertex offset, `rec[5]` extra block/stream boundary, `rec[6]` vertex end/stream boundary, `rec[7]` stream2 end, `rec[8]` stream3 end, `rec[10]` index count, `rec[11]` index offset.
