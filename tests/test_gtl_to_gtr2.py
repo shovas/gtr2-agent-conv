@@ -123,6 +123,26 @@ class GtlToGtr2Test(unittest.TestCase):
             out, n = g.rewrite_aud_sound_paths(p.read_bytes())
             self.assertEqual(n, 0)
 
+    def test_dmg_universal_constants(self):
+        def files(root):
+            return [Path(p) for p in glob.glob(
+                str(ROOT.parent / root / "**" / "*"), recursive=True)
+                if p.lower().endswith(".dmg")]
+        gtl, gtr = files("GTLSteam"), files("GTR2Steam")
+        if not gtl or not gtr:
+            self.skipTest("damage-model corpora not present")
+        self.assertTrue(all(g.validate_dmg_constants(p.read_bytes()) for p in gtl))
+        self.assertTrue(all(not g.validate_dmg_constants(p.read_bytes()) for p in gtr))
+        for p in gtl:
+            data = p.read_bytes()
+            out, n = g.rewrite_dmg_constants(data)
+            self.assertEqual(n, len(g.GTR2_DMG_CONSTANTS), p.name)
+            self.assertEqual(g.validate_dmg_constants(out), [])
+            # GTR2's own values are never re-touched.
+            out2, n2 = g.rewrite_dmg_constants(out)
+            self.assertEqual(n2, 0)
+            self.assertEqual(out2, out)
+
     def test_aud_roadnoise_rewrite(self):
         def files(root):
             return [Path(p) for p in glob.glob(

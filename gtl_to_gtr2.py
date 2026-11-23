@@ -184,6 +184,9 @@ def validate_gtr2_tree(root: str | Path,
         if suffix == ".car":
             for msg in validate_car(p.read_bytes()):
                 problems.append(f"{p}: {msg}")
+        if suffix == ".dmg":
+            for msg in validate_dmg_constants(p.read_bytes()):
+                problems.append(f"{p}: {msg}")
         if suffix == ".rcd":
             for msg in validate_rcd(p.read_bytes()):
                 problems.append(f"{p}: {msg}")
@@ -307,6 +310,43 @@ def validate_aud_paths(data: bytes) -> list[str]:
     if AUD_OLD_PREFIX.search(data):
         return ["stale Cars\\ sound path"]
     return []
+
+
+# .dmg damage constants: each of these key values is single-valued across all
+# 29 GTL and all 26 GTR2 damage files. (vertmult 1.00->1.0 is cosmetic and
+# deliberately omitted.) Values are literal strings so formatting is preserved.
+GTR2_DMG_CONSTANTS = {
+    "aerodiv": ("0.0000050", "1.25e-5"),
+    "aeromin": ("2750.0", "1100.0"),
+    "frontwingcollparams": ("(1750.0, 550.0, 1.00)", "(10000.0, 2400.0, 1.00)"),
+    "part0collparams": ("(1750.0, 550.0, 1.00)", "(7200.0, 1000.0, 0.80)"),
+    "part2collparams": ("(1750.0, 550.0, 1.00)", "(7200.0, 1000.0, 0.80)"),
+    "rearwingcollparams": ("(1750.0, 550.0, 1.00)", "(7500.0, 2000.0, 1.00)"),
+    "wallskidthresh": ("1500.0", "2500.0"),
+    "wheel0collparams": ("(11150.0, 110.0, 1.00)", "(11250.0, 110.0, 1.00)"),
+    "wheel1collparams": ("(11150.0, 110.0, 1.00)", "(11250.0, 110.0, 1.00)"),
+    "wheeldetach": ("20000.0", "18000.0"),
+}
+
+
+def _dmg_value_re(key: str, old: str) -> re.Pattern:
+    return re.compile(rb"(?im)^([ \t]*" + re.escape(key.encode()) +
+                      rb"[ \t]*=[ \t]*)" + re.escape(old.encode()) + rb"(?=[ \t\r\n/]|$)")
+
+
+def rewrite_dmg_constants(data: bytes) -> tuple[bytes, int]:
+    out = data
+    total = 0
+    for key, (old, new) in GTR2_DMG_CONSTANTS.items():
+        out, n = _dmg_value_re(key, old).subn(
+            lambda m: m.group(1) + new.encode(), out)
+        total += n
+    return out, total
+
+
+def validate_dmg_constants(data: bytes) -> list[str]:
+    return [f"stale GTL .dmg value: {k}" for k, (old, _new) in GTR2_DMG_CONSTANTS.items()
+            if _dmg_value_re(k, old).search(data)]
 
 
 # .aud road-noise sample: 30/31 GTL files use gtc_road_roll_int.wav while all
