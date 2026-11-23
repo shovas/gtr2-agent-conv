@@ -7,7 +7,7 @@
 ## Commands
 - Tests: `python3 run_tests.py --mode quick|normal|full` (default `normal`; progressive coverage, budget + timing report; `--list` shows tiers, `--coverage` adds optional line coverage). Plain full suite: `python3 -m unittest discover -s tests -v`.
 - Pre-push safety/privacy check: `python3 pre_push_check.py` (must pass before pushing; allowlists `shovas` and its noreply email)
-- Tools: `mas_tool.py`, `isi_crypt.py`, `jca_crypt.py`, `gmt_tool.py`/`gmt_format.py`, `gmt_layout.py`/`gmt_semantic.py`, `mts_format.py`, `race_gmt.py`, `phs_tool.py`, `rf1_to_gtr2.py`, `text_convert.py`, `simbin_text_tool.py`, `simbin_events_tool.py`, `ghost_align.py`, `gzip_simbin_tool.py`, `fxm_tool.py`, `media_tool.py`, `validate_conversion.py`, `corpus_diff.py`, `validate_materials.py`. See `FEATURES.md` for usage.
+- Tools: `mas_tool.py`, `isi_crypt.py`, `jca_crypt.py`, `gmt_tool.py`/`gmt_format.py`, `gmt_layout.py`/`gmt_semantic.py`, `mts_format.py`, `race_gmt.py`, `phs_tool.py`, `rf1_to_gtr2.py`/`gtl_to_gtr2.py`, `text_convert.py`, `simbin_text_tool.py`, `simbin_events_tool.py`, `ghost_align.py`, `gzip_simbin_tool.py`, `fxm_tool.py`, `media_tool.py`, `validate_conversion.py`, `corpus_diff.py`, `validate_materials.py`. See `FEATURES.md` for usage.
 
 ## Key locations
 All `../` game installs below are **read-only references** — do not copy game data into this repo.

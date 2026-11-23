@@ -235,3 +235,15 @@ python3 race_gmt.py --materials <file.gmt>
 ```
 
 **Decoded**: stage-type enum at +256 and per-material texture-channel index at +260. **Limitations**: the 36-byte position grid is experimental and is not a validated triangle decoder.
+
+## GTL -> GTR2 conversion (building block)
+
+**What it does**: Converts the GTL container layer to GTR2 conventions — rewrites `.trk` `MASFile=` entries (`.gtl`→`.gtr`, teammaps2, `Misc.gtr`) and repacks `.gtl` archives as `.gtr`.
+
+**Commands**:
+```bash
+python3 gtl_to_gtr2.py <source.gtl> <target.gtr>
+python3 gtl_to_gtr2.py <source.gtl> --check
+```
+
+**Limitations**: geometry, physics, vehicle/track config and in-game correctness are not converted or validated.

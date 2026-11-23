@@ -52,9 +52,9 @@ was blocked by a missing `MFC42.DLL`.
 
 ## Final verification
 ```
-python3 run_tests.py --mode quick    -> 67 tests, ~9 s, 0 failures
-python3 run_tests.py --mode normal   -> 152 tests, ~290 s, 0 failures
-python3 run_tests.py --mode full     -> 275 tests, ~667 s, 0 failures (2 skipped)
+python3 run_tests.py --mode quick    -> 72 tests, ~12 s, 0 failures
+python3 run_tests.py --mode normal   -> 157 tests, ~295 s, 0 failures
+python3 run_tests.py --mode full     -> 280 tests, ~672 s, 0 failures (2 skipped)
 python3 pre_push_check.py            -> PASS
 git status --short                    -> clean
 ```
@@ -62,4 +62,5 @@ git status --short                    -> clean
 ## Later work (post-plan)
 - Quick/Normal/Full test execution modes (`run_tests.py`) with deterministic progressive tiers.
 - Offline unresolved-field RE documented in `docs/open-issues-research.md`: FXM key_count, GTTF slots 7/9 and PHYSICS.PHS have multiple independent negative results; remaining confirmation needs a spec or runtime.
-- All original Wave 0-2 tasks and the binary-format decodes (GMT/MAS/MTS/FXM/GTTF/GTR1/Bink/TGQ) are complete and pushed.
+- All original Wave 0-2 tasks and the binary-format decodes (GMT/MAS/MTS/FXM/GTTF/GTR1/Bink/TGQ) are complete.
+- GTL→GTR2 container/TRK building block (`gtl_to_gtr2.py`) implemented and corpus-verified (25 GTL + 34 GTR2 `.trk` files); full pipeline still needs geometry/physics/config adaptation and in-game validation.
