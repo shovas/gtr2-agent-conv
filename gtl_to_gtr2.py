@@ -179,7 +179,10 @@ def validate_gtr2_tree(root: str | Path,
         if suffix == ".gtl":
             problems.append(f"stale .gtl archive: {p}")
         if suffix == ".gdb":
-            for msg in validate_gdb(p.read_bytes()):
+            data = p.read_bytes()
+            for msg in validate_gdb(data):
+                problems.append(f"{p}: {msg}")
+            for msg in validate_gdb_times(data):
                 problems.append(f"{p}: {msg}")
         if suffix == ".car":
             for msg in validate_car(p.read_bytes()):
@@ -254,6 +257,24 @@ def validate_gdb(data: bytes) -> list[str]:
 GTR2_CAR_ONLY_KEYS = (
     "driver1", "driver2", "externaldriverposition", "steeringwheelaxis",
 )
+
+
+def validate_gdb_times(data: bytes) -> list[str]:
+    """The session block sets racetime == racetimescaled (85/85 GTR2 GDBs).
+
+    Later event sections may override ``RaceTime`` alone, so only the first
+    occurrence of each key (the session block) is compared.
+    """
+    text = data.decode("latin-1")
+    first = {}
+    for key in ("racetime", "racetimescaled"):
+        m = re.search(r"(?im)^[ \t]*" + key + r"[ \t]*=[ \t]*([^\r\n]*)", text)
+        if m:
+            first[key] = m.group(1).strip()
+    a, b = first.get("racetime"), first.get("racetimescaled")
+    if a is not None and b is not None and a != b:
+        return [f"racetime {a} != racetimescaled {b}"]
+    return []
 
 
 def validate_car(data: bytes) -> list[str]:

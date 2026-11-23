@@ -350,6 +350,19 @@ class GtlToGtr2Test(unittest.TestCase):
         self.assertTrue(all(g.validate_gdb(p.read_bytes()) for p in gtl_g))
         self.assertTrue(all(not g.validate_gdb(p.read_bytes()) for p in gtr_g))
 
+    def test_gdb_racetime_invariant(self):
+        gdbs = [Path(p) for p in glob.glob(
+            str(ROOT.parent / "GTR2Steam" / "**" / "*"), recursive=True)
+            if p.lower().endswith(".gdb")]
+        if not gdbs:
+            self.skipTest("GTR2 GDB corpus not present")
+        self.assertTrue(all(not g.validate_gdb_times(p.read_bytes()) for p in gdbs))
+        # A deliberately mismatched copy must be flagged.
+        data = gdbs[0].read_bytes()
+        broken = data.replace(b"racetime=180", b"racetime=999", 1)
+        if broken != data:
+            self.assertTrue(g.validate_gdb_times(broken))
+
     def test_car_key_rule(self):
         def cars(root):
             return [Path(p) for p in glob.glob(
