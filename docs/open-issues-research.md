@@ -109,7 +109,15 @@ conclusively establishing it requires actual game execution.
   heading is **cross-validated**: heading derived from consecutive position deltas
   (1.608 rad) matches the frame's heading values (1.583/1.615 rad). The local
   `gtr2_driving/telemetry.py` reference documents GTR2 in-memory fields (pos@140, vel@152,
-  gear@240, RPM@244) — a separate layout. Exact slot 7/9 meanings **unresolved**.
+  gear@240, RPM@244) — a separate layout.
+  Byte-level profiling of GTR2 GTT frames (1,512 samples) shows the field at +28 is
+  **`00 20 00` constant in bytes +28..+30, with only byte +31 varying** (0x3F–0x41 in one
+  file, 0x1F–0x71 across the corpus). Slot 7 is therefore a packed integer-like value,
+  **not a float** — the earlier float reading (values near powers of two) was an artifact
+  of the fixed low bytes. Its correlation with position-derived speed is weak and
+  inconsistent (r=0.03–0.30 across 6 trials), as is the neighbouring byte +32
+  (r=0.05–0.31, sign varies). An RPM-like sawtooth is not confirmed. Exact slot 7/9
+  meanings **unresolved**.
 - **GTR1 extra 16 bytes — RESOLVED**: always `[0, u, v, 0]` (zero padding + 2D float UV pair),
   confirmed across 2,215 vertices in 100 files. Added as `uv` field in `read_gtr1_vertices()`.
 - **GTR1 descriptor-less variant — RESOLVED**: 22,287 GMTs lack the 0x194 grid. Their
