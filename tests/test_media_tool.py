@@ -77,6 +77,25 @@ class MediaToolTest(unittest.TestCase):
                 self.assertEqual(a.getparams(), b.getparams())
                 self.assertEqual(a.readframes(a.getnframes()), b.readframes(b.getnframes()))
 
+    def test_jca_encrypted_textures(self):
+        import glob
+        for ext, magic in ((".dds", b"DDS "), (".tga", None)):
+            sample = next((p for p in glob.glob(str(ROOT.parent / "Race07Complete" / "**" / "*"),
+                                                recursive=True)
+                           if p.lower().endswith(ext) and Path(p).is_file()
+                           and open(p, "rb").read(4) == b"\x0f\xb1\xff\xff"), None)
+            if sample is None:
+                continue
+            with self.subTest(ext=ext):
+                info = media_tool.identify(sample)
+                self.assertEqual(info.format, ext[1:] + "-jca")
+                self.assertGreater(info.details["decrypted_size"], 0)
+                plain = media_tool.decrypt_jca_bytes(Path(sample).read_bytes())
+                if magic:
+                    self.assertEqual(plain[:4], magic)
+                else:
+                    self.assertEqual(plain[1], 0)
+
     def test_compressed_wav_decode_via_ffmpeg(self):
         import glob
         import shutil

@@ -87,6 +87,7 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 - **Write**: PCM WAVE write and round-trip; JCA-wrapped WAV decrypted to plain RIFF/WAVE; lossless byte-copy round-trip for unsupported stdlib formats.
 - **Verification**: `tests/test_media_tool.py` (PCM round-trip; real MP3-in-WAV format 0x55 lossless round-trip when present).
 - **Tool**: `media_tool.py`.
+- **JCA-wrapped textures**: 33,351 JCA-encrypted `.dds` and 4,415 `.tga` found across 7 corpora; `jca-decrypt` and `dds-jca`/`tga-jca` identification added and verified on Race07 samples.
 - **Compressed payloads**: `media_tool.py wav-decode <src> <dst>` decodes ADPCM (WAVE_FORMAT_IMA_ADPCM) and MP3-in-WAV to 16-bit PCM via ffmpeg; verified on both local corpus samples.
 - **Gaps**: encoding compressed WAV payloads not implemented; non-default JCA keys handled only via `--key`.
 

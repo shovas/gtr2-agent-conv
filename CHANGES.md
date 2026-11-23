@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 11:00:00 -0500 - JCA texture support
+- Survey found 33,351 JCA-encrypted DDS and 4,415 JCA-encrypted TGA files across 7 corpora. Generalized `decrypt_jca_bytes()` with `dds-jca`/`tga-jca` identification and `jca-decrypt` CLI; verified on Race07 samples (DDS 4x4, TGA 512x128 32-bit). Added tests.
+
 ## 2026-11-23 10:30:00 -0500 - Compressed WAV decode
 - `media_tool.py wav-decode` converts ADPCM and MP3-in-WAV payloads to 16-bit PCM via ffmpeg; verified on the corpus IMA-ADPCM sample (78,047 frames) and MP3-in-WAV sample (17,280 frames). Added tests.
 
