@@ -105,7 +105,11 @@ conclusively establishing it requires actual game execution.
   `Gtr2VehicleTelemetry` struct documents GTR2 in-memory telemetry (plain-float
   throttle/steering/RPM, 3x3 orientation matrix) — no authoritative `.gtt` file layout.
   Tested the 252-byte frame for an orthonormal 3x3 orientation matrix: none found, so the
-  ghost frame is a compact subset, not a raw telemetry dump. Exact meanings **unresolved**.
+  ghost frame is a compact subset, not a raw telemetry dump. However, the recorded slot-12
+  heading is **cross-validated**: heading derived from consecutive position deltas
+  (1.608 rad) matches the frame's heading values (1.583/1.615 rad). The local
+  `gtr2_driving/telemetry.py` reference documents GTR2 in-memory fields (pos@140, vel@152,
+  gear@240, RPM@244) — a separate layout. Exact slot 7/9 meanings **unresolved**.
 - **GTR1 extra 16 bytes — RESOLVED**: always `[0, u, v, 0]` (zero padding + 2D float UV pair),
   confirmed across 2,215 vertices in 100 files. Added as `uv` field in `read_gtr1_vertices()`.
 - **GTR1 descriptor-less variant — RESOLVED**: 22,287 GMTs lack the 0x194 grid. Their
