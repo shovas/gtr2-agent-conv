@@ -193,6 +193,8 @@ def validate_gtr2_tree(root: str | Path,
                 problems.append(f"{p}: {msg}")
             for msg in validate_aud_paths(data):
                 problems.append(f"{p}: {msg}")
+            for msg in validate_aud_roadnoise(data):
+                problems.append(f"{p}: {msg}")
         if suffix == ".hdc":
             data = p.read_bytes()
             for msg in validate_hdc(data):
@@ -304,6 +306,23 @@ def rewrite_aud_sound_paths(data: bytes) -> tuple[bytes, int]:
 def validate_aud_paths(data: bytes) -> list[str]:
     if AUD_OLD_PREFIX.search(data):
         return ["stale Cars\\ sound path"]
+    return []
+
+
+# .aud road-noise sample: 30/31 GTL files use gtc_road_roll_int.wav while all
+# 25 GTR2 files use road_roll_int.wav (the 31st GTL file omits the key).
+AUD_ROADNOISE_RE = re.compile(
+    rb"(?im)^([ \t]*vs_inside_roadnoise_dry[ \t]*=[ \t]*)gtc_road_roll_int\.wav\b")
+
+
+def rewrite_aud_roadnoise(data: bytes) -> tuple[bytes, int]:
+    out, count = AUD_ROADNOISE_RE.subn(rb"\g<1>road_roll_int.wav", data)
+    return out, count
+
+
+def validate_aud_roadnoise(data: bytes) -> list[str]:
+    if AUD_ROADNOISE_RE.search(data):
+        return ["stale GTL road-noise sample"]
     return []
 
 

@@ -123,6 +123,31 @@ class GtlToGtr2Test(unittest.TestCase):
             out, n = g.rewrite_aud_sound_paths(p.read_bytes())
             self.assertEqual(n, 0)
 
+    def test_aud_roadnoise_rewrite(self):
+        def files(root):
+            return [Path(p) for p in glob.glob(
+                str(ROOT.parent / root / "**" / "*"), recursive=True)
+                if p.lower().endswith(".aud")]
+        gtl, gtr = files("GTLSteam"), files("GTR2Steam")
+        if not gtl or not gtr:
+            self.skipTest("audio corpora not present")
+        self.assertTrue(all(not g.validate_aud_roadnoise(p.read_bytes()) for p in gtr))
+        changed = 0
+        for p in gtl:
+            data = p.read_bytes()
+            out, n = g.rewrite_aud_roadnoise(data)
+            self.assertEqual(g.validate_aud_roadnoise(out), [])
+            if n:
+                changed += 1
+                reverted = __import__('re').compile(
+                    rb"(?im)^([ \t]*vs_inside_roadnoise_dry[ \t]*=[ \t]*)road_roll_int\.wav\b").subn(
+                        rb"\g<1>gtc_road_roll_int.wav", out)[0]
+                self.assertEqual(reverted, data)
+        self.assertGreater(changed, 25)
+        for p in gtr:
+            out, n = g.rewrite_aud_roadnoise(p.read_bytes())
+            self.assertEqual(n, 0)
+
     def test_rcd_key_rule_and_template(self):
         def files(root):
             return [Path(p) for p in glob.glob(

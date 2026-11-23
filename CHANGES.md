@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 02:20:00 -0500 - Audio road-noise value rewrite
+- `vs_inside_roadnoise_dry` uses `gtc_road_roll_int.wav` in 30/30 GTL `.aud` files that define it and `road_roll_int.wav` in all 25 GTR2 files. `rewrite_aud_roadnoise()` converts the value; added validator, test and docs.
+
 ## 2026-11-24 02:00:00 -0500 - Final verification after clutch rule
 - `python3 run_tests.py --mode full`: 47 modules / 294 tests / 819.0 s, 0 failures, 2 skips. Normal: 157 tests / 279 s, 0 failures. Quick: 86 tests, 0 failures. Pre-push check PASS.
 
