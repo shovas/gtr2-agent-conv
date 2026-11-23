@@ -140,7 +140,7 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 
 ## Test execution
 - **Tool**: `run_tests.py --mode quick|normal|full` (default `normal`). Deterministic module lists with progressive coverage (`Quick ⊆ Normal ⊆ Full`), end-to-end budget warnings (Quick ≤60 s, Normal ≤300 s); expensive corpus surveys (Copa Petrobras, Stock Car Extreme, Race07 Complete, Volvo, PHS tooling) are Full-only to keep Normal within budget, and a timing/result report. `--list` prints tier membership; `--coverage` adds an optional line-coverage report (gracefully skipped when the `coverage` package is absent).
-- **Measured**: Quick 21 modules / 120 tests / ~49 s; Normal 38 modules / 191 tests / ~291 s; Full 50 modules / 356 tests / ~800 s (2 skipped — external tools absent).
+- **Measured**: Quick 21 modules / 120 tests / ~49 s; Normal 38 modules / 191 tests / ~291 s; Full 50 modules / 358 tests / ~800 s (2 skipped — external tools absent).
 - **Plain full suite**: `python3 -m unittest discover -s tests -v` remains available.
 - **Verification**: `tests/test_run_tests_modes.py` checks mode selection invariants; `tests/test_gtr1_coverage.py` asserts 33,477/33,477 GTR1 GMTs decode (Normal/Full); `tests/test_gmt_relayout.py` covers relayout round-trips and growth.
 
