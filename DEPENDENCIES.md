@@ -20,6 +20,7 @@
 
 - **git** - repository history/change tracking.
 - **unittest** - built into Python; used for tests.
+- **`coverage`** (optional) - enables `run_tests.py --coverage`; without it the runner still works and prints an "unavailable" notice.
 
 ## Notes
 

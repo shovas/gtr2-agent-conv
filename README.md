@@ -51,6 +51,8 @@ cd project
 python3 run_tests.py --mode quick     # ~10 s smoke tests
 python3 run_tests.py --mode normal    # ~4.5 min (default)
 python3 run_tests.py --mode full      # all tests (~11 min)
+python3 run_tests.py --list           # show tier membership
+python3 run_tests.py --coverage       # optional line-coverage report
 ```
 
 ## Example agent requests

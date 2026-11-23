@@ -27,6 +27,18 @@ class TestModesTest(unittest.TestCase):
         for name in run_tests.select("full"):
             self.assertTrue((ROOT / "tests" / f"{name}.py").is_file(), name)
 
+    def test_list_tiers(self):
+        import io
+        from contextlib import redirect_stdout
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            rc = run_tests.main(["--list"])
+        out = buf.getvalue()
+        self.assertEqual(rc, 0)
+        for mode in ("quick", "normal", "full"):
+            self.assertIn(f"{mode}: {len(run_tests.select(mode))} modules", out)
+        self.assertIn("full-only:", out)
+
 
 if __name__ == "__main__":
     unittest.main()

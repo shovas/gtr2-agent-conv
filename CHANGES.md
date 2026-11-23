@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 18:30:00 -0500 - Test runner gains tier listing and optional coverage
+- `run_tests.py --list` prints Quick/Normal/Full tier membership; `--coverage` adds an optional line-coverage report when the `coverage` package is installed (graceful fallback otherwise). Added a self-test for `--list`.
+
 ## 2026-11-23 18:00:00 -0500 - GTTF frame stride corrected (252 -> 63 bytes)
 - Fixed `simbin_events_tool.find_frame_grid()`: ghost frames are 63 bytes apart, not 252. The old stride grouped four consecutive samples into one; the corrected reader yields 4x as many frames with smooth per-frame position/time deltas (verified across 12 GTT files, ~4.0x frame counts). Independently confirmed by the 7-byte 63-byte-record marker in the reference-only gtr2-agent-tools ghost loader: marker count matches detected frame count in 29/29 GTT files; ~20 Hz sample rate corroborated. Updated docs and tests.
 

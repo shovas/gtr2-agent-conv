@@ -126,8 +126,8 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 - **Gaps**: no in-repo codec; relies on external ffmpeg.
 
 ## Test execution
-- **Tool**: `run_tests.py --mode quick|normal|full` (default `normal`). Deterministic module lists with progressive coverage (`Quick ⊆ Normal ⊆ Full`), end-to-end budget warnings (Quick ≤60 s, Normal ≤300 s), and a timing/result report.
-- **Measured**: Quick 16 modules / 63 tests / ~10 s; Normal 36 modules / 138 tests / ~270 s; Full 43 modules / 259 tests / ~634 s (2 skipped — external tools absent).
+- **Tool**: `run_tests.py --mode quick|normal|full` (default `normal`). Deterministic module lists with progressive coverage (`Quick ⊆ Normal ⊆ Full`), end-to-end budget warnings (Quick ≤60 s, Normal ≤300 s), and a timing/result report. `--list` prints tier membership; `--coverage` adds an optional line-coverage report (gracefully skipped when the `coverage` package is absent).
+- **Measured**: Quick 17 modules / 67 tests / ~9 s; Normal 37 modules / ~141 tests / ~270 s; Full 44 modules / ~263 tests / ~637 s (2 skipped — external tools absent).
 - **Plain full suite**: `python3 -m unittest discover -s tests -v` remains available.
 - **Verification**: `tests/test_run_tests_modes.py` checks mode selection invariants.
 
