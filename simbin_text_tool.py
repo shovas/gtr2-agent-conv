@@ -221,9 +221,10 @@ def validate_aiw_waypoints(aiw: AIW) -> list[str]:
     Verified on 30,710 waypoints across 26 AIW files (rF1/GTL/GTR2/Race07/
     BMW/F1 2002): ``WP_PTRS`` always has 4 fields, and its fourth field equals
     ``wp_branchID`` exactly. Its value buckets are 0=track, 1=pit, 2..105=grid,
-    >=106=pitbox. The second field is normally the next waypoint index, but
-    branch-start waypoints legitimately break that chain, so linkage is not
-    enforced here.
+    >=106=pitbox. ``wp_bitfields`` is 0 for track/pit and 1 for all other
+    classes (30,710/30,710). The second field is normally the next waypoint
+    index, but branch-start waypoints legitimately break that chain, so linkage
+    is not enforced here.
     """
     problems: list[str] = []
     for i, wp in enumerate(aiw.waypoints):
@@ -235,6 +236,11 @@ def validate_aiw_waypoints(aiw: AIW) -> list[str]:
             continue
         if wp.branch_id is not None and wp.branch_id != wp.ptrs[3]:
             problems.append(f"waypoint {i}: branchID={wp.branch_id} != WP_PTRS[3]={wp.ptrs[3]}")
+        if wp.bitfields is not None:
+            expected = 0 if wp.ptrs[3] in (0, 1) else 1
+            if wp.bitfields != expected:
+                problems.append(f"waypoint {i}: bitfields={wp.bitfields} != {expected} "
+                                f"for class {wp.ptrs[3]}")
     return problems
 
 

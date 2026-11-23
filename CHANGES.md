@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 04:30:00 -0500 - AIW wp_bitfields rule verified
+- Corpus-verified a second waypoint rule from the Turbo Basic source hints: `wp_bitfields` is 0 for track/pit waypoints and 1 for grid/pitbox waypoints, holding on all 30,710 local waypoints with zero exceptions. Added it to `validate_aiw_waypoints()` and extended the regression tests.
+
 ## 2026-11-24 04:00:00 -0500 - CAM deactivation invariant
 - Corpus-confirmed the camera deactivation encoding: an FLT_MAX `ActivationLocation` triplet holds exactly when `ActivationRadius=1` (23/23 local cameras, and no other camera has radius 1). The Turbo Basic reference documents a 99999 sentinel that does not occur locally; both are accepted by the new `validate_cam()`. Added a corpus regression test. Also recorded the excluded GTTF shared-memory-header hypothesis.
 

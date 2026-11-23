@@ -85,6 +85,9 @@ wp_branchID=(1)
         self.assertEqual(stt.validate_aiw_waypoints(aiw), [])
         aiw.waypoints[1].branch_id = 7
         self.assertEqual(len(stt.validate_aiw_waypoints(aiw)), 1)
+        aiw.waypoints[1].branch_id = 1
+        aiw.waypoints[1].bitfields = 1
+        self.assertEqual(len(stt.validate_aiw_waypoints(aiw)), 1)  # pit must have bitfields 0
 
 
     def test_cam_parse_and_negated_position(self):
