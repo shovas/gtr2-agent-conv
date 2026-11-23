@@ -15,6 +15,7 @@ from __future__ import annotations
 import argparse
 import gzip
 import math
+import statistics
 import struct
 import sys
 from dataclasses import dataclass, field
@@ -272,6 +273,76 @@ def read_ghost_line(data: bytes) -> list[tuple[float, float, float]]:
         points.append(xyz)
         off += FRAME_STRIDE
     return points
+
+
+def ghost_marker_records(data: bytes, kind: str) -> list[bytes]:
+    """Return 63-byte ghost records aligned so the marker starts at offset 0.
+
+    ``kind`` is ``"dsi"`` (marker already at record +0) or ``"gtt"`` (marker at
+    frame +24, found via :func:`find_frame_grid`).
+    """
+    if kind == "dsi":
+        rows = []
+        off = data.find(GHOST_MARKER)
+        while off >= 0 and off + FRAME_STRIDE <= len(data):
+            rows.append(data[off:off + FRAME_STRIDE])
+            off = data.find(GHOST_MARKER, off + FRAME_STRIDE)
+        return rows
+    if kind == "gtt":
+        grid = find_frame_grid(data)
+        if not grid:
+            return []
+        out = []
+        for frame in read_frames(data, grid):
+            off = frame["offset"] + 24
+            if off + FRAME_STRIDE <= len(data):
+                out.append(data[off:off + FRAME_STRIDE])
+        return out
+    raise ValueError(f"unknown ghost kind: {kind}")
+
+
+def byte_field_stats(rows: list[bytes]) -> tuple[list[float], list[float], list[float]]:
+    """Per-byte (63 positions) zero fraction, mean and std, normalised to 0..1."""
+    n = len(rows)
+    if not n:
+        raise ValueError("no rows")
+    zero = [0.0] * FRAME_STRIDE
+    mean = [0.0] * FRAME_STRIDE
+    std = [0.0] * FRAME_STRIDE
+    for k in range(FRAME_STRIDE):
+        col = [row[k] for row in rows]
+        m = sum(col) / n
+        zero[k] = sum(1 for b in col if b == 0) / n
+        mean[k] = m / 255.0
+        std[k] = (sum((b - m) ** 2 for b in col) / n) ** 0.5 / 255.0
+    return zero, mean, std
+
+
+def _corr(x: list[float], y: list[float]) -> float:
+    mx, my = statistics.mean(x), statistics.mean(y)
+    num = sum((a - mx) * (b - my) for a, b in zip(x, y))
+    den = (sum((a - mx) ** 2 for a in x) * sum((b - my) ** 2 for b in y)) ** 0.5
+    return num / den if den else 0.0
+
+
+def field_alignment_score(a: tuple, b: tuple, lag: int) -> float:
+    """Correlate post-marker byte statistics of two record sets at ``lag``."""
+    total = 0.0
+    for k in range(3):
+        left = a[k][8:FRAME_STRIDE]
+        right = [b[k][(i + lag) % FRAME_STRIDE] for i in range(8, FRAME_STRIDE)]
+        total += _corr(left, right)
+    return total
+
+
+def best_field_alignment(a: tuple, b: tuple) -> tuple[float, int]:
+    """Return ``(best_score, lag)`` over all 63 possible byte alignments."""
+    best = (float("-inf"), 0)
+    for lag in range(FRAME_STRIDE):
+        score = field_alignment_score(a, b, lag)
+        if score > best[0]:
+            best = (score, lag)
+    return best
 
 
 def main(argv=None) -> int:

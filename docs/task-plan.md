@@ -53,8 +53,8 @@ was blocked by a missing `MFC42.DLL`.
 ## Final verification
 ```
 python3 run_tests.py --mode quick    -> 67 tests, ~9 s, 0 failures
-python3 run_tests.py --mode normal   -> 150 tests, ~286 s, 0 failures
-python3 run_tests.py --mode full     -> 273 tests, ~656 s, 0 failures (2 skipped)
+python3 run_tests.py --mode normal   -> 152 tests, ~290 s, 0 failures
+python3 run_tests.py --mode full     -> 275 tests, ~660 s, 0 failures (2 skipped)
 python3 pre_push_check.py            -> PASS
 git status --short                    -> clean
 ```

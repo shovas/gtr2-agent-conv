@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 21:15:00 -0500 - DSI/GTT post-marker field alignment resolved
+- `ghost_align.py` plus helpers in `simbin_events_tool.py` prove the post-marker byte fields of GTR2 `.dsi` and `.gtt` records share one layout: best byte-alignment lag 0 (score 2.938/3.0 vs 0.357 at lag 4) across 68,774 DSI records and 44,602 GTT frames. The 4-byte phase shift is confined to the pre-marker region. Added reproducible script and two unittests.
+
 ## 2026-11-23 21:00:00 -0500 - Final verification after relayout work
 - `python3 run_tests.py --mode full`: 46 modules / 272 tests / 656.3 s, 0 failures, 2 skips. Normal: 39 modules / 150 tests / 285.6 s, 0 failures. Quick: 67 tests / ~9 s. Pre-push check PASS.
 

@@ -158,7 +158,7 @@ python3 rf1_to_gtr2.py <archive.mas> --check
 ```bash
 python3 simbin_events_tool.py <file.gtt|file.vcr>
 ```
-**Decoded**: GTTF metadata, GTL-IRSR, GTR2-IRSR and rF1-IRSR framing, plus the 63-byte GTTF frame grid (position + timestamp; `--frames`) and GTR2 Driving School `.dsi` instructor polylines (`--ghost-line`). **Limitations**: remaining frame fields are uninterpreted.
+**Decoded**: GTTF metadata, GTL-IRSR, GTR2-IRSR and rF1-IRSR framing, plus the 63-byte GTTF frame grid (position + timestamp; `--frames`) and GTR2 Driving School `.dsi` instructor polylines (`--ghost-line`); `ghost_align.py` verifies the two ghost layouts share their post-marker fields. **Limitations**: remaining frame fields are uninterpreted.
 
 ## 11. Consult format documentation
 

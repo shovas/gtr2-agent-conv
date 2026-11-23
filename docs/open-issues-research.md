@@ -139,7 +139,14 @@ patch), but does not identify the exact engine-side use. Further refinement: the
   approx. {small angle, heading, small angle, time-like}) whereas GTT has **three** (heading at +12,
   small angle at +16, time at +20). The extra field explains the 4-byte shift. Applying the reference
   offsets to GTT yields nonsensical values (e.g. −514 for x), so the two formats are structurally
-  related but not byte-identical.
+  related but not byte-identical. **Post-marker alignment RESOLVED**: aligning both formats by the marker
+  (marker at relative +0) and comparing per-byte statistics (zero fraction, mean, std) over +8..+62 for
+  all 68,774 `.dsi` records and 44,602 `.gtt` frames gives a best lag of **0** with score 2.938/3.0
+  (lag 4 scores only 0.357; mean |Δzero-frac| = 0.014 across 55 positions, with the single clear exception
+  of marker+12 where DSI has extra data). So the **4-byte shift is confined to the pre-marker region**
+  (position-to-marker 35 bytes in DSI vs 39 in GTT); the post-marker packed fields share one layout, and
+  DSI files supply 68,774 additional samples for them. Reproducible via `ghost_align.py`; codified in
+  `tests/test_simbin_events_tool.py`.
   Slot 9 (+36) shows the same artifact: its float mantissa is effectively constant, so its values are
   exactly `0, ±8.5, ±34, ±136, ±544, ...` (each step x4) — i.e. only the exponent/sign byte at +39 carries
   data (0x43/0xC3 etc., a sign bit plus a ~7-bit magnitude). Both "floats" are really packed-byte fields,

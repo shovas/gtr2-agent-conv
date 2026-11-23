@@ -135,6 +135,36 @@ class SimbinEventsToolTest(unittest.TestCase):
             self.assertAlmostEqual(pts[0][0], -251.2, delta=0.5)
             self.assertAlmostEqual(pts[-1][0], 210.0, delta=0.5)
 
+    def test_field_alignment_synthetic(self):
+        import ghost_align  # noqa: F401
+        # Two identical record sets must align at lag 0 with score 3.0.
+        rows = [bytes((i * 7 + j * 13) & 0xFF for i in range(63)) for j in range(40)]
+        s = setool.byte_field_stats(rows)
+        score, lag = setool.best_field_alignment(s, s)
+        self.assertEqual(lag, 0)
+        self.assertAlmostEqual(score, 3.0, places=5)
+
+    def test_dsi_gtt_postmarker_alignment(self):
+        """Post-marker fields align at lag 0 across all GTR2 .dsi/.gtt files."""
+        import ghost_align
+        root = ROOT.parent / "GTR2Steam"
+        if not root.is_dir():
+            self.skipTest("GTR2Steam corpus not present")
+        dsi = ghost_align.collect(root, "dsi")
+        gtt = ghost_align.collect(root, "gtt")
+        if not dsi or not gtt:
+            self.skipTest("ghost records not present")
+        sd = setool.byte_field_stats(dsi)
+        sg = setool.byte_field_stats(gtt)
+        score, lag = setool.best_field_alignment(sd, sg)
+        self.assertEqual(lag, 0)
+        self.assertGreater(score, 2.5)
+        self.assertLess(setool.field_alignment_score(sd, sg, 4), 1.0)
+        diffs = [abs(sd[0][k] - sg[0][k]) for k in range(8, setool.FRAME_STRIDE)]
+        self.assertLess(sum(diffs) / len(diffs), 0.05)
+        # The one clear exception is marker+12, where .dsi has extra data.
+        self.assertGreater(abs(sd[0][12] - sg[0][12]), 0.3)
+
     def test_gtt_metadata_framing(self):
         files = _files(".gtt")
         if not files:
