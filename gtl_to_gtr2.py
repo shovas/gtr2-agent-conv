@@ -184,6 +184,9 @@ def validate_gtr2_tree(root: str | Path,
         if suffix == ".car":
             for msg in validate_car(p.read_bytes()):
                 problems.append(f"{p}: {msg}")
+        if suffix == ".aud":
+            for msg in validate_aud(p.read_bytes()):
+                problems.append(f"{p}: {msg}")
         if suffix == ".hdc":
             for msg in validate_hdc(p.read_bytes()):
                 problems.append(f"{p}: {msg}")
@@ -220,7 +223,7 @@ def gdb_key_values(data: bytes) -> dict[str, str]:
     # Use horizontal whitespace only: `\s*` would consume CRLF after an empty
     # value (e.g. "Filter Properties =") and swallow the following key line.
     return {m.group(1).strip().lower(): m.group(2).strip()
-            for m in re.finditer(r"(?m)^[ \t]*([A-Za-z][A-Za-z0-9 ]*?)[ \t]*=[ \t]*([^\r\n]*)", text)}
+            for m in re.finditer(r"(?m)^[ \t]*([A-Za-z_][A-Za-z0-9_ ]*?)[ \t]*=[ \t]*([^\r\n]*)", text)}
 
 
 def validate_gdb(data: bytes) -> list[str]:
@@ -258,6 +261,39 @@ def adapt_car_from_template(data: bytes, template: bytes) -> tuple[bytes, dict]:
         out = _set_gdb_key(out, k, tvals[k])
     return out, {"keys_applied": len(GTR2_CAR_ONLY_KEYS),
                  "already_valid": not validate_car(data)}
+
+
+# .aud: 17 keys are present in all 25 GTR2 audio files; 15 of 31 GTL audio
+# files lack them. Values are sound-file names / mixing parameters, so only a
+# same-name GTR2 template can supply them.
+GTR2_AUD_ONLY_KEYS = (
+    "playerenginevolumeminimum",
+    "trannycoast1rpmtorqueinside", "trannycoast2rpmtorqueinside",
+    "trannycoastblendrpminside", "trannypower1rpmtorqueinside",
+    "trannypower2rpmtorqueinside", "trannypowerblendrpminside",
+    "vs_inside_coast_tranny_1", "vs_inside_coast_tranny_2",
+    "vs_inside_power_tranny_1", "vs_inside_power_tranny_2",
+    "vs_inside_roadnoise_dirt", "vs_inside_roadnoise_dry",
+    "vs_inside_roadnoise_grass", "vs_inside_roadnoise_gravel",
+    "vs_inside_roadnoise_rumblestrip", "vs_inside_roadnoise_wet",
+)
+
+
+def validate_aud(data: bytes) -> list[str]:
+    keys = set(gdb_key_values(data))
+    return [f"missing aud key: {k}" for k in GTR2_AUD_ONLY_KEYS if k not in keys]
+
+
+def adapt_aud_from_template(data: bytes, template: bytes) -> tuple[bytes, dict]:
+    tvals = gdb_key_values(template)
+    missing = [k for k in GTR2_AUD_ONLY_KEYS if k not in tvals]
+    if missing:
+        raise ValueError(f"template lacks aud keys: {missing}")
+    out = data
+    for k in GTR2_AUD_ONLY_KEYS:
+        out = _set_gdb_key(out, k, tvals[k])
+    return out, {"keys_applied": len(GTR2_AUD_ONLY_KEYS),
+                 "already_valid": not validate_aud(data)}
 
 
 # .hdc: 30 keys are present in all 44 GTR2 handling files and none of the 42

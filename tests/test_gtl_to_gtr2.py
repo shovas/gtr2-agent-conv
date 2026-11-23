@@ -75,6 +75,26 @@ class GtlToGtr2Test(unittest.TestCase):
         self.assertEqual(changes["teammaps2"], 1)
         self.assertEqual(g.validate_trk(out), [])
 
+    def test_aud_key_rule_and_template(self):
+        def files(root):
+            return [Path(p) for p in glob.glob(
+                str(ROOT.parent / root / "**" / "*"), recursive=True)
+                if p.lower().endswith(".aud")]
+        gtl, gtr = files("GTLSteam"), files("GTR2Steam")
+        if not gtl or not gtr:
+            self.skipTest("audio corpora not present")
+        self.assertTrue(all(not g.validate_aud(p.read_bytes()) for p in gtr))
+        flagged = [p for p in gtl if g.validate_aud(p.read_bytes())]
+        self.assertGreater(len(flagged), 0)
+        tmpl = next((p for p in gtr if p.name.lower() == "default.aud"), None)
+        if tmpl is not None:
+            for p in flagged[:5]:
+                with self.subTest(name=p.name):
+                    out, rep = g.adapt_aud_from_template(p.read_bytes(),
+                                                         tmpl.read_bytes())
+                    self.assertEqual(g.validate_aud(out), [])
+                    self.assertEqual(rep["keys_applied"], 17)
+
     def test_hdc_key_rule_and_template(self):
         def files(root):
             return [Path(p) for p in glob.glob(

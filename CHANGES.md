@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 23:50:00 -0500 - Audio key validator added
+- `validate_aud()` checks 17 mixing/sound keys universal in all 25 GTR2 `.aud` files (15/31 GTL flagged); `adapt_aud_from_template()` copies them from a same-name GTR2 template. Extended the shared key parser to recognise underscore-containing keys. Added test and docs.
+
 ## 2026-11-23 23:35:00 -0500 - HDC key validator added
 - `validate_hdc()` checks 30 wheel/gear keys universal in all 44 GTR2 `.hdc` files (34/42 GTL flagged); `adapt_hdc_from_template()` copies them from a same-name GTR2 template. Added test and docs.
 
