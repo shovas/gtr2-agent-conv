@@ -90,6 +90,13 @@ files. None of these contradict the recovery-container conclusion.
   the four PAR2 containers' recovery slices at any alignment, and its length is not a
   simple fraction of the 384,000-byte slice size from their Main packet. So it is not a
   fragment of the same recovery set (though it could belong to a different set).
+- **PAR2 recovery-slice test (fresh)**: all five PHS containers were scanned for PAR2 packets.
+  PHYSICS.PHS contains **zero** PAR2 packets; the other four contain Main/FileDesc/RecvSlic packets,
+  and the 7 RecvSlic bodies each hold a full 384,000-byte recovery slice (unique hashes). PHYSICS.PHS
+  matches none of those slices (50/13,064 byte prefix agreement = chance), contains no slice as a
+  substring, and the best XOR combination of all 7 slices gives 69/13,064 (chance ≈51). It is therefore
+  not a truncated slice from this PAR2 set, nor an XOR of its slices. The `GTL_Update_0901.exe` string
+  occurs only in DRIVERS.PHS; no EXE or update-named file exists anywhere in the GTL install to compare against.
 - **Interpretation**: the UI source-MAS loader likely opens these archives looking for
   UI/localization assets and finds none relevant; the PHS members are not dispatched
   to any physics consumer by name. Strong evidence PHS data is **unused by GTL
