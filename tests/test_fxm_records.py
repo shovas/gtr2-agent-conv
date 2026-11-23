@@ -1,6 +1,7 @@
 """Tests for structured FXM node/keyframe records."""
 import glob
 import io
+import collections
 import math
 import os
 import struct
@@ -323,6 +324,40 @@ class FxmRecordTest(unittest.TestCase):
                                    1.0, delta=0.02)
         self.assertEqual(fxm_tool.decode_fxm_semantic(data)["variant"],
                          "single-key")
+
+
+    def test_file_key_count_encodes_node_kind_corpus(self):
+        """file key_count=3 for TRS nodes, 1 for rotation tracks (56,838 nodes)."""
+        import glob
+        counts = collections.Counter()
+        for corpus in ("GTR2Steam", "GTLSteam", "BMWM3Challenge", "Race07Complete",
+                       "Race07Vanilla", "VolvoTheGame"):
+            for p in glob.glob(str(ROOT.parent / corpus / "**" / "*"), recursive=True):
+                if not Path(p).is_file() or not p.lower().endswith((".fxm", ".fxa", ".lma")):
+                    continue
+                try:
+                    data = Path(p).read_bytes()
+                except OSError:
+                    continue
+                for parser in (fxm_tool.parse_node_records,
+                               fxm_tool.parse_length_prefixed_nodes,
+                               fxm_tool.parse_rotation_track_nodes,
+                               fxm_tool.parse_trailing_name_nodes,
+                               fxm_tool.parse_single_key_nodes):
+                    try:
+                        nodes = parser(data)
+                    except Exception:
+                        continue
+                    for node in nodes:
+                        fkc = node.get("key_count")
+                        if "frames" in node:  # rotation track: file key_count=1
+                            self.assertEqual(fkc, 1, p)
+                            counts[1] += 1
+                        else:
+                            self.assertEqual(fkc, 3, p)
+                            counts[3] += 1
+        self.assertGreater(counts[3], 40000)
+        self.assertGreater(counts[1], 10000)
 
 
 if __name__ == "__main__":

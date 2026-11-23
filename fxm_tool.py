@@ -248,7 +248,7 @@ def parse_rotation_track_nodes(b: bytes) -> list[dict]:
             i += 1
             continue
         out.append({"offset": i, "name": name.decode("ascii"),
-                    "size_hint": size_hint, "frames": frames,
+                    "size_hint": size_hint, "key_count": 1, "frames": frames,
                     "times": times, "quaternions": quats})
         # A nameless standard TRS record follows each rotation track.
         i = keys_at + size_hint + 16
@@ -349,6 +349,7 @@ def decode_fxm_semantic(b: bytes) -> dict:
                           "quaternion": k0["quaternion"],
                           "scale": k0["scale"],
                           "key_count": len(dec["keys"]),
+                          "file_key_count": node["key_count"],
                           "issues": issues})
         return {"variant": "standard", "nodes": nodes,
                 "stats": {"nodes": len(nodes),
@@ -364,11 +365,14 @@ def decode_fxm_semantic(b: bytes) -> dict:
                       if abs(k["quat_norm"] - 1.0) > 0.01]
             nodes.append({"name": node["name"], "position": k0["position"],
                           "quaternion": k0["quaternion"], "scale": k0["scale"],
-                          "key_count": len(dec["keys"]), "issues": issues})
+                          "key_count": len(dec["keys"]),
+                          "file_key_count": node["key_count"],
+                          "issues": issues})
         for track in parse_rotation_track_nodes(b):
             nodes.append({"name": track["name"], "kind": "rotation",
                           "position": None, "quaternion": track["quaternions"][0],
                           "scale": None, "key_count": track["frames"],
+                          "file_key_count": 1,  # one component per keyframe (quaternion)
                           "times": track["times"],
                           "rotation_quaternions": track["quaternions"],
                           "issues": []})
@@ -390,7 +394,9 @@ def decode_fxm_semantic(b: bytes) -> dict:
                     issues.append(f"key {i}: non-unit scale")
             nodes.append({"name": node["name"], "position": k0["position"],
                           "quaternion": k0["quaternion"], "scale": k0["scale"],
-                          "key_count": len(dec["keys"]), "issues": issues})
+                          "key_count": len(dec["keys"]),
+                          "file_key_count": node["key_count"],
+                          "issues": issues})
         return {"variant": "trailing-name", "nodes": nodes,
                 "stats": {"nodes": len(nodes),
                           "flagged": sum(1 for n in nodes if n["issues"])}}
@@ -404,7 +410,9 @@ def decode_fxm_semantic(b: bytes) -> dict:
                 issues.append("non-unit scale")
             nodes.append({"name": n["name"], "position": n["position"],
                           "quaternion": n["quaternion"], "scale": n["scale"],
-                          "key_count": 1, "issues": issues})
+                          "key_count": 1,
+                          "file_key_count": n.get("key_count"),
+                          "issues": issues})
         return {"variant": "single-key", "nodes": nodes,
                 "stats": {"nodes": len(nodes),
                           "flagged": sum(1 for n in nodes if n["issues"])}}

@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 06:30:00 -0500 - FXM key_count semantics resolved
+- Corpus-verified that FXM `key_count` encodes the keyframe component count: **3** for every TRS node (46,242 across standard/length-prefixed/trailing-name/single-key layouts) and **1** for marker=2 rotation tracks (10,596), i.e. position/quaternion/scale vs quaternion alone. NUL-named nodes have no key_count field. Added `file_key_count` to the semantic output and a corpus regression test; all 17 FXM tests pass. Full v16 on the prior tree: 366 tests, 0 failures.
+
 ## 2026-11-24 06:00:00 -0500 - SCGT AMBC.BMP decoded
 - Solved the 2 long-standing undecoded Sports Car GT members: they are not LZSS-compressed but a 16-byte header (32x8) plus 768 bytes of raw RGB. Their archive records store 5 bytes fewer than declared, with the remainder in the inter-member gap; `reconstruct_type2_member()` recovers the full 784 bytes and `scgt_raw_texture_to_bmp()` emits a valid, coherent 822-byte BMP. Added a corpus regression test; all 5 SCGT tests pass.
 
