@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 09:55:00 -0500 - Final verification after FXM invariants
+- `python3 run_tests.py --mode full`: 47 modules / 304 tests / 704.4 s, 0 failures, 2 skips. Normal: 166 tests / 271.6 s, 0 failures. Quick: 92 tests, 0 failures. Pre-push check PASS.
+
 ## 2026-11-24 09:30:00 -0500 - FXM keyframe invariants codified
 - `fxm_tool.check_node_consistency()` validates 148/148 standard FXM nodes across 5 corpora: 84-byte keyframe blocks, unit quaternions, +/-1 scale components, and trailer == size_hint-84. Added corpus regression test.
 
