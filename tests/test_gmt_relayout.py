@@ -1,8 +1,11 @@
 """Self-consistency tests for GMT relayout (rebuilt offsets after data grows)."""
 import glob
+import io
 import struct
 import sys
+import tempfile
 import unittest
+from contextlib import redirect_stdout
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -89,6 +92,25 @@ class GmtRelayoutTest(unittest.TestCase):
         self.assertEqual(len(g2.meshes[0].base_vertices), old_vc + 1)
         self.assertEqual(g2.tail, g.tail)
         self.assertEqual(gf.write_gmt(g2), out)
+
+    def test_relayout_cli(self):
+        samples = _samples()
+        if "GOALPOST.GMT" not in samples:
+            self.skipTest("GOALPOST.GMT sample not present")
+        import gmt_tool
+        data, _ = samples["GOALPOST.GMT"]
+        with tempfile.TemporaryDirectory() as td:
+            src, dst = Path(td) / "in.gmt", Path(td) / "out.gmt"
+            src.write_bytes(data)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                rc = gmt_tool.main(["relayout", str(src), str(dst)])
+            self.assertEqual(rc, 0)
+            self.assertIn("relayout:", buf.getvalue())
+            out = dst.read_bytes()
+        g = gf.parse_gmt("out.gmt", out)
+        self.assertEqual(g.mesh_count, 1)
+        self.assertEqual(g.tail, gf.parse_gmt("in.gmt", data).tail)
 
     def test_relayout_rejects_inconsistent_blobs(self):
         samples = _samples()

@@ -41,7 +41,7 @@ python3 isi_crypt.py -e -s 4b1dca9f960524e8 <in> <out>  # encrypt
 
 ## 3. Inspect GMT files (partial)
 
-**What it does**: Parses GMT headers, mesh table records, material/stage string evidence, and observed vertex/stream layouts; diffs GMTs; performs structural lossless round-trip, and can rebuild all offsets after mesh data grows (relayout).
+**What it does**: Parses GMT headers, mesh table records, material/stage string evidence, and observed vertex/stream layouts; diffs GMTs; performs structural lossless round-trip, and can rebuild all offsets after mesh data grows (`gmt_tool.py relayout ...`).
 
 **How to ask**:
 - "Inspect this GMT and tell me what we know about its structure."

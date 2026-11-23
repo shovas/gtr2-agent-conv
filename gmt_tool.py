@@ -13,6 +13,8 @@ import struct
 from dataclasses import dataclass
 from pathlib import Path
 
+import gmt_format
+
 # Observed in GTR2/GT Legends GMTs and hand_selected GOALPOST.GMT.
 GMT_MAGIC_GTR_GTL = bytes.fromhex("c8cfd2d8ced8e6c3d6ded8bebba7bf90")
 GMT_MAGIC_RF1_OLD = bytes.fromhex("c8cfd2d8ced8e6c3d6ded8bebba8bf90")
@@ -214,6 +216,17 @@ def cmd_diff(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_relayout(args: argparse.Namespace) -> int:
+    """Repack a GMT with rebuilt offsets (useful after mesh data changes size)."""
+    data = Path(args.file).read_bytes()
+    g = gmt_format.parse_gmt(args.file, data)
+    out = gmt_format.relayout_gmt(g, align=args.align)
+    Path(args.output).write_bytes(out)
+    print(f"relayout: {g.mesh_count} meshes, {len(data)} -> {len(out)} bytes "
+          f"obj_list_offset {g.obj_list_offset} -> {struct.unpack_from('<I', out, 0)[0]}")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -233,6 +246,12 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("right")
     p.add_argument("-v", "--verbose", action="store_true")
     p.set_defaults(func=cmd_diff)
+
+    p = sub.add_parser("relayout", help="rebuild all offsets and pack a GMT to a new file")
+    p.add_argument("file")
+    p.add_argument("output")
+    p.add_argument("--align", type=int, default=4, help="blob alignment (power of two, default 4)")
+    p.set_defaults(func=cmd_relayout)
 
     args = ap.parse_args(argv)
     return args.func(args)
