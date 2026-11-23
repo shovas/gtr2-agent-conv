@@ -174,6 +174,8 @@ Notably absent in GTL GameData: rFactor-style `.veh/.scn/.gen/.hdv/.tbc/.sfx` (0
 3. **Track chain**: `.gdb`, `.trk`, `.aiw`, `.cam`, `.grd`, `.ani`, textures/models.
 4. **Validation**: parseability, missing refs, stale source extensions, GTR2 layout sanity (`GameData/...`), and in-game smoke test later.
 
+**Implemented offline (2026-11-23)**: step 1 is implemented in `gtl_to_gtr2.py` (`.trk` MASFile `.gtl`→`.gtr`, `teammaps.gtl`→`teammaps2.gtr`, `Misc.gtr` insertion; `.gtl` archives repacked as type-0 `.gtr`; subtree conversion). `validate_gtr2_tree()` covers steps 1 and 4: 34/34 GTR2 `.trk`, 85/85 `.gdb`, 145/145 `.car` pass, with MASFile references resolving 187/187 (GTR2) and 106/106 (GTL). `.gdb` session-key presence is validated (15 universal GTR2 keys) and can be adapted from a same-name GTR2 template (6 corpus pairs); `.car` key presence is validated (4 universal GTR2-only keys). Key **values** for `.gdb`/`.car` are track/car-specific and are deliberately not invented; geometry/physics/config semantics and in-game validation remain open.
+
 ## Confidence / gaps
 
 - **High confidence**: MAS container identification; `.car/.gdb/.trk/.aud/.hdc/.eng/.dmg/.hed/.cam/.grd/.rcd` general purpose from samples.
