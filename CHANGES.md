@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 23:05:00 -0500 - AIW and tire validators added
+- `.aiw`: scrpos/scrori present in all 34 GTR2 AIWs, none of 25 GTL; 6 same-name template adaptations verified. `.tyr`: WetWeather=1 universal across 15 GTR2 files; added to all 26 GTL tire files. Integrated into `validate_gtr2_tree()` with 2 new tests.
+
 ## 2026-11-23 22:50:00 -0500 - Final verification after .car adaptation
 - `python3 run_tests.py --mode full`: 47 modules / 287 tests / 640.9 s, 0 failures, 2 skips. Normal: 164 tests / 294.5 s, 0 failures. Pre-push check PASS.
 

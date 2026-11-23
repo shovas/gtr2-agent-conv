@@ -184,6 +184,12 @@ def validate_gtr2_tree(root: str | Path,
         if suffix == ".car":
             for msg in validate_car(p.read_bytes()):
                 problems.append(f"{p}: {msg}")
+        if suffix == ".aiw":
+            for msg in validate_aiw(p.read_bytes()):
+                problems.append(f"{p}: {msg}")
+        if suffix == ".tyr":
+            for msg in validate_tyr(p.read_bytes()):
+                problems.append(f"{p}: {msg}")
         if suffix == ".trk":
             data = p.read_bytes()
             for msg in validate_trk(data):
@@ -249,6 +255,46 @@ def adapt_car_from_template(data: bytes, template: bytes) -> tuple[bytes, dict]:
         out = _set_gdb_key(out, k, tvals[k])
     return out, {"keys_applied": len(GTR2_CAR_ONLY_KEYS),
                  "already_valid": not validate_car(data)}
+
+
+# .aiw: these two keys are present in all 34 GTR2 AIWs and none of the 25 GTL
+# AIWs. Values are track-specific, so only a same-name GTR2 template can supply them.
+GTR2_AIW_ONLY_KEYS = ("scrpos", "scrori")
+# .tyr: present in all 15 GTR2 tire files with the single value "1"; absent in all 26 GTL.
+GTR2_TYR_CONSTANTS = {"wetweather": "1"}
+
+
+def validate_aiw(data: bytes) -> list[str]:
+    keys = set(gdb_key_values(data))
+    return [f"missing aiw key: {k}" for k in GTR2_AIW_ONLY_KEYS if k not in keys]
+
+
+def adapt_aiw_from_template(data: bytes, template: bytes) -> tuple[bytes, dict]:
+    tvals = gdb_key_values(template)
+    missing = [k for k in GTR2_AIW_ONLY_KEYS if k not in tvals]
+    if missing:
+        raise ValueError(f"template lacks aiw keys: {missing}")
+    out = data
+    for k in GTR2_AIW_ONLY_KEYS:
+        out = _set_gdb_key(out, k, tvals[k])
+    return out, {"keys_applied": len(GTR2_AIW_ONLY_KEYS),
+                 "already_valid": not validate_aiw(data)}
+
+
+def validate_tyr(data: bytes) -> list[str]:
+    vals = gdb_key_values(data)
+    return [f"missing tyr key: {k}" for k in GTR2_TYR_CONSTANTS if k not in vals]
+
+
+def add_tyr_gtr2_defaults(data: bytes) -> tuple[bytes, dict]:
+    """Add the corpus-universal ``WetWeather=1`` key to a GTL ``.tyr``."""
+    out = data
+    added = 0
+    for k, v in GTR2_TYR_CONSTANTS.items():
+        if k not in gdb_key_values(out):
+            out = _set_gdb_key(out, k, v)
+            added += 1
+    return out, {"keys_added": added}
 
 
 def _set_gdb_key(data: bytes, key: str, value: str) -> bytes:

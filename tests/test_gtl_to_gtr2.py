@@ -75,6 +75,45 @@ class GtlToGtr2Test(unittest.TestCase):
         self.assertEqual(changes["teammaps2"], 1)
         self.assertEqual(g.validate_trk(out), [])
 
+    def test_aiw_key_rule_and_template(self):
+        def idx(root):
+            return {Path(p).name.lower(): Path(p) for p in glob.glob(
+                str(ROOT.parent / root / "**" / "*"), recursive=True)
+                if p.lower().endswith(".aiw")}
+        gtl, gtr = idx("GTLSteam"), idx("GTR2Steam")
+        if not gtl or not gtr:
+            self.skipTest("AIW corpora not present")
+        self.assertTrue(all(g.validate_aiw(p.read_bytes()) for p in gtl.values()))
+        self.assertTrue(all(not g.validate_aiw(p.read_bytes()) for p in gtr.values()))
+        common = sorted(set(gtl) & set(gtr))
+        self.assertGreaterEqual(len(common), 5)
+        for name in common:
+            with self.subTest(name=name):
+                src = gtl[name].read_bytes()
+                template = gtr[name].read_bytes()
+                out, _ = g.adapt_aiw_from_template(src, template)
+                self.assertEqual(g.validate_aiw(out), [])
+                tv, ov = g.gdb_key_values(template), g.gdb_key_values(out)
+                for key in g.GTR2_AIW_ONLY_KEYS:
+                    self.assertEqual(ov.get(key), tv[key])
+
+    def test_tyr_wetweather_rule(self):
+        def files(root):
+            return [Path(p) for p in glob.glob(
+                str(ROOT.parent / root / "**" / "*"), recursive=True)
+                if p.lower().endswith(".tyr")]
+        gtl, gtr = files("GTLSteam"), files("GTR2Steam")
+        if not gtl or not gtr:
+            self.skipTest("tire corpora not present")
+        self.assertTrue(all(not g.validate_tyr(p.read_bytes()) for p in gtr))
+        fixed = 0
+        for p in gtl:
+            out, _ = g.add_tyr_gtr2_defaults(p.read_bytes())
+            self.assertEqual(g.validate_tyr(out), [], p.name)
+            self.assertEqual(g.gdb_key_values(out).get("wetweather"), "1")
+            fixed += 1
+        self.assertGreater(fixed, 0)
+
     def test_car_adapt_from_template(self):
         def index(root):
             return {Path(p).name.lower(): Path(p) for p in glob.glob(
@@ -184,15 +223,19 @@ class GtlToGtr2Test(unittest.TestCase):
             self.assertTrue(probs)
             # No stale .gtl, and every problem is a known GDB/shared-archive gap.
             self.assertFalse(any("stale .gtl" in p for p in probs))
-            self.assertTrue(all("missing session key" in p or "unresolved MASFile" in p
+            self.assertTrue(all(any(k in p for k in ("missing session key", "unresolved MASFile",
+                                                      "missing aiw key", "missing tyr key"))
                                 for p in probs))
-            # The one same-name GDB template can close its own gap.
-            name = "sanderstorp.gdb"
-            tgt = Path(td) / name
-            template = gtr_dir / name
-            if tgt.is_file() and template.is_file():
-                out, _ = g.adapt_gdb_from_template(tgt.read_bytes(), template.read_bytes())
-                self.assertEqual(g.validate_gdb(out), [])
+            # Same-name templates close the GDB and AIW gaps for SAnderstorp.
+            for name, adapt, check in (("sanderstorp.gdb", g.adapt_gdb_from_template,
+                                        g.validate_gdb),
+                                       ("sanderstorp.aiw", g.adapt_aiw_from_template,
+                                        g.validate_aiw)):
+                tgt = Path(td) / name
+                template = gtr_dir / name
+                if tgt.is_file() and template.is_file():
+                    out, _ = adapt(tgt.read_bytes(), template.read_bytes())
+                    self.assertEqual(check(out), [])
 
     def test_validate_tree(self):
         src = ROOT.parent / "GTLSteam/GameData/Locations/Anderstorp"
