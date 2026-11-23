@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 05:50:00 -0500 - Final verification after GDB time invariant
+- `python3 run_tests.py --mode full`: 47 modules / 300 tests / 727.1 s, 0 failures, 2 skips. Normal: 163 tests / 283.8 s, 0 failures. Quick: 90 tests, 0 failures. Pre-push check PASS.
+
 ## 2026-11-24 05:30:00 -0500 - GDB session time invariant added
 - `validate_gdb_times()` checks the session-block `racetime == racetimescaled` invariant (85/85 GTR2 GDBs); later event sections may override RaceTime alone, so only the first occurrence is compared. Added test and docs.
 
