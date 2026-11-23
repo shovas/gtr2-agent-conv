@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 15:30:00 -0500 - Final verification after BC4/BC5 decode
+- `python3 run_tests.py --mode full`: 47 modules / 320 tests / 794.3 s, 0 failures, 2 skips. Normal: 167 tests / 291.7 s, 0 failures. Quick: 96 tests, 0 failures. Pre-push check PASS.
+
 ## 2026-11-23 15:00:00 -0500 - BC4/BC5 DDS decode
 - Native BC4/BC5 decode added (`BC4U`/`ATI1`/`BC5U`/`ATI2`) with known-palette synthetic fixtures; BC6H/BC7 and cube maps remain unimplemented (absent from the local corpus). Added regression test.
 
