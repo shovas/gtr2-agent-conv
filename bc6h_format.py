@@ -81,18 +81,39 @@ def _bits(v: int, src: int, length: int) -> int:
     return (v >> src) & ((1 << length) - 1)
 
 
-def _unquantize(x: int, bits: int) -> int:
-    if bits >= 15:
+def _sign_extend(v: int, bits: int) -> int:
+    # Python ints are arbitrary precision, so the C ``v << (32-bits) >> (32-bits)``
+    # trick does not sign-extend; flip the sign bit and subtract instead.
+    sign = 1 << (bits - 1)
+    return (v & ((1 << bits) - 1) ^ sign) - sign
+
+
+def _unquantize(x: int, bits: int, signed: bool = False) -> int:
+    if not signed:
+        if bits >= 15:
+            return x
+        if x == 0:
+            return 0
+        if x == (1 << bits) - 1:
+            return 0xFFFF
+        return ((x << 15) + 0x4000) >> (bits - 1)
+    if bits >= 16:
         return x
-    if x == 0:
-        return 0
-    if x == (1 << bits) - 1:
-        return 0xFFFF
-    return ((x << 15) + 0x4000) >> (bits - 1)
+    magnitude = abs(x)
+    if magnitude == 0:
+        unq = 0
+    elif magnitude >= (1 << (bits - 1)) - 1:
+        unq = 0x7FFF
+    else:
+        unq = ((magnitude << 15) + 0x4000) >> (bits - 1)
+    return -unq if x < 0 else unq
 
 
-def _finish(i: int) -> int:
-    return ((i * 31) >> 6) & 0xFFFF
+def _finish(i: int, signed: bool = False) -> int:
+    if not signed:
+        return ((i * 31) >> 6) & 0xFFFF
+    magnitude = ((abs(i) * 31) >> 5) & 0xFFFF
+    return magnitude | 0x8000 if (i < 0 and magnitude != 0) else magnitude
 
 
 def _half_to_unorm8(h: int) -> int:
@@ -107,10 +128,11 @@ def _half_to_unorm8(h: int) -> int:
     return ((1024 + man) * 255) >> (25 - exp)
 
 
-def decode_block(block: bytes) -> list[tuple[int, int, int, int]] | None:
-    """Decode one 16-byte UF16 block to 16 RGBA8 pixels (raster order).
+def decode_block(block: bytes, signed: bool = False) -> list[tuple[int, int, int, int]] | None:
+    """Decode one 16-byte BC6H block to 16 RGBA8 pixels (raster order).
 
-    Returns ``None`` if the block uses an unsupported mode.
+    ``signed=True`` selects SF16 instead of UF16. Returns ``None`` if the
+    block uses an unsupported mode.
     """
     if len(block) < 16:
         return None
@@ -125,8 +147,9 @@ def decode_block(block: bytes) -> list[tuple[int, int, int, int]] | None:
     for src, length, slot, dst in RUNS[mode]:
         raw[slot] |= _bits(v, src, length) << dst
     n_ep = 4 if two else 2
-    unq = [[_unquantize(raw[c * 4 + k], prec) for k in range(n_ep)]
-           for c in range(3)]
+    values = [[_sign_extend(raw[c * 4 + k], prec) if signed else raw[c * 4 + k]
+               for k in range(n_ep)] for c in range(3)]
+    unq = [[_unquantize(x, prec, signed) for x in row] for row in values]
 
     if two:
         part = (v >> 77) & 31
@@ -146,20 +169,21 @@ def decode_block(block: bytes) -> list[tuple[int, int, int, int]] | None:
         w = weights[idx]
         pixel = tuple(
             _half_to_unorm8(_finish(
-                (unq[c][subset * 2] * (64 - w) + unq[c][subset * 2 + 1] * w + 32) >> 6))
+                (unq[c][subset * 2] * (64 - w) + unq[c][subset * 2 + 1] * w + 32) >> 6,
+                signed))
             for c in range(3))
         out.append((*pixel, 255))
     return out
 
 
-def decode_bc6h(data: bytes, width: int, height: int) -> bytes | None:
-    """Decode a BC6H UF16 image to RGBA8, or None if any block is unsupported."""
+def decode_bc6h(data: bytes, width: int, height: int, signed: bool = False) -> bytes | None:
+    """Decode a BC6H image to RGBA8, or None if any block is unsupported."""
     bw, bh = max(1, (width + 3) // 4), max(1, (height + 3) // 4)
     if len(data) < bw * bh * 16:
         return None
     out = bytearray()
     for by in range(bh):
-        row = [decode_block(data[(by * bw + bx) * 16:(by * bw + bx + 1) * 16])
+        row = [decode_block(data[(by * bw + bx) * 16:(by * bw + bx + 1) * 16], signed)
                for bx in range(bw)]
         if any(b is None for b in row):
             return None

@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 19:00:00 -0500 - Signed BC6H (SF16) decode
+- `bc6h_format.py` now decodes signed BC6H (DXGI `BC6H_SF16`) alongside UF16 for the same two non-transformed modes; `media_tool.py` reads DXGI 96 DDS files. Fixed a Python sign-extension bug found during verification. Matched a corrected independent spec reference on 4,000/4,000 random signed blocks; 3 new tests.
+
 ## 2026-11-23 18:30:00 -0500 - Cube-map DDS round-trip
 - `media_tool.py` now detects `DDSCAPS2_CUBEMAP`, decodes all six faces separately and reassembles them on write. All 24 plain local cube-map DDS files (previously silently downgraded to a single face) round-trip byte-identically, as do 3 JCA-encrypted cube maps including a DXT5 sample. Also fixed level-0 size accounting for DXT4. Added corpus regression tests.
 
