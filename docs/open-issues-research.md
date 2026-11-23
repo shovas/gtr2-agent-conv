@@ -146,7 +146,9 @@ patch), but does not identify the exact engine-side use. Further refinement: the
   of marker+12 where DSI has extra data). So the **4-byte shift is confined to the pre-marker region**
   (position-to-marker 35 bytes in DSI vs 39 in GTT); the post-marker packed fields share one layout, and
   DSI files supply 68,774 additional samples for them. Reproducible via `ghost_align.py`; codified in
-  `tests/test_simbin_events_tool.py`.
+  `tests/test_simbin_events_tool.py`. Using those samples, DSI bytes at marker+16/+18/+20/+22 correlate
+  ~0.63 with consecutive-position step distance, but the corresponding 4-byte float readings correlate
+  ~0 — reinforcing that these are packed-byte fields, not little-endian floats.
   Slot 9 (+36) shows the same artifact: its float mantissa is effectively constant, so its values are
   exactly `0, ±8.5, ±34, ±136, ±544, ...` (each step x4) — i.e. only the exponent/sign byte at +39 carries
   data (0x43/0xC3 etc., a sign bit plus a ~7-bit magnitude). Both "floats" are really packed-byte fields,
