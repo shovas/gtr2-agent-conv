@@ -226,6 +226,23 @@ class MediaToolTest(unittest.TestCase):
                 checked += 1
         self.assertGreater(checked, 0)
 
+    def test_dds_zero_pitch_field_preserved(self):
+        p = (ROOT.parent / "Race07Complete/GameData/Locations/Jyllandsringen/"
+             "Textures/GENERAL_S.DDS")
+        if not p.exists():
+            self.skipTest("DDS with zero pitch field not present")
+        self.assertEqual(struct.unpack_from("<I", p.read_bytes(), 20)[0], 0)
+        self.assertEqual(media_tool.read_dds(p).to_bytes(), p.read_bytes())
+
+    def test_bmp_nonzero_row_padding_preserved(self):
+        p = ROOT.parent / "Race07Complete/GameData/Teams/Motec_Type2/FNTCMOTS.BMP"
+        if not p.exists():
+            self.skipTest("BMP with non-zero row padding not present")
+        with tempfile.TemporaryDirectory() as td:
+            dst = Path(td) / "out.bmp"
+            media_tool.bmp_roundtrip(p, dst)
+            self.assertEqual(dst.read_bytes(), p.read_bytes())
+
     def test_cubemap_dds_roundtrip_preserves_six_faces(self):
         import glob
         samples = [p for p in glob.glob(str(ROOT.parent / "Race07Complete" / "**" / "*"),

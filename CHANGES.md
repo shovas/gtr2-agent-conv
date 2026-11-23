@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 22:30:00 -0500 - Byte-exact DDS header and BMP row padding
+- A mixed-format round-trip audit found two remaining same-length byte mismatches: DDS files with a zero linear-size field (header rewritten) and BMP files with non-zero row padding (padding zeroed). Both are now preserved; a 338-file mixed audit (DDS/TGA/BMP/WAV) shows zero mismatches for all supported variants. Added two regression tests.
+
 ## 2026-11-23 22:00:00 -0500 - Complete JCA cube-map scan
 - Optimized the encrypted-DDS scan using the uncompressed size stored in the JCA header: 33,351 files filtered to 266 candidates, revealing **88 JCA cube maps** (vs 3 in the earlier partial scan). All 88 round-trip byte-identically, including DXT5 and 2 mipmapped samples. Added a mipmapped-cube regression test and corrected the corpus count.
 

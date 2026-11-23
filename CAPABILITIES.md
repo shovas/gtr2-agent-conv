@@ -97,7 +97,7 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 - **Write**: DXT1/DXT3/DXT5 (lossy) and uncompressed RGB(A) mask-based encode from RGBA + DDS file write; lossless byte copy possible.
 - **Verification**: `tests/test_media_tool.py` (synthetic DXT1, DXT3, DXT5, A8R8G8B8, X8R8G8B8, R8G8B8, R5G6B5 round-trips).
 - **Tool**: `media_tool.py`.
-- **Mipmaps**: preserved byte-for-byte on DDS round-trip (level-0 bytes reused when RGBA is unchanged); verified on two mipmapped DXT1/uncompressed corpus files.
+- **Mipmaps**: preserved byte-for-byte on DDS round-trip (level-0 bytes and the original header are reused when RGBA is unchanged, including a zero linear-size field); verified on two mipmapped DXT1/uncompressed corpus files plus 88 encrypted cube maps.
 - **DXT4**: decoded as DXT5-alpha variant; alpha channel matches ffmpeg byte-exactly on the local corpus sample (RGB differences are ffmpeg color-management, also seen for DXT5).
 - **BC4/BC5**: native decode implemented (`BC4U`/`ATI1`/`BC5U`/`ATI2`) with synthetic-block fixtures; no local corpus samples to validate against.
 - **BC6H UF16/SF16**: `bc6h_format.py` decodes **all 14 valid modes** (including delta-transformed endpoints) in both unsigned and signed variants, from Khronos BPTC tables generated mechanically from the spec-derived reference source; DX10 `BC6H_UF16` (DXGI 95) and `BC6H_SF16` (DXGI 96) DDS files are read by `media_tool.py`. Verified against 8,400 synthetic random blocks (14 modes × 2 variants) using an independent spec-table port. A 48,459-file loose-DDS corpus scan found no DX10 headers, so no BC6H/BC7 samples exist locally. Write-back is unsupported (no encoder).
@@ -112,7 +112,7 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 - **Gaps**: color-mapped TGA and other rarer types not implemented (none found in the corpus).
 
 ### BMP
-- **Read/Write**: Semantic read/write for uncompressed BI_RGB 24/32-bit BMP via `media_tool.py` (top-down memory representation, bottom-up file write). Original 54-byte header and trailing padding bytes are preserved; 29/29 supported corpus samples round-trip byte-identically.
+- **Read/Write**: Semantic read/write for uncompressed BI_RGB 8/24/32-bit BMP via `media_tool.py` (top-down memory representation, bottom-up file write). Original 54-byte header, non-zero per-row padding bytes and trailing bytes are preserved; 118/118 supported sampled corpus files round-trip byte-identically.
 - **Verification**: `tests/test_media_tool.py` (synthetic 24-bit round-trip; real 32-bit trailing-byte sample).
 - **Palettized BMP**: 8-bit BI_RGB files (7 corpus samples) decode with palette/indices preserved; verified byte-identical on `legal256.bmp` (512x384, 1024-byte palette).
 - **Gaps**: compressed DIB variants (RLE8/RLE4) are absent from the corpus; BMP-as-TGA quirk detected but routed separately.

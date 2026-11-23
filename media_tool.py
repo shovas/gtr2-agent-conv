@@ -475,18 +475,20 @@ class BmpImage:
     indices: bytes = b""  # raw top-down index rows (unpadded) for <=8 bpp
     trailer: bytes = b""  # bytes after the pixel array in the source file
     source_header: bytes = b""  # original 54-byte header, reused for lossless round-trip
+    row_padding: bytes = b""  # original per-row padding bytes, concatenated
 
     def to_bytes(self) -> bytes:
         if self.palette:
             bytespp = 1
             row_raw = self.width
             row_padded = (row_raw + 3) & ~3
-            pad = b"\x00" * (row_padded - row_raw)
+            pad_len = row_padded - row_raw
             pixel_data = bytearray()
             for y in range(self.height - 1, -1, -1):
                 off = y * row_raw
                 pixel_data.extend(self.indices[off:off + row_raw])
-                pixel_data.extend(pad)
+                pixel_data.extend(self.row_padding[y*pad_len:(y+1)*pad_len]
+                                  if self.row_padding else b"\x00" * pad_len)
             pixel_offset = 14 + 40 + len(self.palette)
             file_size = pixel_offset + len(pixel_data) + len(self.trailer)
             if self.source_header and len(self.source_header) >= 54:
@@ -500,13 +502,14 @@ class BmpImage:
         bytespp = self.bpp // 8
         row_raw = self.width * bytespp
         row_padded = (row_raw + 3) & ~3
-        pad = b'\x00' * (row_padded - row_raw)
+        pad_len = row_padded - row_raw
         pixel_data = bytearray()
         # BMP stores bottom-up
         for y in range(self.height - 1, -1, -1):
             off = y * row_raw
             pixel_data.extend(self.pixels_bgra[off:off+row_raw])
-            pixel_data.extend(pad)
+            pixel_data.extend(self.row_padding[y*pad_len:(y+1)*pad_len]
+                              if self.row_padding else b'\x00' * pad_len)
         pixel_offset = 14 + 40
         file_size = pixel_offset + len(pixel_data) + len(self.trailer)
         if self.source_header and len(self.source_header) >= 54:
@@ -543,10 +546,12 @@ def read_bmp(path: str | Path) -> BmpImage:
         top_down8 = h < 0
         indices = bytearray(w * height8)
         expanded = bytearray(w * height8 * 4)
+        row_padding = bytearray()
         for row in range(height8):
             src_y = row if top_down8 else (height8 - 1 - row)
             src_off = pixel_offset + src_y * row_padded
             indices[row * w:(row + 1) * w] = b[src_off:src_off + w]
+            row_padding.extend(b[src_off + w:src_off + row_padded])
             for x in range(w):
                 idx = indices[row * w + x]
                 expanded[(row * w + x) * 4:(row * w + x + 1) * 4] = palette[idx*4:idx*4+4]
@@ -554,25 +559,28 @@ def read_bmp(path: str | Path) -> BmpImage:
         return BmpImage(width=w, height=height8, bpp=8, compression=0,
                         pixels_bgra=bytes(expanded), palette=palette,
                         indices=bytes(indices), trailer=b[used:],
-                        source_header=b[:54])
+                        source_header=b[:54], row_padding=bytes(row_padding))
     height = abs(h)
     top_down = h < 0
     bytespp = bpp // 8
     row_raw = w * bytespp
     row_padded = (row_raw + 3) & ~3
     pixels = bytearray(w * height * bytespp)
+    row_padding = bytearray()
     for row in range(height):
         src_y = row if top_down else (height - 1 - row)
         src_off = pixel_offset + src_y * row_padded
         dst_off = row * row_raw
         pixels[dst_off:dst_off+row_raw] = b[src_off:src_off+row_raw]
+        row_padding.extend(b[src_off + row_raw:src_off + row_padded])
     # store top-down in memory
     # wait - I looped row from 0..height-1 as destination top-down, reading from src_y. ok.
     # but src_y for bottom-up: height-1-row gives bottom row first. I want dst row 0 = top row.
     # so for bottom-up (top_down False): src_y = height-1-row => dst_off=row*row_raw gives top-down. yes.
     used = pixel_offset + height * row_padded
     return BmpImage(width=w, height=height, bpp=bpp, compression=comp,
-                    pixels_bgra=bytes(pixels), trailer=b[used:], source_header=b[:54])
+                    pixels_bgra=bytes(pixels), trailer=b[used:], source_header=b[:54],
+                    row_padding=bytes(row_padding))
 
 
 def bmp_roundtrip(src: str | Path, dst: str | Path) -> MediaInfo:
@@ -1062,7 +1070,9 @@ class DdsImage:
             # only edited images pay the lossy DXT re-encode.
             if self.level0_payload and self.header and decode_dxt_bytes(
                     self.level0_payload, self.fourcc, self.width, self.height) == self.rgba:
-                payload = self.level0_payload
+                # Preserve the original header verbatim too (some files leave
+                # the linear-size field at 0; rebuilding it costs 1 byte).
+                return bytes(self.header) + self.level0_payload + self.mip_payload
             elif self.fourcc == 'DXT1': payload = encode_dxt1(self.rgba, self.width, self.height)
             elif self.fourcc == 'DXT3': payload = encode_dxt3(self.rgba, self.width, self.height)
             else: payload = encode_dxt5(self.rgba, self.width, self.height)
