@@ -148,7 +148,9 @@ patch), but does not identify the exact engine-side use. Further refinement: the
   DSI files supply 68,774 additional samples for them. Reproducible via `ghost_align.py`; codified in
   `tests/test_simbin_events_tool.py`. Using those samples, DSI bytes at marker+16/+18/+20/+22 correlate
   ~0.63 with consecutive-position step distance, but the corresponding 4-byte float readings correlate
-  ~0 — reinforcing that these are packed-byte fields, not little-endian floats.
+  ~0 — reinforcing that these are packed-byte fields, not little-endian floats. The shared marker+7 byte
+  is strongly peaked at 64 (43% of 5,877 DSI samples, range 39–87 — a bias-64 signed byte) but correlates
+  ~0 with both step distance and heading rate, so it is not speed or steering; exact meaning **unresolved**.
   Slot 9 (+36) shows the same artifact: its float mantissa is effectively constant, so its values are
   exactly `0, ±8.5, ±34, ±136, ±544, ...` (each step x4) — i.e. only the exponent/sign byte at +39 carries
   data (0x43/0xC3 etc., a sign bit plus a ~7-bit magnitude). Both "floats" are really packed-byte fields,
