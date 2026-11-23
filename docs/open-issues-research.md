@@ -88,8 +88,11 @@ conclusively establishing it requires actual game execution.
   acceleration (0.005) or curvature (-0.02) across 10 trials — a smoothed speed-like
   quantity. The published rF2 VCR format packs steer/throttle/RPM into u32 bitfields
   (`rpm=v>>18`, `throttle=(v>>11)&63`, `steer=v&127`); applying that to slot 7 yields
-  "RPM" 2,048–6,016 correlating with speed (r=0.15–0.34 across 6 trials) — plausible
-  engine RPM, but throttle is a constant 4, so the mapping is suggestive, not confirmed.
+  "RPM" 2,048–6,016 correlating with speed (r=0.15–0.34 across 6 trials). **Definitively
+  excluded**: across 1,500 samples steer is always 0 and throttle always 4 (artifacts
+  of the constant low-16 bits `0x2000`), so the rF2 bitfield layout does not transfer.
+  Also tested slots 6-18 as X/Y/Z rotation triples: no unit-norm triples, so the rF2
+  driver-event layout does not map onto GTL's 252-byte ghost frames.
   ISI crypt with all game keys + name-derived keys and skips 0..32 gives
   printability 0.375 -> 0.438 (no valid decrypt). Structurally, slot 9's low 16
   bits are zero in 100% of frames across all files (1437/1437), i.e. a float quantized
