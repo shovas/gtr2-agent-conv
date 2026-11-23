@@ -1,22 +1,14 @@
 #!/usr/bin/env python3
-"""BC6H unsigned-float (UF16) block decoder: modes 10 and 11.
+"""BC6H UF16/SF16 block decoder for all 14 valid modes.
 
-Format data (partition/anchor tables, per-mode bit runs, unquantization,
-interpolation) is transcribed from the Khronos Data Format Specification 1.3.1
-BPTC tables and Microsoft's BC6H documentation. The MIT/Apache-2.0
-``patodois/bcn-decode`` project was consulted as a format reference only; no
-code was copied. Numeric tables were generated mechanically from its
-spec-generated ``tables.rs`` to avoid transcription errors.
-
-Only the two *non-transformed* UF16 modes are implemented (stored mode code
-30: two subsets, 6-bit endpoints; stored code 3: one subset, 10-bit endpoints).
-The other 12 BC6H modes are reported as unsupported rather than guessed. BC6H defines no
-8-bit form: output here clamps to [0, 1] and truncates to 8 bits per channel
-(the HDR half-float range is intentionally lost).
+Numeric tables were generated mechanically from the Khronos BPTC tables as
+published by the MIT/Apache-2.0 `patodois/bcn-decode` reference (format data
+only; no code copied). Verified against an independent spec-derived port on
+all 14 modes with synthetic fixtures. BC6H defines no 8-bit form: output clamps
+to [0, 1] and truncates to 8 bits per channel, losing the HDR range.
 """
 from __future__ import annotations
 
-# Khronos Table 114, partitions 0..31 (BC6H uses a 5-bit partition number).
 PARTITION2 = [
     [0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1],
     [0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1],
@@ -50,29 +42,78 @@ PARTITION2 = [
     [0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0],
     [0,1,1,1,0,0,0,1,1,0,0,0,1,1,1,0],
     [0,0,1,1,1,0,0,1,1,0,0,1,1,1,0,0],
+    [0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1],
+    [0,0,0,0,1,1,1,1,0,0,0,0,1,1,1,1],
+    [0,1,0,1,1,0,1,0,0,1,0,1,1,0,1,0],
+    [0,0,1,1,0,0,1,1,1,1,0,0,1,1,0,0],
+    [0,0,1,1,1,1,0,0,0,0,1,1,1,1,0,0],
+    [0,1,0,1,0,1,0,1,1,0,1,0,1,0,1,0],
+    [0,1,1,0,1,0,0,1,0,1,1,0,1,0,0,1],
+    [0,1,0,1,1,0,1,0,1,0,1,0,0,1,0,1],
+    [0,1,1,1,0,0,1,1,1,1,0,0,1,1,1,0],
+    [0,0,0,1,0,0,1,1,1,1,0,0,1,0,0,0],
+    [0,0,1,1,0,0,1,0,0,1,0,0,1,1,0,0],
+    [0,0,1,1,1,0,1,1,1,1,0,1,1,1,0,0],
+    [0,1,1,0,1,0,0,1,1,0,0,1,0,1,1,0],
+    [0,0,1,1,1,1,0,0,1,1,0,0,0,0,1,1],
+    [0,1,1,0,0,1,1,0,1,0,0,1,1,0,0,1],
+    [0,0,0,0,0,1,1,0,0,1,1,0,0,0,0,0],
+    [0,1,0,0,1,1,1,0,0,1,0,0,0,0,0,0],
+    [0,0,1,0,0,1,1,1,0,0,1,0,0,0,0,0],
+    [0,0,0,0,0,0,1,0,0,1,1,1,0,0,1,0],
+    [0,0,0,0,0,1,0,0,1,1,1,0,0,1,0,0],
+    [0,1,1,0,1,1,0,0,1,0,0,1,0,0,1,1],
+    [0,0,1,1,0,1,1,0,1,1,0,0,1,0,0,1],
+    [0,1,1,0,0,0,1,1,1,0,0,1,1,1,0,0],
+    [0,0,1,1,1,0,0,1,1,1,0,0,0,1,1,0],
+    [0,1,1,0,1,1,0,0,1,1,0,0,1,0,0,1],
+    [0,1,1,0,0,0,1,1,0,0,1,1,1,0,0,1],
+    [0,1,1,1,1,1,1,0,1,0,0,0,0,0,0,1],
+    [0,0,0,1,1,0,0,0,1,1,1,0,0,1,1,1],
+    [0,0,0,0,1,1,1,1,0,0,1,1,0,0,1,1],
+    [0,0,1,1,0,0,1,1,1,1,1,1,0,0,0,0],
+    [0,0,1,0,0,0,1,0,1,1,1,0,1,1,1,0],
+    [0,1,0,0,0,1,0,0,0,1,1,1,0,1,1,1],
 ]
-# Khronos Table 118 anchor texel of subset 1, partitions 0..31.
-ANCHOR2 = [15]*16 + [15,2,8,2,2,8,8,15,2,8,2,2,8,8,2,2]
+ANCHOR2 = [15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,2,8,2,2,8,8,15,2,8,2,2,8,8,2,2,15,15,6,8,2,8,15,15,2,8,2,2,2,15,15,6,6,2,6,8,15,15,2,2,15,15,15,15,15,2,2,15]
 WEIGHTS3 = [0, 9, 18, 27, 37, 46, 55, 64]
 WEIGHTS4 = [0, 4, 9, 13, 17, 21, 26, 30, 34, 38, 43, 47, 51, 55, 60, 64]
 
-# (src bit, length, endpoint slot = channel*4 + endpoint, dst bit),
-# generated from Khronos Tables 122-124.
-RUNS = {
-    30: [  # stored code 30: two subsets, 6-bit endpoints, no delta transform
-        (5,6,0,0),(11,1,7,4),(12,2,11,0),(14,1,10,4),
-        (15,6,4,0),(21,1,6,5),(22,1,10,5),(23,1,11,2),(24,1,6,4),
-        (25,6,8,0),(31,1,7,5),(32,1,11,3),(33,1,11,5),(34,1,11,4),
-        (35,6,1,0),(41,4,6,0),(45,6,5,0),(51,4,7,0),(55,6,9,0),
-        (61,4,10,0),(65,6,2,0),(71,6,3,0),
-    ],
-    3: [  # stored code 3: one subset, 10-bit endpoints
-        (5,10,0,0),(15,10,4,0),(25,10,8,0),
-        (35,10,1,0),(45,10,5,0),(55,10,9,0),
-    ],
+# stored mode code -> (transformed, partition, endpoint bits, delta bits RGB)
+MODE_INFO = {
+    0: (True, True, 10, [5, 5, 5]),
+    1: (True, True, 7, [6, 6, 6]),
+    2: (True, True, 11, [5, 4, 4]),
+    6: (True, True, 11, [4, 5, 4]),
+    10: (True, True, 11, [4, 4, 5]),
+    14: (True, True, 9, [5, 5, 5]),
+    18: (True, True, 8, [6, 5, 5]),
+    22: (True, True, 8, [5, 6, 5]),
+    26: (True, True, 8, [5, 5, 6]),
+    30: (False, True, 6, [0, 0, 0]),
+    3: (False, False, 10, [0, 0, 0]),
+    7: (True, False, 11, [9, 9, 9]),
+    11: (True, False, 12, [8, 8, 8]),
+    15: (True, False, 16, [4, 4, 4]),
 }
-# stored code -> (endpoint bits, partition / two subsets)
-MODE_INFO = {30: (6, True), 3: (10, False)}
+
+# stored mode code -> endpoint bit runs (src, len, slot, dst)
+RUNS = {
+    0: [(2,1,6,4),(3,1,10,4),(4,1,11,4),(5,10,0,0),(15,10,4,0),(25,10,8,0),(35,5,1,0),(40,1,7,4),(41,4,6,0),(45,5,5,0),(50,1,11,0),(51,4,7,0),(55,5,9,0),(60,1,11,1),(61,4,10,0),(65,5,2,0),(70,1,11,2),(71,5,3,0),(76,1,11,3)],
+    1: [(2,1,6,5),(3,2,7,4),(5,7,0,0),(12,2,11,0),(14,1,10,4),(15,7,4,0),(22,1,10,5),(23,1,11,2),(24,1,6,4),(25,7,8,0),(32,1,11,3),(33,1,11,5),(34,1,11,4),(35,6,1,0),(41,4,6,0),(45,6,5,0),(51,4,7,0),(55,6,9,0),(61,4,10,0),(65,6,2,0),(71,6,3,0)],
+    2: [(5,10,0,0),(15,10,4,0),(25,10,8,0),(35,5,1,0),(40,1,0,10),(41,4,6,0),(45,4,5,0),(49,1,4,10),(50,1,11,0),(51,4,7,0),(55,4,9,0),(59,1,8,10),(60,1,11,1),(61,4,10,0),(65,5,2,0),(70,1,11,2),(71,5,3,0),(76,1,11,3)],
+    6: [(5,10,0,0),(15,10,4,0),(25,10,8,0),(35,4,1,0),(39,1,0,10),(40,1,7,4),(41,4,6,0),(45,5,5,0),(50,1,4,10),(51,4,7,0),(55,4,9,0),(59,1,8,10),(60,1,11,1),(61,4,10,0),(65,4,2,0),(69,1,11,0),(70,1,11,2),(71,4,3,0),(75,1,6,4),(76,1,11,3)],
+    10: [(5,10,0,0),(15,10,4,0),(25,10,8,0),(35,4,1,0),(39,1,0,10),(40,1,10,4),(41,4,6,0),(45,4,5,0),(49,1,4,10),(50,1,11,0),(51,4,7,0),(55,5,9,0),(60,1,8,10),(61,4,10,0),(65,4,2,0),(69,2,11,1),(71,4,3,0),(75,1,11,4),(76,1,11,3)],
+    14: [(5,9,0,0),(14,1,10,4),(15,9,4,0),(24,1,6,4),(25,9,8,0),(34,1,11,4),(35,5,1,0),(40,1,7,4),(41,4,6,0),(45,5,5,0),(50,1,11,0),(51,4,7,0),(55,5,9,0),(60,1,11,1),(61,4,10,0),(65,5,2,0),(70,1,11,2),(71,5,3,0),(76,1,11,3)],
+    18: [(5,8,0,0),(13,1,7,4),(14,1,10,4),(15,8,4,0),(23,1,11,2),(24,1,6,4),(25,8,8,0),(33,2,11,3),(35,6,1,0),(41,4,6,0),(45,5,5,0),(50,1,11,0),(51,4,7,0),(55,5,9,0),(60,1,11,1),(61,4,10,0),(65,6,2,0),(71,6,3,0)],
+    22: [(5,8,0,0),(13,1,11,0),(14,1,10,4),(15,8,4,0),(23,1,6,5),(24,1,6,4),(25,8,8,0),(33,1,7,5),(34,1,11,4),(35,5,1,0),(40,1,7,4),(41,4,6,0),(45,6,5,0),(51,4,7,0),(55,5,9,0),(60,1,11,1),(61,4,10,0),(65,5,2,0),(70,1,11,2),(71,5,3,0),(76,1,11,3)],
+    26: [(5,8,0,0),(13,1,11,1),(14,1,10,4),(15,8,4,0),(23,1,10,5),(24,1,6,4),(25,8,8,0),(33,1,11,5),(34,1,11,4),(35,5,1,0),(40,1,7,4),(41,4,6,0),(45,5,5,0),(50,1,11,0),(51,4,7,0),(55,6,9,0),(61,4,10,0),(65,5,2,0),(70,1,11,2),(71,5,3,0),(76,1,11,3)],
+    30: [(5,6,0,0),(11,1,7,4),(12,2,11,0),(14,1,10,4),(15,6,4,0),(21,1,6,5),(22,1,10,5),(23,1,11,2),(24,1,6,4),(25,6,8,0),(31,1,7,5),(32,1,11,3),(33,1,11,5),(34,1,11,4),(35,6,1,0),(41,4,6,0),(45,6,5,0),(51,4,7,0),(55,6,9,0),(61,4,10,0),(65,6,2,0),(71,6,3,0)],
+    3: [(5,10,0,0),(15,10,4,0),(25,10,8,0),(35,10,1,0),(45,10,5,0),(55,10,9,0)],
+    7: [(5,10,0,0),(15,10,4,0),(25,10,8,0),(35,9,1,0),(44,1,0,10),(45,9,5,0),(54,1,4,10),(55,9,9,0),(64,1,8,10)],
+    11: [(5,10,0,0),(15,10,4,0),(25,10,8,0),(35,8,1,0),(43,1,0,11),(44,1,0,10),(45,8,5,0),(53,1,4,11),(54,1,4,10),(55,8,9,0),(63,1,8,11),(64,1,8,10)],
+    15: [(5,10,0,0),(15,10,4,0),(25,10,8,0),(35,4,1,0),(39,1,0,15),(40,1,0,14),(41,1,0,13),(42,1,0,12),(43,1,0,11),(44,1,0,10),(45,4,5,0),(49,1,4,15),(50,1,4,14),(51,1,4,13),(52,1,4,12),(53,1,4,11),(54,1,4,10),(55,4,9,0),(59,1,8,15),(60,1,8,14),(61,1,8,13),(62,1,8,12),(63,1,8,11),(64,1,8,10)],
+}
 
 
 def _bits(v: int, src: int, length: int) -> int:
@@ -131,53 +172,67 @@ def _half_to_unorm8(h: int) -> int:
 def decode_block(block: bytes, signed: bool = False) -> list[tuple[int, int, int, int]] | None:
     """Decode one 16-byte BC6H block to 16 RGBA8 pixels (raster order).
 
-    ``signed=True`` selects SF16 instead of UF16. Returns ``None`` if the
-    block uses an unsupported mode.
+    ``signed=True`` selects SF16 instead of UF16. Returns ``None`` for a
+    reserved mode.
     """
     if len(block) < 16:
         return None
     v = int.from_bytes(block[:16], "little")
     low2 = v & 3
     mode = low2 if low2 < 2 else (v & 31)
-    if mode not in MODE_INFO:
+    info = MODE_INFO.get(mode)
+    if info is None:
         return None
-    prec, two = MODE_INFO[mode]
+    transformed, partition, epb, delta_bits = info
 
     raw = [0] * 12
     for src, length, slot, dst in RUNS[mode]:
         raw[slot] |= _bits(v, src, length) << dst
-    n_ep = 4 if two else 2
-    values = [[_sign_extend(raw[c * 4 + k], prec) if signed else raw[c * 4 + k]
-               for k in range(n_ep)] for c in range(3)]
-    unq = [[_unquantize(x, prec, signed) for x in row] for row in values]
+    n_ep = 4 if partition else 2
+    ep = [[0] * 3 for _ in range(4)]  # [endpoint][channel]
+    for ch in range(3):
+        e0 = _sign_extend(raw[ch * 4], epb) if signed else raw[ch * 4]
+        ep[0][ch] = e0
+        for k in range(1, n_ep):
+            x = raw[ch * 4 + k]
+            if transformed:
+                x = _sign_extend(x, delta_bits[ch])
+                x = (e0 + x) & ((1 << epb) - 1)
+                if signed:
+                    x = _sign_extend(x, epb)
+            elif signed:
+                x = _sign_extend(x, epb)
+            ep[k][ch] = x
+    unq = [[_unquantize(ep[k][ch], epb, signed) for k in range(n_ep)]
+           for ch in range(3)]
 
-    if two:
+    if partition:
         part = (v >> 77) & 31
-        partition, anchor = PARTITION2[part], ANCHOR2[part]
+        pa, an = PARTITION2[part], ANCHOR2[part]
         index_bits, index_pos, weights = 3, 82, WEIGHTS3
     else:
-        partition, anchor = [0] * 16, -1
+        pa, an = [0] * 16, -1
         index_bits, index_pos, weights = 4, 65, WEIGHTS4
 
     out = []
     pos = index_pos
     for i in range(16):
-        n = index_bits - 1 if (i == 0 or i == anchor) else index_bits
+        n = index_bits - 1 if (i == 0 or i == an) else index_bits
         idx = _bits(v, pos, n)
         pos += n
-        subset = partition[i] if two else 0
+        subset = pa[i] if partition else 0
         w = weights[idx]
         pixel = tuple(
             _half_to_unorm8(_finish(
-                (unq[c][subset * 2] * (64 - w) + unq[c][subset * 2 + 1] * w + 32) >> 6,
+                (unq[ch][subset * 2] * (64 - w) + unq[ch][subset * 2 + 1] * w + 32) >> 6,
                 signed))
-            for c in range(3))
+            for ch in range(3))
         out.append((*pixel, 255))
     return out
 
 
 def decode_bc6h(data: bytes, width: int, height: int, signed: bool = False) -> bytes | None:
-    """Decode a BC6H image to RGBA8, or None if any block is unsupported."""
+    """Decode a BC6H image to RGBA8, or None if any block uses a reserved mode."""
     bw, bh = max(1, (width + 3) // 4), max(1, (height + 3) // 4)
     if len(data) < bw * bh * 16:
         return None

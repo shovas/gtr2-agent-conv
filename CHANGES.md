@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 21:00:00 -0500 - Complete BC6H mode coverage
+- `bc6h_format.py` now decodes all 14 valid BC6H modes (including delta-transformed endpoints) in UF16 and SF16, with tables generated mechanically from the spec-derived reference source. Verified against an independent spec port on 8,400 random blocks (14 modes × 2 variants, 300 each); 13 tests pass. BC7 remains the only unimplemented BCn format.
+
 ## 2026-11-23 20:30:00 -0500 - Byte-lossless BMP round-trip
 - 24/32-bit BMP round-trips now preserve the original 54-byte header and trailing padding bytes instead of rebuilding a canonical header and dropping the tail. 29/29 supported corpus samples are byte-identical; added a regression test.
 

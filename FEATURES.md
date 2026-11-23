@@ -109,7 +109,7 @@ python3 media_tool.py tga-roundtrip <src.tga> <dst.tga>
 python3 media_tool.py bmp-roundtrip <src.bmp> <dst.bmp>
 ```
 
-**Limitations**: DDS reads cover DXT1/DXT3/DXT5, BC4/BC5 and BC6H UF16/SF16 (non-transformed modes) plus uncompressed RGB(A); writes cover DXT1/DXT3/DXT5 and uncompressed RGB(A) only; cube maps round-trip byte-identically but faces are not exposed to other tools; TGA limited to type 2/3/10; BMP limited to uncompressed BI_RGB 8/24/32; all WAV round-trips are byte-lossless (compressed payloads included); JPG/MP3 metadata parsed but full semantic decode/encode/edit not implemented; BIK decode via ffmpeg (`media_tool.py bink-decode`) and BIKi encode via external LGPL `bink_build` (`media_tool.py bink-encode`).
+**Limitations**: DDS reads cover DXT1/DXT3/DXT5, BC4/BC5 and all 14 BC6H UF16/SF16 modes plus uncompressed RGB(A); writes cover DXT1/DXT3/DXT5 and uncompressed RGB(A) only; cube maps round-trip byte-identically but faces are not exposed to other tools; TGA limited to type 2/3/10; BMP limited to uncompressed BI_RGB 8/24/32; all WAV round-trips are byte-lossless (compressed payloads included); JPG/MP3 metadata parsed but full semantic decode/encode/edit not implemented; BIK decode via ffmpeg (`media_tool.py bink-decode`) and BIKi encode via external LGPL `bink_build` (`media_tool.py bink-encode`).
 
 ## 7. Decrypt SimBin JCA files (Race 07, Volvo, etc.)
 

@@ -95,9 +95,30 @@ class TestBc6hFormat(unittest.TestCase):
         px = bc.decode_block(encode_block(3, ep, None, [15] * 16), signed=True)
         self.assertGreater(px[1][0], 200)
 
-    def test_unsupported_mode(self):
-        self.assertIsNone(bc.decode_block(bytes(16)))  # mode 0, delta-coded
-        self.assertIsNone(bc.decode_block(bytes([0x1f]) + bytes(15)))  # reserved
+    def test_all_modes_zero_block_black(self):
+        for code in bc.MODE_INFO:
+            with self.subTest(mode=code):
+                blk = bytes([code]) + bytes(15)
+                self.assertEqual(bc.decode_block(blk), [(0, 0, 0, 255)] * 16)
+                self.assertEqual(bc.decode_block(blk, signed=True),
+                                 [(0, 0, 0, 255)] * 16)
+
+    def test_delta_mode_endpoint(self):
+        # Mode 0 is transformed: R0 occupies bits 5..14 (10-bit endpoints).
+        # With zero deltas and zero indices, a max R0 makes every pixel red.
+        blk = (1023 << 5).to_bytes(16, "little")
+        px = bc.decode_block(blk)
+        self.assertTrue(all(p[0] > 200 and p[1] == 0 and p[2] == 0 for p in px))
+
+    def test_reserved_modes(self):
+        # All 14 valid BC6H modes are supported; only codes 19/23/27/31 are
+        # reserved and must be reported as unsupported rather than guessed.
+        self.assertEqual(len(bc.MODE_INFO), 14)
+        for code in (19, 23, 27, 31):
+            blk = bytearray(16)
+            blk[0] = code
+            self.assertIsNone(bc.decode_block(bytes(blk)))
+        self.assertIsNotNone(bc.decode_block(bytes(16)))  # mode 0, delta-coded
 
     def test_decode_bc6h_image(self):
         ep = [0] * 12
