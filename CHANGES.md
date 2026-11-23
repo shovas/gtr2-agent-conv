@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 00:10:00 -0500 - Final verification after audio validator
+- `python3 run_tests.py --mode full`: 47 modules / 291 tests / 688.3 s, 0 failures, 2 skips. Normal: 163 tests / 274 s, 0 failures. Quick: 83 tests, 0 failures. Pre-push check PASS.
+
 ## 2026-11-23 23:50:00 -0500 - Audio key validator added
 - `validate_aud()` checks 17 mixing/sound keys universal in all 25 GTR2 `.aud` files (15/31 GTL flagged); `adapt_aud_from_template()` copies them from a same-name GTR2 template. Extended the shared key parser to recognise underscore-containing keys. Added test and docs.
 
