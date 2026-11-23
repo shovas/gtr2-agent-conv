@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 23:00:00 -0500 - MAS-archived cube maps verified
+- Extended the cube-map survey to DDS members inside MAS archives: 40 archives / 1,872 DDS members revealed 27 cube maps (DXT1/DXT5, up to 9 mips) previously missed by loose-file scans. All 27 round-trip byte-identically; added a fast regression test using `showroom.mas`. Also documented that JCA re-encryption is semantically but not byte-exact.
+
 ## 2026-11-23 22:30:00 -0500 - Byte-exact DDS header and BMP row padding
 - A mixed-format round-trip audit found two remaining same-length byte mismatches: DDS files with a zero linear-size field (header rewritten) and BMP files with non-zero row padding (padding zeroed). Both are now preserved; a 338-file mixed audit (DDS/TGA/BMP/WAV) shows zero mismatches for all supported variants. Added two regression tests.
 

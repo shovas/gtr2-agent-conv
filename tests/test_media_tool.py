@@ -360,6 +360,22 @@ class MediaToolTest(unittest.TestCase):
             with wave.open(str(dst), "rb") as w:
                 self.assertGreater(w.getnframes(), 0)
 
+    def test_archived_cubemap_roundtrip(self):
+        import mas_tool
+        p = ROOT.parent / "RF1Vanilla/GameData/Vehicles/showroom.mas"
+        if not p.is_file():
+            self.skipTest("MAS cube-map sample not present")
+        _mtype, entries = mas_tool.read_archive(p)
+        members = [e for e in entries if e.name.lower() == "car_cube.dds" and e.data]
+        self.assertEqual(len(members), 1)
+        with tempfile.TemporaryDirectory() as td:
+            q = Path(td) / "cube.dds"
+            q.write_bytes(members[0].data)
+            img = media_tool.read_dds(q)
+            self.assertEqual(img.fourcc, "DXT5")
+            self.assertEqual(len(img.cube_face_rgba), 6)
+            self.assertEqual(img.to_bytes(), members[0].data)
+
     def test_jca_mipmapped_cubemap(self):
         import jca_crypt
         src = (ROOT.parent / "Race07Vanilla/GameData/Locations/Vara/TEXTURES/Cube_map.dds")
