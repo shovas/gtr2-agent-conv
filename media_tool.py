@@ -130,6 +130,17 @@ def identify(path: str | Path) -> MediaInfo:
                 return MediaInfo(str(p), size, "tga-jca", details)
         except Exception as e:
             details["error"] = str(e)
+        # JCA-wrapped text config (.car/.gdb/.cam/.scn/.aud/...): detect_jca_key
+        # only recognises media magic, so try the text-aware decoder here.
+        try:
+            text = decrypt_jca_text(b)
+            if text != b and b"=" in text[:4096]:
+                lines = text[:4096].count(b"\n") + 1
+                details.update({"jca_text": True, "lines": lines,
+                                "extension": ext})
+                return MediaInfo(str(p), size, "text-jca", details)
+        except Exception as e:
+            details["error"] = str(e)
         return MediaInfo(str(p), size, "jca", details)
     # WAV
     if head.startswith(b"RIFF") and b[8:12] == b"WAVE":

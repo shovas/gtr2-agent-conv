@@ -432,6 +432,29 @@ class MediaToolTest(unittest.TestCase):
         self.assertEqual(info.format, "dds")
         self.assertGreater(info.details.get("mipmaps", 0), 1)
 
+    def test_identify_jca_text_configs(self):
+        """JCA-wrapped text configs are identified as text-jca, not generic jca."""
+        import glob
+        checked = 0
+        for corpus in ("Race07Complete", "VolvoTheGame"):
+            for ext in (".car", ".gdb", ".cam", ".scn", ".aud"):
+                for p in glob.glob(str(ROOT.parent / corpus / "**" / ("*" + ext)),
+                                   recursive=True):
+                    if open(p, "rb").read(4) != b"\x0f\xb1\xff\xff":
+                        continue
+                    info = media_tool.identify(p)
+                    self.assertEqual(info.format, "text-jca", p)
+                    self.assertTrue(info.details["jca_text"])
+                    self.assertGreater(info.details["lines"], 0)
+                    checked += 1
+                    if checked >= 20:
+                        break
+                if checked >= 20:
+                    break
+            if checked >= 20:
+                break
+        self.assertGreaterEqual(checked, 20)
+
     def test_identify_bik_if_present(self):
         p = ROOT.parent / "GTR2Steam/GameData/Locations/Barcelona/Barcelona.bik"
         if not p.exists():

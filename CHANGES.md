@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 09:00:00 -0500 - Identify JCA-wrapped text configs
+- `media_tool.identify()` now recognises JCA-wrapped text configs (`.car/.gdb/.cam/.scn/.aud/...`) as `text-jca` with line counts, instead of the generic `jca` label; media payloads still report `dds-jca`/`wav-jca`/`tga-jca`. Added a corpus regression test; all 51 media tests pass.
+
 ## 2026-11-24 08:30:00 -0500 - Byte-exact BC DDS write-back
 - `DdsImage.to_bytes()` now round-trips BC4/BC5/BC6H/BC7 DDS files byte-exactly by reusing original level-0 blocks, mip chains and the 20-byte DX10 header when RGBA is unchanged; edited images are rejected rather than silently mis-encoded. Added a 7-format synthetic regression test; all 50 media tests pass. Full v18 on the prior tree: 368 tests, 0 failures.
 
