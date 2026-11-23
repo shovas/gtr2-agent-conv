@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 18:00:00 -0500 - BC6H UF16 DDS decode
+- Added `bc6h_format.py`, decoding the two non-transformed BC6H UF16 modes (two-subset 6-bit and one-subset 10-bit) from spec-derived Khronos BPTC tables. `media_tool.py` now reads DX10 `BC6H_UF16` DDS files; write-back is intentionally unsupported. Verification: 4,000/4,000 random blocks match an independent spec-table reference, plus 8 synthetic-fixture tests. A 48,459-file loose-DDS scan confirmed no DX10 samples exist locally.
+
 ## 2026-11-23 17:30:00 -0500 - Multi-bone ANM decoding
 - Extended `anm_format.py` to the corpus-verified multi-bone layout: 40-byte per-bone headers + TRS/time keys (32-byte stride), with time=0 sentinel handling. All 904 archived ANM files decode; tests updated.
 

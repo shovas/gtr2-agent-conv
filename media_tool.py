@@ -921,7 +921,7 @@ def encode_uncompressed_dds(rgba: bytes, width: int, height: int, rgb_bits=32, r
 def _dds_top_level_size(width: int, height: int, fourcc: str,
                         rgb_bits: int = 32) -> int:
     """Byte size of DDS level 0 (mip chains follow it in the payload)."""
-    if fourcc in ("DXT1", "DXT3", "DXT5", "BC4U", "ATI1", "BC5U", "ATI2"):
+    if fourcc in ("DXT1", "DXT3", "DXT5", "BC4U", "ATI1", "BC5U", "ATI2", "BC6H_UF16"):
         blocks = max(1, (width + 3) // 4) * max(1, (height + 3) // 4)
         if fourcc in ("DXT1", "BC4U", "ATI1"):
             return blocks * 8
@@ -1048,7 +1048,22 @@ def read_dds(path: str | Path) -> DdsImage:
     pf_flags, fourcc = struct.unpack_from('<I4s', b, 80)
     fourcc_s = fourcc.decode('latin1','replace').strip('\x00')
     rgb_bits = struct.unpack_from('<I', b, 88)[0]
-    if fourcc_s == 'DXT1':
+    payload_start = 128
+    if fourcc_s == 'DX10':
+        # DDS_DX10 extended header (20 bytes) follows the legacy 128-byte header.
+        if len(b) < 148:
+            raise ValueError('Truncated DDS DX10 header')
+        dxgi, dimension, misc_flag, array_size, misc_flags2 = struct.unpack_from('<5I', b, 128)
+        payload_start = 148
+        if dxgi == 95:  # DXGI_FORMAT_BC6H_UF16
+            import bc6h_format
+            rgba = bc6h_format.decode_bc6h(b[148:], width, height)
+            if rgba is None:
+                raise ValueError('Unsupported BC6H block mode in DX10 DDS')
+            fourcc_s = 'BC6H_UF16'
+        else:
+            raise ValueError(f'Unsupported DX10 DDS DXGI format: {dxgi}')
+    elif fourcc_s == 'DXT1':
         rgba = decode_dxt1(b[128:], width, height)
     elif fourcc_s == 'DXT3':
         rgba = decode_dxt3(b[128:], width, height)
@@ -1069,10 +1084,10 @@ def read_dds(path: str | Path) -> DdsImage:
     else:
         raise ValueError(f'Unsupported DDS fourcc for decode: {fourcc_s}')
     top = _dds_top_level_size(width, height, fourcc_s, rgb_bits)
-    mip_payload = b[128 + top:] if (mipmaps or 1) > 1 else b""
+    mip_payload = b[payload_start + top:] if (mipmaps or 1) > 1 else b""
     return DdsImage(width=width, height=height, mipmaps=mipmaps or 1, fourcc=fourcc_s,
                     rgba=rgba, header=b[:128], mip_payload=mip_payload,
-                    level0_payload=b[128:128 + top])
+                    level0_payload=b[payload_start:payload_start + top])
 
 
 def dds_roundtrip(src: str | Path, dst: str | Path) -> MediaInfo:

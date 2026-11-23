@@ -100,7 +100,8 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 - **Mipmaps**: preserved byte-for-byte on DDS round-trip (level-0 bytes reused when RGBA is unchanged); verified on two mipmapped DXT1/uncompressed corpus files.
 - **DXT4**: decoded as DXT5-alpha variant; alpha channel matches ffmpeg byte-exactly on the local corpus sample (RGB differences are ffmpeg color-management, also seen for DXT5).
 - **BC4/BC5**: native decode implemented (`BC4U`/`ATI1`/`BC5U`/`ATI2`) with synthetic-block fixtures; no local corpus samples to validate against.
-- **Gaps**: BC6H/BC7 and cube maps not implemented; none occur in the local GTR2/GTL corpus (0/7,480 DDS files).
+- **BC6H UF16**: `bc6h_format.py` decodes the two non-transformed modes (stored codes 30 and 3) from spec-derived Khronos BPTC tables; DX10 `BC6H_UF16` DDS files are read by `media_tool.py`. Verified against 4,000 synthetic random blocks using an independent spec-table port. A 48,459-file loose-DDS corpus scan found no DX10 headers, so no BC6H/BC7 samples exist locally. Write-back is unsupported (no encoder).
+- **Gaps**: the 12 delta-transformed BC6H modes, signed SF16, BC7 and cube maps are not implemented; none occur in the local corpus.
 
 ### TGA
 - **Read/Write**: Semantic read/write for uncompressed truecolor/grayscale (type 2/3) and RLE truecolor (type 10) via `media_tool.py`. Type 2/3 round-trip is byte-identical; type 10 round-trip is pixel-identical (encoder emits raw packets).
