@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 13:20:00 -0500 - Final verification after multi-track validation
+- `python3 run_tests.py --mode full`: 47 modules / 309 tests / 735.2 s, 0 failures, 2 skips. Normal: 169 tests / 284.2 s, 0 failures. Quick: 95 tests, 0 failures. Pre-push check PASS.
+
 ## 2026-11-24 12:50:00 -0500 - Multi-track end-to-end validation
 - Extended `convert_tree` validation to all 7 GTL track folders with GTR2 counterparts (Anderstorp, Donington, Hockenheim, Imola, Magny-Cours, Monza, Spa): every converted subtree validates with 0 problems using same-extension templates. Added regression test; no new failures to triage.
 
