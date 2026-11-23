@@ -182,7 +182,7 @@ Notably absent in GTL GameData: rFactor-style `.veh/.scn/.gen/.hdv/.tbc/.sfx` (0
 
 `.hat` files are gzip-compressed binary (no text keys after decompression); `.set` files are CUBEASF text whose only same-name GTL/GTR2 differences are track-specific view/lighting values, so neither yielded a corpus-wide rule.
 
-**JCA-encrypted media**: 33,351 DDS + 4,415 TGA + 2,781 WAV files across the corpora carry the `0fb1ffff` JCA header; the default key decrypts 20/20 sampled textures and Race07 audio samples to valid DDS/TGA/RIFF payloads (`media_tool.py jca-decrypt`).
+**JCA-encrypted media**: 33,351 DDS + 4,415 TGA + 4,112 WAV files across the corpora (Race07Complete/Vanilla + VolvoTheGame) carry the `0fb1ffff` JCA header; the default key decrypts 20/20 sampled textures and Race07 audio samples to valid DDS/TGA/RIFF payloads (`media_tool.py jca-decrypt`).
 
 **Extension survey**: the only remaining common extensions are binary media (`.bmp`, `.dds`, `.jpg`, `.mp3`, `.tga`, `.wav`), executables/libraries, `.vcr` replays (handled by `simbin_events_tool.py`), and `.set`/`.hat` with 2 GTL files — no further text config format to survey.
 
