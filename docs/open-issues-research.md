@@ -156,14 +156,14 @@ patch), but does not identify the exact engine-side use. Further refinement: the
   smoothly from r=0.995 at lag 1 with a +0.176/frame trend (a continuous signal, not a periodic counter);
   correlation with heading curvature (13,528 samples) is r=-0.012. A lattice search over 15 scales x 3 biases
   against DSI heading/pitch/time found no exact fixed-point quantization for any packed byte (best 52%, driven
-  by constant values). Its exact meaning remains **unresolved**.
+ A lagged cross-correlation with speed (10,527 samples, lags -10..+10) peaks at only |r|=0.137, so slot 7 is not a delayed speed signal.  by constant values). Its exact meaning remains **unresolved**.
   A 17,392-frame test appeared to show within-file slot-9/pitch correlation r=0.687, but that is an artifact:
   the byte is 0 in ~all frames with only 1-2 exceptions at 64, which drive the correlation. With corrected
   63-byte alignment, those exceptions occur only at the **first or last frame** of each file (e.g. index 0 or
   n−1), and their larger dt/step values are boundary artifacts — slot 9 is effectively constant-zero padding.
   Exact meaning **unresolved**.
   FXM keyframe-field survey (148 nodes across 5 corpora): quaternions are exactly unit, scale components are all +/-1 (one mirrored bone), and the 4-byte trailer equals `size_hint - 84` in 148/148 nodes — a new corpus-confirmed structural invariant via `fxm_tool.check_node_consistency()`. FXM `key_count`: a fresh child-count hypothesis was excluded (0 children for 47/49 nodes), and an
-  unfiltered node scan still found only value 3 (53/53 nodes, size_hint 96). Cross-variant header diff: the
+ Expanded to 12 corpora: 91 files / 148 standard nodes, all key_count=3 — invariant corpus-wide.  unfiltered node scan still found only value 3 (53/53 nodes, size_hint 96). Cross-variant header diff: the
   standard node header triple is `(1, 96, 3)` (second field varies 94–100 across the corpus), while the
   NUL-name variant trailer is `(1, 0x50=80, 1)` in 239/239 nodes. The variants never coexist in one file
   (5 standard-only, 55 NUL-only), and NUL files use `LMA `/`FXA ` magic with mixed header bytes, so the
