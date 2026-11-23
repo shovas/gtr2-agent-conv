@@ -207,7 +207,7 @@ python3 pre_push_check.py
 
 **Command**:
 ```bash
-python3 -m unittest discover -s tests -v
+python3 run_tests.py --mode quick|normal|full
 ```
 
 ## 15. Inspect CUBE MTS meshes (Nascar SimRacing / F1C lineage)

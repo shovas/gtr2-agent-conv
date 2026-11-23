@@ -34,7 +34,7 @@ conclusively establishing it requires actual game execution.
 - **Experiment**: tested strides 32/48/64 against unit-normal constraint; 48 gave 40/40 unit normals, others ~50%.
 - **Evidence**: `gmt_semantic.read_gtr1_vertices()`; 5,024/5,024 normals unit length across 53 files.
 - **Added**: function + test; docs updated.
-- **Remaining**: extra 16 bytes per vertex, descriptor variants for 127+ files with zero first count. **Partially resolved**.
+- **Remaining**: none of the originally listed gaps — extra bytes resolved as UV pair and descriptor-less variant decoded (see Second-pass section). **Resolved**.
 
 ## 5. PHS runtime consumer
 - **Hypothesis**: GTL contains a PHS/PAR2-aware loader.
@@ -97,8 +97,10 @@ conclusively establishing it requires actual game execution.
   printability 0.375 -> 0.438 (no valid decrypt). Structurally, slot 9's low 16
   bits are zero in 100% of frames across all files (1437/1437), i.e. a float quantized
   to 16-bit granularity (~43 distinct high-16 values, e.g. ±8.5, ±35, ±136) — a coarse
-  control value, not a raw angle. No 2-byte small-integer fields (gear/flags) found; only
-  time is monotonic. Exact meanings **unresolved**.
+  control value, not a raw angle. Slot 7's high byte takes ~50 distinct values but with a
+  median run length of 1 (changes nearly every frame) — not a discrete gear/throttle
+  plateau. No 2-byte small-integer fields (gear/flags) found; only time is monotonic.
+  Exact meanings **unresolved**.
 - **GTR1 extra 16 bytes — RESOLVED**: always `[0, u, v, 0]` (zero padding + 2D float UV pair),
   confirmed across 2,215 vertices in 100 files. Added as `uv` field in `read_gtr1_vertices()`.
 - **GTR1 descriptor-less variant — RESOLVED**: 22,287 GMTs lack the 0x194 grid. Their
