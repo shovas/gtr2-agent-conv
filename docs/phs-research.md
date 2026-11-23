@@ -75,6 +75,14 @@ files. None of these contradict the recovery-container conclusion.
   (lines 25-27), alongside UI archives (`GTLOptions1/2.gtl`, `UIAssets.gtl`).
 - **Archives contain only PHS**: `Physics2.gtl` = DRIVERS/PHYSICS/CARS.PHS,
   `AIStrat.gtl` = AI.PHS, `LiveTrack2.gtl` = TRACKS.PHS — no UI assets at all.
+- **Inline-immediate search (radare2)**: searched GTL.exe for `50 53 48` ("PHS") as an
+  inline comparison constant — 3 hits at 0x72f1f4/0x72f208/0x72f218, all part of
+  `PSHADEBUMPEXDECL`/`PSHADEBUMPDECL`/`PSHADEEXDECL` pixel-shader strings. **False positives**;
+  no PHS extension-dispatch constant exists.
+- **Cross-correlation with plain-text physics**: 4,672 `.rcd/.hdv/.veh/.tyr/.gen` files
+  across 8 corpora (entropy 4.95, 100% printable) vs PHYSICS.PHS (entropy 7.986, 38%
+  printable, all 256 byte values) — zero of 4,787 extracted tokens appear in PHS.
+  **No structural match**; PHS is not a simple encoding of known physics text.
 - **Interpretation**: the UI source-MAS loader likely opens these archives looking for
   UI/localization assets and finds none relevant; the PHS members are not dispatched
   to any physics consumer by name. Strong evidence PHS data is **unused by GTL
