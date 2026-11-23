@@ -83,6 +83,10 @@ files. None of these contradict the recovery-container conclusion.
   across 8 corpora (entropy 4.95, 100% printable) vs PHYSICS.PHS (entropy 7.986, 38%
   printable, all 256 byte values) — zero of 4,787 extracted tokens appear in PHS.
   **No structural match**; PHS is not a simple encoding of known physics text.
+- **Truncated-slice test**: PHYSICS.PHS's 13,064 bytes share no 64-byte chunk with any of
+  the four PAR2 containers' recovery slices at any alignment, and its length is not a
+  simple fraction of the 384,000-byte slice size from their Main packet. So it is not a
+  fragment of the same recovery set (though it could belong to a different set).
 - **Interpretation**: the UI source-MAS loader likely opens these archives looking for
   UI/localization assets and finds none relevant; the PHS members are not dispatched
   to any physics consumer by name. Strong evidence PHS data is **unused by GTL
