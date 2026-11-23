@@ -341,10 +341,12 @@ def relayout_gmt(g: GmtFile, align: int = 4) -> bytes:
         rec[4] = vo
         rec[5] = vo + vc * 32 if extra else 0
         # Preserve the anomalous r6==0 case seen in one original mesh; otherwise
-        # r6 marks the end of the combined base+extra vertex block.
-        rec[6] = 0 if m.record.raw[6] == 0 else cursor
+        # r6 marks the end of the combined base+extra vertex block. A nonzero
+        # r6 is required for streams to be recognised on reparse.
+        has_streams = bool(m.stream2_data or m.stream3_data)
+        rec[6] = 0 if (m.record.raw[6] == 0 and not has_streams) else cursor
 
-        if m.stream2_data or m.stream3_data:
+        if has_streams:
             # raw[7]/raw[8] are END offsets of stream2/stream3 respectively;
             # both streams start at raw[6] (the end of the vertex block).
             blobs.append((cursor, m.stream2_data))
