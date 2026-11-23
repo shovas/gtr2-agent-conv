@@ -97,6 +97,7 @@ files. None of these contradict the recovery-container conclusion.
   substring, and the best XOR combination of all 7 slices gives 69/13,064 (chance ≈51). It is therefore
   not a truncated slice from this PAR2 set, nor an XOR of its slices. The `GTL_Update_0901.exe` string
   occurs only in DRIVERS.PHS; no EXE or update-named file exists anywhere in the GTL install to compare against.
+- **Arbitrary-offset window test**: scanned all 7 recovery slices at 64-byte steps for a 13,064-byte window matching PHYSICS.PHS (sampling every 16th byte): best 12/816 matches — chance level. It is not a window of any slice.
 - **Recovery-slice exponent test**: the 7 `RecvSlic` bodies carry 4-byte PAR2 exponents; PHYSICS.PHS's
   leading u32 (0x6050b465) matches none of them, so it is not a bare recovery-slice body from that set.
 - **Distribution comparison**: PHYSICS.PHS byte entropy 7.986 (chi2 0.993 vs uniform) is statistically
