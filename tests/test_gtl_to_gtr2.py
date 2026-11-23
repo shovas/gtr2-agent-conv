@@ -75,6 +75,49 @@ class GtlToGtr2Test(unittest.TestCase):
         self.assertEqual(changes["teammaps2"], 1)
         self.assertEqual(g.validate_trk(out), [])
 
+    def test_car_adapt_from_template(self):
+        def index(root):
+            return {Path(p).name.lower(): Path(p) for p in glob.glob(
+                str(ROOT.parent / root / "**" / "*"), recursive=True)
+                if p.lower().endswith(".car")}
+        gtl, gtr = index("GTLSteam"), index("GTR2Steam")
+        common = sorted(set(gtl) & set(gtr))
+        if not common:
+            self.skipTest("no same-name GTL/GTR2 .car pair present")
+        for name in common:
+            with self.subTest(name=name):
+                src = gtl[name].read_bytes()
+                template = gtr[name].read_bytes()
+                out, report = g.adapt_car_from_template(src, template)
+                self.assertEqual(g.validate_car(out), [])
+                self.assertEqual(report["keys_applied"], 4)
+                tv, ov = g.gdb_key_values(template), g.gdb_key_values(out)
+                for key in g.GTR2_CAR_ONLY_KEYS:
+                    self.assertEqual(ov.get(key), tv[key])
+                strip = lambda d: [ln for ln in d.split(b"\n")
+                                   if not any(ln.lower().lstrip().startswith(k.encode())
+                                              for k in g.GTR2_CAR_ONLY_KEYS)]
+                self.assertEqual(strip(src), strip(out))
+
+    def test_car_adapt_generic_template(self):
+        gtl = [Path(p) for p in glob.glob(
+            str(ROOT.parent / "GTLSteam" / "**" / "*"), recursive=True)
+            if p.lower().endswith(".car")]
+        tmpl = next((p for p in glob.glob(
+            str(ROOT.parent / "GTR2Steam" / "**" / "*"), recursive=True)
+            if p.lower().endswith("safetycar.car")), None)
+        if not gtl or tmpl is None:
+            self.skipTest("car corpora not present")
+        template = Path(tmpl).read_bytes()
+        for src in gtl[:10]:
+            with self.subTest(name=src.name):
+                data = src.read_bytes()
+                out, _ = g.adapt_car_from_template(data, template)
+                self.assertEqual(g.validate_car(out), [])
+                ov, tv = g.gdb_key_values(out), g.gdb_key_values(template)
+                for key in g.GTR2_CAR_ONLY_KEYS:
+                    self.assertEqual(ov.get(key), tv[key])
+
     def test_gdb_session_key_rule(self):
         gtl, gtr = _trks("GTLSteam"), _trks("GTR2Steam")
         gdbs = lambda root: [Path(p) for p in glob.glob(

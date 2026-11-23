@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 22:35:00 -0500 - .car template adaptation added
+- `gtl_to_gtr2.adapt_car_from_template()` copies the four universal GTR2-only car keys (driver1, driver2, externaldriverposition, steeringwheelaxis) from a template, preserving all other lines. Verified on the 1 same-name corpus pair (`safetycar.car`) and 10 generic-template cases; 2 new tests.
+
 ## 2026-11-23 22:20:00 -0500 - Final Full-suite verification (GTL conversion work)
 - `python3 run_tests.py --mode full`: 47 modules / 285 tests / 658.4 s, 0 failures, 2 skips. GTL->GTR2 validators: GTR2 GameData 0 problems; GTL 0/25 .trk, 0/53 .gdb, 0/96 .car pass; GTR2 34/34, 85/85, 145/145 pass. Pre-push check PASS.
 

@@ -233,6 +233,24 @@ def validate_car(data: bytes) -> list[str]:
     return [f"missing car key: {k}" for k in GTR2_CAR_ONLY_KEYS if k not in keys]
 
 
+def adapt_car_from_template(data: bytes, template: bytes) -> tuple[bytes, dict]:
+    """Copy the four GTR2-only universal ``.car`` keys from a template.
+
+    Same-name GTL/GTR2 ``.car`` counterparts are rare in the local corpora (1:
+    ``safetycar.car``), so this is only meaningful when the template is the
+    GTR2 version of the same vehicle. All other lines are preserved byte-for-byte.
+    """
+    tvals = gdb_key_values(template)
+    missing = [k for k in GTR2_CAR_ONLY_KEYS if k not in tvals]
+    if missing:
+        raise ValueError(f"template lacks car keys: {missing}")
+    out = data
+    for k in GTR2_CAR_ONLY_KEYS:
+        out = _set_gdb_key(out, k, tvals[k])
+    return out, {"keys_applied": len(GTR2_CAR_ONLY_KEYS),
+                 "already_valid": not validate_car(data)}
+
+
 def _set_gdb_key(data: bytes, key: str, value: str) -> bytes:
     """Replace or insert one GDB key line, preserving all other bytes."""
     lines = data.splitlines(keepends=True)
