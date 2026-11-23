@@ -508,11 +508,15 @@ class BmpImage:
             pixel_data.extend(self.pixels_bgra[off:off+row_raw])
             pixel_data.extend(pad)
         pixel_offset = 14 + 40
-        file_size = pixel_offset + len(pixel_data)
+        file_size = pixel_offset + len(pixel_data) + len(self.trailer)
+        if self.source_header and len(self.source_header) >= 54:
+            hdr = bytearray(self.source_header[:54])
+            struct.pack_into('<I', hdr, 2, file_size)
+            return bytes(hdr + pixel_data + self.trailer)
         hdr = struct.pack('<2sIHHI', b'BM', file_size, 0, 0, pixel_offset)
         dib = struct.pack('<IiiHHIIiiII', 40, self.width, self.height, 1, self.bpp, 0,
                           len(pixel_data), 2835, 2835, 0, 0)
-        return bytes(hdr + dib + pixel_data)
+        return bytes(hdr + dib + pixel_data + self.trailer)
 
 
 def read_bmp(path: str | Path) -> BmpImage:
@@ -566,7 +570,9 @@ def read_bmp(path: str | Path) -> BmpImage:
     # wait - I looped row from 0..height-1 as destination top-down, reading from src_y. ok.
     # but src_y for bottom-up: height-1-row gives bottom row first. I want dst row 0 = top row.
     # so for bottom-up (top_down False): src_y = height-1-row => dst_off=row*row_raw gives top-down. yes.
-    return BmpImage(width=w, height=height, bpp=bpp, compression=comp, pixels_bgra=bytes(pixels))
+    used = pixel_offset + height * row_padded
+    return BmpImage(width=w, height=height, bpp=bpp, compression=comp,
+                    pixels_bgra=bytes(pixels), trailer=b[used:], source_header=b[:54])
 
 
 def bmp_roundtrip(src: str | Path, dst: str | Path) -> MediaInfo:

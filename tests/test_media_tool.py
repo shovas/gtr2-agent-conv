@@ -617,6 +617,16 @@ class MediaToolTest(unittest.TestCase):
             self.assertEqual(a.pixels, b.pixels)
             self.assertEqual((a.width,a.height,a.bpp,a.image_type), (2,2,24,10))
 
+    def test_bmp_32bit_trailing_bytes_preserved(self):
+        p = (ROOT.parent / "GTR2Steam/GameData/Teams/NGT/Ferrari 360 Teams/GPC Giesse/"
+             "04064_NGT_FERRARI_360Graph.bmp")
+        if not p.exists():
+            self.skipTest("trailing-byte BMP sample not present")
+        with tempfile.TemporaryDirectory() as td:
+            dst = Path(td) / "out.bmp"
+            media_tool.bmp_roundtrip(p, dst)
+            self.assertEqual(dst.read_bytes(), p.read_bytes())
+
     def test_bmp_roundtrip(self):
         with tempfile.TemporaryDirectory() as td:
             src = Path(td) / "a.bmp"

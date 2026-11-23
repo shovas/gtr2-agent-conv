@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 20:30:00 -0500 - Byte-lossless BMP round-trip
+- 24/32-bit BMP round-trips now preserve the original 54-byte header and trailing padding bytes instead of rebuilding a canonical header and dropping the tail. 29/29 supported corpus samples are byte-identical; added a regression test.
+
 ## 2026-11-23 20:00:00 -0500 - Byte-lossless WAV round-trip
 - `wav_roundtrip()` no longer rewrites WAV files through stdlib `wave`, which silently dropped `LIST`/`PAD`/`fact` chunks and rewrote WAVEFORMATEX headers. All 30 sampled corpus files (24 with extra chunks) now round-trip byte-identically. Added a regression test.
 

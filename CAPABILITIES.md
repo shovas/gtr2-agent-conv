@@ -111,8 +111,8 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 - **Gaps**: color-mapped TGA and other rarer types not implemented (none found in the corpus).
 
 ### BMP
-- **Read/Write**: Semantic read/write for uncompressed BI_RGB 24/32-bit BMP via `media_tool.py` (top-down memory representation, bottom-up file write).
-- **Verification**: `tests/test_media_tool.py` (synthetic 24-bit round-trip).
+- **Read/Write**: Semantic read/write for uncompressed BI_RGB 24/32-bit BMP via `media_tool.py` (top-down memory representation, bottom-up file write). Original 54-byte header and trailing padding bytes are preserved; 29/29 supported corpus samples round-trip byte-identically.
+- **Verification**: `tests/test_media_tool.py` (synthetic 24-bit round-trip; real 32-bit trailing-byte sample).
 - **Palettized BMP**: 8-bit BI_RGB files (7 corpus samples) decode with palette/indices preserved; verified byte-identical on `legal256.bmp` (512x384, 1024-byte palette).
 - **Gaps**: compressed DIB variants (RLE8/RLE4) are absent from the corpus; BMP-as-TGA quirk detected but routed separately.
 
