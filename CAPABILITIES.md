@@ -125,6 +125,12 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 - **Verification**: `tests/test_media_tool.py` (`test_tgq_identify_and_decode`).
 - **Gaps**: no in-repo codec; relies on external ffmpeg.
 
+## Test execution
+- **Tool**: `run_tests.py --mode quick|normal|full` (default `normal`). Deterministic module lists with progressive coverage (`Quick ⊆ Normal ⊆ Full`), end-to-end budget warnings (Quick ≤60 s, Normal ≤300 s), and a timing/result report.
+- **Measured**: Quick 16 modules / 63 tests / ~10 s; Normal 36 modules / 138 tests / ~270 s; Full 43 modules / 259 tests / ~634 s (2 skipped — external tools absent).
+- **Plain full suite**: `python3 -m unittest discover -s tests -v` remains available.
+- **Verification**: `tests/test_run_tests_modes.py` checks mode selection invariants.
+
 ## Conversion pipeline
 
 ### GTL -> GTR2 end-to-end conversion

@@ -25,7 +25,7 @@ QUICK = (
     "test_pre_push_check", "test_text_convert", "test_validate_conversion",
     "test_validate_materials", "test_gmt_tool", "test_gmt_semantic",
     "test_simbin_text_tool", "test_gtr1_vanilla", "test_scgt", "test_gmt_variants",
-    "test_fxm_crosscorpus", "test_simbin_tools",
+    "test_fxm_crosscorpus", "test_simbin_tools", "test_run_tests_modes",
 )
 
 # Medium-cost tests (corpora read but bounded); target total ≤5 min.
