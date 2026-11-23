@@ -154,7 +154,9 @@ patch), but does not identify the exact engine-side use. Further refinement: the
   excluded: no correlation with acceleration (r=-0.02), position coordinates (|r|<0.14) or heading (r=-0.01);
   not a byte-XOR/sum checksum of position floats (0.3% chance-level matches). A 17,392-frame test
   appeared to show within-file slot-9/pitch correlation r=0.687, but that is an artifact: the byte is 0
-  in ~all frames with only 1-2 exceptions at 64, which drive the correlation. Exact meaning **unresolved**.
+  in ~all frames with only 1-2 exceptions at 64, which drive the correlation. With corrected 63-byte alignment,
+  those exceptions occur only at the **first or last frame** of each file (e.g. index 0 or n−1), and their larger
+  dt/step values are boundary artifacts — slot 9 is effectively constant-zero padding. Exact meaning **unresolved**.
   FXM keyframe-field survey (148 nodes across 5 corpora): quaternions are exactly unit, scale components are all +/-1 (one mirrored bone), and the 4-byte trailer equals `size_hint - 84` in 148/148 nodes — a new corpus-confirmed structural invariant via `fxm_tool.check_node_consistency()`. FXM `key_count`: a fresh child-count hypothesis was excluded (0 children for 47/49 nodes), and an
   unfiltered node scan still found only value 3 (53/53 nodes, size_hint 96). Cross-variant header diff: the
   standard node header triple is `(1, 96, 3)` (second field varies 94–100 across the corpus), while the
