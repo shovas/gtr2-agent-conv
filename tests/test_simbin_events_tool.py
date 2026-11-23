@@ -57,9 +57,14 @@ class SimbinEventsToolTest(unittest.TestCase):
             grid = setool.find_frame_grid(data)
             if not grid:
                 continue
-            self.assertEqual(grid["stride"], 252)
+            self.assertEqual(grid["stride"], 63)
             frames = setool.read_frames(data, grid)
-            self.assertGreater(len(frames), 100)
+            self.assertGreater(len(frames), 400)
+            # At a 63-byte stride consecutive samples are adjacent frames, so
+            # position deltas are small; a 252-byte stride skipped 4 frames.
+            deltas = [abs(frames[i + 1]["position"][0] - frames[i]["position"][0])
+                      for i in range(len(frames) - 1)]
+            self.assertLess(max(deltas), 5.0)
             self.assertTrue(all(0 < frames[i + 1]["time"] - frames[i]["time"] < 1.0
                                 for i in range(len(frames) - 1)))
             self.assertTrue(any(abs(x) > 1 for x in frames[0]["position"]))

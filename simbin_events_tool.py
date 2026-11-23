@@ -6,8 +6,9 @@ These live inside gzip containers (`gzip_simbin_tool.py`). Verified fields:
   u32-length-prefixed TRK filename, u32-length-prefixed AIW filename,
   then binary records with embedded ASCII strings.
 
-Full lap/frame record semantics are NOT decoded; this tool identifies the
-header, filenames, and all printable strings with their offsets.
+Frame grid (63-byte stride) decodes position, heading, pitch and time per
+sample; the meaning of the remaining per-frame fields is NOT decoded. This
+tool also identifies the header, filenames, and printable strings.
 """
 from __future__ import annotations
 
@@ -190,26 +191,30 @@ def parse_file(path: str | Path) -> EventFile:
     return parse_payload(data)
 
 
-FRAME_STRIDE = 252
+# The ghost replay stores one frame sample every 63 bytes. An earlier reader
+# used 252 (4 samples) as the stride, which collapsed four consecutive frames
+# into one; a 63-byte stride yields 4x as many frames with smooth per-frame
+# position/time deltas (verified across the GTR2 GTTF corpus).
+FRAME_STRIDE = 63
 FRAME_TIME_OFF = 20
 
 
 def find_frame_grid(data: bytes) -> dict | None:
     """Locate the GTTF frame-record grid.
 
-    Records are 252 bytes apart; the f32 at +20 increases monotonically by
-    ~0.05..1.0 per frame and the first three floats are car positions.  The
-    grid start varies with metadata length, so each phase (mod 252) is tried.
+    Records are 63 bytes apart; the f32 at +20 increases monotonically by
+    ~0.01..0.2 per frame and the first three floats are car positions.  The
+    grid start varies with metadata length, so each phase (mod 63) is tried.
     """
     best_run, best_start = 0, None
-    for phase in range(0, FRAME_STRIDE, 4):
+    for phase in range(0, FRAME_STRIDE):
         run, start = 0, None
         for off in range(phase, len(data) - FRAME_STRIDE - 24, FRAME_STRIDE):
             if off + FRAME_STRIDE + 24 > len(data):
                 break
             t0 = struct.unpack_from("<f", data, off + FRAME_TIME_OFF)[0]
             t1 = struct.unpack_from("<f", data, off + FRAME_STRIDE + FRAME_TIME_OFF)[0]
-            if math.isfinite(t0) and math.isfinite(t1) and 0.05 < t1 - t0 < 1.0:
+            if math.isfinite(t0) and math.isfinite(t1) and 0.001 < t1 - t0 < 1.0:
                 if run == 0:
                     start = off
                 run += 1
