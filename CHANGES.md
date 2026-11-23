@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 22:20:00 -0500 - Final Full-suite verification (GTL conversion work)
+- `python3 run_tests.py --mode full`: 47 modules / 285 tests / 658.4 s, 0 failures, 2 skips. GTL->GTR2 validators: GTR2 GameData 0 problems; GTL 0/25 .trk, 0/53 .gdb, 0/96 .car pass; GTR2 34/34, 85/85, 145/145 pass. Pre-push check PASS.
+
 ## 2026-11-23 22:00:00 -0500 - GDB session-key validation and template adaptation
 - Corpus comparison: all 85 GTR2 `.gdb` files contain 15 universal session keys, none of the 53 GTL files do. `gtl_to_gtr2.py` validates this and can copy the keys from a same-name GTR2 template (6 corpus pairs: 11 missing keys -> 0, all other lines byte-identical). Fixed a CRLF-swallowing regex bug. Also added a `.car` key validator: all 145 GTR2 cars carry four universal keys absent from all 96 GTL cars; values are car-specific so only presence is enforced. A full-subtree test inventories the remaining gaps (shared archives outside the subtree and unmatched GDB templates).
 
