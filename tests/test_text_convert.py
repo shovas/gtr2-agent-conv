@@ -45,5 +45,27 @@ class TextConvertTest(unittest.TestCase):
         self.assertGreater(report["copy"], 0)
 
 
+    def test_jca_encrypted_scn_decryption(self):
+        """Race07/Volvo .scn files are JCA-wrapped; tree conversion must decrypt."""
+        import glob
+        import media_tool
+        samples = [p for p in glob.glob(
+            str(ROOT.parent / "Race07Complete" / "**" / "*.scn"), recursive=True)
+            if open(p, "rb").read(4) == b"\x0f\xb1\xff\xff"]
+        if not samples:
+            self.skipTest("encrypted SCN corpus not present")
+        checked = 0
+        for path in samples:
+            data = Path(path).read_bytes()
+            plain = media_tool.decrypt_jca_text(data)
+            self.assertNotEqual(plain[:4], b"\x0f\xb1\xff\xff", path)
+            text = tc.decode_config_bytes(data)
+            self.assertIn("=", text, path)
+            converted = tc.scn_to_trk(text, Path(path).name)
+            self.assertTrue(converted, path)
+            checked += 1
+        self.assertGreaterEqual(checked, 5)
+
+
 if __name__ == "__main__":
     unittest.main()

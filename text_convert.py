@@ -11,6 +11,12 @@ from pathlib import Path
 
 from simbin_text_tool import aiw_for_simbin
 
+def decode_config_bytes(data: bytes) -> str:
+    """Decode a SimBin/ISI text config, transparently decrypting JCA-wrapped files."""
+    from media_tool import decrypt_jca_text
+    return decrypt_jca_text(data).decode("latin-1")
+
+
 KEYVALUE = re.compile(r"^(\s*)([A-Za-z_][\w]*)\s*=\s*(.*?)(\s*)$")
 
 
@@ -84,13 +90,13 @@ def convert_tree(source: str | Path, target: str | Path, check: bool = False) ->
             if not check:
                 out = dst / rel
                 out.parent.mkdir(parents=True, exist_ok=True)
-                out.write_bytes(aiw_for_simbin(path.read_bytes().decode("latin-1")).encode("latin-1"))
+                out.write_bytes(aiw_for_simbin(decode_config_bytes(path.read_bytes())).encode("latin-1"))
             report["aiw"] += 1
         elif ext == ".scn":
             if not check:
                 out = (dst / rel).with_suffix(".trk")
                 out.parent.mkdir(parents=True, exist_ok=True)
-                out.write_bytes(scn_to_trk(path.read_bytes().decode("latin-1"), src.name).encode("latin-1"))
+                out.write_bytes(scn_to_trk(decode_config_bytes(path.read_bytes()), src.name).encode("latin-1"))
             report["scn"] += 1
         else:
             if not check:

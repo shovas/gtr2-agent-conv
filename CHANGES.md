@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 07:30:00 -0500 - JCA-wrapped text configs across the corpus
+- Surveyed all text config formats: JCA-encrypted variants are common in Race07/Volvo (`.car` 68.7%, `.cam` 64.9%, `.aud` 62.4%, `.gdb` 44%, `.scn` 92.5%, plus `.hdc/.eng/.tyr/.trk/.dmg/.hed/.grb`), while `.aiw/.rcd/.txt/.ini/.svm` are always plain. Added `media_tool.decrypt_jca_text()` (key trial + text validation) and wired it into `text_convert.py` for `.aiw`/`.scn`; `gtl_to_gtr2.aud_plain()` now reuses it. Added a corpus regression test for encrypted `.scn`; all 32 text/converter tests pass.
+
 ## 2026-11-24 07:00:00 -0500 - JCA-encrypted .aud conversion support
 - Found 153 JCA-wrapped `.aud` files (Race07/Volvo) whose decrypted key sets are a strict subset of plain-text audio maps. `gtl_to_gtr2.aud_plain()` now decrypts them transparently before the sound-path, road-noise and key rules run, converting them to plain GTR2 text. Added a corpus regression test; all 28 converter tests pass. Full v17 on the prior tree: 367 tests, 0 failures.
 

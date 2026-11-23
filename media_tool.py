@@ -55,6 +55,29 @@ def decrypt_jca_bytes(data: bytes, key_name: str | None = None) -> bytes:
     return jca_crypt.decrypt_bytes(data, custom)
 
 
+def decrypt_jca_text(data: bytes) -> bytes:
+    """Decrypt a JCA-wrapped text config (.aud/.car/.gdb/.scn/...) to plain text.
+
+    Unlike media payloads, text has no recognisable magic, so each known key
+    is tried and the candidate with >90% printable bytes plus a '=' is chosen.
+    Non-JCA input is returned unchanged; undecryptable input is preserved.
+    Corpus-verified on 153 JCA-wrapped .aud files (Race07/Volvo).
+    """
+    if data[:4] != JCA_MAGIC:
+        return data
+    import jca_crypt
+    for name in [None] + sorted(jca_crypt.CUSTOM_KEYS):
+        try:
+            out = jca_crypt.decrypt_bytes(data, jca_crypt.CUSTOM_KEYS.get(name))
+        except Exception:
+            continue
+        sample = out[:4096]
+        if b"=" in sample and sum(32 <= c < 127 or c in (9, 10, 13)
+                                  for c in sample) > 0.9 * len(sample):
+            return out
+    return data
+
+
 def decrypt_jca_wav(data: bytes, key_name: str | None = None) -> bytes:
     """Decrypt a JCA-wrapped WAV to plain RIFF/WAVE bytes.
 

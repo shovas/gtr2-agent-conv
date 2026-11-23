@@ -397,19 +397,8 @@ def aud_plain(data: bytes) -> bytes:
     text files. GTL/GTR2/BMW .aud files are always plain text. Plain input is
     returned unchanged, and undecryptable input is preserved rather than lost.
     """
-    if data[:4] != b"\x0f\xb1\xff\xff":
-        return data
-    import jca_crypt
-    for name in [None] + sorted(jca_crypt.CUSTOM_KEYS):
-        try:
-            out = jca_crypt.decrypt_bytes(data, jca_crypt.CUSTOM_KEYS.get(name))
-        except Exception:
-            continue
-        sample = out[:4096]
-        if b"=" in sample and sum(32 <= c < 127 or c in (9, 10, 13)
-                                  for c in sample) > 0.9 * len(sample):
-            return out
-    return data
+    from media_tool import decrypt_jca_text
+    return decrypt_jca_text(data)
 
 
 def rewrite_aud_sound_paths(data: bytes) -> tuple[bytes, int]:
