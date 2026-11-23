@@ -928,7 +928,7 @@ def _dds_top_level_size(width: int, height: int, fourcc: str,
                         rgb_bits: int = 32) -> int:
     """Byte size of DDS level 0 (mip chains follow it in the payload)."""
     if fourcc in ("DXT1", "DXT3", "DXT5", "DXT4", "BC4U", "ATI1", "BC5U", "ATI2",
-                  "BC6H_UF16", "BC6H_SF16"):
+                  "BC6H_UF16", "BC6H_SF16", "BC7_UNORM"):
         blocks = max(1, (width + 3) // 4) * max(1, (height + 3) // 4)
         if fourcc in ("DXT1", "BC4U", "ATI1"):
             return blocks * 8
@@ -963,6 +963,12 @@ def _decode_dds_payload(payload: bytes, fourcc_s: str, width: int, height: int,
                                        signed=(fourcc_s == 'BC6H_SF16'))
         if rgba is None:
             raise ValueError('Unsupported BC6H block mode in DX10 DDS')
+        return rgba
+    if fourcc_s == 'BC7_UNORM':
+        import bc7_format
+        rgba = bc7_format.decode_bc7(payload, width, height)
+        if rgba is None:
+            raise ValueError('Truncated BC7 DDS payload')
         return rgba
     if fourcc_s == 'UNCOMPRESSED':
         return decode_uncompressed_dds(payload, width, height, rgb_bits,
@@ -1116,6 +1122,8 @@ def read_dds(path: str | Path) -> DdsImage:
             fourcc_s = 'BC6H_UF16'
         elif dxgi == 96:  # DXGI_FORMAT_BC6H_SF16
             fourcc_s = 'BC6H_SF16'
+        elif dxgi in (97, 98, 99):  # BC7_TYPELESS / UNORM / UNORM_SRGB
+            fourcc_s = 'BC7_UNORM'
         else:
             raise ValueError(f'Unsupported DX10 DDS DXGI format: {dxgi}')
     elif fourcc_s == '' and (pf_flags & 0x40):  # DDPF_RGB (optional alpha)

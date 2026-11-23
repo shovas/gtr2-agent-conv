@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-23 21:30:00 -0500 - BC7 DDS decode
+- Added `bc7_format.py`, decoding all 8 BC7 modes from mechanically generated Khronos BPTC tables; `media_tool.py` reads DX10 BC7 (DXGI 97/98/99) DDS files. Verified against an independent spec transcription on 8,000 random blocks (1,000 per mode) and 8 synthetic tests. Confirmed the spec's rotation-channel convention against Microsoft's BC7 mode reference. No local BC7 samples exist.
+
 ## 2026-11-23 21:00:00 -0500 - Complete BC6H mode coverage
 - `bc6h_format.py` now decodes all 14 valid BC6H modes (including delta-transformed endpoints) in UF16 and SF16, with tables generated mechanically from the spec-derived reference source. Verified against an independent spec port on 8,400 random blocks (14 modes × 2 variants, 300 each); 13 tests pass. BC7 remains the only unimplemented BCn format.
 
