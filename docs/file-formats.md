@@ -180,6 +180,8 @@ Notably absent in GTL GameData: rFactor-style `.veh/.scn/.gen/.hdv/.tbc/.sfx` (0
 
 **Archive-level survey (31 same-name GTL/GTR2 archives)**: member sets differ per track (content was genuinely changed between games), with 36 same-basename `.tga`→`.dds` texture pairs in 5 archives but 13 GTL TGAs without counterparts and 76 loose `.tga` files still shipped in GTR2 — so neither a blanket extension rewrite nor a "no TGA" rule is justified. No archive-member rule was added.
 
+`.hat` files are gzip-compressed binary (no text keys after decompression); `.set` files are CUBEASF text whose only same-name GTL/GTR2 differences are track-specific view/lighting values, so neither yielded a corpus-wide rule.
+
 **Extension survey**: the only remaining common extensions are binary media (`.bmp`, `.dds`, `.jpg`, `.mp3`, `.tga`, `.wav`), executables/libraries, `.vcr` replays (handled by `simbin_events_tool.py`), and `.set`/`.hat` with 2 GTL files — no further text config format to survey.
 
 **`.trk` key survey**: all 16 universal keys are identical in GTL and GTR2 (no new rules beyond the MASFile rewrites).
