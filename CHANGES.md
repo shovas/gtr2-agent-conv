@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 06:35:00 -0500 - Final verification after multi-object fix
+- `python3 run_tests.py --mode full`: 47 modules / 301 tests / 725.0 s, 0 failures, 2 skips. Normal: 164 tests / 269.9 s, 0 failures. Quick: 90 tests, 0 failures. Pre-push check PASS.
+
 ## 2026-11-24 06:15:00 -0500 - Multi-object GMT bridge fixed
 - `gmt_layout.old_to_new()` now fills all N mesh records of multi-object rF1 GMTs using the N submesh headers (previously only record 0 was populated). Validated on 8,109/8,109 old-layout GMTs for parse, byte round-trip and relayout; added a multi-object coherence test.
 
