@@ -52,10 +52,14 @@ was blocked by a missing `MFC42.DLL`.
 
 ## Final verification
 ```
-python3 -m unittest discover -s tests -v   -> 244 tests OK (skipped=2)
-git status --short                          -> clean
-
-Additional corpora reviewed after the plan was written (F1CS2000, GameStockCar,
-NascarSimRacing, Race07Complete) are recorded in `AGENTS.md` and
-`docs/binary-formats.md`; no new plan tasks arose from them.
+python3 run_tests.py --mode quick    -> 66 tests, ~9 s, 0 failures
+python3 run_tests.py --mode normal   -> 138 tests, ~270 s, 0 failures
+python3 run_tests.py --mode full     -> 262 tests, ~637 s, 0 failures (2 skipped)
+python3 pre_push_check.py            -> PASS
+git status --short                    -> clean
 ```
+
+## Later work (post-plan)
+- Quick/Normal/Full test execution modes (`run_tests.py`) with deterministic progressive tiers.
+- Offline unresolved-field RE documented in `docs/open-issues-research.md`: FXM key_count, GTTF slots 7/9 and PHYSICS.PHS have multiple independent negative results; remaining confirmation needs a spec or runtime.
+- All original Wave 0-2 tasks and the binary-format decodes (GMT/MAS/MTS/FXM/GTTF/GTR1/Bink/TGQ) are complete and pushed.
