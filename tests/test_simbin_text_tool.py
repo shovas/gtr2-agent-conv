@@ -81,6 +81,32 @@ class SimbinTextToolTest(unittest.TestCase):
         self.assertEqual(info.stamps, ["Detail.tga"])
         self.assertEqual(info.decals, ["Small"])
 
+    def test_cin_script_fixture(self):
+        """.cin events parse with Probability/Iterations invariants."""
+        sample = ("PreRacePresentation\n{\nCinematicEvent\n{\n"
+                  "Type = CAMERA_SELECT\nProbability = 1.00\n"
+                  "Time = +0.0\nIterations = 1\nWait = YES\n"
+                  "Camera = STATIC001\n}\n}\n")
+        info = stt.parse_cin(sample)
+        self.assertEqual(info.sections, ["PreRacePresentation"])
+        self.assertEqual(len(info.events), 1)
+        self.assertEqual(info.events[0].type, "CAMERA_SELECT")
+        self.assertEqual(info.events[0].camera, "STATIC001")
+        self.assertEqual(stt.validate_cin(info), [])
+        bad = sample.replace("Probability = 1.00", "Probability = 0.50")
+        self.assertTrue(stt.validate_cin(stt.parse_cin(bad)))
+
+    def test_scr_script_fixture(self):
+        """.scr Actor blocks parse Detail/Position/Mesh."""
+        sample = ('Actor "Pit box"\n{\nDetail 0\nPosition 1.0 2.0 3.0\n'
+                  'Mesh "Startbox.gmt"\nMove PATH\n}\n')
+        info = stt.parse_scr(sample)
+        self.assertEqual(info.actors[0].name, "Pit box")
+        self.assertEqual(info.actors[0].position, (1.0, 2.0, 3.0))
+        self.assertEqual(info.actors[0].mesh, "Startbox.gmt")
+        self.assertEqual(info.actors[0].move, "PATH")
+        self.assertEqual(stt.validate_scr(info), [])
+
     def test_eng_torque_curve(self):
         """.eng RPMTorque points are (rpm, friction, torque) with rising RPM."""
         sample = ("RPMTorque=(0, -58.40, -58.00)\n"

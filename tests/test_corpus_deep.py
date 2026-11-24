@@ -94,6 +94,21 @@ class CorpusDeepTest(unittest.TestCase):
         self.assertEqual(rf_sections, gtr_sections)
         self.assertEqual(len(rf_sections), 15)
 
+    def test_cin_scr_corpus(self):
+        """All .cin (409) and .scr (123) scripts validate."""
+        import glob
+        ne = na = 0
+        for p in glob.glob(str(ROOT.parent / "**" / "*.cin"), recursive=True):
+            info = stt.parse_cin(Path(p).read_bytes())
+            self.assertEqual(stt.validate_cin(info), [], p)
+            ne += len(info.events)
+        for p in glob.glob(str(ROOT.parent / "**" / "*.scr"), recursive=True):
+            info = stt.parse_scr(Path(p).read_bytes())
+            self.assertEqual(stt.validate_scr(info), [], p)
+            na += len(info.actors)
+        self.assertEqual(ne, 5798)
+        self.assertEqual(na, 1998)
+
     def test_hdc_uses_hdv_parser(self):
         """.hdc handling files share the .hdv section/key structure."""
         import glob

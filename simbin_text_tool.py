@@ -296,6 +296,144 @@ def parse_veh(data: bytes | str) -> dict[str, str]:
     return out
 
 
+CIN_EVENT_TYPES = frozenset((
+    "CAMERA_SELECT", "WAIT", "CAMERA_SET_LAST", "CAMERA_ACQUIRE_CONTROL",
+    "SCRIPT_END", "GRIDWALK", "COMMENTARY_START",
+))
+
+
+@dataclass
+class CinEvent:
+    type: str = ""
+    probability: str = ""
+    time: str = ""
+    iterations: str = ""
+    wait: str = ""
+    camera: str = ""
+    commentary: str = ""
+
+
+@dataclass
+class CinInfo:
+    sections: list[str] = field(default_factory=list)
+    events: list[CinEvent] = field(default_factory=list)
+
+
+def parse_cin(data: bytes | str) -> CinInfo:
+    """Parse an rFactor ``.cin`` cinematic script into its events.
+
+    Corpus-verified on 409 files (5,798 ``CinematicEvent`` blocks): every
+    event carries Type/Probability/Time/Iterations. ``Probability`` is 1.00 and
+    ``Iterations`` is 1 in all 5,798; ``Type`` is drawn from a closed set of 7
+    values, ``Wait`` is YES/NO, and ``Time`` is a non-negative ``+N`` offset.
+    """
+    text = data if isinstance(data, str) else data.decode("latin-1")
+    info = CinInfo()
+    current: CinEvent | None = None
+    for line in text.splitlines():
+        code = line.split("//", 1)[0].strip()
+        if not code:
+            continue
+        if code == "CinematicEvent":
+            current = CinEvent()
+            info.events.append(current)
+            continue
+        if not code.startswith("CinematicEvent") and code.endswith("Presentation"):
+            info.sections.append(code)
+            continue
+        if current is None:
+            continue
+        m = re.match(r"^([A-Za-z_][\w]*)\s*=\s*(.*)$", code)
+        if not m:
+            continue
+        key, value = m.group(1).lower(), m.group(2).strip().strip('"')
+        if hasattr(current, key):
+            setattr(current, key, value)
+    return info
+
+
+def validate_cin(info: CinInfo) -> list[str]:
+    """Check corpus-verified .cin invariants; return a list of problems."""
+    problems: list[str] = []
+    if not info.sections:
+        problems.append("no presentation section")
+    for i, event in enumerate(info.events):
+        for field in ("type", "probability", "time", "iterations"):
+            if not getattr(event, field):
+                problems.append(f"event {i}: missing {field}")
+        if event.type and event.type not in CIN_EVENT_TYPES:
+            problems.append(f"event {i}: unknown Type {event.type}")
+        if event.probability and event.probability != "1.00":
+            problems.append(f"event {i}: Probability {event.probability} != 1.00")
+        if event.iterations and event.iterations != "1":
+            problems.append(f"event {i}: Iterations {event.iterations} != 1")
+        if event.wait and event.wait not in ("YES", "NO"):
+            problems.append(f"event {i}: Wait {event.wait} not YES/NO")
+    return problems
+
+
+@dataclass
+class ScrActor:
+    name: str = ""
+    detail: str = ""
+    position: tuple[float, ...] | None = None
+    mesh: str = ""
+    move: str = ""
+    parent: str = ""
+
+
+@dataclass
+class ScrInfo:
+    actors: list[ScrActor] = field(default_factory=list)
+
+
+def parse_scr(data: bytes | str) -> ScrInfo:
+    """Parse an rFactor ``.scr`` scene script into its Actor blocks.
+
+    Corpus-verified on 123 files (1,998 ``Actor`` blocks): every actor has
+    Detail, Position and Mesh; Move (1,959) and Parent (1,816) are optional.
+    """
+    text = data if isinstance(data, str) else data.decode("latin-1")
+    info = ScrInfo()
+    actor: ScrActor | None = None
+    for line in text.splitlines():
+        code = line.split("//", 1)[0].strip()
+        if not code:
+            continue
+        m = re.match(r'^Actor\s+"([^"]*)"', code)
+        if m:
+            actor = ScrActor(name=m.group(1))
+            info.actors.append(actor)
+            continue
+        if actor is None:
+            continue
+        m = re.match(r"^(Detail|Position|Mesh|Move|Parent)\s+(.*)$", code)
+        if not m:
+            continue
+        key, value = m.group(1).lower(), m.group(2).strip()
+        if key == "position":
+            actor.position = _all_floats(value)
+        elif key == "detail":
+            actor.detail = value
+        elif key == "mesh":
+            actor.mesh = value.strip('"')
+        elif key == "move":
+            actor.move = value
+        elif key == "parent":
+            actor.parent = value.strip('"')
+    return info
+
+
+def validate_scr(info: ScrInfo) -> list[str]:
+    """Check corpus-verified .scr invariants; return a list of problems."""
+    problems: list[str] = []
+    for i, actor in enumerate(info.actors):
+        for field in ("detail", "position", "mesh"):
+            if not getattr(actor, field):
+                problems.append(f"actor {i}: missing {field}")
+    return problems
+
+
 ENG_UNIVERSAL_KEYS = (
     "startertiming", "enginemaprange", "launchrpmlogic", "revlimitlogic",
     "rpmtorque", "lifetimeenginerpm", "lifetimeoiltemp", "fuelestimate",

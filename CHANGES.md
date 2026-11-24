@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 23:59:59 -0500 - .cin/.scr script parsers
+- Added `simbin_text_tool.parse_cin()`/`validate_cin()` (409 files, 5,798 events) and `parse_scr()`/`validate_scr()` (123 files, 1,998 actors). Corpus-verified Probability=1.00/Iterations=1 in every cinematic event and closed Type vocabulary; 0 validation problems. Added 3 regression tests (corpus check full-tier); all 29 simbin-text/corpus-deep tests pass.
+
 ## 2026-11-24 23:59:45 -0500 - .hdc parser reuse confirmed
 - Corpus-verified that all 472 `.hdc` handling files (incl. JCA-wrapped) use the `.hdv` section/key structure and parse with `parse_hdv()` (835 keys, 18 sections). Added a full-tier corpus test. Also recorded GTTF byte-31 event/smoothing negatives and the `.aud` vocabulary survey.
 
