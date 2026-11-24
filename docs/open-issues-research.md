@@ -327,6 +327,8 @@ GTR1 coverage is now complete: a full `../GTR1Vanilla` scan (33,477 GMTs with th
 
 - **SCGT `.prt` object references (negative)**: the 5 archived `.prt` scene files are well-formed CRLF ASCII with balanced braces (7 `Group`, 940 `Instance` records, 977 `ObjFile` references), validated by `simbin_text_tool.validate_prt()` with a full-tier test. None of the 977 object names resolve to archive member basenames, `.vrl` meshes, `.scn` declarations or `.aiw` content; the references appear to be stale editor-level object IDs. No reference-resolution rule promoted.
 
+- **TRK camera-name namespace negative**: across 152 GTR2/GTL/Race07 track scripts with sibling `.cam` files, none of 288 `View=` references or 135,196 `Instance=` references matches a parsed `.cam` camera name (0 matches). These are separate namespaces — `View` names view definitions, `Instance` names scene objects, while `.cam` names cameras. Full-tier corpus-fact regression test.
+
 - **AIW camera-reference negative**: none of the 465 AIW files across the eight validated corpora contains a `ControlPoint` or `camera` token (case-insensitive). Camera/ControlPoint data lives in `.cam` and `.trk` files, not AIWs, so no cross-reference validator applies. Full-tier corpus-fact regression test added.
 
 - **GDB TerrainDataFile references**: `parse_gdb_terrain_refs()` extracts `.tdf` overrides from rF1-era event files. RF1Vanilla has 26 references, all resolving to loose or archived `.tdf` files; F1C/F12002/NT2003 event files contain no `TerrainDataFile` keys. Full-tier regression test; no exceptions.

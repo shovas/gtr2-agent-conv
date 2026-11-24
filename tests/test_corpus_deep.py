@@ -227,6 +227,37 @@ class CorpusDeepTest(unittest.TestCase):
         self.assertGreater(checked, 110)
         self.assertGreater(resolved / checked, 0.95)
 
+    def test_trk_cam_names_are_separate_namespaces(self):
+        """TRK View/Instance names never match .cam camera names."""
+        import glob
+        import media_tool
+        import simbin_text_tool as stt_local
+        views = instances = matches = 0
+        for root in ("GTR2Steam", "GTLSteam", "Race07Complete"):
+            base = ROOT.parent / root
+            for p in glob.glob(str(base / "**" / "*.trk"), recursive=True):
+                if not Path(p).is_file():
+                    continue
+                cam = Path(p).with_suffix(".cam")
+                if not cam.is_file():
+                    continue
+                names = {c.name.lower() for c in stt_local.parse_cam(
+                    media_tool.decrypt_jca_text(cam.read_bytes()).decode("latin-1")).cameras}
+                text = media_tool.decrypt_jca_text(Path(p).read_bytes()).decode("latin-1")
+                for key in ("View", "Instance"):
+                    for m in re.finditer(r"(?mi)^[ \t]*" + key + r"[ \t]*=\s*([^\r\n]+)", text):
+                        value = m.group(1).strip().strip('"').lower()
+                        if not value:
+                            continue
+                        if key == "View":
+                            views += 1
+                        else:
+                            instances += 1
+                        matches += value in names
+        self.assertGreater(views, 250)
+        self.assertGreater(instances, 100000)
+        self.assertEqual(matches, 0)
+
     def test_gdb_filter_class_resolution(self):
         """GDB filter class tags resolve against local .car declarations."""
         import glob

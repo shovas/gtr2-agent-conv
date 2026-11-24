@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 04:30:00 -0500 - TRK/CAM namespace negative
+- Documented that TRK `View=`/`Instance=` names never match `.cam` camera names across 152 track scripts (288 and 135,196 references respectively). Full-tier corpus-fact regression test added.
+
 ## 2026-11-26 04:00:00 -0500 - AIW camera-reference negative
 - Documented that no AIW in the eight validated corpora (465 files) contains ControlPoint/camera references; camera data is in .cam/.trk formats. Full-tier corpus-fact regression test added.
 
