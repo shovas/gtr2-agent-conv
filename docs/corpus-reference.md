@@ -37,6 +37,12 @@ the quick-lookup index. Sizes/counts are approximate (surveyed 2026-11-23/24).
 | `TC2000/` | 1.4G / 938 | rF1-era Argentine touring-car sim: 34 type-1 `.mas`, 188 DDS, 158 WAV, 36 `.veh`, **35 `.rcd` with a distinct 12-key "talent" driver family** (no `reputation`/`courtesy`/`recovery`) now handled by `parse_rcd()`/`validate_rcd()`, 26 `.cam`/`.gdb`/`.aiw`, 14 `.hdv`, 12 `.svm`, `.tdf` text. |
 | `SimuladorTopRace2009/` | 2.1G / 1,084 | rF1-era: 26 type-1 `.mas`, 241 DDS, 158 WAV, 118 **uppercase `.GMT`** files carrying the known Top Race 2009 ISI signature (`0xde4139f961fa2817`, enctype 0); `isi_crypt` decrypts all 118 but none expose the standard GMT magic/submeshes (same unresolved post-decryption pattern as GSC GMTs). 41 `.veh`, 40 `.rcd`, 27 `.cam`, `.tdf`, Qt DLLs. |
 
+## Additional rF1-era series folders (reviewed 2026-11-25)
+
+| Folder | Size / files | Key facts |
+|---|---|---|
+| `SuperleagueFormula2009/` | 717M / 568 | rF1-era sim; 28 type-1 MAS archives, 19 `.veh`, 18 `.rcd`, 9 `.cam`, 8 `.scn`, 6 `.vcr` replays / `.aiw`, `.gdb`, `.tdf`; ISI signature `0x38af3150902cc55b` is a known enctype-1 game in `isi_crypt.GAMES`. |
+
 ## Ancestral ISIMotor / format-evolution corpora
 
 | Folder | Size / files | Key facts |

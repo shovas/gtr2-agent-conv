@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-25 01:45:00 -0500 - Expanded corpus review and test fixes
+- Reviewed five new ISIMotor-era folders (RaceRoomTheGame 1/2, LexusIsfTrackTime, TC2000, SimuladorTopRace2009) plus SuperleagueFormula2009; documented in `AGENTS.md`/`docs/corpus-reference.md`. Added `volvo`-key JCA detection for RaceRoom GMTs (`gmt-jca`), a 12-key "talent" `.rcd` family, and relaxed exact-count corpus assertions to withstand expanded corpora. Normal suite: 220 tests, 0 failures.
+
 ## 2026-11-25 01:30:00 -0500 - rF1 .svm setup detector
 - Added `gtl_to_gtr2.validate_svm_setup()` / `rf1_svm_paths()` to flag unconverted rF1-style car setups in GTR2 trees. Corpus-verified 10/70 vanilla GTR2 setups still carry `gMa1.000f` headers, so it is a diagnostic rather than a hard error. Added a regression test; all 31 converter tests pass.
 
