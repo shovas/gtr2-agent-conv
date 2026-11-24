@@ -91,6 +91,8 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 
 - **AIW waypoint pointer/path validator**: `simbin_text_tool.validate_aiw_pointers()` enforces corpus-verified bounds on **457,832 waypoints across 465 AIWs** from eight corpora (Race07Vanilla, GTLSteam, GTR2Steam, Race07Complete, RF1Vanilla, Automobilista, StockCarExtreme, F1 2002): every `WP_PTRS` entry is -1 ("no link") or a valid waypoint index, and every `wp_path` holds two finite lateral offsets with |value| < 100. Only the addon track `Hill.AIW` uses -1 for pointers 0/1 (7 records). `parse_aiw()` exposes `wp_path`; full-tier regression test. The stricter `validate_aiw_waypoints()` flags three content-defect files (`Hill.AIW`, `Nurburg.AIW`, `Lienz_24H.AIW`). F1 Challenge 99-02 ships no `.aiw` files.
 
+- **BMW M3 Challenge reference resolution**: 2 plain `.aud` files have 186/190 WAV refs (97.9%) resolving (4 references to absent `raex.wav`); 17 plain `.car` files have 51/51 config refs resolving. The 17 `.bmw` archives contain only media (no config/audio members). Full-tier regression test.
+
 ## Coverage gaps (documented, not yet addressed)
 - **GTR 2004 corpus** (`../GTR1Vanilla`, third GMT magic `...bba6bf90` at 0x04) is fully decoded by `gmt_semantic.py` (descriptor grid + descriptor-less object-mesh path; 33,477/33,477 files). `gmt_format.py` itself still targets the GTL/GTR2 layout only; use `gmt_semantic.py` for GTR1. See `docs/binary-formats.md`.
 - **Untested ISI signatures**: `isi_crypt.GAMES` supports 8 signatures but real corpora exist only for rFactor and Game Stock Car; ARCA Sim Racing, Simulador Turismo Carretera, Top Race 2009, Superleague Formula, STC 2012 and Formula Truck have no local corpus.

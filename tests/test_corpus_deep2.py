@@ -372,6 +372,51 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertEqual(n, 465)
         self.assertGreater(wps, 450000)
 
+    def test_bmw_m3_reference_resolution(self):
+        """BMW M3 Challenge .aud/.car references resolve locally."""
+        import glob
+        import os
+        import re
+        base = ROOT.parent / "BMWM3Challenge"
+        wavs = {os.path.basename(p).lower()
+                for p in glob.glob(str(base / "**" / "*"), recursive=True)
+                if os.path.isfile(p) and p.lower().endswith(".wav")}
+        files = {e: {os.path.basename(p).lower()
+                     for p in glob.glob(str(base / "**" / "*"), recursive=True)
+                     if os.path.isfile(p) and p.lower().endswith(e)}
+                 for e in (".hdc", ".cas", ".aud", ".cam")}
+        checked = resolved = auds = 0
+        pattern = r"(?m)^\s*([A-Za-z_][\w]*)\s*=\s*(.*)$"
+        for p in glob.glob(str(base / "**" / "*"), recursive=True):
+            if not os.path.isfile(p) or not p.lower().endswith(".aud"):
+                continue
+            text = media_tool.decrypt_jca_text(Path(p).read_bytes()).decode("latin-1")
+            auds += 1
+            for _k, v in re.findall(pattern, text):
+                m = re.search(r"([^\\/]+\.wav)$", v.strip().strip('"'), re.I)
+                if m:
+                    checked += 1
+                    resolved += m.group(1).lower() in wavs
+        self.assertEqual(auds, 2)
+        self.assertEqual(checked, 190)
+        self.assertEqual(resolved, 186)  # 4 references to absent raex.wav
+        cars = refs = ok = 0
+        for p in glob.glob(str(base / "**" / "*"), recursive=True):
+            if not os.path.isfile(p) or not p.lower().endswith(".car"):
+                continue
+            text = media_tool.decrypt_jca_text(Path(p).read_bytes()).decode("latin-1")
+            d = {k.lower(): v.strip().strip('"') for k, v in re.findall(pattern, text)}
+            cars += 1
+            for key, ext in (("hdvehicle", ".hdc"), ("graphics", ".cas"),
+                             ("sounds", ".aud"), ("camera", ".cam")):
+                m = re.search(r"([^\\/]+\.\w+)$", d.get(key, ""), re.I)
+                if m:
+                    refs += 1
+                    ok += m.group(1).lower() in files[ext]
+        self.assertEqual(cars, 17)
+        self.assertEqual(refs, 51)
+        self.assertEqual(ok, refs)
+
     def test_rfm_corpus(self):
         """All 10 rF1 .rfm mod descriptors carry 37 universal keys."""
         import glob

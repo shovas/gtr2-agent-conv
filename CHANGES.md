@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-25 15:00:00 -0500 - BMW M3 Challenge reference resolution
+- Corpus-verified 186/190 `.aud` WAV refs (four `raex.wav` references absent) and 51/51 `.car` config refs in BMW M3 Challenge; its 17 `.bmw` archives hold only media. Full-tier regression test added.
+
 ## 2026-11-25 14:30:00 -0500 - AIW validation across eight corpora
 - Extended AIW pointer/path validation to RF1Vanilla, Automobilista, StockCarExtreme and F1 2002: 457,832 waypoints across 465 files now pass. Documented a third stricter-validator exception (`Lienz_24H.AIW`, non-unit `wp_perp`) and that F1 Challenge ships no AIWs. Full-tier regression test updated.
 
