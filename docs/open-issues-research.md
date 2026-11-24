@@ -3,6 +3,14 @@
 All work here is **offline**: no game was launched. "Runtime-dependent" means
 conclusively establishing it requires actual game execution.
 
+## GTTF slot +36 quantized-field structure (2026-11-24)
+
+The 4-byte field at frame offset +36 is **not** a free f32: bytes +36/+37 are `00 00` in 853/860 sampled frames (99.2%; only 3 distinct patterns, including `00 40`). All variation lives in bytes +38/+39 (54 distinct patterns). f32 interpretation yields only **82 distinct values** across 44,631 samples, dominated by ±34·4^k (34, 136, 544, 2176, 8704, 34816 and negative counterparts) plus ±8.5/±8.8 — a heavily quantized signal. A second hypothesis (v = ±38·4^k) fits only 27/44,631 and was rejected. The big-endian u16 at +38 shows only weak correlation with position-derived speed (median r=0.146, max 0.359 across 29 files; no file exceeds |r|=0.5). Recorded as a structural characterisation; no semantic decoder promoted.
+
+## `.hdr` index table (2026-11-24)
+
+Beyond the verified +8 block count, the 4-/8-byte tables following the 16-byte `.hdr` header do not resolve to per-sound MP3 offsets with any tested interpretation: parsing the remainder as u16/u32 (little- or big-endian) yields monotonicity 0.06-0.51 (random ≈0.5), mod-3 bias at most 0.43 vs uniform 0.33, and MP3-frame-sync hit rates that merely mirror the natural 1/3 of `.dat` block boundaries that begin with a sync. `u16@0` has 125 distinct values (not a filename index; `0002.hdr` etc. all carry 0x62) and does not correlate with the MP3 sample rate (24000 Hz mono 128 kbps across sampled files). Only the block-count field is used by `hdr_dat_mp3()`; the table semantics remain undecoded. No speculative decoder added.
+
 ## Encrypted `.svm` setups (2026-11-24)
 
 10 shipped `.svm` files (only **2 distinct payloads**, duplicated across corpora: `Toban Long.svm` 558 B and `Orchard Lake Oval.svm` 449 B) carry `//[[gMb1.000f ...]]` headers followed by a high-entropy payload beginning `5b 79 6d 98 7f 80 a9 e0` (221 distinct byte values, ~11 short ASCII runs, implausible f32 alignments). The two payloads share a 20-byte prefix. Exhausted offline hypotheses:
