@@ -867,6 +867,20 @@ class MediaToolTest(unittest.TestCase):
             self.assertEqual(a.rgba[3], 255)
 
 
+    def test_cubeasf_family_identification(self):
+        """Plain CUBEASF scene files (.scn/.clf/.set/.trk) are identified."""
+        import glob
+        n = 0
+        for ext in (".scn", ".clf", ".set"):
+            for p in glob.glob(str(ROOT.parent / "**" / ("*" + ext)), recursive=True):
+                if open(p, "rb").read(7) != b"CUBEASF":
+                    continue
+                info = media_tool.identify(p)
+                self.assertEqual(info.format, "cubeasf", p)
+                self.assertEqual(info.details["extension"], ext)
+                n += 1
+        self.assertGreater(n, 150)  # ~203 plain .scn/.clf/.set (others are JCA)
+
     def test_svm_identification_corpus(self):
         """All .svm car setups are identified by variant."""
         import glob

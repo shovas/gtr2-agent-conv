@@ -255,6 +255,11 @@ def identify(path: str | Path) -> MediaInfo:
         bpp = b[16]
         if idlen == 0 and cmap == 0 and imgtype in (2, 10) and bpp in (24, 32) and w > 0 and h > 0:
             return MediaInfo(str(p), size, "tga-in-bmp", {"image_type": imgtype, "width": w, "height": h, "bpp": bpp})
+    # rFactor CUBEASF scene family (.scn/.clf/.set/.trk/.bak), parsed by
+    # simbin_text_tool.parse_scn; JCA-wrapped variants are reported above.
+    if b.startswith(b"CUBEASF"):
+        return MediaInfo(str(p), size, "cubeasf", {"family": "rFactor scene",
+                                                   "extension": ext})
     # .svm car setups: rF1 uses a gMa header, GTR2 plain [GENERAL]/[CONTROLS]
     # sections, and a few shipped files have an encrypted gMb payload.
     if ext == ".svm":

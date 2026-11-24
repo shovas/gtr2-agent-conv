@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 13:00:00 -0500 - CUBEASF family identification
+- `media_tool.identify()` now recognises plain CUBEASF scene files (`.scn/.clf/.set/.trk`) as `cubeasf`; all 69 `.clf` and 417 `.scn` files parse with `simbin_text_tool.parse_scn()`. Added a corpus regression test; all 56 media tests pass.
+
 ## 2026-11-24 12:30:00 -0500 - SVM setup identification and key-subset rule
 - All 10 encrypted `.svm` setups share an 8-byte payload magic (`5b 79 6d 98 7f 80 a9 e0`) and resist standard decompression and ISI-crypt — recorded as an undecoded variant. Added `.svm` variant identification (all 21,141 local setups classified) and `simbin_text_tool.parse_svm()`. Corpus-verified that rF1 setup keys (77) are a strict subset of GTR2 keys (86), so no rF1-only setup key requires remapping; only `car`/`createdby` are near-universal GTR2 additions. Added 2 regression tests; all 60 media/text tests pass.
 
