@@ -877,6 +877,13 @@ class MediaToolTest(unittest.TestCase):
         self.assertGreater(c.get("svm-gtr2", 0), 20000)
         self.assertGreater(c.get("svm-rf1", 0), 500)
         self.assertGreater(c.get("svm-encrypted", 0), 0)
+        # All 10 encrypted setups share one 8-byte payload magic.
+        magics = set()
+        for p in glob.glob(str(ROOT.parent / "**" / "*.svm"), recursive=True):
+            i = media_tool.identify(p)
+            if i.format == "svm-encrypted":
+                magics.add(i.details["payload_magic"])
+        self.assertEqual(magics, {"5b 79 6d 98 7f 80 a9 e0"})
         self.assertEqual(sum(v for k, v in c.items() if k.startswith("svm-")),
                          sum(c.values()))
 

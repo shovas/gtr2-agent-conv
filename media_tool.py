@@ -261,7 +261,10 @@ def identify(path: str | Path) -> MediaInfo:
         if b.startswith(b"//[[gMa1.000f"):
             return MediaInfo(str(p), size, "svm-rf1", {"plain_text": True})
         if b.startswith(b"//[[gMb1.000f") or b.startswith(b"//[[gMb1.002f"):
-            return MediaInfo(str(p), size, "svm-encrypted", {"header": b[:14].decode("latin-1", "replace")})
+            payload = b[b.find(b"\n") + 1:]
+            return MediaInfo(str(p), size, "svm-encrypted",
+                             {"header": b[:14].decode("latin-1", "replace"),
+                              "payload_magic": payload[:8].hex(" ")})
         prefix = b[:4096]
         if (b.lstrip().startswith((b"[GENERAL]", b"[CONTROLS]", b"[BODYAERO]",
                                    b"VehicleClassSetting"))

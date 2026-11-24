@@ -3,7 +3,7 @@
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
 ## 2026-11-24 12:30:00 -0500 - SVM setup identification and key-subset rule
-- Added `.svm` variant identification (all 21,141 local setups classified) and `simbin_text_tool.parse_svm()`. Corpus-verified that rF1 setup keys (77) are a strict subset of GTR2 keys (86), so no rF1-only setup key requires remapping; only `car`/`createdby` are near-universal GTR2 additions. Added 2 regression tests; all 60 media/text tests pass.
+- All 10 encrypted `.svm` setups share an 8-byte payload magic (`5b 79 6d 98 7f 80 a9 e0`) and resist standard decompression and ISI-crypt — recorded as an undecoded variant. Added `.svm` variant identification (all 21,141 local setups classified) and `simbin_text_tool.parse_svm()`. Corpus-verified that rF1 setup keys (77) are a strict subset of GTR2 keys (86), so no rF1-only setup key requires remapping; only `car`/`createdby` are near-universal GTR2 additions. Added 2 regression tests; all 60 media/text tests pass.
 
 ## 2026-11-24 12:00:00 -0500 - Gzip .hat track-data reader
 - Added `media_tool.hat_decompress()`, `hat-gzip` identification and a `hat-decompress` CLI command. All 188 local `.hat` files are valid gzip streams; GTR2/GTL use a `gMb1.000f/1.002f` header and Race07 a bare `Ver 0.08` header. Added a corpus regression test; all 54 media tests pass.
