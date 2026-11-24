@@ -15,6 +15,10 @@ Cross-corpus check: `simbin_events_tool.find_frame_grid()` detects the 63-byte f
 
 `../SimuladorTopRace2009/GameData/Vehicles/TRV6_2009/trv6_09.hdv` (12,746 B) has a valid `//[[gMb1.002f (c)2007]]` 44-byte header followed by a 12,701-byte high-entropy payload (`7b 4a 9b 6c...`). Exhausted: ISI-crypt forced enctypes 0/1 at skips 0/4/12/16, all JCA keys, zlib/gzip at offsets 0/44/45 — no printable text or valid layout. The corpus test now skips this one file; no speculative decoder added.
 
+## GTTF +24/+28/+44 packed-integer hypotheses (2026-11-25)
+
+Using ccgepmonitor's `mLapDist`/`mPathLateral` semantics as a guide: slot +24 is the constant marker `01 00 00 34` in 29/29 files (no data); slot +28 begins `00 20 00 XX` (fixed low 16 bits `0x2000`) in all files, and its varying byte +31 shows no correlation with cumulative distance (median r=-0.014) or frame delta-time (-0.010). Slot +44 holds near-1e38 floats (±1.6e38 range) — not bounded lateral metres. No packed-integer or bounded-range interpretation matched any runtime field; recorded as negative.
+
 ## GTTF slots 28/36/40 kinematic hypotheses (2026-11-25)
 
 Using ccgepmonitor's documented GTR2 runtime ranges as a guide, slots +28/+36/+40 were correlated against speed and longitudinal acceleration across all 29 files: median r ≈ 0 for every combination, max |r| ≤ 0.08, no file above 0.5. These slots are not speed or acceleration signals under any simple linear or sign-flipped interpretation. The 24-bit integer at +32 was also tested against cumulative lap distance (ccgepmonitor `mLapDist` semantics): median r=-0.05, max 0.254, no file above 0.9 — not a lap-distance field. Combined with earlier quadratic/quantization/exclusion results, they remain uninterpreted.
