@@ -91,7 +91,7 @@ python3 fxm_tool.py nodes <file.fxm>            # heuristic name extraction
 python3 fxm_tool.py keys <file.fxm>             # decoded skeleton node TRS keyframes
 ```
 
-**Decoded**: contiguous skeleton-node table, per-node 2 TRS keys (position/quaternion/scale), and a name-stable bone ID (`size_hint == 84 + id`). **Limitations**: `key_count` meaning and animation playback semantics are unconfirmed.
+**Decoded**: contiguous skeleton-node table, per-node 2 TRS keys (position/quaternion/scale), a name-stable bone ID (`size_hint == 84 + id`), and `key_count` (3 components for TRS nodes, 1 for rotation tracks — corpus-verified on 56,838 nodes). **Limitations**: animation playback semantics in-game are unconfirmed.
 
 ## 6. Identify media formats / WAV, TGA, BMP round-trip (partial)
 
@@ -160,6 +160,21 @@ python3 rf1_to_gtr2.py <archive.mas> <out.gtr> --relayout   # rebuild GMT offset
 python3 simbin_events_tool.py <file.gtt|file.vcr>
 ```
 **Decoded**: GTTF metadata, GTL-IRSR, GTR2-IRSR and rF1-IRSR framing, plus the 63-byte GTTF frame grid (position + timestamp; `--frames`) and GTR2 Driving School `.dsi` instructor polylines (`--ghost-line`); `ghost_align.py` verifies the two ghost layouts share their post-marker fields. **Limitations**: remaining frame fields are uninterpreted.
+
+## 11. Inspect setups, descriptors and legacy audio/config containers
+
+**What it does**: Parses rFactor `.veh` vehicle descriptors and `.svm` car setups, identifies gzip `.hat` track data and NASCAR-era `.hdr`/`.dat` MP3 audio pairs, and recognises CUBEASF scene files.
+
+**How to ask**: "Parse this .veh descriptor" / "Identify this .svm setup" / "Decompress this .hat file" / "Decode this .hdr/.dat audio pair."
+
+```bash
+python3 media_tool.py hat-decompress <file.hat> <out.bin>
+python3 media_tool.py hdr-dat-decode <file.hdr> <out.wav>
+python3 media_tool.py info <file.svm|file.hat|file.hdr|file.veh|file.scn>
+python3 -c "import simbin_text_tool as s; print(s.parse_veh(open('car.veh','rb').read()))"
+```
+
+**Decoded**: `parse_veh()` (2,763 files, 57 keys), `parse_svm()` (21,141 setups classified), `hat_decompress()` (188 gzip files) and `hdr_dat_mp3()` (1,982 pairs). **Limitations**: 10 encrypted `.svm` payloads and the GTTF/PHYSICS opaque fields remain undecoded.
 
 ## 11. Consult format documentation
 
@@ -252,7 +267,7 @@ python3 gtl_to_gtr2.py --validate <GameData-dir>
 
 ## FXM semantic decoding
 
-`fxm_tool.py semantic <file>` decodes and validates FXM skeleton nodes from both file variants. **Limitations**: key_count semantics and animation-to-mesh binding remain unresolved.
+`fxm_tool.py semantic <file>` decodes and validates FXM skeleton nodes from both file variants. **Limitations**: animation-to-mesh binding and in-game playback remain unresolved.
 
 ## JCA-encrypted audio
 
