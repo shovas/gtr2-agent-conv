@@ -568,6 +568,35 @@ class CorpusDeep2Test(unittest.TestCase):
                         checked += 1
         self.assertGreater(checked, 1100)
 
+    def test_scn_mas_reference_resolution(self):
+        """rF1-era .scn MASFile references resolve to local archives."""
+        import glob
+        import os
+        checked = resolved = paths = paths_ok = 0
+        for root in ("RF1Vanilla", "F1C", "F12002", "NT2003"):
+            base = ROOT.parent / root
+            files = {os.path.basename(p).lower()
+                     for p in glob.glob(str(base / "**" / "*"), recursive=True)
+                     if os.path.isfile(p)}
+            dirs = {os.path.relpath(os.path.dirname(p), base).lower().replace("\\", "/")
+                    for p in glob.glob(str(base / "**" / "*"), recursive=True)
+                    if os.path.isfile(p)}
+            for p in glob.glob(str(base / "**" / "*.scn"), recursive=True):
+                if not os.path.isfile(p):
+                    continue
+                info = stt.parse_scn(stt.read_text(p))
+                for entry in info.mas_files:
+                    checked += 1
+                    resolved += os.path.basename(entry.replace("\\", "/")).lower() in files
+                for entry in info.search_path:
+                    paths += 1
+                    rel = "/".join(x for x in entry.lower().replace("\\", "/").split("/") if x)
+                    paths_ok += rel in dirs or any(d.endswith("/" + rel) for d in dirs)
+        self.assertGreater(checked, 120)
+        self.assertGreater(resolved / checked, 0.98)
+        self.assertGreater(paths, 70)
+        self.assertLess(paths_ok / paths, 0.3)  # documented stale SearchPaths
+
     def test_rfm_corpus(self):
         """All 10 rF1 .rfm mod descriptors carry 37 universal keys."""
         import glob

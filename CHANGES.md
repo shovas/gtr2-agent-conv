@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 00:30:00 -0500 - SCN reference resolution
+- Corpus-verified 131/132 `.scn` MASFile references resolving across four rF1-era corpora and documented 13/83 SearchPath resolution (stale NT2003 Season03 paths). Full-tier regression test added.
+
 ## 2026-11-26 00:00:00 -0500 - TRK reference resolution
 - Added `simbin_text_tool.parse_trk_refs()` and a full-tier test: 293/293 MASFile and 140,120/140,123 MeshFile references resolve across 152 GTR2/GTL/Race07 track scripts; three missing Race07 crowd-mesh references documented.
 
