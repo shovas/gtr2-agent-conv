@@ -548,6 +548,33 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertGreater(checked, 1200)
         self.assertGreater(resolved / checked, 0.8)
 
+    def test_wav_header_invariants(self):
+        """PCM WAV headers are internally consistent across four corpora."""
+        import glob
+        import os
+        import random
+        rng = random.Random(7)
+        checked = nonpcm = jca = 0
+        for root in ("GTR2Steam", "GTLSteam", "Race07Complete", "VolvoTheGame"):
+            base = ROOT.parent / root
+            paths = []
+            for pattern in ("**/*.wav", "**/*.WAV"):
+                paths.extend(glob.glob(str(base / pattern), recursive=True))
+            paths = [p for p in paths if os.path.isfile(p)]
+            rng.shuffle(paths)
+            for p in paths[:25]:
+                raw = Path(p).read_bytes()
+                wrapped = raw[:4] == media_tool.JCA_MAGIC
+                jca += wrapped
+                header = media_tool.wav_header(raw, "volvo" if root == "VolvoTheGame" else None)
+                self.assertIsNotNone(header, p)
+                self.assertEqual(media_tool.validate_wav_header(header), [], p)
+                checked += 1
+                nonpcm += header.audio_format != 1
+        self.assertGreater(checked, 80)
+        self.assertGreater(jca, 30)  # Volvo/Race07 JCA coverage
+        self.assertGreater(nonpcm, 0)  # documented MPEG-in-WAVE exception
+
     def test_cam_radius_positive_integer(self):
         """CAM ActivationRadius is a positive integer across SimBin installs."""
         import glob

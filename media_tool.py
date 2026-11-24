@@ -422,6 +422,58 @@ def identify(path: str | Path) -> MediaInfo:
     return MediaInfo(str(p), size, "unknown", {"ext": ext})
 
 
+@dataclass
+class WavHeader:
+    audio_format: int
+    channels: int
+    sample_rate: int
+    byte_rate: int
+    block_align: int
+    bits_per_sample: int
+
+
+def wav_header(data: bytes, key_name: str | None = None) -> WavHeader | None:
+    """Parse RIFF/WAVE fmt data, decrypting JCA-wrapped audio if needed.
+
+    Corpus-verified on sampled GTR2/GTL/Race07/Volvo WAVs. Volvo requires
+    ``key_name="volvo"``; other corpora use the default JCA key.
+    """
+    if data[:4] == JCA_MAGIC:
+        try:
+            data = decrypt_jca_wav(data, key_name)
+        except Exception:
+            return None
+    if data[:4] != b"RIFF" or len(data) < 36 or data[8:12] != b"WAVE":
+        return None
+    pos = 12
+    while pos + 8 <= len(data):
+        chunk_id = data[pos:pos + 4]
+        size = struct.unpack_from("<I", data, pos + 4)[0]
+        if chunk_id == b"fmt " and pos + 8 + 16 <= len(data):
+            af, ch, sr, br, ba, bps = struct.unpack_from("<HHIIHH", data, pos + 8)
+            return WavHeader(af, ch, sr, br, ba, bps)
+        pos += 8 + size + (size & 1)
+    return None
+
+
+def validate_wav_header(header: WavHeader) -> list[str]:
+    """Check corpus-verified PCM WAV invariants; non-PCM is left opaque."""
+    if header.audio_format != 1:
+        return []  # e.g. WAVE_FORMAT_MPEGLAYER3 (0x55); not covered
+    problems: list[str] = []
+    if header.channels not in (1, 2):
+        problems.append(f"channels {header.channels}")
+    if header.bits_per_sample not in (8, 16):
+        problems.append(f"bits per sample {header.bits_per_sample}")
+    if header.sample_rate not in (8000, 11025, 22000, 22050, 44100, 48000):
+        problems.append(f"sample rate {header.sample_rate}")
+    if header.block_align != header.channels * header.bits_per_sample // 8:
+        problems.append(f"block align {header.block_align}")
+    if header.byte_rate != header.sample_rate * header.channels * header.bits_per_sample // 8:
+        problems.append(f"byte rate {header.byte_rate}")
+    return problems
+
+
 def wav_decode(src: str | Path, dst: str | Path,
                ffmpeg_exe: str | None = None) -> bool:
     """Decode a compressed WAV (ADPCM, MP3-in-WAV) to PCM WAV via ffmpeg.

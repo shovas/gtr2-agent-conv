@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 03:00:00 -0500 - WAV header validator
+- Added `media_tool.wav_header()` and `validate_wav_header()` with JCA key support (Volvo requires `volvo`). Corpus-verified PCM consistency across four installs; documented MPEG-in-WAVE (0x55) files as out of scope. Full-tier regression test added.
+
 ## 2026-11-26 02:30:00 -0500 - SCR actor references and GTL.exe RE
 - Added `parse_scr_move()` and a full-tier test: 1,177/1,177 SCR actor refs and 1,160/1,160 Parent refs resolve; animation tokens are internal mesh sequences, not `.anm` files. Documented a GTL.exe reverse-engineering pass: no PHS strings, no PHS extension dispatch, and all inline byte hits are coincidences — no PHS-specific loader exists in the binaries.
 
