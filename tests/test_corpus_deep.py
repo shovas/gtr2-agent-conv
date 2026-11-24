@@ -141,6 +141,47 @@ class CorpusDeepTest(unittest.TestCase):
                 break
         self.assertGreater(n, 1000)
 
+    def test_gtr1_to_gtr2_gmt_roundtrip(self):
+        """Converted GTR1 third-magic GMTs reparse as valid GTR2 GMTs."""
+        import glob
+        import gmt_format
+        import gtr1_to_gmt
+        import mas_tool
+        import vrl_to_gmt
+        template = None
+        for q in glob.glob(str(ROOT.parent / "GTR2Steam" / "**" / "*.gmt"),
+                           recursive=True)[:500]:
+            try:
+                if gmt_format.parse_gmt(q).meshes:
+                    template = Path(q).read_bytes()
+                    break
+            except Exception:
+                continue
+        self.assertIsNotNone(template)
+        n = 0
+        for arc in glob.glob(str(ROOT.parent / "GTR1Vanilla" / "**" / "*.gtr"),
+                             recursive=True)[:12]:
+            try:
+                _, entries = mas_tool.read_archive(arc)
+            except Exception:
+                continue
+            for e in entries:
+                if not e.name.lower().endswith(".gmt") or not e.data:
+                    continue
+                geometry = gtr1_to_gmt.geometry_from_gtr1(e.data)
+                if not geometry:
+                    continue
+                positions, normals, triangles = geometry
+                data = gtr1_to_gmt.gtr1_to_gmt(e.data, template)
+                self.assertEqual(vrl_to_gmt.verify_gmt_geometry(
+                    data, positions, triangles, normals), [], e.name)
+                n += 1
+                if n >= 25:
+                    break
+            if n >= 25:
+                break
+        self.assertGreater(n, 20)
+
     def test_vrl_to_gtr2_gmt_roundtrip(self):
         """Converted VRL meshes reparse as valid GTR2 GMTs."""
         import glob

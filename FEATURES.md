@@ -11,6 +11,15 @@ End-user guide to what you can ask an agent to do with this repository. This pro
 
 **Known gap**: VRL UV-like coordinate pairs are not transferred because the GTR2 vertex layout's packed UV fields are not corpus-confirmed.
 
+## Convert GTR1 third-magic meshes to GTR2 GMT (partial)
+
+**What it does**: Converts GTR1 third-magic `.gmt` meshes (inside `.gtr` archives) into GTR2-layout GMTs, merging descriptor submeshes into one mesh. Positions and unit normals come from corpus-verified descriptor fields; triangles are rebuilt from the descriptor index lists.
+
+**How to ask**:
+- "Convert this GTR1 `.gmt` to a GTR2 `.gmt` using a real GTR2 GMT as a structural template."
+
+**Known gap**: UV-like descriptor fields remain untransferred pending semantic confirmation.
+
 ## 1. Inspect MAS archives (`.gtr`, `.gtl`, `.mas`)
 
 **What it does**: Lists, extracts, creates, and modifies GMOTORMAS10 MAS archives used by GTR2/GT Legends.

@@ -81,19 +81,19 @@ def _index_blob(triangles: list[tuple[int, int, int]]) -> bytes:
     return struct.pack("<I", 0) + struct.pack(f"<{len(flat)}H", *flat)
 
 
-def vrl_to_gmt(vrl: dict, template: bytes) -> bytes:
-    """Build a one-submesh GTR2 GMT from a decoded VRL mesh dict.
-
-    ``template`` supplies the structural header region, mesh-record defaults
-    and material tail of a real GTR2 GMT. Returns reparseable GMT bytes.
-    """
+def build_gmt(positions: list[tuple[float, float, float]],
+              triangles: list[tuple[int, int, int]],
+              template: bytes,
+              normals: list[tuple[float, float, float]] | None = None) -> bytes:
+    """Build a one-submesh GTR2 GMT from positions/triangles and a template."""
     base = gmt_format.parse_gmt("template.gmt", data=template)
     if not base.meshes:
         raise ValueError("template GMT has no mesh record to use as a default")
     template_record = list(base.meshes[0].record.raw)
 
-    positions, triangles = prepare_geometry(vrl)
-    vertices = _vertex_blob(positions, _normals(positions, triangles))
+    if normals is None:
+        normals = _normals(positions, triangles)
+    vertices = _vertex_blob(positions, normals)
     indices = _index_blob(triangles)
     vc, ic = len(positions), len(triangles) * 3
     if vc == 0:
@@ -126,8 +126,14 @@ def vrl_to_gmt(vrl: dict, template: bytes) -> bytes:
     return gmt_format.relayout_gmt(output)
 
 
-def verify_gmt(data: bytes, vrl: dict) -> list[str]:
-    """Re-parse generated GMT; return problems (empty means verified)."""
+def vrl_to_gmt(vrl: dict, template: bytes) -> bytes:
+    """Build a one-submesh GTR2 GMT from a decoded VRL mesh dict."""
+    positions, triangles = prepare_geometry(vrl)
+    return build_gmt(positions, triangles, template)
+
+
+def verify_gmt_geometry(data: bytes, positions, triangles, normals) -> list[str]:
+    """Re-parse a generated GMT against expected geometry."""
     problems: list[str] = []
     try:
         parsed = gmt_format.parse_gmt("generated.gmt", data=data)
@@ -135,8 +141,6 @@ def verify_gmt(data: bytes, vrl: dict) -> list[str]:
         return [f"parse failed: {exc}"]
     if len(parsed.meshes) != 1:
         return [f"expected 1 mesh, got {len(parsed.meshes)}"]
-    positions, triangles = prepare_geometry(vrl)
-    normals = _normals(positions, triangles)
     mesh = parsed.meshes[0]
     if mesh.record.vertex_count != len(positions):
         problems.append("vertex count mismatch")
@@ -153,6 +157,12 @@ def verify_gmt(data: bytes, vrl: dict) -> list[str]:
                 problems.append("normal mismatch")
                 break
     return problems
+
+
+def verify_gmt(data: bytes, vrl: dict) -> list[str]:
+    """Re-parse a VRL-generated GMT; return problems (empty means verified)."""
+    positions, triangles = prepare_geometry(vrl)
+    return verify_gmt_geometry(data, positions, triangles, _normals(positions, triangles))
 
 
 def main(argv=None) -> int:

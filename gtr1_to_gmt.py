@@ -1,0 +1,83 @@
+#!/usr/bin/env python3
+"""Convert a GTR1 third-magic GMT to a GTR2-layout GMT.
+
+Uses the corpus-verified parts of :func:`gmt_semantic.read_gtr1_geometry`:
+descriptor vertex fields 1-3 (position-like, triangle-adjacency evidence) and
+fields 4-6 (unit normals, 20,164/20,164 finite records). Per-descriptor index
+buffers are rebased into one combined triangle list. UV-like fields 9-11 are
+not transferred because their semantics remain unconfirmed.
+
+A real GTR2 GMT is required as a structural template at runtime; no game data
+is stored in this repository.
+"""
+from __future__ import annotations
+
+import argparse
+import math
+from pathlib import Path
+
+import gmt_semantic
+import vrl_to_gmt
+
+
+def geometry_from_gtr1(data: bytes) -> tuple[list, list, list] | None:
+    """Return (positions, normals, triangles) from all GTR1 descriptors."""
+    descriptors = gmt_semantic.read_gtr1_geometry(data)
+    if not descriptors:
+        return None
+    positions: list = []
+    normals: list = []
+    triangles: list = []
+    for item in descriptors:
+        base = len(positions)
+        for vertex in item["vertices"]:
+            positions.append(tuple(vertex[1:4]))
+            normal = tuple(vertex[4:7])
+            if not all(math.isfinite(x) for x in normal):
+                normal = (0.0, 1.0, 0.0)
+            normals.append(normal)
+        raw = list(item["indices"])
+        if len(raw) % 3 == 0:
+            groups = [tuple(raw[i:i + 3]) for i in range(0, len(raw), 3)]
+        else:
+            groups = [tuple(raw[i:i + 3]) for i in range(len(raw) - 2)]
+        for a, b, c in groups:
+            if len({a, b, c}) == 3 and max(a, b, c) < item["v_count"]:
+                triangles.append((base + a, base + b, base + c))
+    if not positions or not triangles:
+        return None
+    return positions, normals, triangles
+
+
+def gtr1_to_gmt(data: bytes, template: bytes) -> bytes:
+    """Build a one-submesh GTR2 GMT from GTR1 third-magic GMT bytes."""
+    geometry = geometry_from_gtr1(data)
+    if geometry is None:
+        raise ValueError("no decodable GTR1 geometry")
+    positions, normals, triangles = geometry
+    return vrl_to_gmt.build_gmt(positions, triangles, template, normals)
+
+
+def main(argv=None) -> int:
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("gmt", help="GTR1 third-magic .gmt file")
+    ap.add_argument("template", help="real GTR2 .gmt used as structural template")
+    ap.add_argument("output", help="destination .gmt path")
+    args = ap.parse_args(argv)
+    geometry = geometry_from_gtr1(Path(args.gmt).read_bytes())
+    if geometry is None:
+        print("no decodable geometry")
+        return 1
+    positions, normals, triangles = geometry
+    data = vrl_to_gmt.build_gmt(positions, triangles, Path(args.template).read_bytes(), normals)
+    problems = vrl_to_gmt.verify_gmt_geometry(data, positions, triangles, normals)
+    if problems:
+        print("verification failed:", problems)
+        return 1
+    Path(args.output).write_bytes(data)
+    print(f"wrote {args.output}: {len(positions)} vertices, {len(triangles)} triangles")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

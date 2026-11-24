@@ -95,6 +95,8 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 
 - **VRL → GTR2 GMT conversion**: `vrl_to_gmt.py` builds a one-submesh GTR2 GMT from a decoded `.vrl` using a real GTR2 GMT as a structural template (header region, mesh-record defaults, material tail). VRL positions (first three floats of 16-byte records, adjacency ratio 0.356; 4th zero in 300/300 files) are copied, normals are computed from triangulated quads/triangles, and indices are emitted as u16 after the 4-byte lead. `verify_gmt()` re-parses the output; corpus-validated on 25 VRL meshes with a full-tier round-trip test. UV-like coordinates are deliberately not transferred (packed UV field semantics unconfirmed).
 
+- **GTR1 → GTR2 GMT conversion**: `gtr1_to_gmt.py` merges all third-magic descriptor submeshes into one GTR2 mesh, using descriptor fields 1–3 as positions, confirmed unit normals (4–6), and rebased u16 triangles. Built on the shared `vrl_to_gmt.build_gmt()`; full-tier round-trip test over 25 GTR1 GMTs. UV-like fields remain untransferred.
+
 ## Coverage gaps (documented, not yet addressed)
 - **GTR 2004 corpus** (`../GTR1Vanilla`, third GMT magic `...bba6bf90` at 0x04) is fully decoded by `gmt_semantic.py` (descriptor grid + descriptor-less object-mesh path; 33,477/33,477 files). `gmt_format.py` itself still targets the GTL/GTR2 layout only; use `gmt_semantic.py` for GTR1. See `docs/binary-formats.md`.
 - **Untested ISI signatures**: `isi_crypt.GAMES` supports 8 signatures but real corpora exist only for rFactor and Game Stock Car; ARCA Sim Racing, Simulador Turismo Carretera, Top Race 2009, Superleague Formula, STC 2012 and Formula Truck have no local corpus.
