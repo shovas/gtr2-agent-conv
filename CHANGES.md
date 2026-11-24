@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 20:00:00 -0500 - Test-tier rebalance
+- Moved the 21.5 s ANM full-corpus decode-rate check into a new full-only `tests/test_corpus_deep.py`, restoring the Quick tier to 58.7 s (≤60 s budget, 137 tests). Full tier is now 51 modules / 392 tests; all tests pass.
+
 ## 2026-11-24 19:30:00 -0500 - Aud key coverage confirmed on encrypted corpus
 - All 17 GTR2-only `.aud` keys used by `validate_aud()` are present in every corpus, including 101 decrypted JCA Race07 and 9 Volvo files — no audio-key addition is needed for Race07 sources. Documented as a no-gap confirmation.
 
