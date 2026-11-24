@@ -49,6 +49,7 @@ All `../` game installs below are **read-only references** — do not copy game 
 - `~/tmp/tools.unsorted.irrelevant/` - remaining large/generated/irrelevant items (installers, caches, etc.).
 
 - `../RaceRoomTheGame/` (497M, 6,756 files), `../RaceRoomTheGame2/` (1.1G, 15,163): early RaceRoom ISIMotor sims; 14,603 loose JCA v1 GMTs decryptable with the **volvo** key (see `media_tool.detect_jca_key()`), plus `.car/.gdb/.aiw/.cam/.aud/.rcs` configs; `docs/corpus-reference.md` has details.
+- `../ccgepmonitor/` (2.7M, 65 files; **no license file — reference only, do not copy code**): C# monitor reading GTR2 telemetry shared-memory buffers (`$GTR2CrewChief_Telemetry$` etc.); `GTR2Data.cs` documents GTR2 runtime state (game phase, yellow flags, surface types, sectors, pit state) useful only as GTTF telemetry hypotheses cross-check, not file formats.
 - `../SuperleagueFormula2009/` (717M, 568): rF1-era sim with the known Superleague ISI signature (enctype 1); 28 type-1 `.mas`, `.veh/.rcd/.cam/.scn/.aiw/.gdb`, 6 `.vcr` replays.
 - `../LexusIsfTrackTime/` (233M, 412), `../TC2000/` (1.4G, 938), `../SimuladorTopRace2009/` (2.1G, 1,084): rF1-era single-series sims; type-1 MAS archives, `.veh/.hdv/.rcd/.svm/.scn/.aiw`, `.rfm`. TC2000 introduces a 12-key "talent" `.rcd` driver family; TR2009 uses the known Top Race 2009 ISI signature on 118 uppercase GMTs that decrypt but expose no submeshes. See `docs/corpus-reference.md`.
 

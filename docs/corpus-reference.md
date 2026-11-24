@@ -43,6 +43,12 @@ the quick-lookup index. Sizes/counts are approximate (surveyed 2026-11-23/24).
 |---|---|---|
 | `SuperleagueFormula2009/` | 717M / 568 | rF1-era sim; 28 type-1 MAS archives, 19 `.veh`, 18 `.rcd`, 9 `.cam`, 8 `.scn`, 6 `.vcr` replays / `.aiw`, `.gdb`, `.tdf`; ISI signature `0x38af3150902cc55b` is a known enctype-1 game in `isi_crypt.GAMES`. |
 
+## Additional reference tool (reviewed 2026-11-25)
+
+| Folder | Size / files | Key facts |
+|---|---|---|
+| `ccgepmonitor/` | 2.7M / 65 | C# GTR2 telemetry monitor (no license — **reference only, do not copy**). `GTR2Data.cs` maps GTR2 shared-memory state: `$GTR2CrewChief_Telemetry$`/`Scoring`/`PitInfo`/`Extended`/`HWControl` buffers, enums for game phase, yellow flags, surface types, sectors, finish status, pit state. Runtime state only — useful as GTTF telemetry hypotheses cross-check, not file format specs. |
+
 ## Ancestral ISIMotor / format-evolution corpora
 
 | Folder | Size / files | Key facts |
