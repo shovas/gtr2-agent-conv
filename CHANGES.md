@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-25 02:00:00 -0500 - Superleague IRSR prefix variant
+- Extended `parse_rf1_metadata()` to accept the `ffff` prefix variant found in 5/6 Superleague Formula 2009 `.Vcr` replays; all 6 now parse driver and car names. Added a full-tier corpus regression test.
+
 ## 2026-11-25 01:45:00 -0500 - Expanded corpus review and test fixes
 - Reviewed five new ISIMotor-era folders (RaceRoomTheGame 1/2, LexusIsfTrackTime, TC2000, SimuladorTopRace2009) plus SuperleagueFormula2009; documented in `AGENTS.md`/`docs/corpus-reference.md`. Added `volvo`-key JCA detection for RaceRoom GMTs (`gmt-jca`), a 12-key "talent" `.rcd` family, and relaxed exact-count corpus assertions to withstand expanded corpora. Normal suite: 220 tests, 0 failures.
 

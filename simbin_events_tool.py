@@ -121,8 +121,11 @@ def parse_rf1_metadata(data: bytes, off: int) -> dict | None:
     """Parse rFactor-era IRSR metadata: 9-byte prefix, 1-byte-length driver,
     NUL-terminated vehicle and skin names. Validated on 5 RF1Vanilla replays.
     """
-    RF1_PREFIX = bytes.fromhex("000048030100000000")
-    if data[off:off + 9] != RF1_PREFIX:
+    # rF1 uses 0x4803 in bytes 2-3; Superleague Formula 2009 replays use
+    # 0xffff in the same slot (corpus-verified: 5/6 local Superleague .Vcr).
+    RF1_PREFIXES = (bytes.fromhex("000048030100000000"),
+                    bytes.fromhex("0000ffff0100000000"))
+    if data[off:off + 9] not in RF1_PREFIXES:
         return None
     q = off + 9
     if q >= len(data):

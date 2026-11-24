@@ -1,6 +1,7 @@
 """Tests for the GTTF/IRSR structural reader (29 GTT + 13 VCR files)."""
 import glob
 import gzip
+import struct
 import math
 import os
 import sys
@@ -236,6 +237,31 @@ class SimbinEventsToolTest(unittest.TestCase):
         joined = " ".join(s for _, s in e.strings)
         self.assertIn("Henrik Roos", joined)
         self.assertIn(".CAR", joined)
+
+
+    def test_superleague_rf1_irsr_prefix(self):
+        """Superleague replays use an ffff prefix variant and still parse."""
+        import os
+        paths = [p for p in glob.glob(
+            str(ROOT.parent / "SuperleagueFormula2009" / "**" / "*"), recursive=True)
+            if os.path.isfile(p) and p.lower().endswith(".vcr")]
+        if len(paths) < 6:
+            self.skipTest("Superleague replay corpus not present")
+        prefixes = set()
+        for p in paths:
+            ev = setool.parse_file(p)
+            self.assertEqual(ev.kind, "IRSR")
+            self.assertTrue(ev.driver, p)
+            self.assertTrue(ev.car.lower().endswith(".veh"), p)
+            raw = Path(p).read_bytes()
+            data = gzip.decompress(raw) if raw[:2] == b"\x1f\x8b" else raw
+            i = data.find(b"IRSR") + 8
+            for _ in range(4):
+                n = struct.unpack_from("<I", data, i)[0]
+                i += 4 + n
+            prefixes.add(data[i:i+4].hex())
+        self.assertIn("0000ffff", prefixes)
+        self.assertIn("00004803", prefixes)
 
 
 if __name__ == "__main__":
