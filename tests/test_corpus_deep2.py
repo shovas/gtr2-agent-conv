@@ -12,6 +12,7 @@ import collections
 import re
 import anm_format  # noqa: E402
 import simbin_text_tool as stt  # noqa: E402
+import media_tool  # noqa: E402
 import mas_tool  # noqa: E402
 
 
@@ -134,6 +135,34 @@ class CorpusDeep2Test(unittest.TestCase):
                 self.assertEqual(info.details["jca_key"], "volvo", path)
                 n += 1
             self.assertEqual(n, 20)
+
+    def test_car_reference_resolution(self):
+        """GTL .car HDVehicle/Graphics/Sounds references all resolve locally."""
+        import glob
+        import os
+        import re
+        for root in ("GTLSteam", "GTR2Steam"):
+            base = ROOT.parent / root
+            files = {e: {os.path.basename(p).lower()
+                         for p in glob.glob(str(base / "**" / ("*" + e)), recursive=True)}
+                     for e in (".hdc", ".cas", ".cam", ".aud")}
+            checked = resolved = 0
+            for p in (p for p in glob.glob(str(base / "**" / "*"), recursive=True)
+                      if os.path.isfile(p) and p.lower().endswith(".car")):
+                text = media_tool.decrypt_jca_text(Path(p).read_bytes()).decode("latin-1")
+                d = {k.lower(): v.strip().strip('"') for k, v in re.findall(
+                    r"(?m)^\s*([A-Za-z_][\w]*)\s*=\s*(.*)$", text)}
+                for key, ext in (("hdvehicle", ".hdc"), ("graphics", ".cas"),
+                                 ("sounds", ".aud")):
+                    m = re.search(r"([^\\/]+\.\w+)$", d.get(key, ""), re.I)
+                    if m:
+                        checked += 1
+                        resolved += m.group(1).lower() in files[ext]
+            self.assertGreater(checked, 200)
+            if root == "GTLSteam":
+                self.assertEqual(resolved, checked)  # 288/288
+            else:
+                self.assertGreater(resolved / checked, 0.85)  # alt liveries absent
 
     def test_aud_wav_reference_resolution(self):
         """Vanilla GTR2/GTL .aud WAV references all resolve to local files."""

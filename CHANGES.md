@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-25 05:15:00 -0500 - .car reference resolution verified
+- Extended reference-resolution checks to `.car` configs: GTL 288/288 HDVehicle/Graphics/Sounds references resolve; GTR2 419/435 (16 alternate livery `.cas` files absent by design). Full-tier regression test added.
+
 ## 2026-11-25 05:00:00 -0500 - .aud WAV reference resolution verified
 - Corpus-verified that all WAV path references in vanilla GTR2/GTL `.aud` files resolve to local WAV basenames (1,094/1,094 and 1,374/1,374); Race07/Race07Vanilla 98%, Volvo 85%. Full-tier regression test added.
 
