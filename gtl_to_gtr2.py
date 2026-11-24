@@ -294,6 +294,29 @@ def validate_gtr2_tree(root: str | Path,
 # Session keys present in all 85 local GTR2 .gdb files; only 3 of them are
 # present in all 53 local GTL .gdb files (qualify1start, racelaps, racestart).
 # Their *values* vary by track, so only the presence rule is corpus-confirmed.
+def validate_svm_setup(data: bytes) -> list[str]:
+    """Flag an rF1-style ``.svm`` car setup present in a GTR2 tree.
+
+    Corpus-verified: rF1 setups carry a ``gMa1.000f`` header and 6 keys;
+    GTR2 setups use plain ``[GENERAL]`` sections and 72 keys. Vanilla GTR2
+    itself ships 10 rF1-style setups (Driving School content), so this is a
+    diagnostic rather than a hard validation error.
+    """
+    if data.startswith(b"//[[gMa1."):
+        return ["rF1-style .svm header (gMa1.000f) in GTR2 tree"]
+    problems: list[str] = []
+    if not data.startswith(b"[GENERAL]") and b"VehicleClassSetting=" not in data[:4096]:
+        problems.append("not a plain GTR2 .svm setup")
+    return problems
+
+
+def rf1_svm_paths(root: str | Path) -> list[Path]:
+    """Return .svm files under ``root`` that still use the rF1 header."""
+    return sorted(p for p in Path(root).rglob("*")
+                  if p.is_file() and p.suffix.lower() == ".svm"
+                  and p.read_bytes().startswith(b"//[[gMa1."))
+
+
 GTR2_SESSION_KEYS = (
     "practice1day", "practice1start", "practice2day",
     "practice2start", "qualify1day", "qualify1start", "qualify2day",

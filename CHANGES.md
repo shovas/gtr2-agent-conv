@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-25 01:30:00 -0500 - rF1 .svm setup detector
+- Added `gtl_to_gtr2.validate_svm_setup()` / `rf1_svm_paths()` to flag unconverted rF1-style car setups in GTR2 trees. Corpus-verified 10/70 vanilla GTR2 setups still carry `gMa1.000f` headers, so it is a diagnostic rather than a hard error. Added a regression test; all 31 converter tests pass.
+
 ## 2026-11-25 01:00:00 -0500 - .dmg damage parser
 - Added `simbin_text_tool.parse_dmg()` / `validate_dmg()` for all 200 damage configs (plain + JCA-decrypted): 43 universal keys out of 102 distinct, 0 validation problems. Added a full-tier corpus test; Quick remains 57.1 s.
 

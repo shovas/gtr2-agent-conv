@@ -623,5 +623,15 @@ class GtlToGtr2Test(unittest.TestCase):
                 self.assertEqual(mas_tool.read_archive(p)[0], 0)
 
 
+    def test_rf1_svm_detector(self):
+        """rF1-style .svm setups are detected; vanilla GTR2 has 10."""
+        self.assertIn("rF1-style", " ".join(g.validate_svm_setup(
+            b"//[[gMa1.000f (c)2004    ]]\n[DRIVELINE]\nFinalDriveSetting=1\n")))
+        self.assertEqual(g.validate_svm_setup(
+            b"[GENERAL]\r\nNotes=\"\"\r\nSymmetric=1\r\n"), [])
+        paths = g.rf1_svm_paths(ROOT.parent / "GTR2Steam")
+        self.assertEqual(len(paths), 10)
+
+
 if __name__ == "__main__":
     unittest.main()
