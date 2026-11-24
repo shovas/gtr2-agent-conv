@@ -116,11 +116,17 @@ class SimbinTextToolTest(unittest.TestCase):
             n += 1
         self.assertEqual(n, 172)
         self.assertEqual((tb, tbar, tj), (1872, 3320, 688))
+        self.assertEqual(len(stt.SP_UNIVERSAL_BODIES), 9)
+        self.assertEqual(len(stt.SP_UNIVERSAL_BARS), 6)
 
     def test_sp_parser_reference_validation(self):
         """A dangling posbody reference is flagged."""
-        good = ("[BODY]\nname=body mass=(0.0) inertia=(0,0,0) pos=(0,0,0)\n"
-                "[BAR]\nposbody=body negbody=body pos=(1,0,0) neg=(2,0,0)\n")
+        bodies = "".join(f"[BODY]\nname={n} mass=(0.0) inertia=(0,0,0) pos=(0,0,0)\n"
+                         for n in stt.SP_UNIVERSAL_BODIES)
+        bars = "".join(f"[BAR]\nname={n} posbody=body negbody=body "
+                       "pos=(1,0,0) neg=(2,0,0)\n" for n in stt.SP_UNIVERSAL_BARS)
+        good = bodies + bars + ("[BAR]\nposbody=body negbody=body "
+                                "pos=(1,0,0) neg=(2,0,0)\n")
         self.assertEqual(stt.validate_sp(stt.parse_sp(good)), [])
         bad = good.replace("negbody=body", "negbody=missing")
         self.assertTrue(stt.validate_sp(stt.parse_sp(bad)))

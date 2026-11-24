@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 22:00:00 -0500 - .sp naming-convention invariants
+- Corpus-verified 9 universal body names and 6 universal bar names across all 172 `.sp` files; added them to `validate_sp()` (still 0 problems corpus-wide). Also recorded negative results for `.hdr` index-table semantics and GTTF slot +36 quantisation. All 14 simbin text tests pass.
+
 ## 2026-11-24 21:30:00 -0500 - .cas parser reuse confirmed
 - Corpus-verified that all 417 plain `.cas` car-graphics descriptors parse with `parse_scn()` (378 with MASFile references), sharing the `.gen`/`.trk` key family. Added a regression test; all 14 simbin text tests pass.
 

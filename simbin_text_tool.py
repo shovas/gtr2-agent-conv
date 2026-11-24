@@ -393,10 +393,24 @@ def parse_sp(data: bytes | str) -> SpInfo:
     return info
 
 
+SP_UNIVERSAL_BODIES = ("body", "fl_spindle", "fr_spindle", "fl_wheel",
+                       "fr_wheel", "rl_wheel", "rr_wheel", "fuel_tank",
+                       "driver_head")
+SP_UNIVERSAL_BARS = ("fl_fore_upper", "fl_fore_lower", "fl_steering",
+                     "fr_fore_upper", "fr_fore_lower", "fr_steering")
+
+
 def validate_sp(info: SpInfo) -> list[str]:
     """Check corpus-verified .sp invariants; return a list of problems."""
     problems: list[str] = []
     names = {b.name for b in info.bodies if b.name}
+    for required in SP_UNIVERSAL_BODIES:
+        if required not in names:
+            problems.append(f"missing universal body {required}")
+    bar_names = {bar.name for bar in info.bars if bar.name}
+    for required in SP_UNIVERSAL_BARS:
+        if required not in bar_names:
+            problems.append(f"missing universal bar {required}")
     for i, b in enumerate(info.bodies):
         for field in ("name", "mass", "inertia", "pos"):
             if not getattr(b, field):
