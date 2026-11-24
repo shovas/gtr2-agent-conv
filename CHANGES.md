@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 17:30:00 -0500 - GMT variant identification
+- `media_tool.identify()` now reports plain GMT (ISI magic at +8), `gmt-gtr1` (third magic at +4), `racegmt` (`RaceGMT\0`) and JCA-wrapped GMT by content; corpus survey found 21,180 plain + 45,359 JCA + 643 RaceGMT loose files. Added a regression test; all 60 media tests pass.
+
 ## 2026-11-24 17:00:00 -0500 - rFactor .set camera/scene parser
 - Added `simbin_text_tool.parse_set()` for the 22 CUBEASF `.set` descriptors. Corpus-verified: every file has one `mainview` View and one `FDirect01` Directional Light with `AmbientColor`; 5 have Instance/SearchPath sections. The parser handles multiple key=value pairs per line and dotted filenames. Added 2 regression tests; all 10 simbin text tests pass.
 

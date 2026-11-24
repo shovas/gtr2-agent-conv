@@ -215,6 +215,15 @@ def identify(path: str | Path) -> MediaInfo:
             else:
                 break
         return MediaInfo(str(p), size, "jpg", details)
+    # GMT mesh variants: ISI magic at +8, GTR1 third magic at +4, Race 07 DLC
+    if len(b) >= 24 and b[8:24] == bytes.fromhex(
+            "c8cfd2d8ced8e6c3d6ded8bebba7bf90"):
+        return MediaInfo(str(p), size, "gmt", {"version": "isi-magic@8"})
+    if len(b) >= 20 and b[4:20] == bytes.fromhex(
+            "c8cfd2d8ced8e6c3d6ded8bdbba6bf90"):
+        return MediaInfo(str(p), size, "gmt-gtr1", {"version": "gtr1-magic@4"})
+    if b.startswith(b"RaceGMT\0"):
+        return MediaInfo(str(p), size, "racegmt", {"version": "RaceGMT\\0"})
     # GIF87a/GIF89a (little-endian width/height at +6)
     if b[:6] in (b"GIF87a", b"GIF89a") and len(b) >= 10:
         w, h = struct.unpack_from("<HH", b, 6)

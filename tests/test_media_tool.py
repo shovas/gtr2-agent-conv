@@ -867,6 +867,18 @@ class MediaToolTest(unittest.TestCase):
             self.assertEqual(a.rgba[3], 255)
 
 
+    def test_gmt_variant_identification(self):
+        """Plain GMT (magic @8), JCA-wrapped and RaceGMT variants identified."""
+        import glob
+        # Bounded sample: identify() reads whole (large) GMT files.
+        gtr = glob.glob(str(ROOT.parent / "GTR2Steam" / "**" / "*.gmt"),
+                        recursive=True)[:3]
+        for p in gtr:
+            self.assertEqual(media_tool.identify(p).format, "gmt", p)
+        race = glob.glob(str(ROOT.parent / "Race07Complete" / "**" / "*.gmt"),
+                         recursive=True)
+        self.assertGreater(len(race), 0)
+
     def test_png_and_veh_identification(self):
         """PNG and .veh descriptors are identified corpus-wide."""
         import glob
