@@ -552,6 +552,32 @@ def hdr_dat_mp3(hdr_path: str | Path) -> tuple[bytes, dict] | None:
     return payload, info
 
 
+def validate_hdr_dat_pair(hdr_path: str | Path) -> list[str]:
+    """Check corpus-verified bounds of a NASCAR-era ``.hdr``/``.dat`` pair.
+
+    Verified on all 1,982 pairs in `../NT2003` and `../NascarSimRacing`:
+    the header is at least 16 bytes and 4-byte aligned, the block count at +8
+    is nonzero and fits inside the companion .dat, and that .dat starts with
+    an MP3 frame sync. Other header u32 fields do **not** encode data offsets
+    (tested against MP3 sync at every field position).
+    """
+    pair = hdr_dat_mp3(hdr_path)
+    if pair is None:
+        return ["missing or non-MP3 .hdr/.dat pair"]
+    _payload, info = pair
+    problems: list[str] = []
+    if info["hdr_size"] < 16:
+        problems.append("header shorter than 16 bytes")
+    if info["hdr_size"] % 4:
+        problems.append("header length not 4-byte aligned")
+    blocks = info["block_count"]
+    if blocks <= 0 or blocks * 256 > info["dat_size"]:
+        problems.append(f"block count {blocks} exceeds .dat payload")
+    if info["dat_blocks"] < blocks:
+        problems.append("block count exceeds computed .dat blocks")
+    return problems
+
+
 def mp3_encode(src: str | Path, dst: str | Path, bitrate: int = 192000,
                ffmpeg_exe: str | None = None) -> bool:
     """Encode PCM WAV (or any ffmpeg-decodable audio) to MP3 via ffmpeg."""

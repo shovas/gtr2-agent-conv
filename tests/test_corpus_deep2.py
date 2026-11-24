@@ -330,6 +330,20 @@ class CorpusDeep2Test(unittest.TestCase):
 
 
 
+    def test_hdr_dat_index_bounds(self):
+        """HDR index bounds match the companion MP3 .dat on all pairs."""
+        import glob
+        import os
+        n = 0
+        for root in ("NT2003", "NascarSimRacing"):
+            for h in glob.glob(str(ROOT.parent / root / "**" / "*.hdr"),
+                               recursive=True):
+                if not os.path.isfile(os.path.splitext(h)[0] + ".dat"):
+                    continue
+                self.assertEqual(media_tool.validate_hdr_dat_pair(h), [], h)
+                n += 1
+        self.assertGreater(n, 1900)
+
     def test_anm_keyframe_corpus(self):
         """ANM keyframes: monotonic times and unit quaternions corpus-wide."""
         import glob

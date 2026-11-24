@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-25 08:40:00 -0500 - HDR pair bounds validator
+- Added `media_tool.validate_hdr_dat_pair()` enforcing corpus-verified bounds on all 1,982 NASCAR `.hdr`/`.dat` pairs (header alignment/size, block count fits payload) with a full-tier regression test. Documented that the remaining header fields are category flags, not data offsets (only 1.8% chance-level sync hits; 789/829 nonzero +12 values out of bounds).
+
 ## 2026-11-25 08:20:00 -0500 - SCGT .vrl flag and group blocks decoded
 - Extended `simbin_text_tool.read_vrl()` with the 13 consecutive N*4 blocks: eight zero blocks, one constant-15 block, two zero blocks, a sorted vertex map (< M) and small per-vertex group IDs (<256). Corpus-verified on 3,000/3,000 members with two documented `CONE10.VRL` exceptions; full-tier regression test added.
 
