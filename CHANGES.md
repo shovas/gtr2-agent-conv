@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-25 19:30:00 -0500 - GTR2 f0 per-mesh marker
+- Characterized GTR2 base-vertex f0 as a per-mesh marker: across 15.6M vertices, 71,547 nonzero values occur exactly once per mesh, always on vertex 0. Added `gmt_format.mesh_marker()` and a full-tier regression test; the packed halfword semantics remain unresolved (ruled out as material index, mesh ordinal, UV or color).
+
 ## 2026-11-25 19:00:00 -0500 - GTR2 vertex color field decoded
 - Identified GTR2 base-vertex f7 as a packed color word (alpha 255, grayscale in 11,841/11,841 sampled vertices across 40 meshes) and added `gmt_format.unpack_vertex_color()` with a full-tier regression test. Confirmed f7 is not a packed UV pair; f0 remains unresolved.
 

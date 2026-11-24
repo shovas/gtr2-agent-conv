@@ -89,6 +89,19 @@ class GmtMesh:
     stream3_data: bytes = b""  # rec[7]..rec[8], layout unconfirmed
 
 
+def mesh_marker(mesh: GmtMesh) -> int | None:
+    """Return the per-mesh f0 marker on vertex 0, or None when absent.
+
+    Corpus-verified on 71,547 GTR2/GTL meshes: f0 is nonzero for exactly one
+    vertex per mesh, always the first. Its two u16 halves are small integers
+    that do not match material index, mesh ordinal or vertex count, so their
+    semantics remain unresolved.
+    """
+    if not mesh.base_vertices:
+        return None
+    return mesh.base_vertices[0].f0 or None
+
+
 def unpack_vertex_color(value: int) -> tuple[int, int, int, int]:
     """Decode a GTR2 base-vertex f7 word into its four bytes.
 

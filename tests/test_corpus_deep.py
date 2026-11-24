@@ -142,6 +142,43 @@ class CorpusDeepTest(unittest.TestCase):
                 break
         self.assertGreater(n, 1000)
 
+    def test_gmt_f0_is_first_vertex_marker(self):
+        """A nonzero f0 occurs only on vertex 0 of a mesh."""
+        import glob
+        import gmt_format
+        import mas_tool
+        meshes = marked = 0
+        for p in glob.glob(str(ROOT.parent / "GTR2Steam" / "**" / "*.gtr"),
+                           recursive=True) + \
+                glob.glob(str(ROOT.parent / "GTLSteam" / "**" / "*.gtl"),
+                          recursive=True):
+            try:
+                _, entries = mas_tool.read_archive(p)
+            except Exception:
+                continue
+            for e in entries:
+                if not e.name.lower().endswith(".gmt") or not e.data:
+                    continue
+                try:
+                    g = gmt_format.parse_gmt(e.name, data=e.data)
+                except Exception:
+                    continue
+                for m in g.meshes:
+                    if not m.base_vertices:
+                        continue
+                    meshes += 1
+                    nonzero = [i for i, v in enumerate(m.base_vertices) if v.f0]
+                    if nonzero:
+                        marked += 1
+                        self.assertEqual(nonzero, [0], e.name)
+                        self.assertEqual(gmt_format.mesh_marker(m),
+                                         m.base_vertices[0].f0, e.name)
+                if meshes >= 12000:
+                    break
+            if meshes >= 12000:
+                break
+        self.assertGreater(marked, 1000)
+
     def test_gmt_vertex_f7_is_packed_color(self):
         """Base-vertex f7 holds packed grayscale colors, not packed UVs."""
         import glob
