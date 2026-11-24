@@ -15,6 +15,10 @@ Cross-corpus check: `simbin_events_tool.find_frame_grid()` detects the 63-byte f
 
 `../SimuladorTopRace2009/GameData/Vehicles/TRV6_2009/trv6_09.hdv` (12,746 B) has a valid `//[[gMb1.002f (c)2007]]` 44-byte header followed by a 12,701-byte high-entropy payload (`7b 4a 9b 6c...`). Exhausted: ISI-crypt forced enctypes 0/1 at skips 0/4/12/16, all JCA keys, zlib/gzip at offsets 0/44/45 — no printable text or valid layout. The corpus test now skips this one file; no speculative decoder added.
 
+## GTTF slots 28/36/40 kinematic hypotheses (2026-11-25)
+
+Using ccgepmonitor's documented GTR2 runtime ranges as a guide, slots +28/+36/+40 were correlated against speed and longitudinal acceleration across all 29 files: median r ≈ 0 for every combination, max |r| ≤ 0.08, no file above 0.5. These slots are not speed or acceleration signals under any simple linear or sign-flipped interpretation. Combined with earlier quadratic/quantization/exclusion results, they remain uninterpreted.
+
 ## GTTF field +16 pitch hypothesis (2026-11-25)
 
 Tested whether the small angle f32 at frame offset +16 encodes pitch/vertical motion: correlation with position-derived vertical velocity across all 29 GTT files gave median r=0.003 (max |r|=0.298), and smoothing the vertical velocity (alpha 0.2/0.5) did not help (median ~0.002). Field +16 is not a pitch/vertical-velocity signal.
