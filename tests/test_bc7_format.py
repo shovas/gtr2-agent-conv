@@ -83,8 +83,8 @@ class TestBc7Format(unittest.TestCase):
             dds = media_tool.read_dds(path)
             self.assertEqual(dds.fourcc, "BC7_UNORM")
             self.assertEqual(dds.rgba[:4], b"\xff\xff\xff\xff")
-            with self.assertRaises(ValueError):
-                dds.to_bytes()  # write-back intentionally unsupported
+            # Unedited BC write-back is byte-exact (DX10 header preserved).
+            self.assertEqual(dds.to_bytes(), open(path, "rb").read())
         finally:
             os.unlink(path)
 

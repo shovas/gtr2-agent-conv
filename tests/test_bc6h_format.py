@@ -152,8 +152,8 @@ class TestBc6hFormat(unittest.TestCase):
             self.assertEqual(dds.fourcc, "BC6H_UF16")
             self.assertEqual(dds.width, 4)
             self.assertEqual(dds.rgba[-4:], b"\xff\xff\xff\xff")
-            with self.assertRaises(ValueError):
-                dds.to_bytes()  # write-back is intentionally unsupported
+            # Unedited BC write-back is byte-exact (DX10 header preserved).
+            self.assertEqual(dds.to_bytes(), open(path, "rb").read())
         finally:
             os.unlink(path)
 
