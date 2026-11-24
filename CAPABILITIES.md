@@ -109,6 +109,8 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 
 - **Scene script reference resolution**: rF1-era `.scr` Actor Mesh references resolve to archive members in 1,127/1,321 cases (85.3%) across seven corpora; GTR2/GTL/Race07Complete ship no `.cin`/`.scr` scripts. Full-tier regression test.
 
+- **CAM radius validation**: `validate_cam()` now enforces positive-integer `ActivationRadius` (1,153/1,153 GTR2/GTL/Race07 cameras; 635 multiples of five), in addition to the FLT_MAX deactivation sentinel rule. Full-tier regression test.
+
 ## Coverage gaps (documented, not yet addressed)
 - **GTR 2004 corpus** (`../GTR1Vanilla`, third GMT magic `...bba6bf90` at 0x04) is fully decoded by `gmt_semantic.py` (descriptor grid + descriptor-less object-mesh path; 33,477/33,477 files). `gmt_format.py` itself still targets the GTL/GTR2 layout only; use `gmt_semantic.py` for GTR1. See `docs/binary-formats.md`.
 - **Untested ISI signatures**: `isi_crypt.GAMES` supports 8 signatures but real corpora exist only for rFactor and Game Stock Car; ARCA Sim Racing, Simulador Turismo Carretera, Top Race 2009, Superleague Formula, STC 2012 and Formula Truck have no local corpus.

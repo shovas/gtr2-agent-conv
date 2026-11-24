@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-25 23:00:00 -0500 - CAM radius invariant
+- Extended `simbin_text_tool.validate_cam()` to require positive-integer `ActivationRadius`, corpus-verified on 1,153 GTR2/GTL/Race07 cameras. Documented that radius is not a camera-centred trigger sphere (only 1% within radius); full-tier regression test added.
+
 ## 2026-11-25 22:30:00 -0500 - Scene script reference probe
 - Corpus-verified 1,127/1,321 rF1-era `.scr` Mesh references (85.3%) resolving to archive members across seven corpora, with missing pit-crew wheel variants documented. GTR2/GTL/Race07Complete have no `.cin`/`.scr` files. Full-tier regression test added.
 

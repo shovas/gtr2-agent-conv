@@ -519,6 +519,26 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertGreater(checked, 1200)
         self.assertGreater(resolved / checked, 0.8)
 
+    def test_cam_radius_positive_integer(self):
+        """CAM ActivationRadius is a positive integer across SimBin installs."""
+        import glob
+        import os
+        checked = 0
+        for root in ("GTR2Steam", "GTLSteam", "Race07Complete"):
+            for p in glob.glob(str(ROOT.parent / root / "**" / "*.cam"),
+                               recursive=True):
+                if not os.path.isfile(p):
+                    continue
+                info = stt.parse_cam(stt.read_text(p))
+                self.assertEqual(stt.validate_cam(info), [], p)
+                for cam in info.cameras:
+                    if cam.activation_radius is not None:
+                        self.assertGreater(cam.activation_radius, 0, p)
+                        self.assertAlmostEqual(cam.activation_radius,
+                                               round(cam.activation_radius), places=6, msg=p)
+                        checked += 1
+        self.assertGreater(checked, 1100)
+
     def test_rfm_corpus(self):
         """All 10 rF1 .rfm mod descriptors carry 37 universal keys."""
         import glob
