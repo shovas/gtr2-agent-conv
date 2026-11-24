@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-25 23:30:00 -0500 - AIW lap-distance coherence
+- Added `score_distance` parsing for `WP_SCORE` and `simbin_text_tool.aiw_lap_distance_coherence()`. Corpus-verified on 464 AIWs: 99.86% of adjacent class-0 lap-distance pairs are non-decreasing within contiguous runs; full-tier regression test. Documented as calibrated evidence rather than a strict ordering rule.
+
 ## 2026-11-25 23:00:00 -0500 - CAM radius invariant
 - Extended `simbin_text_tool.validate_cam()` to require positive-integer `ActivationRadius`, corpus-verified on 1,153 GTR2/GTL/Race07 cameras. Documented that radius is not a camera-centred trigger sphere (only 1% within radius); full-tier regression test added.
 

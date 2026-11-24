@@ -339,6 +339,35 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertEqual(cars, 16)
         self.assertEqual(includes, 16)
 
+    def test_aiw_lap_distance_coherence(self):
+        """WP_SCORE lap distance is non-decreasing within track runs."""
+        import glob
+        import os
+        import isi_crypt
+        n = 0
+        scores = []
+        roots = ("Race07Vanilla", "GTLSteam", "GTR2Steam", "Race07Complete",
+                 "RF1Vanilla", "Automobilista", "StockCarExtreme", "F12002")
+        for root in roots:
+            for p in glob.glob(str(ROOT.parent / root / "**" / "*"), recursive=True):
+                if not os.path.isfile(p) or not p.lower().endswith(".aiw"):
+                    continue
+                raw = Path(p).read_bytes()
+                if raw[:4] == media_tool.JCA_MAGIC:
+                    text = media_tool.decrypt_jca_text(raw).decode("latin-1")
+                else:
+                    sign, _ = isi_crypt.crypt_info(raw)
+                    text = (isi_crypt.decrypt_bytes(raw).decode("latin-1")
+                            if sign in isi_crypt.GAMES else raw.decode("latin-1"))
+                score = stt.aiw_lap_distance_coherence(stt.parse_aiw(text))
+                if score is None:
+                    continue
+                self.assertGreater(score, 0.98, p)
+                scores.append(score)
+                n += 1
+        self.assertEqual(n, 464)
+        self.assertGreater(sum(scores) / len(scores), 0.99)
+
     def test_aiw_waypoint_pointer_bounds(self):
         """AIW pointers and wp_path offsets stay in bounds across 8 corpora."""
         import glob

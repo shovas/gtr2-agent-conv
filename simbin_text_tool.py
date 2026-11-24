@@ -29,6 +29,7 @@ class Waypoint:
     ptrs: tuple[int, int, int, int] | None = None
     path: tuple[float, float] | None = None
     score_checkpoint: int | None = None
+    score_distance: float | None = None
     perp: tuple[float, float, float] | None = None
 
     def wp_class(self) -> int | None:
@@ -116,6 +117,11 @@ def parse_aiw(data: str) -> AIW:
                     if parts:
                         try:
                             waypoint.score_checkpoint = int(float(parts[0].strip("() ")))
+                        except ValueError:
+                            pass
+                    if len(parts) > 1:
+                        try:
+                            waypoint.score_distance = float(parts[1].strip("() "))
                         except ValueError:
                             pass
     return aiw
@@ -274,6 +280,28 @@ def validate_aiw_waypoints(aiw: AIW) -> list[str]:
             if abs(norm - 1.0) > 0.01:
                 problems.append(f"waypoint {i}: track/pit wp_perp norm {norm:.4f} != 1")
     return problems
+
+
+def aiw_lap_distance_coherence(aiw: AIW) -> float | None:
+    """Fraction of non-decreasing lap distances within contiguous track runs.
+
+    ``WP_SCORE``'s second field is lap distance. Across 464 AIWs from eight
+    corpora, class-0 (track) waypoints are non-decreasing in 332,656/333,117
+    adjacent pairs (99.86%); decreases are lap-wrap discontinuities at run
+    starts. This is calibrated evidence, not a strict waypoint-order rule.
+    """
+    runs: list[list[float]] = []
+    current: list[float] = []
+    for wp in aiw.waypoints:
+        if wp.wp_class() == 0 and wp.score_distance is not None:
+            current.append(wp.score_distance)
+        elif current:
+            runs.append(current)
+            current = []
+    if current:
+        runs.append(current)
+    pairs = [(a, b) for run in runs for a, b in zip(run, run[1:])]
+    return sum(1 for a, b in pairs if b >= a) / len(pairs) if pairs else None
 
 
 def validate_aiw_pointers(aiw: AIW) -> list[str]:
