@@ -215,6 +215,12 @@ def identify(path: str | Path) -> MediaInfo:
             else:
                 break
         return MediaInfo(str(p), size, "jpg", details)
+    # PNG (IHDR: width, height, bit depth, colour type)
+    if b.startswith(b"\x89PNG\r\n\x1a\n") and len(b) >= 33:
+        w, h, depth, ctype = struct.unpack_from(">IIBB", b, 16)
+        return MediaInfo(str(p), size, "png", {"width": w, "height": h,
+                                               "bit_depth": depth,
+                                               "color_type": ctype})
     # MP3
     if head.startswith(b"ID3") or (len(head) >= 2 and head[0] == 0xFF and (head[1] & 0xE0) == 0xE0):
         details = {"id3": head.startswith(b"ID3")}
@@ -260,6 +266,9 @@ def identify(path: str | Path) -> MediaInfo:
     if b.startswith(b"CUBEASF"):
         return MediaInfo(str(p), size, "cubeasf", {"family": "rFactor scene",
                                                    "extension": ext})
+    # rFactor .veh vehicle descriptor (key=value with Graphics=/HDVehicle=)
+    if ext == ".veh" and (b"Graphics=" in b[:8192] or b"HDVehicle=" in b[:8192]):
+        return MediaInfo(str(p), size, "rfactor-veh", {"extension": ext})
     # rFactor scene scripts: .scr (Actor/Mesh blocks), .cin (CinematicEvent)
     if ext == ".scr" and b"Actor" in b[:8192]:
         return MediaInfo(str(p), size, "rfactor-scr", {"extension": ext})

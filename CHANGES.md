@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 16:00:00 -0500 - PNG and .veh identification
+- `media_tool.identify()` now reports PNG files (1,640 local, with IHDR metadata) and `.veh` descriptors (2,763) by format; prior sampled survey had shown both classes unidentified. Added a corpus regression test; all 59 media tests pass.
+
 ## 2026-11-24 15:30:00 -0500 - SVM section-name invariant
 - Corpus verification extended: the 15 `.svm` section names are identical between rF1 (517 files) and GTR2 (20,614 files) setups, so rF1→GTR2 setup conversion needs no section renaming — only the header and optional GTR2-only keys differ. Added test assertions.
 

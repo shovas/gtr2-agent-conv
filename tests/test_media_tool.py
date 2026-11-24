@@ -867,6 +867,23 @@ class MediaToolTest(unittest.TestCase):
             self.assertEqual(a.rgba[3], 255)
 
 
+    def test_png_and_veh_identification(self):
+        """PNG and .veh descriptors are identified corpus-wide."""
+        import glob
+        import simbin_text_tool as stt
+        pngs = glob.glob(str(ROOT.parent / "**" / "*.png"), recursive=True)
+        self.assertGreater(len(pngs), 1000)
+        for p in pngs:
+            i = media_tool.identify(p)
+            self.assertEqual(i.format, "png", p)
+            self.assertGreater(i.details["width"], 0)
+            self.assertIn(i.details["color_type"], (0, 2, 3, 4, 6))
+        vehs = glob.glob(str(ROOT.parent / "**" / "*.veh"), recursive=True)
+        self.assertGreater(len(vehs), 2000)
+        for p in vehs:
+            self.assertEqual(media_tool.identify(p).format, "rfactor-veh", p)
+            self.assertIn("graphics", stt.parse_veh(Path(p).read_bytes()))
+
     def test_rfactor_scene_scripts_identification(self):
         """.scr and .cin scene scripts are identified."""
         import glob
