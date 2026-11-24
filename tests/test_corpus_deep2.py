@@ -616,6 +616,19 @@ class CorpusDeep2Test(unittest.TestCase):
                         checked += 1
         self.assertGreater(checked, 1100)
 
+    def test_svm_numeric_bounds(self):
+        """Plain .svm numeric values stay within corpus-observed bounds."""
+        import glob
+        import os
+        checked = 0
+        for p in glob.glob(str(ROOT.parent / "**" / "*"), recursive=True):
+            if not os.path.isfile(p) or not p.lower().endswith(".svm"):
+                continue
+            data = Path(p).read_bytes()
+            self.assertEqual(stt.validate_svm_numeric(data), [], p)
+            checked += 1
+        self.assertGreater(checked, 20000)
+
     def test_scn_mas_reference_resolution(self):
         """rF1-era .scn MASFile references resolve to local archives."""
         import glob

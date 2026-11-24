@@ -327,6 +327,8 @@ GTR1 coverage is now complete: a full `../GTR1Vanilla` scan (33,477 GMTs with th
 
 - **SCGT `.prt` object references (negative)**: the 5 archived `.prt` scene files are well-formed CRLF ASCII with balanced braces (7 `Group`, 940 `Instance` records, 977 `ObjFile` references), validated by `simbin_text_tool.validate_prt()` with a full-tier test. None of the 977 object names resolve to archive member basenames, `.vrl` meshes, `.scn` declarations or `.aiw` content; the references appear to be stale editor-level object IDs. No reference-resolution rule promoted.
 
+- **SVM numeric bounds**: `validate_svm_numeric()` checks 11 high-frequency numeric keys against inclusive corpus-observed ranges (e.g. `brakediscsetting` 0..1, `brakepadsetting` exactly 2, `slowbumpsetting` 0..19, `pressuresetting` 4..107, `cambersetting` 0..160). Verified across all 21,183 plain `.svm` files (517 rF1 + 20,666 GTR2 variants from the earlier survey); encrypted `gMb1.000f` payloads are skipped. Bounds are intentionally broad across cars/games. Full-tier regression test.
+
 - **TRK camera-name namespace negative**: across 152 GTR2/GTL/Race07 track scripts with sibling `.cam` files, none of 288 `View=` references or 135,196 `Instance=` references matches a parsed `.cam` camera name (0 matches). These are separate namespaces — `View` names view definitions, `Instance` names scene objects, while `.cam` names cameras. Full-tier corpus-fact regression test.
 
 - **AIW camera-reference negative**: none of the 465 AIW files across the eight validated corpora contains a `ControlPoint` or `camera` token (case-insensitive). Camera/ControlPoint data lives in `.cam` and `.trk` files, not AIWs, so no cross-reference validator applies. Full-tier corpus-fact regression test added.

@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 05:00:00 -0500 - SVM numeric bounds
+- Added `simbin_text_tool.validate_svm_numeric()` with corpus-observed inclusive bounds for 11 high-frequency setup keys; verified on all 21,183 plain `.svm` files with encrypted payloads skipped. Full-tier regression test added.
+
 ## 2026-11-26 04:30:00 -0500 - TRK/CAM namespace negative
 - Documented that TRK `View=`/`Instance=` names never match `.cam` camera names across 152 track scripts (288 and 135,196 references respectively). Full-tier corpus-fact regression test added.
 

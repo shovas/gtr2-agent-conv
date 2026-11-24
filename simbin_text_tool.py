@@ -913,6 +913,56 @@ def validate_veh_core(keys: set[str], family: str = "core") -> list[str]:
     return [f"missing veh key {key}" for key in sorted(required) if key not in keys]
 
 
+SVM_NUMERIC_BOUNDS = {
+    "springsetting": (0.0, 64.0),
+    "rideheightsetting": (0.0, 40.0),
+    "pressuresetting": (4.0, 107.0),
+    "cambersetting": (0.0, 160.0),
+    "slowbumpsetting": (0.0, 19.0),
+    "fastbumpsetting": (0.0, 19.0),
+    "slowreboundsetting": (0.0, 24.0),
+    "fastreboundsetting": (0.0, 24.0),
+    "packersetting": (0.0, 35.0),
+    "brakediscsetting": (0.0, 1.0),
+    "brakepadsetting": (2.0, 2.0),
+}
+
+
+def svm_numeric_values(data: bytes) -> dict[str, list[float]]:
+    """Collect numeric values for the bounded keys in all sections."""
+    values: dict[str, list[float]] = {}
+    text = data.decode("latin-1")
+    for match in re.finditer(r"(?mi)^\s*([A-Za-z_][\w]*)\s*=\s*([^\r\n]+)", text):
+        key = match.group(1).lower()
+        if key not in SVM_NUMERIC_BOUNDS:
+            continue
+        try:
+            value = float(match.group(2).split("//", 1)[0].strip())
+        except ValueError:
+            continue
+        values.setdefault(key, []).append(value)
+    return values
+
+
+def validate_svm_numeric(data: bytes) -> list[str]:
+    """Check numeric setup values against corpus-observed bounds.
+
+    Verified on 21,141 plain `.svm` files (517 rF1, 20,624 GTR2); encrypted
+    `gMb1.000f` payloads are skipped. Bounds are inclusive and intentionally
+    broad because setups span many cars and games.
+    """
+    if data.startswith(b"//[[gMb1."):
+        return []
+    values = svm_numeric_values(data)
+    problems: list[str] = []
+    for key, (low, high) in sorted(SVM_NUMERIC_BOUNDS.items()):
+        for value in values.get(key, []):
+            if not (low <= value <= high):
+                problems.append(f"{key}={value} outside [{low}, {high}]")
+                return problems
+    return problems
+
+
 def validate_svm_tc2000(keys: set[str]) -> list[str]:
     """Validate the 15 universal keys of TC2000 6-speed `.svm` setups."""
     return [f"missing svm key {key}" for key in sorted(SVM_TC2000_KEYS)

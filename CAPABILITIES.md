@@ -133,6 +133,8 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 
 - **TRK/CAM namespace boundary**: 288 `View=` and 135,196 `Instance=` references across 152 track scripts share no names with parsed `.cam` cameras; the namespaces are distinct. Full-tier corpus-fact test.
 
+- **SVM numeric validation**: `simbin_text_tool.validate_svm_numeric()` checks 11 high-frequency setup keys against inclusive corpus-observed bounds across all 21,183 plain `.svm` files; encrypted payloads are skipped. Full-tier regression test.
+
 ## Coverage gaps (documented, not yet addressed)
 - **GTR 2004 corpus** (`../GTR1Vanilla`, third GMT magic `...bba6bf90` at 0x04) is fully decoded by `gmt_semantic.py` (descriptor grid + descriptor-less object-mesh path; 33,477/33,477 files). `gmt_format.py` itself still targets the GTL/GTR2 layout only; use `gmt_semantic.py` for GTR1. See `docs/binary-formats.md`.
 - **Untested ISI signatures**: `isi_crypt.GAMES` supports 8 signatures but real corpora exist only for rFactor and Game Stock Car; ARCA Sim Racing, Simulador Turismo Carretera, Top Race 2009, Superleague Formula, STC 2012 and Formula Truck have no local corpus.
