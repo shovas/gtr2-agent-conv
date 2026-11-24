@@ -141,6 +141,10 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 
 - **HDC numeric validation**: `simbin_text_tool.validate_hdc_numeric()` checks 20 chassis/suspension/brake fields against bounds from 86 GTR2/GTL files. Full-tier regression test.
 
+- **ENG/GRB numeric validation**: `validate_eng_numeric()` (12 fields, 66 files) and `validate_grb_numeric()` (2 fields, 60 files) enforce corpus-observed bounds. Full-tier regression test.
+
+- **ENG/GRB numeric validation**: `simbin_text_tool.validate_eng_numeric()` (12 engine fields, 66 files) and `validate_grb_numeric()` (gear ratio/bevel, 60 files) enforce corpus-observed bounds; full-tier regression test.
+
 ## Coverage gaps (documented, not yet addressed)
 - **GTR 2004 corpus** (`../GTR1Vanilla`, third GMT magic `...bba6bf90` at 0x04) is fully decoded by `gmt_semantic.py` (descriptor grid + descriptor-less object-mesh path; 33,477/33,477 files). `gmt_format.py` itself still targets the GTL/GTR2 layout only; use `gmt_semantic.py` for GTR1. See `docs/binary-formats.md`.
 - **Untested ISI signatures**: `isi_crypt.GAMES` supports 8 signatures but real corpora exist only for rFactor and Game Stock Car; ARCA Sim Racing, Simulador Turismo Carretera, Top Race 2009, Superleague Formula, STC 2012 and Formula Truck have no local corpus.

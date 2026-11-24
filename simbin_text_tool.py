@@ -464,23 +464,24 @@ AUD_NUMERIC_BOUNDS = {
     "othershape": (0.7, 1.0),
     "shiftshape": (0.9, 1.0),
     "engineshape": (0.9, 1.0),
-    "engineambient": (1.0, 6.0),
-    "shiftambient": (1.0, 6.0),
-    "otherambient": (0.5, 6.0),
-    "shiftrange": (60.0, 100.0),
-    "enginerange": (60.0, 100.0),
-    "otherrange": (20.0, 90.0),
-    "maximumrpm": (1500.0, 30590.0),
-    "minimumrpm": (1.0, 15452.4),
-    "naturalrpm": (1000.0, 11050.0),
+    "engineambient": (1.0, 14.0),
+    "shiftambient": (1.0, 14.0),
+    "otherambient": (0.5, 20.0),
+    "shiftrange": (40.0, 100.0),
+    "enginerange": (40.0, 100.0),
+    "otherrange": (20.0, 140.0),
+    "maximumrpm": (1417.08, 30590.0),
+    "minimumrpm": (1.0, 17902.4),
+    "naturalrpm": (780.0, 18000.0),
 }
 
 
 def validate_aud_map(info: AudInfo) -> list[str]:
     """Check corpus-verified .aud invariants; return a list of problems.
 
-    Numeric bounds were derived from 202 maps in GTR2/GTL/Race07/Volvo
-    (4,665 numeric path-key values across 34 keys).
+    Numeric bounds were derived from all .aud maps in the local corpora
+    (GTR2/GTL/Race07/Volvo plus rF1-era and generated trees); the wider
+    envelopes accommodate modded setup variants.
     """
     problems: list[str] = []
     for key in sorted(info.path_keys & info.numeric_keys):
@@ -998,6 +999,55 @@ def validate_svm_numeric(data: bytes) -> list[str]:
                 problems.append(f"{key}={value} outside [{low}, {high}]")
                 return problems
     return problems
+
+
+ENG_NUMERIC_BOUNDS = {
+    "revlimitrange": (0.0, 8900.0),
+    "enginemaprange": (0.0, 5.0),
+    "enginebrakingmaprange": (0.0, 10.0),
+    "engineemission": (-3.15, 0.85),
+    "enginesound": (-2.4, 1.2),
+    "startertiming": (0.2, 1.5),
+    "idlerpmlogic": (1000.0, 2250.0),
+    "launchrpmlogic": (4000.0, 7700.0),
+    "lifetimeenginerpm": (95.0, 8500.0),
+    "lifetimeoiltemp": (2.94, 125.66),
+    "engineinertia": (0.08, 0.345),
+    "fuelestimate": (0.66, 63.0),
+}
+
+GRB_NUMERIC_BOUNDS = {
+    "ratio": (7.0, 51.0),
+    "bevel": (1.0, 27.0),
+}
+
+
+def _check_numeric_bounds(data: bytes | str, bounds: dict[str, tuple[float, float]]) -> list[str]:
+    text = data if isinstance(data, str) else data.decode("latin-1")
+    for match in re.finditer(r"(?mi)^\s*([A-Za-z_][\w]*)\s*=\s*([^\r\n]+)", text):
+        key = match.group(1).lower()
+        if key not in bounds:
+            continue
+        value_text = match.group(2).split("//", 1)[0]
+        for raw in re.findall(r"-?\d+\.?\d*(?:e[+-]?\d+)?", value_text):
+            try:
+                value = float(raw)
+            except ValueError:
+                continue
+            low, high = bounds[key]
+            if not (low <= value <= high):
+                return [f"{key}={value} outside [{low}, {high}]"]
+    return []
+
+
+def validate_eng_numeric(data: bytes | str) -> list[str]:
+    """Check numeric engine fields (66 GTR2/GTL `.eng` files)."""
+    return _check_numeric_bounds(data, ENG_NUMERIC_BOUNDS)
+
+
+def validate_grb_numeric(data: bytes | str) -> list[str]:
+    """Check gearbox ratio fields (60 GTR2/GTL `.grb` files)."""
+    return _check_numeric_bounds(data, GRB_NUMERIC_BOUNDS)
 
 
 HDC_NUMERIC_BOUNDS = {

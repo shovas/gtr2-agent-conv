@@ -616,6 +616,27 @@ class CorpusDeep2Test(unittest.TestCase):
                         checked += 1
         self.assertGreater(checked, 1100)
 
+    def test_eng_grb_numeric_bounds(self):
+        """ENG/GRB numeric fields stay within corpus-observed bounds."""
+        import glob
+        import os
+        engines = boxes = 0
+        for root in ("GTR2Steam", "GTLSteam"):
+            for p in glob.glob(str(ROOT.parent / root / "**" / "*"), recursive=True):
+                if not os.path.isfile(p):
+                    continue
+                low = p.lower()
+                if low.endswith(".eng"):
+                    text = media_tool.decrypt_jca_text(Path(p).read_bytes())
+                    self.assertEqual(stt.validate_eng_numeric(text), [], p)
+                    engines += 1
+                elif low.endswith(".grb"):
+                    text = media_tool.decrypt_jca_text(Path(p).read_bytes())
+                    self.assertEqual(stt.validate_grb_numeric(text), [], p)
+                    boxes += 1
+        self.assertEqual(engines, 66)
+        self.assertEqual(boxes, 60)
+
     def test_hdc_numeric_bounds(self):
         """HDC chassis fields stay within corpus-observed bounds."""
         import glob
