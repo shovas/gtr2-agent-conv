@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-25 07:00:00 -0500 - Full GSC GMT survey complete
+- Completed the incremental `gsc_survey.py` survey over all 29,033 GMT members in 352 MAS archives from the four GSC corpora: 29,022 GSC-signature, 1,096 decodable (3.8%), 1,003 with submeshes, 904 finite / 414 plausible. Cache reached full coverage over 15 bounded runs with 100% cached-hit reuse.
+
 ## 2026-11-25 06:45:00 -0500 - Incremental GSC classification cache
 - Added lazy MAS member reads (`read_member`, `read_archive(read_data=False)`) and `gsc_survey.py` with a persistent archive+member classification cache in gitignored `.cache/`. Quick/normal/full modes bound runtime; verified 200→400→2,260 cache growth with 100% cached-hit reuse. Added a regression test.
 
