@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-25 22:30:00 -0500 - Scene script reference probe
+- Corpus-verified 1,127/1,321 rF1-era `.scr` Mesh references (85.3%) resolving to archive members across seven corpora, with missing pit-crew wheel variants documented. GTR2/GTL/Race07Complete have no `.cin`/`.scr` files. Full-tier regression test added.
+
 ## 2026-11-25 22:00:00 -0500 - Full-corpus batch conversion
 - Ran `batch_convert.py --limit 0` over both source corpora: 48,108 verified GMTs written (13,292/13,293 VRL; 34,816/36,128 GTR1). Fixed VRL vertex-map inclusive boundary (max == M) and decoded GTR1 descriptor indices as triangle strips, then documented all remaining skips as degenerate/placeholder content (`TB*.GMT`, one `FNCE02.VRL`, 3 source-less meshes). Full-tier suite still green.
 

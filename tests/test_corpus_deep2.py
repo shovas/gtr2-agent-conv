@@ -484,6 +484,41 @@ class CorpusDeep2Test(unittest.TestCase):
                     archived += os.path.splitext(e.name)[1].lower() in (".aud", ".car")
             self.assertEqual(archived, 0, root)
 
+    def test_script_reference_resolution(self):
+        """rF1-era .scr Mesh refs mostly resolve; SimBin installs have none."""
+        import glob
+        import os
+        import mas_tool
+        for root in ("GTR2Steam", "GTLSteam", "Race07Complete"):
+            base = ROOT.parent / root
+            self.assertEqual(
+                [p for p in glob.glob(str(base / "**" / "*"), recursive=True)
+                 if os.path.isfile(p) and p.lower().endswith((".cin", ".scr"))], [], root)
+        checked = resolved = 0
+        for root in ("NT2003", "NascarSimRacing", "F12002", "F1C", "RF1Vanilla",
+                     "Automobilista", "StockCarExtreme"):
+            base = ROOT.parent / root
+            names = set()
+            for arc in glob.glob(str(base / "**" / "*.mas"), recursive=True) + \
+                    glob.glob(str(base / "**" / "*.MAS"), recursive=True):
+                try:
+                    _, entries = mas_tool.read_archive(arc, read_data=False)
+                except Exception:
+                    continue
+                for e in entries:
+                    names.add(os.path.basename(e.name).lower())
+            for p in glob.glob(str(base / "**" / "*.scr"), recursive=True):
+                if not os.path.isfile(p):
+                    continue
+                for actor in stt.parse_scr(Path(p).read_bytes()).actors:
+                    if not actor.mesh:
+                        continue
+                    checked += 1
+                    resolved += os.path.basename(
+                        actor.mesh.replace("\\", "/")).lower() in names
+        self.assertGreater(checked, 1200)
+        self.assertGreater(resolved / checked, 0.8)
+
     def test_rfm_corpus(self):
         """All 10 rF1 .rfm mod descriptors carry 37 universal keys."""
         import glob
