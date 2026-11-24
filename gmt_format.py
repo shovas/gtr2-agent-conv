@@ -89,6 +89,18 @@ class GmtMesh:
     stream3_data: bytes = b""  # rec[7]..rec[8], layout unconfirmed
 
 
+def unpack_vertex_color(value: int) -> tuple[int, int, int, int]:
+    """Decode a GTR2 base-vertex f7 word into its four bytes.
+
+    Corpus-verified on 11,841 vertices across 40 GTR2/GTL meshes with varying
+    f7: the high byte is always 255 and the three lower bytes are equal
+    (grayscale colors such as 0xff343434). This is a packed color, **not** a
+    packed UV pair. Byte/channel ordering is not asserted because all sampled
+    colors are grayscale.
+    """
+    return tuple((value >> (8 * i)) & 0xFF for i in range(4))
+
+
 def _extract_ascii_strings(raw: bytes, min_len: int = 4) -> List[str]:
     out: List[str] = []
     i = 0

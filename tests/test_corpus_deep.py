@@ -142,6 +142,44 @@ class CorpusDeepTest(unittest.TestCase):
                 break
         self.assertGreater(n, 1000)
 
+    def test_gmt_vertex_f7_is_packed_color(self):
+        """Base-vertex f7 holds packed grayscale colors, not packed UVs."""
+        import glob
+        import gmt_format
+        import mas_tool
+        meshes = colors = 0
+        for p in glob.glob(str(ROOT.parent / "GTR2Steam" / "**" / "*.gtr"),
+                           recursive=True) + \
+                glob.glob(str(ROOT.parent / "GTLSteam" / "**" / "*.gtl"),
+                          recursive=True):
+            try:
+                _, entries = mas_tool.read_archive(p)
+            except Exception:
+                continue
+            for e in entries:
+                if not e.name.lower().endswith(".gmt") or not e.data:
+                    continue
+                try:
+                    g = gmt_format.parse_gmt(e.name, data=e.data)
+                except Exception:
+                    continue
+                for m in g.meshes:
+                    vs = m.base_vertices
+                    if len(vs) < 100 or len({v.f7 for v in vs}) <= 10:
+                        continue
+                    meshes += 1
+                    for v in vs:
+                        r, g0, b, a = gmt_format.unpack_vertex_color(v.f7)
+                        self.assertEqual(a, 255, e.name)
+                        self.assertEqual((r, g0, b), (r, r, r), e.name)
+                        colors += 1
+                if meshes >= 40:
+                    break
+            if meshes >= 40:
+                break
+        self.assertGreater(meshes, 30)
+        self.assertGreater(colors, 10000)
+
     def test_gtr1_to_gtr2_gmt_roundtrip(self):
         """Converted GTR1 third-magic GMTs reparse as valid GTR2 GMTs."""
         import glob

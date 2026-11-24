@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-25 19:00:00 -0500 - GTR2 vertex color field decoded
+- Identified GTR2 base-vertex f7 as a packed color word (alpha 255, grayscale in 11,841/11,841 sampled vertices across 40 meshes) and added `gmt_format.unpack_vertex_color()` with a full-tier regression test. Confirmed f7 is not a packed UV pair; f0 remains unresolved.
+
 ## 2026-11-25 18:30:00 -0500 - Converter output material validation
 - Both VRL→GMT and GTR1→GMT round-trip tests now also run `validate_materials.check_gmt()` on converted output (clean). Documented that `validate_conversion.independent_read()` targets the old-layout submesh format and does not apply to new-layout GTR2 output.
 
