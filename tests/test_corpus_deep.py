@@ -33,6 +33,42 @@ def _anm_samples(root, limit=None):
 
 
 class CorpusDeepTest(unittest.TestCase):
+    def test_gsc_gmt_prefilter(self):
+        """0x1D4 near-magic predicts GSC GMT decodability (recall 1.0)."""
+        import glob
+        import isi_crypt
+        import mas_tool
+        import gmt_semantic
+        n = tp = fp = fn = 0
+        for root in ("Automobilista", "StockCarExtreme", "GameStockCar",
+                     "CopaPetrobrasdeMarcas"):
+            for arc in glob.glob(str(ROOT.parent / root / "**" / "*.mas"), recursive=True)[:15]:
+                try:
+                    _, entries = mas_tool.read_archive(arc)
+                except Exception:
+                    continue
+                for e in entries:
+                    if not e.name.lower().endswith(".gmt") or not e.data:
+                        continue
+                    try:
+                        d = isi_crypt.decrypt_bytes(e.data)
+                    except Exception:
+                        continue
+                    pred = gmt_semantic.is_gsc_decodable(d)
+                    dec = bool(gmt_semantic.read_gmt(d)["submeshes"])
+                    tp += pred and dec; fp += pred and not dec; fn += not pred and dec
+                    n += 1
+                    if n >= 150:
+                        break
+                if n >= 150:
+                    break
+            if n >= 150:
+                break
+        self.assertGreater(n, 100)
+        self.assertEqual(fn, 0)  # no decodable file missed by the pre-filter
+        self.assertGreater(tp, 0)
+        self.assertGreater(tp, fp)
+
     def test_sp_parser_corpus(self):
         """.sp suspension geometry: field presence and body refs hold."""
         import glob

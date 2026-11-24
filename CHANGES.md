@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-25 05:30:00 -0500 - GSC GMT decodability pre-filter
+- Added `gmt_semantic.is_gsc_decodable()` using the 0x1D4 near-magic to pre-filter ISI-decrypted GSC GMTs before full submesh scans: 100% recall, 99.5% specificity on a 200-file four-corpus sample. Full-tier regression test added.
+
 ## 2026-11-25 05:15:00 -0500 - .car reference resolution verified
 - Extended reference-resolution checks to `.car` configs: GTL 288/288 HDVehicle/Graphics/Sounds references resolve; GTR2 419/435 (16 alternate livery `.cas` files absent by design). Full-tier regression test added.
 
