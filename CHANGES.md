@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 07:30:00 -0500 - HED head-physics validator
+- Added `simbin_text_tool.validate_hed_numeric()` covering vector ordering and component bounds for the two shipped GTR2/GTL `.hed` files. Full-tier regression test added.
+
 ## 2026-11-26 07:00:00 -0500 - ENG/GRB bounds and AUD envelope fix
 - Added `validate_eng_numeric()` (12 fields, 66 GTR2/GTL `.eng` files) and `validate_grb_numeric()` (ratio/bevel, 60 `.grb` files). Widened `AUD_NUMERIC_BOUNDS` to the full corpus envelope after Full v114 exposed modded `.aud` values outside the initial four-corpus ranges. Full-tier tests green.
 

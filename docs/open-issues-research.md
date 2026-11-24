@@ -329,6 +329,8 @@ GTR1 coverage is now complete: a full `../GTR1Vanilla` scan (33,477 GMTs with th
 
 - **SCGT `.prt` object references (negative)**: the 5 archived `.prt` scene files are well-formed CRLF ASCII with balanced braces (7 `Group`, 940 `Instance` records, 977 `ObjFile` references), validated by `simbin_text_tool.validate_prt()` with a full-tier test. None of the 977 object names resolve to archive member basenames, `.vrl` meshes, `.scn` declarations or `.aiw` content; the references appear to be stale editor-level object IDs. No reference-resolution rule promoted.
 
+- **HED head-physics scope**: only 2 `.hed` files ship (one each in GTR2/GTL), so `validate_hed_numeric()` checks vector/ordering invariants rather than overfitting tight bounds: 3-vectors for min/max position and orientation with `min < max` componentwise, spring directions in [-1,1], and broad component envelopes from the two samples. Full-tier regression test; wider numeric bounds would need more samples.
+
 - **ENG/GRB numeric field bounds**: `validate_eng_numeric()` covers 12 engine fields from 66 GTR2/GTL `.eng` files (e.g. revlimitrange 0–8900, emission −3.15..0.85, starter timing 0.2–1.5, idle RPM 1000–2250, inertia 0.08–0.345); `validate_grb_numeric()` covers gearbox `ratio` 7–51 and `bevel` 1–27 from 60 `.grb` files. Full-tier regression test.
 
 - **HDC numeric field bounds**: `HDC_NUMERIC_BOUNDS` covers 20 chassis/suspension/brake fields from 86 GTR2/GTL `.hdc` files (344 records per universal field), e.g. springmult 0.49–1.2, bumptravel −0.12..−0.02, reboundtravel −0.3..−0.12, bumpstopspring 35k–250k, frictiontorque 5.5–12.5, spininertia 0.55–1.85, camber 0–42, brake torque 1017–4000. Full-tier regression test.

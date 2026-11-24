@@ -1001,6 +1001,45 @@ def validate_svm_numeric(data: bytes) -> list[str]:
     return problems
 
 
+HED_NUMERIC_BOUNDS = {
+    "headinertia": (0.028, 0.032),
+    "headmass": (6.0, 6.0),
+    "maxori": (7.0, 7.0),
+    "minori": (-7.0, -7.0),
+    "maxpos": (0.015, 0.08),
+    "minpos": (-0.08, -0.03),
+    "springbody": (-0.05, 2.0),
+    "springhead": (-0.05, 2.0),
+    "springdir": (-1.0, 1.0),
+    "springparams": (1.31, 8500.0),
+}
+
+
+def validate_hed_numeric(data: bytes | str) -> list[str]:
+    """Check head-physics vector fields and limit ordering.
+
+    Verified on the only 2 shipped HED files (GTR2/GTL): positions and
+    orientations are 3-vectors with min < max, spring directions lie in
+    [-1, 1], and all numeric components fall in the observed envelopes.
+    """
+    text = data if isinstance(data, str) else data.decode("latin-1")
+    problems = _check_numeric_bounds(text, HED_NUMERIC_BOUNDS)
+    vectors: dict[str, list[float]] = {}
+    for key in ("minpos", "maxpos", "minori", "maxori"):
+        match = re.search(r"(?mi)^\s*" + key + r"\s*=\s*\(([^)]*)\)", text)
+        if not match:
+            continue
+        try:
+            vectors[key] = [float(x) for x in match.group(1).split(",")]
+        except ValueError:
+            continue
+    for low_key, high_key in (("minpos", "maxpos"), ("minori", "maxori")):
+        if low_key in vectors and high_key in vectors:
+            if any(a >= b for a, b in zip(vectors[low_key], vectors[high_key])):
+                problems.append(f"{low_key} not below {high_key}")
+    return problems
+
+
 ENG_NUMERIC_BOUNDS = {
     "revlimitrange": (0.0, 8900.0),
     "enginemaprange": (0.0, 5.0),

@@ -616,6 +616,20 @@ class CorpusDeep2Test(unittest.TestCase):
                         checked += 1
         self.assertGreater(checked, 1100)
 
+    def test_hed_numeric_bounds(self):
+        """Head-physics vectors obey corpus-observed limits and ordering."""
+        import glob
+        import os
+        checked = 0
+        for root in ("GTR2Steam", "GTLSteam"):
+            for p in glob.glob(str(ROOT.parent / root / "**" / "*"), recursive=True):
+                if not os.path.isfile(p) or not p.lower().endswith(".hed"):
+                    continue
+                text = media_tool.decrypt_jca_text(Path(p).read_bytes())
+                self.assertEqual(stt.validate_hed_numeric(text), [], p)
+                checked += 1
+        self.assertEqual(checked, 2)
+
     def test_eng_grb_numeric_bounds(self):
         """ENG/GRB numeric fields stay within corpus-observed bounds."""
         import glob
