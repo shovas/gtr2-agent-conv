@@ -216,6 +216,23 @@ class CorpusDeepTest(unittest.TestCase):
                 n += 1
             self.assertEqual(n, 20)
 
+    def test_raceroom_shader_corpus(self):
+        """All 226 RaceRoom JCA shaders decrypt to ISI shader sources."""
+        import glob
+        import os
+        import media_tool
+        n = 0
+        for root in ("RaceRoomTheGame", "RaceRoomTheGame2"):
+            for ext in ("vsh", "gfx", "psh"):
+                for p in glob.glob(str(ROOT.parent / root / "**" / "*"), recursive=True):
+                    if not os.path.isfile(p) or not p.lower().endswith("." + ext):
+                        continue
+                    info = media_tool.identify(p)
+                    self.assertEqual(info.format, "shader-jca", p)
+                    self.assertTrue(info.details["shader_source"])
+                    n += 1
+        self.assertEqual(n, 226)
+
     def test_rcs_and_utf16_dic(self):
         """.rcs control configs and UTF-16 .dic identification."""
         import glob

@@ -86,6 +86,28 @@ def decrypt_jca_text(data: bytes) -> bytes:
     return data
 
 
+def decrypt_jca_shader(data: bytes) -> bytes | None:
+    """Decrypt a JCA-wrapped ISI shader source (.vsh/.psh/.gfx).
+
+    Corpus-verified on 226 RaceRoom shader files (v1, volvo key): decrypted
+    payloads are HLSL/PS1.1 or gMotor2 shader-description text, which contain
+    no '=' and therefore are not accepted by ``decrypt_jca_text``.
+    """
+    if data[:4] != JCA_MAGIC:
+        return None
+    import jca_crypt
+    for name in [None] + sorted(jca_crypt.CUSTOM_KEYS):
+        try:
+            out = jca_crypt.decrypt_bytes(data, jca_crypt.CUSTOM_KEYS.get(name))
+        except Exception:
+            continue
+        flat = b" ".join(out[:4096].split())
+        if (b"ps.1.1" in flat or b"register (c" in flat or
+                b"gMotor2 Shader" in flat or b"PS_OUTPUT ps2" in flat):
+            return out
+    return None
+
+
 def decrypt_jca_wav(data: bytes, key_name: str | None = None) -> bytes:
     """Decrypt a JCA-wrapped WAV to plain RIFF/WAVE bytes.
 
@@ -142,12 +164,24 @@ def identify(path: str | Path) -> MediaInfo:
                 w, h, bpp = struct.unpack_from("<HHB", plain, 12)
                 details.update({"image_type": plain[2], "width": w, "height": h, "bpp": bpp})
                 return MediaInfo(str(p), size, "tga-jca", details)
+            # RaceRoom .vsh/.psh/.gfx are JCA-encrypted ISI shader sources;
+            # identify them by decrypted source signatures.
+            head = plain[:4096]
+            if ext in (".vsh", ".psh", ".gfx"):
+                flat0 = b" ".join(head.split())
+                if (b"register (c" in flat0 or b"ps.1.1" in flat0 or
+                        b"gMotor2 Shader" in flat0 or b"PS_OUTPUT ps2" in flat0):
+                    details["shader_source"] = True
+                    return MediaInfo(str(p), size, "shader-jca", details)
         except Exception as e:
             details["error"] = str(e)
-        # JCA-wrapped text config (.car/.gdb/.cam/.scn/.aud/...): detect_jca_key
-        # only recognises media magic, so try the text-aware decoder here.
+        # JCA-wrapped text config / shader source: detect_jca_key only recognises
+        # media magic, so try the text-aware decoder here.
         try:
             text = decrypt_jca_text(b)
+            if ext in (".vsh", ".psh", ".gfx") and decrypt_jca_shader(b):
+                details["shader_source"] = True
+                return MediaInfo(str(p), size, "shader-jca", details)
             if text != b and b"=" in text[:4096]:
                 lines = text[:4096].count(b"\n") + 1
                 details.update({"jca_text": True, "lines": lines,

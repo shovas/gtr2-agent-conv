@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-25 03:30:00 -0500 - RaceRoom shader decryption and identification
+- Added `media_tool.decrypt_jca_shader()` and `shader-jca` identification for all 226 RaceRoom `.vsh`/`.gfx`/`.psh` files (JCA v1, volvo key); these decrypt to ISI HLSL/PS1.1 source with no `=` so the text detector misses them. Full-tier corpus regression test added.
+
 ## 2026-11-25 03:15:00 -0500 - .rcs control sets and UTF-16 .dic fix
 - Added `parse_rcs()`/`validate_rcs()` for 36 RaceRoom control-set configs (5 universal keys) and fixed `identify()` misclassifying UTF-16LE `.dic` files as MP3 (ff fe BOM matched an MP3 sync) — now `utf16-text`. Added a full-tier regression test.
 
