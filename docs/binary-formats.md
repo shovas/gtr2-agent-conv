@@ -160,7 +160,7 @@ These are usually text but may contain null-padded SimBin headers: `.aiw`, `.svm
 - 17 `.bmw` files are GMOTORMAS10 type-0 archives (2,720 members total), readable and member-level lossless round-trippable with `mas_tool.py` unchanged.
 - 976 GMTs (26 loose + 950 inside `.bmw`) all have normal GMT magic.
 - 75 FXM-family files (`FXM `/`FXA `/`LMA ` magics) all use known magics; 5 have extension != magic (e.g. `TE_wait-l.FXM` is `LMA `, `FPDriverRHD_M02.LMA` is `FXM `).
-- `.psh`/`.vsh` inside archives are plain-text HLSL/PS1.1 shader sources; embedded `.db` is a Windows thumbnail cache. No new binary format found.
+- `.psh`/`.vsh` inside archives are plain-text HLSL/PS1.1 shader sources; embedded `.db` is a Windows thumbnail cache. A later survey found **192 JCA-encrypted uppercase `.PSH` files** in `Race07Vanilla/Shaders` — they decrypt to plain PS1.1 shader assembly text and are reported as `text-jca` by `media_tool.identify()`. No new binary format found.
 - Verification: `tests/test_bmw_m3.py`.
 
 ### Done / strong
