@@ -108,6 +108,35 @@ class CorpusDeepTest(unittest.TestCase):
         self.assertGreater(subs, 15)
         self.assertGreater(faces, 10)
 
+    def test_gdb_terrain_data_references(self):
+        """GDB TerrainDataFile refs resolve; only rF1Vanilla uses them."""
+        import glob
+        import mas_tool
+        import simbin_text_tool as stt_local
+        refs = resolved = 0
+        for root in ("RF1Vanilla", "F1C", "F12002", "NT2003"):
+            base = ROOT.parent / root
+            names: set[str] = set()
+            for p in glob.glob(str(base / "**" / "*"), recursive=True):
+                if Path(p).is_file() and p.lower().endswith(".tdf"):
+                    names.add(Path(p).name.lower())
+                if p.lower().endswith((".mas", ".MAS")):
+                    try:
+                        _, entries = mas_tool.read_archive(p, read_data=False)
+                    except Exception:
+                        continue
+                    for e in entries:
+                        if e.name.lower().endswith(".tdf"):
+                            names.add(Path(e.name).name.lower())
+            for p in glob.glob(str(base / "**" / "*.gdb"), recursive=True):
+                if not Path(p).is_file():
+                    continue
+                for ref in stt_local.parse_gdb_terrain_refs(stt_local.read_text(p)):
+                    refs += 1
+                    resolved += ref in names
+        self.assertEqual(refs, 26)
+        self.assertEqual(resolved, refs)
+
     def test_scr_move_parent_references(self):
         """SCR Move/Parent actor references resolve locally."""
         import glob

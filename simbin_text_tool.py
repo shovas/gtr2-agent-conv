@@ -968,6 +968,21 @@ def validate_ani_text(rules: list[dict]) -> list[str]:
     return problems
 
 
+def parse_gdb_terrain_refs(data: bytes | str) -> list[str]:
+    """Extract TerrainDataFile basenames from an rF1-era GDB event file.
+
+    Corpus-verified: 26 refs in RF1Vanilla all resolve to loose or archived
+    .tdf files; F1C, F12002 and NT2003 event files contain no such key.
+    """
+    text = data if isinstance(data, str) else data.decode("latin-1")
+    refs: list[str] = []
+    for match in re.finditer(r"(?mi)^[ \t]*TerrainDataFile[ \t]*=[ \t]*(.*)$", text):
+        value = match.group(1).split("//", 1)[0].strip().strip('"')
+        if value:
+            refs.append(os.path.basename(value.replace("\\", "/")).lower())
+    return refs
+
+
 def parse_scr_move(value: str) -> tuple[str | None, str | None]:
     """Split a `.scr` Move value into (actor reference, animation name).
 

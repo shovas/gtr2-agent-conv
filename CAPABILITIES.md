@@ -127,6 +127,8 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 
 - **WAV header validation**: `media_tool.wav_header()` parses RIFF/WAVE fmt chunks (including JCA-wrapped audio with an optional key) and `validate_wav_header()` checks PCM channel/bit-depth/sample-rate and byte-rate arithmetic. Corpus-verified on sampled GTR2/GTL/Race07/Volvo audio; MPEG-in-WAVE (format 0x55) is documented as out of scope. Full-tier regression test.
 
+- **GDB terrain references**: `simbin_text_tool.parse_gdb_terrain_refs()` extracts `TerrainDataFile` overrides; 26/26 RF1Vanilla refs resolve to loose/archived `.tdf` files, with no such keys in F1C/F12002/NT2003. Full-tier regression test.
+
 ## Coverage gaps (documented, not yet addressed)
 - **GTR 2004 corpus** (`../GTR1Vanilla`, third GMT magic `...bba6bf90` at 0x04) is fully decoded by `gmt_semantic.py` (descriptor grid + descriptor-less object-mesh path; 33,477/33,477 files). `gmt_format.py` itself still targets the GTL/GTR2 layout only; use `gmt_semantic.py` for GTR1. See `docs/binary-formats.md`.
 - **Untested ISI signatures**: `isi_crypt.GAMES` supports 8 signatures but real corpora exist only for rFactor and Game Stock Car; ARCA Sim Racing, Simulador Turismo Carretera, Top Race 2009, Superleague Formula, STC 2012 and Formula Truck have no local corpus.

@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 03:30:00 -0500 - GDB terrain data references
+- Added `parse_gdb_terrain_refs()` and a full-tier test: 26/26 RF1Vanilla `TerrainDataFile` references resolve to local `.tdf` files; F1C/F12002/NT2003 contain no such keys.
+
 ## 2026-11-26 03:00:00 -0500 - WAV header validator
 - Added `media_tool.wav_header()` and `validate_wav_header()` with JCA key support (Volvo requires `volvo`). Corpus-verified PCM consistency across four installs; documented MPEG-in-WAVE (0x55) files as out of scope. Full-tier regression test added.
 
