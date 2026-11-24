@@ -67,6 +67,8 @@ Generic section/key parsing of all 1,287 `.gdb` and 3,385 `.car` files found **6
 - JCA with all known keys: no valid decrypt.
 Known-plaintext XOR against typical GTR2 setup prefixes (`[GENERAL]\r\n`, `VehicleClassSetting=`) yields no repeating keystream or recognisable pattern. **Undecoded** — likely a proprietary compiled/encrypted setup format; needs the originating tool or source. No speculative decoder added.
 
+Follow-up (fresh two-payload/cipher probes): the two distinct payloads share a **21-byte identical prefix** and diverge exactly at byte 21; XORing them at every alignment −64..+64 gives a maximum zero-run of 21 at offset 0 (6.9% zero bytes overall) — no shared keystream beyond the common header. Raw Blowfish decryption of the payload without a JCA header, across all 8 versions × default/`raceroom`/`raceroom_plr`/`volvo`/`old_raceroom` keys, peaks at 0.413 printability (vs 0.428 baseline). Raw ISI crypt without a signature header, across all enctypes 0–7 × six key seeds × skips 0/4/8/16, peaks at 0.430 printability (no meaningful improvement). XORing ciphertext against `//[[gMa1.000f`, `[GENERAL]\r\n` and `//[[gMb1.000f` yields aperiodic keystreams with no period ≤64. The payload signature/prefix bytes are category markers, not a known cipher header.
+
 ## 1. In-game validation alternatives
 - **Understanding/confidence**: structural validation existed; runtime correctness unproven.
 - **Hypothesis**: exact semantic equality between source and converted geometry, plus an independent parser cross-check, provides strong offline compatibility confidence.
