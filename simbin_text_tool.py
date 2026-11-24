@@ -297,6 +297,143 @@ def parse_veh(data: bytes | str) -> dict[str, str]:
 
 
 @dataclass
+class SetView:
+    name: str = ""
+    clear: str | None = None
+    color: tuple[float, ...] | None = None
+    size: tuple[float, ...] | None = None
+    center: tuple[float, ...] | None = None
+    fov: tuple[float, ...] | None = None
+    clip_planes: tuple[float, ...] | None = None
+    dont_clear_target: str | None = None
+
+
+@dataclass
+class SetLight:
+    name: str = ""
+    kind: str = ""  # Type= (e.g. Directional)
+    direction: tuple[float, ...] | None = None
+    intensity: tuple[float, ...] | None = None
+    color: tuple[float, ...] | None = None
+
+
+@dataclass
+class SetInstance:
+    name: str = ""
+    mesh_files: list[str] = field(default_factory=list)
+    coll_target: str | None = None
+    hat_target: str | None = None
+    lod_in: tuple[float, ...] | None = None
+    lod_out: tuple[float, ...] | None = None
+
+
+@dataclass
+class SetInfo:
+    views: list[SetView] = field(default_factory=list)
+    lights: list[SetLight] = field(default_factory=list)
+    instances: list[SetInstance] = field(default_factory=list)
+    ambient_color: tuple[float, ...] | None = None
+    search_paths: list[str] = field(default_factory=list)
+
+
+_SET_KV_RE = re.compile(r'([A-Za-z_]\w*)\s*=\s*(\([^)]*\)|"[^"]*"|[^\s]+)')
+
+
+def _all_floats(value: str) -> tuple[float, ...] | None:
+    out: list[float] = []
+    for token in _FLOAT_RE.findall(value):
+        try:
+            out.append(float(token))
+        except ValueError:  # e.g. a lone '.' in a filename like foo.gmt
+            continue
+    return tuple(out) if out else None
+
+
+def parse_set(data: bytes | str) -> SetInfo:
+    """Parse an rFactor ``.set`` CUBEASF camera/scene descriptor.
+
+    Corpus-verified on 22 local files: 20 distinct keys organised into View,
+    Light and optional Instance blocks plus global ``AmbientColor`` and
+    ``SearchPath``. Multiple key=value pairs can share a line (e.g.
+    ``Size=(.5,0.5) Center=(0.5,0.5)``), so a line may yield several fields.
+    """
+    text = data if isinstance(data, str) else data.decode("latin-1")
+    info = SetInfo()
+    block: str = ""  # '' | 'view' | 'light' | 'instance'
+    for line in text.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("//"):
+            continue
+        code = stripped.split("//", 1)[0]
+        for key, raw in _SET_KV_RE.findall(code):
+            kl = key.lower()
+            value = raw.strip('"')
+            if kl == "view":
+                info.views.append(SetView(name=value))
+                block = "view"
+                continue
+            if kl == "light":
+                info.lights.append(SetLight(name=value))
+                block = "light"
+                continue
+            if kl == "instance":
+                info.instances.append(SetInstance(name=value))
+                block = "instance"
+                continue
+            nums = _all_floats(raw)
+            if kl == "ambientcolor" and nums:
+                info.ambient_color = nums
+                continue
+            if kl == "searchpath":
+                info.search_paths.append(value)
+                continue
+            if block == "view" and info.views:
+                v = info.views[-1]
+                if kl == "clear":
+                    v.clear = value
+                elif kl == "color":
+                    v.color = nums
+                elif kl == "size":
+                    v.size = nums
+                elif kl == "center":
+                    v.center = nums
+                elif kl == "fov":
+                    v.fov = nums
+                elif kl == "clipplanes":
+                    v.clip_planes = nums
+                elif kl == "dontcleartarget":
+                    v.dont_clear_target = value
+            elif block == "light" and info.lights:
+                light = info.lights[-1]
+                if kl == "type":
+                    light.kind = value
+                elif kl == "dir":
+                    light.direction = nums
+                elif kl == "intensity":
+                    light.intensity = nums
+                elif kl == "color":
+                    light.color = nums
+            elif block == "instance" and info.instances:
+                inst = info.instances[-1]
+                if kl == "meshfile":
+                    inst.mesh_files.append(value)
+                elif kl == "colltarget":
+                    inst.coll_target = value
+                elif kl == "hattarget":
+                    inst.hat_target = value
+                elif kl == "lodin":
+                    inst.lod_in = nums
+                elif kl == "lodout":
+                    inst.lod_out = nums
+            else:
+                if kl == "ambientcolor":
+                    info.ambient_color = nums
+                elif kl == "searchpath":
+                    info.search_paths.append(value)
+    return info
+
+
+@dataclass
 class HdvInfo:
     sections: set[str] = field(default_factory=set)
     keys: set[str] = field(default_factory=set)

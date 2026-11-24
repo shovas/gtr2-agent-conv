@@ -66,6 +66,55 @@ class SimbinTextToolTest(unittest.TestCase):
         self.assertGreater(parsed, 0)
 
 
+    def test_set_parser_corpus(self):
+        """.set files: 22 CUBEASF camera/scene descriptors parse fully."""
+        import glob
+        n = with_inst = with_search = 0
+        for p in glob.glob(str(ROOT.parent / "**" / "*.set"), recursive=True):
+            if Path(p).read_bytes()[:7] != b"CUBEASF":
+                continue  # 3 unrelated tool settings files
+            info = stt.parse_set(Path(p).read_bytes())
+            self.assertEqual(len(info.views), 1, p)
+            self.assertEqual(len(info.lights), 1, p)
+            self.assertIsNotNone(info.ambient_color, p)
+            view = info.views[0]
+            self.assertEqual(view.name, "mainview")
+            self.assertIn(view.clear, ("False", "false"))
+            self.assertEqual(len(view.color), 3)
+            self.assertEqual(len(view.size), 2)
+            self.assertEqual(len(view.center), 2)
+            self.assertEqual(len(view.fov), 2)
+            self.assertEqual(len(view.clip_planes), 2)
+            light = info.lights[0]
+            self.assertEqual(light.name, "FDirect01")
+            self.assertEqual(light.kind, "Directional")
+            self.assertEqual(len(light.direction), 3)
+            self.assertEqual(len(light.color), 3)
+            with_inst += bool(info.instances)
+            with_search += bool(info.search_paths)
+            n += 1
+        self.assertEqual(n, 22)
+        self.assertEqual(with_inst, 5)
+        self.assertEqual(with_search, 5)
+
+    def test_set_multi_kv_per_line(self):
+        """Lines can pack several key=value pairs; filenames with '.' are safe."""
+        info = stt.parse_set(
+            "CUBEASF\nView=mainview\n{\nSize=(.5, 0.5) Center=(0.5, 0.5)\n"
+            "ClipPlanes=(0.10, 20.00)\n}\nAmbientColor=(95,104,121)\n"
+            "Instance=Test\n{\nMeshFile=SpinnerAlphaFloor.gmt CollTarget=False "
+            "LODOut=(30.0)\n}\nSearchPath=UiData\\\n")
+        v = info.views[0]
+        self.assertEqual(v.size, (0.5, 0.5))
+        self.assertEqual(v.center, (0.5, 0.5))
+        self.assertEqual(v.clip_planes, (0.1, 20.0))
+        self.assertEqual(info.ambient_color, (95.0, 104.0, 121.0))
+        inst = info.instances[0]
+        self.assertEqual(inst.mesh_files, ["SpinnerAlphaFloor.gmt"])
+        self.assertEqual(inst.coll_target, "False")
+        self.assertEqual(inst.lod_out, (30.0,))
+        self.assertEqual(info.search_paths, ["UiData\\"])
+
     def test_hdv_parser_corpus(self):
         """.hdv physics: 9 universal sections, 81 universal keys over 156 files."""
         import glob

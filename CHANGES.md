@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 17:00:00 -0500 - rFactor .set camera/scene parser
+- Added `simbin_text_tool.parse_set()` for the 22 CUBEASF `.set` descriptors. Corpus-verified: every file has one `mainview` View and one `FDirect01` Directional Light with `AmbientColor`; 5 have Instance/SearchPath sections. The parser handles multiple key=value pairs per line and dotted filenames. Added 2 regression tests; all 10 simbin text tests pass.
+
 ## 2026-11-24 16:30:00 -0500 - GIF identification
 - `media_tool.identify()` now reports 479 genuine GIF87a/GIF89a files as `gif` with dimensions; JPEG/PNG masquerading as `.gif` are already identified by content. Added corpus assertions; all 59 media tests pass.
 
