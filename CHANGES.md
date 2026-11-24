@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 15:30:00 -0500 - SVM section-name invariant
+- Corpus verification extended: the 15 `.svm` section names are identical between rF1 (517 files) and GTR2 (20,614 files) setups, so rF1→GTR2 setup conversion needs no section renaming — only the header and optional GTR2-only keys differ. Added test assertions.
+
 ## 2026-11-24 15:00:00 -0500 - Scene script identification
 - `media_tool.identify()` now labels 123 `.scr` and 409 `.cin` rFactor scene/cinematic scripts; 14 `.djs` files were confirmed as raw MP3. Added a corpus regression test; all 58 media tests pass.
 

@@ -122,6 +122,8 @@ class SimbinTextToolTest(unittest.TestCase):
         import glob
         rf_keys = set()
         gtr_keys = set()
+        rf_sections = set()
+        gtr_sections = set()
         n_rf = n_gtr = 0
         for p in glob.glob(str(ROOT.parent / "**" / "*.svm"), recursive=True):
             info = stt.parse_svm(Path(p).read_bytes())
@@ -129,14 +131,19 @@ class SimbinTextToolTest(unittest.TestCase):
                 continue
             if info.variant == "rf1":
                 rf_keys |= info.keys
+                rf_sections |= info.sections
                 n_rf += 1
             else:
                 gtr_keys |= info.keys
+                gtr_sections |= info.sections
                 n_gtr += 1
         self.assertGreater(n_rf, 400)
         self.assertGreater(n_gtr, 10000)
         self.assertEqual(len(rf_keys), 77)
         self.assertEqual(rf_keys - gtr_keys, set())
+        # Section names are identical across rF1 and GTR2 setups.
+        self.assertEqual(rf_sections, gtr_sections)
+        self.assertEqual(len(rf_sections), 15)
 
 
 if __name__ == "__main__":
