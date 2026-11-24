@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 16:30:00 -0500 - GIF identification
+- `media_tool.identify()` now reports 479 genuine GIF87a/GIF89a files as `gif` with dimensions; JPEG/PNG masquerading as `.gif` are already identified by content. Added corpus assertions; all 59 media tests pass.
+
 ## 2026-11-24 16:00:00 -0500 - PNG and .veh identification
 - `media_tool.identify()` now reports PNG files (1,640 local, with IHDR metadata) and `.veh` descriptors (2,763) by format; prior sampled survey had shown both classes unidentified. Added a corpus regression test; all 59 media tests pass.
 

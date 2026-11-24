@@ -215,6 +215,11 @@ def identify(path: str | Path) -> MediaInfo:
             else:
                 break
         return MediaInfo(str(p), size, "jpg", details)
+    # GIF87a/GIF89a (little-endian width/height at +6)
+    if b[:6] in (b"GIF87a", b"GIF89a") and len(b) >= 10:
+        w, h = struct.unpack_from("<HH", b, 6)
+        return MediaInfo(str(p), size, "gif", {"width": w, "height": h,
+                                               "version": b[:6].decode("latin-1")})
     # PNG (IHDR: width, height, bit depth, colour type)
     if b.startswith(b"\x89PNG\r\n\x1a\n") and len(b) >= 33:
         w, h, depth, ctype = struct.unpack_from(">IIBB", b, 16)

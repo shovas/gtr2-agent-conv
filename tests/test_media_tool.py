@@ -871,6 +871,15 @@ class MediaToolTest(unittest.TestCase):
         """PNG and .veh descriptors are identified corpus-wide."""
         import glob
         import simbin_text_tool as stt
+        gifs = glob.glob(str(ROOT.parent / "**" / "*.gif"), recursive=True)
+        n_gif = 0
+        for p in gifs:
+            i = media_tool.identify(p)
+            if i.format == "gif":
+                self.assertGreater(i.details["width"], 0)
+                self.assertIn(i.details["version"], ("GIF87a", "GIF89a"))
+                n_gif += 1
+        self.assertGreater(n_gif, 400)  # 479 genuine GIFs; some .gif are JPEG/HTML
         pngs = glob.glob(str(ROOT.parent / "**" / "*.png"), recursive=True)
         self.assertGreater(len(pngs), 1000)
         for p in pngs:
