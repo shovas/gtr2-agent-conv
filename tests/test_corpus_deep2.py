@@ -259,6 +259,49 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertGreater(checked, 7000)
         self.assertGreater(resolved / checked, 0.97)
 
+    def test_race07vanilla_reference_resolution(self):
+        """Race07Vanilla .aud WAV and .car config references resolve."""
+        import glob
+        import os
+        import re
+        base = ROOT.parent / "Race07Vanilla"
+        wavs = {os.path.basename(p).lower()
+                for p in glob.glob(str(base / "**" / "*.wav"), recursive=True)}
+        files = {e: {os.path.basename(p).lower()
+                     for p in glob.glob(str(base / "**" / ("*" + e)), recursive=True)}
+                 for e in (".hdc", ".cas", ".aud", ".cam")}
+        checked = resolved = auds = 0
+        for p in glob.glob(str(base / "**" / "*.aud"), recursive=True):
+            raw = Path(p).read_bytes()
+            self.assertEqual(raw[:4], media_tool.JCA_MAGIC)
+            text = media_tool.decrypt_jca_text(raw).decode("latin-1")
+            auds += 1
+            for _k, v in re.findall(r"(?m)^\s*([A-Za-z_][\w]*)\s*=\s*(.*)$", text):
+                m = re.search(r"([^\\/]+\.wav)$", v.strip().strip('"'), re.I)
+                if m:
+                    checked += 1
+                    resolved += m.group(1).lower() in wavs
+        self.assertEqual(auds, 43)
+        self.assertGreater(checked, 4000)
+        self.assertGreater(resolved / checked, 0.98)
+        cars = refs = ok = 0
+        pattern = r"(?m)^\s*([A-Za-z_][\w]*)\s*=\s*(.*)$"
+        for p in glob.glob(str(base / "**" / "*.car"), recursive=True):
+            raw = Path(p).read_bytes()
+            self.assertEqual(raw[:4], media_tool.JCA_MAGIC)
+            text = media_tool.decrypt_jca_text(raw).decode("latin-1")
+            d = {k.lower(): v.strip().strip('"') for k, v in re.findall(pattern, text)}
+            cars += 1
+            for key, ext in (("hdvehicle", ".hdc"), ("graphics", ".cas"),
+                             ("sounds", ".aud"), ("camera", ".cam")):
+                m = re.search(r"([^\\/]+\.\w+)$", d.get(key, ""), re.I)
+                if m:
+                    refs += 1
+                    ok += m.group(1).lower() in files[ext]
+        self.assertEqual(cars, 335)
+        self.assertEqual(refs, 262)
+        self.assertEqual(ok, refs)
+
     def test_volvo_reference_resolution(self):
         """Volvo (volvo JCA key) .car/.aud references resolve locally."""
         import glob

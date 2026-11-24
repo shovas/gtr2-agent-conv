@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-25 13:00:00 -0500 - Race07Vanilla reference resolution
+- Corpus-verified all 43 JCA-wrapped `.aud` files have 4,783/4,830 WAV refs (99.0%) resolving locally (47 missing Caterham basenames), and all 335 JCA-wrapped `.car` files have 262/262 config refs resolving. Full-tier regression test added.
+
 ## 2026-11-25 12:30:00 -0500 - Volvo .car/.aud reference resolution
 - Corpus-verified all VolvoTheGame configs decrypt with the non-default `volvo` JCA key: 453/483 `.aud` WAV refs (93.8%) resolve, with 10 missing C30 audio basenames; 16/16 `.car` `Include=..\*.inccar` references resolve. Full-tier regression test added.
 
