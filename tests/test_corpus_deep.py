@@ -216,6 +216,25 @@ class CorpusDeepTest(unittest.TestCase):
                 n += 1
             self.assertEqual(n, 20)
 
+    def test_tc2000_superleague_rf1_config_corpus(self):
+        """Shared universal keys in TC2000/Superleague .gdb/.cam/.aiw."""
+        import os
+        import re
+        import media_tool
+        for root in ("TC2000", "SuperleagueFormula2009"):
+            for ext in (".gdb", ".cam", ".aiw"):
+                n = 0
+                for p in glob.glob(str(ROOT.parent / root / "**" / "*"), recursive=True):
+                    if not os.path.isfile(p) or not p.lower().endswith(ext):
+                        continue
+                    text = media_tool.decrypt_jca_text(
+                        Path(p).read_bytes()).decode("latin-1")
+                    keys = set(x.lower() for x in re.findall(
+                        r"(?m)^\s*([A-Za-z_][\w]*)\s*=", text))
+                    self.assertEqual(stt.validate_rf1_config(keys, ext), [], p)
+                    n += 1
+                self.assertGreater(n, 0, f"{root} {ext}")
+
     def test_tc2000_superleague_veh_svm_corpus(self):
         """TC2000/Superleague .veh core keys and TC2000 6-speed .svm keys."""
         import os

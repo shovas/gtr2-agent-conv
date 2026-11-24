@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-25 02:45:00 -0500 - TC2000/Superleague rF1 config validators
+- Added `validate_rf1_config()` with corpus-verified universal key sets shared across TC2000 and Superleague: `.gdb` 28 keys, `.cam` 10, `.aiw` 70 (plus 7 universal sections). 0 validation problems across 95 files; full-tier regression test added.
+
 ## 2026-11-25 02:30:00 -0500 - TC2000/Superleague config family validators
 - Added `validate_veh_core()` / `validate_svm_tc2000()` corpus-verified key sets: TC2000 `.veh` 26/26 keys universal (36 files), Superleague `.veh` 22 universal (19 files), TC2000 `.svm` 15 universal 6-speed keys (12 files), all 0 validation problems. Added a full-tier regression test.
 

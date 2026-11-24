@@ -719,6 +719,20 @@ def validate_grb(info: GrbInfo) -> list[str]:
     return problems
 
 
+RF1_GDB_CORE_KEYS = frozenset(("attrition", "dayambientrgb", "daydirectionalrgb", "dayfogrgb", "eventname", "garagedepth", "grandprixname", "latitude", "length", "location", "nightambientrgb", "nightdirectionalrgb", "nightfogrgb", "northdirection", "racedate", "settingsai", "settingsfolder", "shadowminsunangle", "sunriseambientrgb", "sunrisedirectionalrgb", "sunrisefogrgb", "sunsetambientrgb", "sunsetdirectionalrgb", "sunsetfogrgb", "terraindatafile", "trackname", "tracktype", "venuename", ))
+RF1_CAM_CORE_KEYS = frozenset(("center", "clear", "clipplanes", "color", "flags1", "flags2", "fov", "lodmultiplier", "mipmaplodbias", "size", ))
+RF1_AIW_CORE_KEYS = frozenset(("aibrakingstiffness", "aidraftstickiness", "airange", "aispec", "autogenaltgrid", "autogengrid", "auxspots", "bestadjust", "delaypitcrewload", "drivinglines", "fogdensity", "fueluse", "garagespots", "garori", "garpos", "gridindex", "grooveheightoffset", "groovewidth", "groovewidthwet", "intermediatefogcolor", "intermediatefoglevel", "intermediatefogplanes", "lanespacing", "lap_length", "lefthandedpits", "locationindex", "midadjust", "multilinetimes", "number_waypoints", "ori", "pitlanepaths", "pitlanes", "pitori", "pitpos", "pitspots", "pos", "rainydarkness", "rainyfogcolor", "rainyfogplanes", "safetycarreleasedist", "sector_1_length", "sector_2_length", "slowwhenpushed", "startinggrid", "teamindex", "teleportwp", "times", "trackstate", "ultracarefulyellow", "worstadjust", "wp_bitfields", "wp_branchid", "wp_cheat", "wp_dwidth", "wp_galpha", "wp_groove_lat", "wp_lockedalpha", "wp_lockedlats", "wp_multipathlat", "wp_normal", "wp_path", "wp_perp", "wp_pitlane", "wp_pos", "wp_ptrs", "wp_score", "wp_test_speed", "wp_vect", "wp_width", "wp_wpse", ))
+
+
+def validate_rf1_config(keys: set[str], ext: str) -> list[str]:
+    """Validate universal keys of an rF1-era .gdb/.cam/.aiw config."""
+    needed = {".gdb": RF1_GDB_CORE_KEYS, ".cam": RF1_CAM_CORE_KEYS,
+              ".aiw": RF1_AIW_CORE_KEYS}.get(ext)
+    if needed is None:
+        raise ValueError(f"unsupported config extension {ext}")
+    return [f"missing {ext} key {key}" for key in sorted(needed) if key not in keys]
+
+
 VEH_CORE_KEYS = frozenset((
     "cameras", "category", "classes", "cockpit", "defaultlivery", "description",
     "driver", "engine", "fullteamname", "genstring", "graphics", "hdvehicle",
