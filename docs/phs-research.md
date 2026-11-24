@@ -65,6 +65,7 @@ New angles tried that were not in the first investigation:
 | ISI crypt forced enctype 0/1, skips 0..64 | best printability 0.427 (from 0.384), entropy still ~7.8 — no valid decrypt | **Excluded** as a simple ISI-crypt payload |
 | PAR2 slice reconstruction: search all four sibling PHS files for PHYSICS.PHS's first 64 bytes | no match; PHYSICS.PHS also lacks the PAR2 set id and `PAR2\0PKT` magic; the `GTL_Update_0901.exe` target is not present locally | **Unverifiable offline** — needs the update executable or a full slice set |
 | 256/512-byte record stride on PHYSICS.PHS (13,064 bytes) | no repeating header prefix; 8-/264-byte tails | **No structure found** |
+| Raw-deflate brute force at **every** byte offset 0..13,061 (wbits -15/31/47) | only 3 tiny decompressions (317/109/139 bytes) yielding repetitive garbage (`c7 c7...`, `<<<<...`) | **Excluded** as a deflate/zlib stream anywhere in the blob |
 | PAR2 slice-exponent probe | sibling `RecvSlic` bodies start with a small u32 exponent (53/58/59) then 384,000 bytes of slice data; PHYSICS.PHS starts with u32 1,615,901,797 | **Excluded** as a bare PAR2 recovery slice (no plausible exponent) |
 
 Excluded by this pass: a literal PAR2-aware loader in the GTL binaries; a feasible
