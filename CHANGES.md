@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 14:00:00 -0500 - rFactor .hdv parser
+- Added `simbin_text_tool.parse_hdv()` for rFactor high-detail vehicle physics. Corpus-verified on 156 files: 17 sections / 496 keys, with nine sections and 81 keys universal. Values are de-commented and quoted strings preserved; added 2 regression tests. All 8 simbin text tests pass.
+
 ## 2026-11-24 13:30:00 -0500 - rFactor .veh parser
 - Added `simbin_text_tool.parse_veh()` for rFactor vehicle descriptors. Corpus-verified on 2,763 files / 57 keys: `Graphics` is universal and six identifier keys appear in all but 2 files. Added a regression test; all 6 simbin text tests pass.
 

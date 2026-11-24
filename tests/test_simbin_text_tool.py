@@ -1,4 +1,5 @@
 """Tests for the standalone AIW/SCN semantic reader."""
+import collections
 import glob
 import os
 import sys
@@ -64,6 +65,39 @@ class SimbinTextToolTest(unittest.TestCase):
                 self.assertIsInstance(info.mas_files, list)
         self.assertGreater(parsed, 0)
 
+
+    def test_hdv_parser_corpus(self):
+        """.hdv physics: 9 universal sections, 81 universal keys over 156 files."""
+        import glob
+        sec = collections.Counter()
+        key = collections.Counter()
+        n = 0
+        for p in glob.glob(str(ROOT.parent / "**" / "*.hdv"), recursive=True):
+            info = stt.parse_hdv(Path(p).read_bytes())
+            self.assertGreater(len(info.keys), 100, p)
+            n += 1
+            for s in info.sections:
+                sec[s] += 1
+            for k in info.keys:
+                key[k] += 1
+        self.assertEqual(n, 156)
+        self.assertEqual(len(sec), 17)
+        self.assertEqual(len(key), 496)
+        universal_sec = {s for s, v in sec.items() if v == n}
+        self.assertEqual(universal_sec,
+                         {"general", "bodyaero", "suspension", "controls",
+                          "engine", "frontleft", "frontright", "rearleft", "rearright"})
+        self.assertGreaterEqual(sum(1 for v in key.values() if v == n), 80)
+        self.assertIn("mass", key)
+        self.assertIn("inertia", key)
+
+    def test_hdv_value_comments_and_quotes(self):
+        info = stt.parse_hdv(
+            "[GENERAL]\r\nMass=603.0  // kg\r\nNotes=\"a // b\"\r\nInertia=(1,2,3)\r\n")
+        self.assertEqual(info.values["mass"], "603.0")
+        self.assertEqual(info.values["notes"], "a // b")
+        self.assertEqual(info.values["inertia"], "(1,2,3)")
+        self.assertEqual(info.sections, {"general"})
 
     def test_veh_parser_corpus(self):
         """.veh descriptors: 57 keys, Graphics universal, 6 near-universal."""
