@@ -17,7 +17,7 @@ Cross-corpus check: `simbin_events_tool.find_frame_grid()` detects the 63-byte f
 
 ## GTTF slots 28/36/40 kinematic hypotheses (2026-11-25)
 
-Using ccgepmonitor's documented GTR2 runtime ranges as a guide, slots +28/+36/+40 were correlated against speed and longitudinal acceleration across all 29 files: median r ≈ 0 for every combination, max |r| ≤ 0.08, no file above 0.5. These slots are not speed or acceleration signals under any simple linear or sign-flipped interpretation. Combined with earlier quadratic/quantization/exclusion results, they remain uninterpreted.
+Using ccgepmonitor's documented GTR2 runtime ranges as a guide, slots +28/+36/+40 were correlated against speed and longitudinal acceleration across all 29 files: median r ≈ 0 for every combination, max |r| ≤ 0.08, no file above 0.5. These slots are not speed or acceleration signals under any simple linear or sign-flipped interpretation. The 24-bit integer at +32 was also tested against cumulative lap distance (ccgepmonitor `mLapDist` semantics): median r=-0.05, max 0.254, no file above 0.9 — not a lap-distance field. Combined with earlier quadratic/quantization/exclusion results, they remain uninterpreted.
 
 ## GTTF field +16 pitch hypothesis (2026-11-25)
 
