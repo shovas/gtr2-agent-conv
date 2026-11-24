@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-25 20:30:00 -0500 - SCGT text .ani parser
+- Added `simbin_text_tool.parse_ani_text()` and `validate_ani_text()` for SCGT's CRLF text animation-rule format (distinct from binary ANM). Corpus-verified on the single shipped `.ani` member: 12 rule blocks with matching frame counts, in-range sequences, positive rates and known methods. Full-tier regression test added.
+
 ## 2026-11-25 20:00:00 -0500 - SCGT .prt validator
 - Added `simbin_text_tool.validate_prt()` with a full-tier regression test over all 5 Sports Car GT `.prt` members (CRLF ASCII, balanced braces, key/value lines). Documented that none of their 977 ObjFile object names resolve to shipped content.
 

@@ -103,6 +103,8 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 
 - **SCGT `.prt` scenes**: `simbin_text_tool.validate_prt()` checks all 5 archived Sports Car GT `.prt` files (CRLF ASCII, balanced braces, `Key=...` lines; 940 instances / 977 ObjFile refs). Full-tier regression test. Object names do not resolve to shipped content and are documented as stale editor IDs.
 
+- **SCGT text `.ani` rules**: `simbin_text_tool.parse_ani_text()` / `validate_ani_text()` parse CRLF text animation rule blocks (name, base, frames, sequence, method, rate). Corpus-verified on the single shipped member (12 rules, all invariants clean); full-tier regression test. Binary `anm_format.read_anm()` does not apply to this text format.
+
 ## Coverage gaps (documented, not yet addressed)
 - **GTR 2004 corpus** (`../GTR1Vanilla`, third GMT magic `...bba6bf90` at 0x04) is fully decoded by `gmt_semantic.py` (descriptor grid + descriptor-less object-mesh path; 33,477/33,477 files). `gmt_format.py` itself still targets the GTL/GTR2 layout only; use `gmt_semantic.py` for GTR1. See `docs/binary-formats.md`.
 - **Untested ISI signatures**: `isi_crypt.GAMES` supports 8 signatures but real corpora exist only for rFactor and Game Stock Car; ARCA Sim Racing, Simulador Turismo Carretera, Top Race 2009, Superleague Formula, STC 2012 and Formula Truck have no local corpus.

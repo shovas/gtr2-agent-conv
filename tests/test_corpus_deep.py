@@ -108,6 +108,26 @@ class CorpusDeepTest(unittest.TestCase):
         self.assertGreater(subs, 15)
         self.assertGreater(faces, 10)
 
+    def test_scgt_text_ani_corpus(self):
+        """The SCGT text .ani member parses into valid animation rules."""
+        import glob
+        import simbin_text_tool as stt_local
+        n = 0
+        for arc in glob.glob(str(ROOT.parent / "SportsCarGtUsa" / "**" / "*.mas"),
+                             recursive=True):
+            try:
+                _, entries = mas_tool.read_archive(arc)
+            except Exception:
+                continue
+            for e in entries:
+                if not e.name.lower().endswith(".ani") or not e.data:
+                    continue
+                rules = stt_local.parse_ani_text(e.data)
+                self.assertEqual(stt_local.validate_ani_text(rules), [], e.name)
+                self.assertEqual(len(rules), 12)
+                n += 1
+        self.assertEqual(n, 1)
+
     def test_scgt_prt_corpus(self):
         """All SCGT .prt members are well-formed CRLF text scenes."""
         import glob

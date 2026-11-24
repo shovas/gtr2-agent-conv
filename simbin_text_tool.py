@@ -889,6 +889,55 @@ def validate_svm_tc2000(keys: set[str]) -> list[str]:
             if key not in keys]
 
 
+def parse_ani_text(data: bytes) -> list[dict]:
+    """Parse a plain-text Sports Car GT ``.ani`` animation rule file.
+
+    Unlike binary ANM files, SCGT ``ANI.ANI`` is CRLF text containing named
+    rule blocks. Corpus-verified on the single shipped member (12 rules).
+    """
+    text = data.decode("latin-1")
+    rules = []
+    block_re = re.compile(r"(?ms)^\s*AnimRuleName=(\S+)\s*\r?\n\s*\{(.*?)\r?\n\s*\}")
+    for name, body in block_re.findall(text):
+        fields = dict(re.findall(r"(\w+)\s*=\s*([^\r\n]+)", body))
+        frames_m = re.search(r"\((\d+)\)", fields.get("AnimFrames", ""))
+        seq_m = re.search(r"\(([^)]*)\)", fields.get("AnimSequence", ""))
+        rate_m = re.search(r"\(([-\d.]+)\)", fields.get("AnimRate", ""))
+        rules.append({
+            "name": name,
+            "base": fields.get("AnimBaseName", "").strip(),
+            "frames": int(frames_m.group(1)) if frames_m else None,
+            "sequence": [int(x) for x in re.findall(r"-?\d+", seq_m.group(1))]
+            if seq_m else [],
+            "method": fields.get("AnimMethod", "").strip(),
+            "rate": float(rate_m.group(1)) if rate_m else None,
+        })
+    return rules
+
+
+def validate_ani_text(rules: list[dict]) -> list[str]:
+    """Check corpus-verified invariants of a text ANI rule list."""
+    problems: list[str] = []
+    if not rules:
+        return ["no animation rules"]
+    for rule in rules:
+        label = rule["name"]
+        if any(rule[k] is None or rule[k] == "" for k in ("base", "frames", "rate", "method")):
+            problems.append(f"{label}: missing required field")
+            continue
+        if rule["base"] != label:
+            problems.append(f"{label}: base name mismatch")
+        if rule["frames"] != len(rule["sequence"]):
+            problems.append(f"{label}: frame count != sequence length")
+        if any(not 0 <= i < rule["frames"] for i in rule["sequence"]):
+            problems.append(f"{label}: sequence index out of range")
+        if rule["rate"] <= 0:
+            problems.append(f"{label}: non-positive rate")
+        if rule["method"] not in ("manual", "transient"):
+            problems.append(f"{label}: unknown method {rule['method']}")
+    return problems
+
+
 def validate_prt(data: bytes) -> list[str]:
     """Check corpus-verified structure of a Sports Car GT ``.prt`` scene.
 
