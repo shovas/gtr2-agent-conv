@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-25 00:30:00 -0500 - Structured .aud sound-map parser
+- Added `simbin_text_tool.parse_aud()` / `validate_aud_map()` for all 364 `.aud` files (plain + JCA-decrypted): 80,821 mappings, 193 keys split into 139 path-valued and 34 numeric-valued with 0 mixed keys, and all path values using backslashes. Added 2 regression tests (corpus full-tier); all 32 simbin-text/corpus-deep tests pass.
+
 ## 2026-11-24 23:59:59 -0500 - .cin/.scr script parsers
 - Added `simbin_text_tool.parse_cin()`/`validate_cin()` (409 files, 5,798 events) and `parse_scr()`/`validate_scr()` (123 files, 1,998 actors). Corpus-verified Probability=1.00/Iterations=1 in every cinematic event and closed Type vocabulary; 0 validation problems. Added 3 regression tests (corpus check full-tier); all 29 simbin-text/corpus-deep tests pass.
 

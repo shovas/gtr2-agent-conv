@@ -81,6 +81,19 @@ class SimbinTextToolTest(unittest.TestCase):
         self.assertEqual(info.stamps, ["Detail.tga"])
         self.assertEqual(info.decals, ["Small"])
 
+    def test_aud_sound_map_fixture(self):
+        """.aud keys are consistently path- or numeric-valued."""
+        sample = ("VS_INSIDE_COAST_ENGINE_1=GTR\\engine.wav\n"
+                  "MinimumRPM=1000\n"
+                  "VS_OUTSIDE_SHIFT_1=1.20,Mini\\shift_1\n")
+        info = stt.parse_aud(sample)
+        self.assertEqual(info.path_keys,
+                         {"vs_inside_coast_engine_1", "vs_outside_shift_1"})
+        self.assertEqual(info.numeric_keys, {"minimumrpm"})
+        self.assertEqual(stt.validate_aud_map(info), [])
+        mixed = sample + "MinimumRPM=GTR\\x.wav\n"
+        self.assertTrue(stt.validate_aud_map(stt.parse_aud(mixed)))
+
     def test_cin_script_fixture(self):
         """.cin events parse with Probability/Iterations invariants."""
         sample = ("PreRacePresentation\n{\nCinematicEvent\n{\n"

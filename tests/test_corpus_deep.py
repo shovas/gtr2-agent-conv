@@ -94,6 +94,18 @@ class CorpusDeepTest(unittest.TestCase):
         self.assertEqual(rf_sections, gtr_sections)
         self.assertEqual(len(rf_sections), 15)
 
+    def test_aud_sound_map_corpus(self):
+        """All .aud files (plain + JCA) have no mixed path/numeric keys."""
+        import glob
+        import media_tool
+        n = 0
+        for p in glob.glob(str(ROOT.parent / "**" / "*.aud"), recursive=True):
+            info = stt.parse_aud(
+                media_tool.decrypt_jca_text(Path(p).read_bytes()))
+            self.assertEqual(stt.validate_aud_map(info), [], p)
+            n += 1
+        self.assertEqual(n, 364)
+
     def test_gdb_car_corpus(self):
         """Generic .gdb/.car parsing: 1,287 + 3,385 files all valid."""
         import glob

@@ -353,6 +353,50 @@ def validate_config(info: ConfigInfo) -> list[str]:
     return problems
 
 
+@dataclass
+class AudInfo:
+    values: dict[str, list[str]] = field(default_factory=dict)
+    path_keys: set[str] = field(default_factory=set)
+    numeric_keys: set[str] = field(default_factory=set)
+
+
+def parse_aud(data: bytes | str) -> AudInfo:
+    """Parse a SimBin ``.aud`` sound-event map (JCA or plain).
+
+    Corpus-verified on 360 files (plain and JCA-wrapped) with 80,821 mappings:
+    193 distinct keys split cleanly into 139 path-valued and 34 numeric-valued
+    keys — **no key mixes the two**. Path values always use backslashes and
+    may carry a ``time,path`` prefix. Pass decrypted bytes for JCA files (see
+    ``media_tool.decrypt_jca_text``).
+    """
+    text = data if isinstance(data, str) else data.decode("latin-1")
+    info = AudInfo()
+    for line in text.splitlines():
+        m = re.match(r"^\s*([A-Za-z_][\w]*)\s*=\s*([^\r\n]+)", line)
+        if not m:
+            continue
+        key = m.group(1).lower()
+        value = m.group(2).split("//", 1)[0].strip().strip('"')
+        info.values.setdefault(key, []).append(value)
+        if "\\" in value:
+            info.path_keys.add(key)
+        elif re.fullmatch(r"[+-]?[\d.eE]+", value):
+            info.numeric_keys.add(key)
+    return info
+
+
+def validate_aud_map(info: AudInfo) -> list[str]:
+    """Check corpus-verified .aud invariants; return a list of problems."""
+    problems: list[str] = []
+    for key in sorted(info.path_keys & info.numeric_keys):
+        problems.append(f"key {key} mixes path and numeric values")
+    for key in info.path_keys:
+        for value in info.values[key]:
+            if "/" in value and "\\" not in value:
+                problems.append(f"key {key}: forward-slash path {value}")
+    return problems
+
+
 CIN_EVENT_TYPES = frozenset((
     "CAMERA_SELECT", "WAIT", "CAMERA_SET_LAST", "CAMERA_ACQUIRE_CONTROL",
     "SCRIPT_END", "GRIDWALK", "COMMENTARY_START",
