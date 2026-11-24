@@ -867,6 +867,17 @@ class MediaToolTest(unittest.TestCase):
             self.assertEqual(a.rgba[3], 255)
 
 
+    def test_rfactor_gen_identification(self):
+        """All .gen vehicle-graphics descriptors are identified."""
+        import glob
+        import simbin_text_tool as stt
+        n = 0
+        for p in glob.glob(str(ROOT.parent / "**" / "*.gen"), recursive=True):
+            self.assertEqual(media_tool.identify(p).format, "rfactor-gen", p)
+            stt.parse_scn(stt.read_text(p))  # same key family as .scn
+            n += 1
+        self.assertGreater(n, 250)
+
     def test_cubeasf_family_identification(self):
         """Plain CUBEASF scene files (.scn/.clf/.set/.trk) are identified."""
         import glob

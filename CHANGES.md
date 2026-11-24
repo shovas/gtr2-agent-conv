@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 14:30:00 -0500 - rFactor .gen identification
+- `media_tool.identify()` now labels all 294 `.gen` vehicle-graphics descriptors and they all parse with `simbin_text_tool.parse_scn()`. Added a corpus regression test; all 57 media tests pass.
+
 ## 2026-11-24 14:00:00 -0500 - rFactor .hdv parser
 - Added `simbin_text_tool.parse_hdv()` for rFactor high-detail vehicle physics. Corpus-verified on 156 files: 17 sections / 496 keys, with nine sections and 81 keys universal. Values are de-commented and quoted strings preserved; added 2 regression tests. All 8 simbin text tests pass.
 

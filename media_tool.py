@@ -260,6 +260,9 @@ def identify(path: str | Path) -> MediaInfo:
     if b.startswith(b"CUBEASF"):
         return MediaInfo(str(p), size, "cubeasf", {"family": "rFactor scene",
                                                    "extension": ext})
+    # rFactor .gen vehicle-graphics descriptor (same key family as .scn)
+    if ext == ".gen" and (b"MeshFile=" in b[:8192] or b"MASFile=" in b[:8192]):
+        return MediaInfo(str(p), size, "rfactor-gen", {"extension": ext})
     # .svm car setups: rF1 uses a gMa header, GTR2 plain [GENERAL]/[CONTROLS]
     # sections, and a few shipped files have an encrypted gMb payload.
     if ext == ".svm":
