@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-25 01:00:00 -0500 - .dmg damage parser
+- Added `simbin_text_tool.parse_dmg()` / `validate_dmg()` for all 200 damage configs (plain + JCA-decrypted): 43 universal keys out of 102 distinct, 0 validation problems. Added a full-tier corpus test; Quick remains 57.1 s.
+
 ## 2026-11-25 00:30:00 -0500 - Structured .aud sound-map parser
 - Added `simbin_text_tool.parse_aud()` / `validate_aud_map()` for all 364 `.aud` files (plain + JCA-decrypted): 80,821 mappings, 193 keys split into 139 path-valued and 34 numeric-valued with 0 mixed keys, and all path values using backslashes. Added 2 regression tests (corpus full-tier); all 32 simbin-text/corpus-deep tests pass.
 

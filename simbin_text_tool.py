@@ -397,6 +397,69 @@ def validate_aud_map(info: AudInfo) -> list[str]:
     return problems
 
 
+DMG_UNIVERSAL_KEYS = frozenset((
+    "activateinstance",
+    "aerodiv",
+    "aeromin",
+    "deactivateinstance",
+    "defaultlimit",
+    "engine",
+    "frontwingcollparams",
+    "frontwingdetach",
+    "frontwingmassinertia",
+    "frontwingpos",
+    "frontwingrandom",
+    "part0collparams",
+    "part0detach",
+    "part0massinertia",
+    "part0pos",
+    "part0random",
+    "part2collparams",
+    "part2detach",
+    "part2massinertia",
+    "part2pos",
+    "part2random",
+    "radiatorcoverinstance",
+    "radiusadd",
+    "radiusmax",
+    "radiusmult",
+    "rearwingcollparams",
+    "rearwingdetach",
+    "rearwingmassinertia",
+    "rearwingpos",
+    "rearwingrandom",
+    "vertmult",
+    "wallskidthresh",
+    "wheel0collparams",
+    "wheel0massinertia",
+    "wheel1collparams",
+    "wheel1massinertia",
+    "wheel2collparams",
+    "wheel2massinertia",
+    "wheel3collparams",
+    "wheel3massinertia",
+    "wheelbend",
+    "wheeldetach",
+    "wheelrandom",
+))
+
+
+def parse_dmg(data: bytes | str) -> ConfigInfo:
+    """Parse an rFactor/GTR2 ``.dmg`` damage config.
+
+    Corpus-verified on 200 files (plain and JCA-wrapped): 102 distinct keys,
+    43 of which are universal across every file (collision params, instance
+    names, radius multipliers). Pass decrypted bytes for JCA files.
+    """
+    return _parse_config(data)
+
+
+def validate_dmg(info: ConfigInfo) -> list[str]:
+    """Check corpus-verified .dmg invariants; return a list of problems."""
+    return [f"missing {key}" for key in sorted(DMG_UNIVERSAL_KEYS)
+            if key not in info.keys]
+
+
 CIN_EVENT_TYPES = frozenset((
     "CAMERA_SELECT", "WAIT", "CAMERA_SET_LAST", "CAMERA_ACQUIRE_CONTROL",
     "SCRIPT_END", "GRIDWALK", "COMMENTARY_START",

@@ -94,6 +94,19 @@ class CorpusDeepTest(unittest.TestCase):
         self.assertEqual(rf_sections, gtr_sections)
         self.assertEqual(len(rf_sections), 15)
 
+    def test_dmg_parser_corpus(self):
+        """All 200 .dmg files carry the 43 universal damage keys."""
+        import glob
+        import media_tool
+        n = 0
+        for p in glob.glob(str(ROOT.parent / "**" / "*.dmg"), recursive=True):
+            info = stt.parse_dmg(
+                media_tool.decrypt_jca_text(Path(p).read_bytes()))
+            self.assertEqual(stt.validate_dmg(info), [], p)
+            n += 1
+        self.assertEqual(n, 200)
+        self.assertEqual(len(stt.DMG_UNIVERSAL_KEYS), 43)
+
     def test_aud_sound_map_corpus(self):
         """All .aud files (plain + JCA) have no mixed path/numeric keys."""
         import glob
