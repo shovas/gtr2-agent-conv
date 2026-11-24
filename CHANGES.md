@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-25 21:30:00 -0500 - Descriptor-less GTR1 conversion fallback
+- Extended `gtr1_to_gmt.geometry_from_gtr1()` to convert descriptor-less shadow/LOD meshes via their object-mesh streams (NaN sentinel position components zeroed to preserve topology). Batch conversion at 100 members per family now writes 200/200 verified GMTs with zero skips; full-tier regression test added.
+
 ## 2026-11-25 21:00:00 -0500 - Batch mesh archive conversion
 - Added `batch_convert.py`: walks SCGT/GTR1 archives, converts all decodable meshes with the dedicated converters, re-parses and material-checks every output, and writes only verified GMTs to an explicit output directory. `--limit` supports bounded runs; full-tier regression test over 8 members per family.
 

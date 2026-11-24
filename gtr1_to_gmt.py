@@ -24,7 +24,20 @@ def geometry_from_gtr1(data: bytes) -> tuple[list, list, list] | None:
     """Return (positions, normals, triangles) from all GTR1 descriptors."""
     descriptors = gmt_semantic.read_gtr1_geometry(data)
     if not descriptors:
-        return None
+        # Descriptor-less GTR1 meshes (e.g. shadow/LOD objects) carry an
+        # rF1-style object mesh instead: 32-byte positions + u16 triangles.
+        obj = gmt_semantic.read_gtr1_object_mesh(data)
+        if not obj or not obj["positions"] or not obj["triangles"]:
+            return None
+        # Some object-mesh records contain NaN sentinel components; zero them
+        # rather than dropping vertices, which would break triangle topology.
+        positions = [tuple(0.0 if not math.isfinite(x) else x for x in pos[:3])
+                     for pos in obj["positions"]]
+        triangles = [tuple(t) for t in obj["triangles"]
+                     if len(set(t)) == 3 and max(t) < len(positions)]
+        if not positions or not triangles:
+            return None
+        return positions, vrl_to_gmt._normals(positions, triangles), triangles
     positions: list = []
     normals: list = []
     triangles: list = []

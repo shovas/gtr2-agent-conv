@@ -10,6 +10,7 @@ directory. Game data is never copied into this repository.
 from __future__ import annotations
 
 import argparse
+import struct
 from pathlib import Path
 
 import gmt_format
@@ -42,37 +43,60 @@ def archive_members(root: Path, extension: str):
                 yield arc, entry
 
 
-def convert_member(kind: str, data: bytes, template: bytes, name: str) -> bytes | None:
+def convert_member(kind: str, data: bytes, template: bytes, name: str,
+                   reasons: dict[str, int] | None = None) -> bytes | None:
     """Convert and verify one member; return GMT bytes or None when skipped."""
+    def skip(reason: str) -> None:
+        if reasons is not None:
+            reasons[reason] = reasons.get(reason, 0) + 1
+
     if kind == "vrl":
         vrl = stt.read_vrl(data)
         if not vrl or vrl["vertex_count"] == 0:
+            skip("no_vrl_geometry")
             return None
-        output = vrl_to_gmt.vrl_to_gmt(vrl, template)
+        try:
+            output = vrl_to_gmt.vrl_to_gmt(vrl, template)
+        except (ValueError, struct.error) as exc:
+            skip(f"vrl_build:{type(exc).__name__}:{exc}")
+            return None
         problems = vrl_to_gmt.verify_gmt(output, vrl)
     else:
         geometry = gtr1_to_gmt.geometry_from_gtr1(data)
         if geometry is None:
+            skip("no_gtr1_geometry")
             return None
         positions, normals, triangles = geometry
-        output = gtr1_to_gmt.gtr1_to_gmt(data, template)
+        try:
+            output = gtr1_to_gmt.gtr1_to_gmt(data, template)
+        except (ValueError, struct.error) as exc:
+            skip(f"gtr1_build:{type(exc).__name__}:{exc}")
+            return None
         problems = vrl_to_gmt.verify_gmt_geometry(output, positions, triangles, normals)
-    problems.extend(validate_materials.check_gmt(output, name))
-    return None if problems else output
+    material_problems = validate_materials.check_gmt(output, name)
+    problems.extend(material_problems)
+    if problems:
+        skip(f"verify:{problems[0] if not material_problems else 'material:' + material_problems[0]}")
+        return None
+    if reasons is not None:
+        reasons["ok"] = reasons.get("ok", 0) + 1
+    return output
 
 
 def batch_convert(template: bytes, out_dir: Path, limit: int = 0,
-                  roots: dict[str, Path] | None = None) -> dict:
+                  roots: dict[str, Path] | None = None,
+                  reasons: dict[str, int] | None = None) -> dict:
     """Convert up to ``limit`` members per family; return a report."""
     roots = roots or DEFAULT_ROOTS
     out_dir.mkdir(parents=True, exist_ok=True)
     report: dict[str, int] = {}
+    reasons = reasons if reasons is not None else {}
     for kind, ext in (("vrl", ".vrl"), ("gtr1", ".gmt")):
         target = out_dir / kind
         target.mkdir(exist_ok=True)
         scanned = written = 0
         for arc, entry in archive_members(Path(roots[kind]), ext):
-            data = convert_member(kind, entry.data, template, entry.name)
+            data = convert_member(kind, entry.data, template, entry.name, reasons)
             scanned += 1
             if data is not None:
                 safe = arc.stem + "_" + Path(entry.name).stem + ".gmt"
@@ -93,9 +117,12 @@ def main(argv=None) -> int:
     args = ap.parse_args(argv)
     template = Path(args.template).read_bytes()
     gmt_format.parse_gmt("template.gmt", data=template)  # fail early on bad template
-    report = batch_convert(template, Path(args.out), args.limit)
+    reasons: dict[str, int] = {}
+    report = batch_convert(template, Path(args.out), args.limit, reasons=reasons)
     for key, value in report.items():
         print(f"{key}={value}")
+    for reason, count in sorted(reasons.items(), key=lambda kv: -kv[1]):
+        print(f"reason[{reason}]={count}")
     return 0
 
 

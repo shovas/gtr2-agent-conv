@@ -288,6 +288,44 @@ class CorpusDeepTest(unittest.TestCase):
                 self.assertGreater(len(gmt_format.parse_gmt(f).meshes), 0, f.name)
                 self.assertEqual(validate_materials.check_gmt(data, f.name), [], f.name)
 
+    def test_gtr1_descriptorless_fallback(self):
+        """Descriptor-less GTR1 shadow meshes convert via object-mesh streams."""
+        import glob
+        import gmt_format
+        import gtr1_to_gmt
+        import mas_tool
+        import vrl_to_gmt
+        template = None
+        for q in glob.glob(str(ROOT.parent / "GTR2Steam" / "**" / "*.gmt"),
+                           recursive=True)[:500]:
+            try:
+                if gmt_format.parse_gmt(q).meshes:
+                    template = Path(q).read_bytes()
+                    break
+            except Exception:
+                continue
+        self.assertIsNotNone(template)
+        found = 0
+        for arc in glob.glob(str(ROOT.parent / "GTR1Vanilla" / "**" / "*.gtr"),
+                             recursive=True)[:6]:
+            try:
+                _, entries = mas_tool.read_archive(arc)
+            except Exception:
+                continue
+            for e in entries:
+                if e.name != "ARMCOSHAD01.GMT" or not e.data:
+                    continue
+                geometry = gtr1_to_gmt.geometry_from_gtr1(e.data)
+                self.assertIsNotNone(geometry)
+                positions, normals, triangles = geometry
+                self.assertGreater(len(positions), 20)
+                self.assertGreater(len(triangles), 20)
+                data = gtr1_to_gmt.gtr1_to_gmt(e.data, template)
+                self.assertEqual(vrl_to_gmt.verify_gmt_geometry(
+                    data, positions, triangles, normals), [], e.name)
+                found += 1
+        self.assertEqual(found, 1)
+
     def test_gtr1_to_gtr2_gmt_roundtrip(self):
         """Converted GTR1 third-magic GMTs reparse as valid GTR2 GMTs."""
         import glob
