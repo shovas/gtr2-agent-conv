@@ -867,6 +867,16 @@ class MediaToolTest(unittest.TestCase):
             self.assertEqual(a.rgba[3], 255)
 
 
+    def test_rfactor_scene_scripts_identification(self):
+        """.scr and .cin scene scripts are identified."""
+        import glob
+        for ext, fmt in ((".scr", "rfactor-scr"), (".cin", "rfactor-cin")):
+            n = 0
+            for p in glob.glob(str(ROOT.parent / "**" / ("*" + ext)), recursive=True):
+                self.assertEqual(media_tool.identify(p).format, fmt, p)
+                n += 1
+            self.assertGreater(n, 100)
+
     def test_rfactor_gen_identification(self):
         """All .gen vehicle-graphics descriptors are identified."""
         import glob

@@ -260,6 +260,11 @@ def identify(path: str | Path) -> MediaInfo:
     if b.startswith(b"CUBEASF"):
         return MediaInfo(str(p), size, "cubeasf", {"family": "rFactor scene",
                                                    "extension": ext})
+    # rFactor scene scripts: .scr (Actor/Mesh blocks), .cin (CinematicEvent)
+    if ext == ".scr" and b"Actor" in b[:8192]:
+        return MediaInfo(str(p), size, "rfactor-scr", {"extension": ext})
+    if ext == ".cin" and b"CinematicEvent" in b[:16384]:
+        return MediaInfo(str(p), size, "rfactor-cin", {"extension": ext})
     # rFactor .gen vehicle-graphics descriptor (same key family as .scn)
     if ext == ".gen" and (b"MeshFile=" in b[:8192] or b"MASFile=" in b[:8192]):
         return MediaInfo(str(p), size, "rfactor-gen", {"extension": ext})

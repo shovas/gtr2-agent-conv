@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 15:00:00 -0500 - Scene script identification
+- `media_tool.identify()` now labels 123 `.scr` and 409 `.cin` rFactor scene/cinematic scripts; 14 `.djs` files were confirmed as raw MP3. Added a corpus regression test; all 58 media tests pass.
+
 ## 2026-11-24 14:30:00 -0500 - rFactor .gen identification
 - `media_tool.identify()` now labels all 294 `.gen` vehicle-graphics descriptors and they all parse with `simbin_text_tool.parse_scn()`. Added a corpus regression test; all 57 media tests pass.
 
