@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-25 04:30:00 -0500 - Lexus config corpus validation
+- Corpus-verified LexusIsfTrackTime configs: 11 `.veh` (27 universal keys), 5 `.scn`, 5 `.cam` all parse with existing rules; full-tier regression test added.
+
 ## 2026-11-25 04:15:00 -0500 - RaceRoom FXM corpus validation
 - Corpus-verified all 91 RaceRoom `.fxm`/`.fxa`/`.lma` files decode with existing parsers and the 1/3 `key_count` invariant (3,114 nodes). Added a full-tier regression test.
 

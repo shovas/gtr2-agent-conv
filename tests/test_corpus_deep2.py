@@ -34,6 +34,34 @@ def _anm_samples(root, limit=None):
 
 class CorpusDeep2Test(unittest.TestCase):
 
+    def test_lexus_configs_corpus(self):
+        """LexusIsfTrackTime .veh/.scn/.cam parse with existing rules."""
+        import glob
+        import media_tool
+        root = ROOT.parent / "LexusIsfTrackTime"
+        vehs = 0
+        for p in glob.glob(str(root / "**" / "*.veh"), recursive=True):
+            text = media_tool.decrypt_jca_text(Path(p).read_bytes()).decode("latin-1")
+            keys = set(x.lower() for x in re.findall(
+                r"(?m)^\s*([A-Za-z_][\w]*)\s*=", text))
+            self.assertEqual(stt.validate_veh_core(keys, "core"), [], p)
+            vehs += 1
+        self.assertEqual(vehs, 11)
+        scns = 0
+        for p in (p for p in glob.glob(str(root / "**" / "*"), recursive=True)
+                  if p.lower().endswith(".scn")):
+            text = media_tool.decrypt_jca_text(Path(p).read_bytes()).decode("latin-1")
+            self.assertIsInstance(stt.parse_scn(text).mas_files, list)
+            scns += 1
+        self.assertEqual(scns, 5)
+        cams = 0
+        for p in (p for p in glob.glob(str(root / "**" / "*"), recursive=True)
+                  if p.lower().endswith(".cam")):
+            text = media_tool.decrypt_jca_text(Path(p).read_bytes()).decode("latin-1")
+            self.assertTrue(stt.parse_cam(text).cameras, p)
+            cams += 1
+        self.assertEqual(cams, 5)
+
     def test_raceroom_fxm_corpus(self):
         """All 91 RaceRoom FXM/FXA/LMA files decode with key_count 1 or 3."""
         import glob
