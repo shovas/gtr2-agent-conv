@@ -49,11 +49,11 @@ def geometry_from_gtr1(data: bytes) -> tuple[list, list, list] | None:
             if not all(math.isfinite(x) for x in normal):
                 normal = (0.0, 1.0, 0.0)
             normals.append(normal)
+        # GTR1 index lists are triangle strips with degenerate separator
+        # triangles. Use a sliding window so valid triangles between
+        # separators are not lost.
         raw = list(item["indices"])
-        if len(raw) % 3 == 0:
-            groups = [tuple(raw[i:i + 3]) for i in range(0, len(raw), 3)]
-        else:
-            groups = [tuple(raw[i:i + 3]) for i in range(len(raw) - 2)]
+        groups = [tuple(raw[i:i + 3]) for i in range(len(raw) - 2)]
         for a, b, c in groups:
             if len({a, b, c}) == 3 and max(a, b, c) < item["v_count"]:
                 triangles.append((base + a, base + b, base + c))

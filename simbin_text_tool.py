@@ -1038,7 +1038,7 @@ def _vrl_table_problems(data: bytes) -> list[str]:
     if any(v != 15 for v in blocks[8]):
         problems.append("constant-15 flag block corrupted")
     vertex_map, group_ids = blocks[11], blocks[12]
-    if vertex_map[0] != 0 or max(vertex_map) >= second:
+    if vertex_map[0] != 0 or max(vertex_map) > second:
         problems.append("vertex map out of bounds")
     if max(group_ids) >= 256:
         problems.append("group ID out of bounds")

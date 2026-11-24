@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-25 22:00:00 -0500 - Full-corpus batch conversion
+- Ran `batch_convert.py --limit 0` over both source corpora: 48,108 verified GMTs written (13,292/13,293 VRL; 34,816/36,128 GTR1). Fixed VRL vertex-map inclusive boundary (max == M) and decoded GTR1 descriptor indices as triangle strips, then documented all remaining skips as degenerate/placeholder content (`TB*.GMT`, one `FNCE02.VRL`, 3 source-less meshes). Full-tier suite still green.
+
 ## 2026-11-25 21:30:00 -0500 - Descriptor-less GTR1 conversion fallback
 - Extended `gtr1_to_gmt.geometry_from_gtr1()` to convert descriptor-less shadow/LOD meshes via their object-mesh streams (NaN sentinel position components zeroed to preserve topology). Batch conversion at 100 members per family now writes 200/200 verified GMTs with zero skips; full-tier regression test added.
 
