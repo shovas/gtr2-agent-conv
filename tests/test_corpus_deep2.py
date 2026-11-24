@@ -339,6 +339,26 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertEqual(cars, 16)
         self.assertEqual(includes, 16)
 
+    def test_aiw_waypoint_pointer_bounds(self):
+        """AIW previous/next pointers and wp_path offsets stay in bounds."""
+        import glob
+        import os
+        n = wps = 0
+        for root in ("Race07Vanilla", "GTLSteam"):
+            for p in glob.glob(str(ROOT.parent / root / "**" / "*"), recursive=True):
+                if not os.path.isfile(p) or not p.lower().endswith(".aiw"):
+                    continue
+                aiw = stt.parse_aiw(
+                    media_tool.decrypt_jca_text(Path(p).read_bytes()).decode("latin-1"))
+                self.assertEqual(stt.validate_aiw_waypoints(aiw), [], p)
+                self.assertEqual(stt.validate_aiw_pointers(aiw), [], p)
+                for wp in aiw.waypoints:
+                    self.assertIsNotNone(wp.path, p)
+                n += 1
+                wps += len(aiw.waypoints)
+        self.assertEqual(n, 66)
+        self.assertGreater(wps, 60000)
+
     def test_rfm_corpus(self):
         """All 10 rF1 .rfm mod descriptors carry 37 universal keys."""
         import glob

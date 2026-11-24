@@ -27,6 +27,7 @@ class Waypoint:
     bitfields: int | None = None
     branch_id: int | None = None
     ptrs: tuple[int, int, int, int] | None = None
+    path: tuple[float, float] | None = None
     score_checkpoint: int | None = None
     perp: tuple[float, float, float] | None = None
 
@@ -103,6 +104,13 @@ def parse_aiw(data: str) -> AIW:
                     match = PTR4_RE.match(value)
                     if match:
                         waypoint.ptrs = tuple(int(match.group(i)) for i in (1, 2, 3, 4))
+                elif key == "wp_path":
+                    match = re.match(r"\(\s*([^,]+),\s*([^)]+)\)", value)
+                    if match:
+                        try:
+                            waypoint.path = (float(match.group(1)), float(match.group(2)))
+                        except ValueError:
+                            pass
                 elif key == "wp_score":
                     parts = value.split(",")
                     if parts:
@@ -264,6 +272,33 @@ def validate_aiw_waypoints(aiw: AIW) -> list[str]:
             norm = math.sqrt(sum(x * x for x in wp.perp))
             if abs(norm - 1.0) > 0.01:
                 problems.append(f"waypoint {i}: track/pit wp_perp norm {norm:.4f} != 1")
+    return problems
+
+
+def validate_aiw_pointers(aiw: AIW) -> list[str]:
+    """Check corpus-verified waypoint pointer/path bounds.
+
+    Verified on 64,766 waypoints across 66 Race07Vanilla/GTLSteam AIWs:
+    ``WP_PTRS[0]`` and ``[1]`` (previous/next) are always valid waypoint
+    indices, ``[2]`` is either -1 or a valid index, and ``wp_path`` always
+    carries two finite lateral offsets with |value| < 100.
+    """
+    problems: list[str] = []
+    count = len(aiw.waypoints)
+    for i, wp in enumerate(aiw.waypoints):
+        if wp.ptrs is not None:
+            for j in (0, 1):
+                if not (0 <= wp.ptrs[j] < count):
+                    problems.append(f"waypoint {i}: pointer {j} {wp.ptrs[j]} out of range")
+                    return problems
+            if wp.ptrs[2] != -1 and not (0 <= wp.ptrs[2] < count):
+                problems.append(f"waypoint {i}: pointer 2 {wp.ptrs[2]} out of range")
+                return problems
+        if wp.path is not None:
+            if len(wp.path) != 2 or not all(math.isfinite(x) and abs(x) < 100
+                                           for x in wp.path):
+                problems.append(f"waypoint {i}: invalid wp_path {wp.path}")
+                return problems
     return problems
 
 
