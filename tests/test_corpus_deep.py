@@ -94,6 +94,19 @@ class CorpusDeepTest(unittest.TestCase):
         self.assertEqual(rf_sections, gtr_sections)
         self.assertEqual(len(rf_sections), 15)
 
+    def test_hdc_uses_hdv_parser(self):
+        """.hdc handling files share the .hdv section/key structure."""
+        import glob
+        import media_tool
+        n = 0
+        for p in glob.glob(str(ROOT.parent / "**" / "*.hdc"), recursive=True):
+            info = stt.parse_hdv(media_tool.decrypt_jca_text(Path(p).read_bytes()))
+            self.assertIn("mass", info.keys)
+            self.assertIn("general", info.sections)
+            self.assertIn("frontleft", info.sections)
+            n += 1
+        self.assertEqual(n, 472)
+
     def test_eng_parser_corpus(self):
         """All 333 .eng files validate with rising RPMTorque curves."""
         import glob

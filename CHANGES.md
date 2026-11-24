@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 23:59:45 -0500 - .hdc parser reuse confirmed
+- Corpus-verified that all 472 `.hdc` handling files (incl. JCA-wrapped) use the `.hdv` section/key structure and parse with `parse_hdv()` (835 keys, 18 sections). Added a full-tier corpus test. Also recorded GTTF byte-31 event/smoothing negatives and the `.aud` vocabulary survey.
+
 ## 2026-11-24 23:59:30 -0500 - .eng engine-file parser
 - Added `simbin_text_tool.parse_eng()` / `validate_eng()` for all 333 `.eng` files: 28 universal keys and strictly increasing RPMTorque RPM values in every file (12,771 points, 0 validation problems). Added 2 regression tests (corpus full-tier); all 25 simbin-text/corpus-deep tests pass.
 
