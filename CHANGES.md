@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 19:00:00 -0500 - Config text identification
+- `media_tool.identify()` now labels plain `.rcd/.gdb/.car/.aiw/.cam/.hed/.dmg/.grb` configs by distinctive key signatures; JCA-wrapped variants stay `text-jca`. Added a corpus regression test; all 63 media tests pass.
+
 ## 2026-11-24 18:30:00 -0500 - MAS archive identification
 - `media_tool.identify()` now reports MAS archives by content magic (1,090 `.mas`, all `.gtr`/`.gtl`/`.bmw`) with variant metadata; 25 signature-less type-2 archives stay unknown. Added a corpus regression test; all 62 media tests pass.
 

@@ -293,6 +293,21 @@ def identify(path: str | Path) -> MediaInfo:
     if b.startswith(b"CUBEASF"):
         return MediaInfo(str(p), size, "cubeasf", {"family": "rFactor scene",
                                                    "extension": ext})
+    # SimBin/ISI text configs (plain variants; JCA ones reported as text-jca)
+    _CFG_SIGNS = {
+        ".rcd": (b"Abbreviation=", b"Nationality="),
+        ".gdb": (b"RaceStart", b"RaceLaps"),
+        ".car": (b"HDVehicle=", b"Graphics="),
+        ".aiw": (b"wp_pos=", b"WP_PTRS="),
+        ".cam": (b"Position=", b"Orientation="),
+        ".hed": (b"Spring", b"SpringBody"),
+        ".dmg": (b"RestrictionSphere", b"RadiusAdd"),
+        ".grb": (b"ratio=", b"bevel="),
+    }
+    if ext in _CFG_SIGNS:
+        head16 = b[:65536]
+        if any(sig in head16 for sig in _CFG_SIGNS[ext]):
+            return MediaInfo(str(p), size, "config-" + ext[1:], {"extension": ext})
     # rFactor text-config families (plain variants; JCA ones reported above)
     if ext == ".cas" and (b"MeshFile=" in b[:8192] or b"SearchPath=" in b[:8192]):
         return MediaInfo(str(p), size, "rfactor-cas", {"extension": ext})

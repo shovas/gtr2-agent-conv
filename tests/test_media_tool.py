@@ -867,6 +867,14 @@ class MediaToolTest(unittest.TestCase):
             self.assertEqual(a.rgba[3], 255)
 
 
+    def test_config_text_identification(self):
+        """Plain SimBin/ISI config text formats are identified by content."""
+        import glob
+        for ext in (".rcd", ".gdb", ".car", ".aiw", ".dmg", ".grb"):
+            fs = glob.glob(str(ROOT.parent / "GTR2Steam" / "**" / ("*" + ext)), recursive=True)
+            n = sum(1 for p in fs if media_tool.identify(p).format == "config-" + ext[1:])
+            self.assertGreater(n, 0, ext)
+
     def test_mas_archive_identification(self):
         """MAS archives are identified by content magic across extensions."""
         import glob
