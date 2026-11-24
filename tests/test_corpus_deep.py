@@ -33,6 +33,45 @@ def _anm_samples(root, limit=None):
 
 
 class CorpusDeepTest(unittest.TestCase):
+    def test_opaque_gsc_flags(self):
+        """Opaque GSC GMTs carry one of three flags words at +4."""
+        import glob
+        import isi_crypt
+        import mas_tool
+        import gmt_semantic
+        import time
+        n = known = 0
+        started = time.time()
+        arcs = []
+        for root in ("Automobilista", "StockCarExtreme", "GameStockCar",
+                     "CopaPetrobrasdeMarcas"):
+            arcs += glob.glob(str(ROOT.parent / root / "**" / "*.mas"),
+                              recursive=True)
+        arcs.sort(key=lambda p: (ROOT.parent / p).stat().st_size)
+        for arc in arcs:
+            try:
+                _, entries = mas_tool.read_archive(arc, read_data=False)
+            except Exception:
+                continue
+            for e in entries:
+                if not e.name.lower().endswith(".gmt"):
+                    continue
+                try:
+                    d = isi_crypt.decrypt_bytes(mas_tool.read_member(arc, e))
+                except Exception:
+                    continue
+                if gmt_semantic.is_gsc_decodable(d):
+                    continue
+                flags = gmt_semantic.opaque_gsc_flags(d)
+                n += 1
+                known += flags in gmt_semantic.GSC_OPAQUE_FLAGS
+                if n >= 400:
+                    break
+            if n >= 400 or time.time() - started > 240:
+                break
+        self.assertGreater(n, 300)
+        self.assertGreaterEqual(known / n, 0.95)
+
     def test_gsc_geometry_invariants(self):
         """GSC geometry: UV count == vertex count, face indices in range."""
         import glob

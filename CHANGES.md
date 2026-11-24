@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-25 11:00:00 -0500 - Opaque GSC GMT header marker
+- Added `gmt_semantic.opaque_gsc_flags()` with a corpus-verified header marker at +4 (`0x04000020`, `0x20` or `0` in 782/800 opaque GSC GMTs) and a full-tier regression test. Documented that member lengths show no fixed-record alignment, so no size-based framing decoder follows.
+
 ## 2026-11-25 10:30:00 -0500 - GTR1 triangle-coherence probe
 - Added `gmt_semantic.gtr1_triangle_coherence()` with corpus-calibrated evidence that GTR1 vertex fields 1–3 are spatially coherent (adjacent/random distance median 0.439 across 400 descriptors vs 0.803 for fields 9–11). Full-tier regression test added; semantics remain an inference rather than a strict position label.
 

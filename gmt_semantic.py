@@ -227,6 +227,21 @@ def gtr1_triangle_coherence(item: dict, fields: tuple[int, ...] = (1, 2, 3),
     return adjacent / random_d if random_d > 1e-9 else None
 
 
+GSC_OPAQUE_FLAGS = (0x04000020, 0x20, 0)
+
+
+def opaque_gsc_flags(data: bytes) -> int | None:
+    """Read the flags word at +4 of an ISI-decrypted opaque GSC GMT.
+
+    Corpus-verified on 800 opaque members across all four GSC corpora: the
+    u32 at +4 takes one of `0x04000020` (600), `0x20` (162) or `0` (20) in
+    782/800 files. It is a structural marker only — no decoder is implied.
+    """
+    if len(data) < 8:
+        return None
+    return struct.unpack_from("<I", data, 4)[0]
+
+
 def read_gsc_geometry(data: bytes) -> dict | None:
     """Decode geometry from an ISI-decrypted, decodable GSC old-layout GMT.
 
