@@ -66,6 +66,26 @@ class SimbinTextToolTest(unittest.TestCase):
         self.assertGreater(parsed, 0)
 
 
+    def test_inccar_uses_veh_parser(self):
+        """.inccar configs share the .veh key=value syntax (96 keys)."""
+        import collections
+        import glob
+        c = collections.Counter()
+        n = 0
+        for p in glob.glob(str(ROOT.parent / "**" / "*.inccar"), recursive=True):
+            d = stt.parse_veh(Path(p).read_bytes())
+            if not d:
+                continue
+            n += 1
+            for k in d:
+                c[k] += 1
+        self.assertGreaterEqual(n, 39)
+        self.assertEqual(len(c), 100)
+        core = {"hdvehicle", "sounds", "engine", "classes", "description",
+                "manufacturer", "model", "modelid", "horsepower", "weight",
+                "transmission", "torque", "valves"}
+        self.assertTrue(all(c[k] >= 39 for k in core))
+
     def test_sp_parser_corpus(self):
         """.sp suspension geometry: field presence and body refs hold."""
         import glob

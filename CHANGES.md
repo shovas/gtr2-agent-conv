@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 21:00:00 -0500 - .inccar parser reuse confirmed
+- Corpus-verified that all 42 plain `.inccar` vehicle-include configs use the `.veh` key=value syntax and are fully parsed by `parse_veh()` (100 keys, 17 near-universal). Added a regression test; all 13 simbin text tests pass.
+
 ## 2026-11-24 20:30:00 -0500 - rFactor .sp suspension-geometry parser
 - Added `simbin_text_tool.parse_sp()` / `validate_sp()` for 172 plain `.sp` files: 1,872 bodies, 3,320 bars, 688 joints. Corpus-verified field presence and referential integrity — all 8,016 body references resolve, 0 validation problems. Added 2 regression tests; all 12 simbin text tests pass.
 
