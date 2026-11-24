@@ -137,6 +137,40 @@ class CorpusDeepTest(unittest.TestCase):
         self.assertGreater(scores / n, 0.6)
         self.assertGreater(scores / n - baseline / n, 0.2)
 
+    def test_gtr1_triangle_coherence(self):
+        """GTR1 fields 1-3 are more spatially coherent than fields 9-11."""
+        import glob
+        import statistics
+        import gmt_semantic
+        import mas_tool
+        a = []
+        b = []
+        for arc in glob.glob(str(ROOT.parent / "GTR1Vanilla" / "**" / "*.gtr"),
+                             recursive=True)[:15]:
+            try:
+                _, entries = mas_tool.read_archive(arc)
+            except Exception:
+                continue
+            for e in entries:
+                if not e.name.lower().endswith(".gmt") or not e.data:
+                    continue
+                geom = gmt_semantic.read_gtr1_geometry(e.data)
+                if not geom:
+                    continue
+                for item in geom:
+                    x = gmt_semantic.gtr1_triangle_coherence(item, (1, 2, 3))
+                    y = gmt_semantic.gtr1_triangle_coherence(item, (9, 10, 11))
+                    if x is not None and y is not None:
+                        a.append(x)
+                        b.append(y)
+                if len(a) >= 300:
+                    break
+            if len(a) >= 300:
+                break
+        self.assertGreater(len(a), 250)
+        self.assertLess(statistics.median(a), 0.6)
+        self.assertLess(statistics.median(a), statistics.median(b) - 0.2)
+
     def test_gtr1_descriptor_geometry(self):
         """GTR1 third-magic descriptor vertices/indices decode cleanly."""
         import glob

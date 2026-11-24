@@ -77,6 +77,8 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 
 - **VRL UV-like coordinate scoring**: `simbin_text_tool.vrl_uv_quad_score()` measures quad-corner coordinate reuse in decoded `.vrl` meshes. Corpus-calibrated on 1,046 files (mean 0.753) against a shuffled baseline (0.271), supporting per-corner texture coordinates; full-tier regression test. Exact labeling remains an inference, not a strict decoder claim.
 
+- **GTR1 triangle-coherence score**: `gmt_semantic.gtr1_triangle_coherence()` measures adjacent-vs-random vertex distance in any field triple. Corpus-calibrated on 400 descriptors (fields 1–3 median 0.439 vs fields 9–11 0.803), supporting position-like coherence of fields 1–3; full-tier regression test. This is inference, not a strict semantic label.
+
 ## Coverage gaps (documented, not yet addressed)
 - **GTR 2004 corpus** (`../GTR1Vanilla`, third GMT magic `...bba6bf90` at 0x04) is fully decoded by `gmt_semantic.py` (descriptor grid + descriptor-less object-mesh path; 33,477/33,477 files). `gmt_format.py` itself still targets the GTL/GTR2 layout only; use `gmt_semantic.py` for GTR1. See `docs/binary-formats.md`.
 - **Untested ISI signatures**: `isi_crypt.GAMES` supports 8 signatures but real corpora exist only for rFactor and Game Stock Car; ARCA Sim Racing, Simulador Turismo Carretera, Top Race 2009, Superleague Formula, STC 2012 and Formula Truck have no local corpus.
