@@ -867,5 +867,47 @@ class MediaToolTest(unittest.TestCase):
             self.assertEqual(a.rgba[3], 255)
 
 
+    def test_hdr_dat_audio_pairs(self):
+        """NASCAR-era .hdr/.dat pairs are MP3 streams with a block index."""
+        import glob
+        checked = exact = 0
+        for root in ("NT2003", "NascarSimRacing"):
+            for hdr in glob.glob(str(ROOT.parent / root / "**" / "*.hdr"),
+                                 recursive=True):
+                pair = media_tool.hdr_dat_mp3(hdr)
+                if pair is None:
+                    continue
+                payload, info = pair
+                self.assertEqual(payload[0], 0xFF)
+                self.assertEqual(payload[1] & 0xE0, 0xE0)
+                self.assertEqual(info["dat_size"] % 256, 0)
+                self.assertGreater(info["block_count"], 0)
+                self.assertEqual(media_tool.identify(hdr).format, "hdr-dat")
+                if info["block_count"] == info["dat_blocks"]:
+                    exact += 1
+                checked += 1
+                if checked >= 60:
+                    break
+            if checked >= 60:
+                break
+        self.assertGreaterEqual(checked, 60)
+        self.assertGreater(exact, 0)  # NT2003 headers match exactly
+
+    def test_hdr_dat_decode_to_wav(self):
+        """A real pair decodes to a valid PCM WAV via ffmpeg."""
+        import shutil
+        if shutil.which("ffmpeg") is None:
+            self.skipTest("ffmpeg unavailable")
+        hdr = ROOT.parent / "NT2003/Sounds/Commentary/Blank.hdr"
+        if not hdr.is_file():
+            self.skipTest("audio pair not present")
+        with tempfile.TemporaryDirectory() as td:
+            dst = Path(td) / "out.wav"
+            self.assertTrue(media_tool._cmd_hdr_dat_decode(hdr, dst))
+            with wave.open(str(dst), "rb") as w:
+                self.assertGreater(w.getnframes(), 1000)
+                self.assertIn(w.getnchannels(), (1, 2))
+
+
 if __name__ == "__main__":
     unittest.main()

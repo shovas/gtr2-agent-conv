@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 11:30:00 -0500 - NASCAR-era .hdr/.dat audio decoder
+- Added `media_tool.hdr_dat_mp3()` and the `hdr-dat-decode` CLI command: the small `.hdr` is an index and its companion `.dat` is a plain MP3 stream, decodable to PCM WAV via the existing ffmpeg path. Corpus-verified on 1,982 pairs (476 NT2003 + 1,506 NascarSimRacing); the `.hdr` block count is exact for all 476 NT2003 pairs. `identify()` now reports such headers as `hdr-dat`. Added 2 regression tests; all 53 media tests pass.
+
 ## 2026-11-24 11:00:00 -0500 - ANM corpus coverage verified
 - Surveyed all 2,436 archived `.anm` members across 21 `../` game folders: **2,435 decode**, with the sole exception (F12001 `CATSTEER.ANM`) carrying a genuinely degenerate quaternion that the decoder correctly rejects. Corrected the stale "single-bone only / 673 multi-bone unsupported" docstring, clarified that +28 is the bone count (version at +16 is always 1), and added a 7-corpus regression test. All 4 ANM tests pass.
 

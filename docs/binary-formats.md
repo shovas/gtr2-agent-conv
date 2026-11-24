@@ -59,7 +59,7 @@ These are usually text but may contain null-padded SimBin headers: `.aiw`, `.svm
 
 ### NASCAR Thunder 2003 (ISI, 2002) cross-corpus observations (evidence only, `../NT2003`)
 - 179 MAS type-3 archives, 19,006 members; 10,397 `.mts` meshes (10,206 standard `CUBE_MTS_4.10` magic, 191 object-level header variants). No known ISI encryption signatures.
-- 476 `.hdr` audio headers paired with 476 `.dat` MPEG-audio files (`fff3`/`fffb` frame sync); 70 `.veh` (`\r\nHDVehi`) and 70 `.hdv` (`\r\n//`) text files.
+- 476 `.hdr` audio headers paired with 476 `.dat` MPEG-audio files (`fff3`/`fffb` frame sync), now decodable via `media_tool.hdr_dat_mp3()` / `hdr-dat-decode` (see also 1,506 further pairs in `../NascarSimRacing`); 70 `.veh` (`\r\nHDVehi`) and 70 `.hdv` (`\r\n//`) text files.
 - Verification: `tests/test_nt2003.py`.
 
 ### Race07Complete (Race 07 + DLC: WTCC, STCC, Race On, GTR Evolution) — evidence only

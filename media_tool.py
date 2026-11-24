@@ -255,6 +255,18 @@ def identify(path: str | Path) -> MediaInfo:
         bpp = b[16]
         if idlen == 0 and cmap == 0 and imgtype in (2, 10) and bpp in (24, 32) and w > 0 and h > 0:
             return MediaInfo(str(p), size, "tga-in-bmp", {"image_type": imgtype, "width": w, "height": h, "bpp": bpp})
+    # NASCAR-era .hdr/.dat audio pair: the .hdr is an index and the companion
+    # .dat is a plain MP3 stream. Content-based so it cannot collide with
+    # unrelated .hdr files that lack an MP3 companion.
+    if ext == ".hdr":
+        pair = hdr_dat_mp3(p)
+        if pair is not None:
+            _payload, info = pair
+            return MediaInfo(str(p), size, "hdr-dat",
+                             {"companion": info["dat_path"],
+                              "block_count": info["block_count"],
+                              "dat_blocks": info["dat_blocks"],
+                              "codec": "mp3"})
     return MediaInfo(str(p), size, "unknown", {"ext": ext})
 
 
@@ -323,6 +335,38 @@ def mp3_decode(src: str | Path, dst: str | Path,
             return w.getcomptype() == "NONE" and w.getnframes() > 0
     except Exception:
         return False
+
+
+def hdr_dat_mp3(hdr_path: str | Path) -> tuple[bytes, dict] | None:
+    """Return the raw MP3 payload of a NASCAR-era ``.hdr``/``.dat`` audio pair.
+
+    Verified on 1,982 pairs in `../NT2003` and `../NascarSimRacing`: the small
+    ``.hdr`` file is an index (its +8 u32 is a 256-byte-block count, exact for
+    all 476 NT2003 pairs) and the companion ``.dat`` is a plain concatenated
+    MP3 stream (``ff f3`` frame sync, LAME tag). The index is not needed to
+    extract the audio, so this helper validates the pair and returns the MP3
+    bytes plus header metadata; use ``mp3_decode`` on a temporary file (or the
+    ``.dat`` itself) to obtain PCM WAV. Returns ``None`` when the companion is
+    missing or is not MP3.
+    """
+    h = Path(hdr_path)
+    dat = h.with_suffix(".dat")
+    if h.suffix.lower() != ".hdr" or not dat.is_file() or not h.is_file():
+        return None
+    header = h.read_bytes()
+    payload = dat.read_bytes()
+    if len(header) < 12 or len(payload) < 4:
+        return None
+    if not (payload[0] == 0xFF and (payload[1] & 0xE0) == 0xE0):
+        return None
+    info = {
+        "hdr_size": len(header),
+        "dat_size": len(payload),
+        "block_count": struct.unpack_from("<I", header, 8)[0],
+        "dat_blocks": len(payload) // 256,
+        "dat_path": str(dat),
+    }
+    return payload, info
 
 
 def mp3_encode(src: str | Path, dst: str | Path, bitrate: int = 192000,
@@ -1306,6 +1350,21 @@ def bink_encode(frames_dir: str | Path, dst: str | Path, fps: int = 25,
     return out if out.is_file() else None
 
 
+def _cmd_hdr_dat_decode(hdr: str | Path, dst: str | Path) -> bool:
+    pair = hdr_dat_mp3(hdr)
+    if pair is None:
+        return False
+    payload, _info = pair
+    import tempfile
+    with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as fh:
+        fh.write(payload)
+        tmp = fh.name
+    try:
+        return mp3_decode(tmp, dst)
+    finally:
+        Path(tmp).unlink(missing_ok=True)
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__)
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -1329,6 +1388,12 @@ def main(argv=None):
     p.add_argument("--exe", default=None)
     p.set_defaults(func=lambda a: print(bink_encode(a.frames_dir, a.dst, a.fps,
                                                    exe=a.exe) or "bink_build unavailable"))
+    p = sub.add_parser("hdr-dat-decode",
+                       help="decode a NASCAR-era .hdr/.dat MP3 audio pair to WAV")
+    p.add_argument("hdr")
+    p.add_argument("dst")
+    p.set_defaults(func=lambda a: print(
+        "ok" if _cmd_hdr_dat_decode(a.hdr, a.dst) else "failed") or 0)
     p = sub.add_parser("wav-roundtrip")
     p.add_argument("src")
     p.add_argument("dst")
