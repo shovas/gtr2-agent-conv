@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 04:00:00 -0500 - AIW camera-reference negative
+- Documented that no AIW in the eight validated corpora (465 files) contains ControlPoint/camera references; camera data is in .cam/.trk formats. Full-tier corpus-fact regression test added.
+
 ## 2026-11-26 03:30:00 -0500 - GDB terrain data references
 - Added `parse_gdb_terrain_refs()` and a full-tier test: 26/26 RF1Vanilla `TerrainDataFile` references resolve to local `.tdf` files; F1C/F12002/NT2003 contain no such keys.
 

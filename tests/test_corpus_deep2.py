@@ -339,6 +339,27 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertEqual(cars, 16)
         self.assertEqual(includes, 16)
 
+    def test_aiw_has_no_camera_references(self):
+        """AIW files contain no ControlPoint/camera name references."""
+        import glob
+        import os
+        n = 0
+        for root in ("Race07Vanilla", "GTLSteam", "GTR2Steam", "Race07Complete",
+                     "RF1Vanilla", "Automobilista", "StockCarExtreme", "F12002"):
+            base = ROOT.parent / root
+            for p in glob.glob(str(base / "**" / "*"), recursive=True):
+                if not os.path.isfile(p) or not p.lower().endswith(".aiw"):
+                    continue
+                raw = Path(p).read_bytes()
+                text = (media_tool.decrypt_jca_text(raw).decode("latin-1")
+                        if raw[:4] == media_tool.JCA_MAGIC
+                        else raw.decode("latin-1"))
+                low = text.lower()
+                self.assertNotIn("controlpoint", low, p)
+                self.assertNotIn("camera", low, p)
+                n += 1
+        self.assertEqual(n, 465)
+
     def test_aiw_lap_distance_coherence(self):
         """WP_SCORE lap distance is non-decreasing within track runs."""
         import glob

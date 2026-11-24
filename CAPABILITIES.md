@@ -129,6 +129,8 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 
 - **GDB terrain references**: `simbin_text_tool.parse_gdb_terrain_refs()` extracts `TerrainDataFile` overrides; 26/26 RF1Vanilla refs resolve to loose/archived `.tdf` files, with no such keys in F1C/F12002/NT2003. Full-tier regression test.
 
+- **AIW camera-reference scope**: 465 AIWs across eight corpora contain no `ControlPoint`/`camera` tokens; camera data lives in `.cam`/`.trk` instead. Full-tier corpus-fact test.
+
 ## Coverage gaps (documented, not yet addressed)
 - **GTR 2004 corpus** (`../GTR1Vanilla`, third GMT magic `...bba6bf90` at 0x04) is fully decoded by `gmt_semantic.py` (descriptor grid + descriptor-less object-mesh path; 33,477/33,477 files). `gmt_format.py` itself still targets the GTL/GTR2 layout only; use `gmt_semantic.py` for GTR1. See `docs/binary-formats.md`.
 - **Untested ISI signatures**: `isi_crypt.GAMES` supports 8 signatures but real corpora exist only for rFactor and Game Stock Car; ARCA Sim Racing, Simulador Turismo Carretera, Top Race 2009, Superleague Formula, STC 2012 and Formula Truck have no local corpus.
