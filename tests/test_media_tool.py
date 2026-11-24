@@ -867,6 +867,21 @@ class MediaToolTest(unittest.TestCase):
             self.assertEqual(a.rgba[3], 255)
 
 
+    def test_mas_archive_identification(self):
+        """MAS archives are identified by content magic across extensions."""
+        import glob
+        import os
+        for ext in (".gtr", ".gtl", ".bmw"):
+            fs = [p for p in glob.glob(str(ROOT.parent / "**" / ("*" + ext)), recursive=True)
+                  if os.path.isfile(p)]
+            self.assertGreater(len(fs), 0, ext)
+            for p in fs:
+                self.assertEqual(media_tool.identify(p).format, "mas", p)
+        mas = [p for p in glob.glob(str(ROOT.parent / "**" / "*.mas"), recursive=True)
+               if os.path.isfile(p)]
+        n = sum(1 for p in mas if media_tool.identify(p).format == "mas")
+        self.assertGreater(n, 1000)
+
     def test_rfactor_text_config_identification(self):
         """Plain .cas/.sp/.inccar configs are identified (JCA ones are text-jca)."""
         import glob

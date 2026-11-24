@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 18:30:00 -0500 - MAS archive identification
+- `media_tool.identify()` now reports MAS archives by content magic (1,090 `.mas`, all `.gtr`/`.gtl`/`.bmw`) with variant metadata; 25 signature-less type-2 archives stay unknown. Added a corpus regression test; all 62 media tests pass.
+
 ## 2026-11-24 18:00:00 -0500 - rFactor text-config identification
 - `media_tool.identify()` now labels plain `.cas` (417), `.sp` (172) and `.inccar` (39) text configs; their JCA-wrapped counterparts (147/93/119) all decrypt to key=value text and remain `text-jca`. Added a corpus regression test; all 61 media tests pass.
 

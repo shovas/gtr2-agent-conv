@@ -215,6 +215,19 @@ def identify(path: str | Path) -> MediaInfo:
             else:
                 break
         return MediaInfo(str(p), size, "jpg", details)
+    # MAS archive headers (content-based, regardless of file extension)
+    if b.startswith(b"GMOTORMAS10"):
+        return MediaInfo(str(p), size, "mas", {"variant": "type0"})
+    if b.startswith(b"CUBEMAS4.10"):
+        return MediaInfo(str(p), size, "mas", {"variant": "type3"})
+    if b.startswith((b"CUBEMAS4.00", b"CUBEMAS4.01")):
+        return MediaInfo(str(p), size, "mas", {"variant": "type6"})
+    if b.startswith(b"CUBEMAS2.50"):
+        return MediaInfo(str(p), size, "mas", {"variant": "type5"})
+    if b.startswith(bytes.fromhex("c8cfd2d8ced8e6c9caddd8bebba6bf90")):
+        return MediaInfo(str(p), size, "mas", {"variant": "type1"})
+    if b.startswith(bytes.fromhex("cec3d5c7c0d9e6c9caddd8bebba6bf90")):
+        return MediaInfo(str(p), size, "mas", {"variant": "type1x"})
     # GMT mesh variants: ISI magic at +8, GTR1 third magic at +4, Race 07 DLC
     if len(b) >= 24 and b[8:24] == bytes.fromhex(
             "c8cfd2d8ced8e6c3d6ded8bebba7bf90"):
