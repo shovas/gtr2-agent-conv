@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-25 04:15:00 -0500 - RaceRoom FXM corpus validation
+- Corpus-verified all 91 RaceRoom `.fxm`/`.fxa`/`.lma` files decode with existing parsers and the 1/3 `key_count` invariant (3,114 nodes). Added a full-tier regression test.
+
 ## 2026-11-25 04:00:00 -0500 - Split corpus-deep test module
 - Split the 19-test / ~120 s full-only `test_corpus_deep.py` into two modules for balance; all 19 tests pass. Full tier is now 52 modules / 423 tests.
 

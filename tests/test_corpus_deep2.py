@@ -34,6 +34,25 @@ def _anm_samples(root, limit=None):
 
 class CorpusDeep2Test(unittest.TestCase):
 
+    def test_raceroom_fxm_corpus(self):
+        """All 91 RaceRoom FXM/FXA/LMA files decode with key_count 1 or 3."""
+        import glob
+        import os
+        import fxm_tool
+        n = nodes = 0
+        for root in ("RaceRoomTheGame", "RaceRoomTheGame2"):
+            for p in glob.glob(str(ROOT.parent / root / "**" / "*"), recursive=True):
+                if not os.path.isfile(p) or not p.lower().endswith((".fxm", ".fxa", ".lma")):
+                    continue
+                result = fxm_tool.decode_fxm_semantic(Path(p).read_bytes())
+                self.assertTrue(result["nodes"], p)
+                for node in result["nodes"]:
+                    self.assertIn(node.get("file_key_count", node.get("key_count")), (1, 3), p)
+                    nodes += 1
+                n += 1
+        self.assertEqual(n, 91)
+        self.assertGreater(nodes, 3000)
+
     def test_eng_parser_corpus(self):
         """All 333 .eng files validate with rising RPMTorque curves."""
         import glob
