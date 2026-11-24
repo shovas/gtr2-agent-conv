@@ -266,6 +266,44 @@ def validate_aiw_waypoints(aiw: AIW) -> list[str]:
     return problems
 
 
+@dataclass
+class SvmInfo:
+    variant: str  # rf1 | gtr2 | encrypted
+    keys: set[str] = field(default_factory=set)
+    sections: set[str] = field(default_factory=set)
+
+
+def parse_svm(data: bytes) -> SvmInfo:
+    """Parse an ISIMotor ``.svm`` car setup into its sections and key names.
+
+    Corpus-verified on 21,141 setup files: rF1 uses the ``gMa1.000f`` header,
+    GTR2 uses plain ``[GENERAL]``/``[CONTROLS]`` sections, and a handful of
+    shipped GTR2 files have an opaque encrypted ``gMb1.000f`` payload. The
+    rF1 key vocabulary (77 keys across 517 files) is a strict subset of the
+    GTR2 vocabulary (86 keys across 20,593 files), so no rF1-only key needs
+    remapping on conversion.
+    """
+    if data.startswith(b"//[[gMa1."):
+        variant = "rf1"
+    elif data.startswith(b"//[[gMb1."):
+        return SvmInfo("encrypted")
+    else:
+        variant = "gtr2"
+    text = data.decode("latin-1")
+    info = SvmInfo(variant)
+    for line in text.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("[") and stripped.endswith("]"):
+            info.sections.add(stripped[1:-1].lower())
+            continue
+        # Setup comments are trailing // after a value, not full-line markers.
+        code = stripped.split("//", 1)[0].strip()
+        m = KEYVALUE_RE.match(code)
+        if m:
+            info.keys.add(m.group(1).strip().lower())
+    return info
+
+
 def parse_scn(data: str) -> ScnInfo:
     info = ScnInfo()
     section = 0

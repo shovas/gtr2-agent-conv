@@ -867,6 +867,19 @@ class MediaToolTest(unittest.TestCase):
             self.assertEqual(a.rgba[3], 255)
 
 
+    def test_svm_identification_corpus(self):
+        """All .svm car setups are identified by variant."""
+        import glob
+        c = {}
+        for p in glob.glob(str(ROOT.parent / "**" / "*.svm"), recursive=True):
+            fmt = media_tool.identify(p).format
+            c[fmt] = c.get(fmt, 0) + 1
+        self.assertGreater(c.get("svm-gtr2", 0), 20000)
+        self.assertGreater(c.get("svm-rf1", 0), 500)
+        self.assertGreater(c.get("svm-encrypted", 0), 0)
+        self.assertEqual(sum(v for k, v in c.items() if k.startswith("svm-")),
+                         sum(c.values()))
+
     def test_hat_gzip_corpus(self):
         """All local .hat files are gzip track data with a classified header."""
         import glob

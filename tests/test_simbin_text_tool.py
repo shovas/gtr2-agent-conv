@@ -65,5 +65,27 @@ class SimbinTextToolTest(unittest.TestCase):
         self.assertGreater(parsed, 0)
 
 
+    def test_svm_key_subset_corpus(self):
+        """rF1 .svm keys are a strict subset of the GTR2 setup vocabulary."""
+        import glob
+        rf_keys = set()
+        gtr_keys = set()
+        n_rf = n_gtr = 0
+        for p in glob.glob(str(ROOT.parent / "**" / "*.svm"), recursive=True):
+            info = stt.parse_svm(Path(p).read_bytes())
+            if info.variant == "encrypted":
+                continue
+            if info.variant == "rf1":
+                rf_keys |= info.keys
+                n_rf += 1
+            else:
+                gtr_keys |= info.keys
+                n_gtr += 1
+        self.assertGreater(n_rf, 400)
+        self.assertGreater(n_gtr, 10000)
+        self.assertEqual(len(rf_keys), 77)
+        self.assertEqual(rf_keys - gtr_keys, set())
+
+
 if __name__ == "__main__":
     unittest.main()

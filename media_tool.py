@@ -255,6 +255,21 @@ def identify(path: str | Path) -> MediaInfo:
         bpp = b[16]
         if idlen == 0 and cmap == 0 and imgtype in (2, 10) and bpp in (24, 32) and w > 0 and h > 0:
             return MediaInfo(str(p), size, "tga-in-bmp", {"image_type": imgtype, "width": w, "height": h, "bpp": bpp})
+    # .svm car setups: rF1 uses a gMa header, GTR2 plain [GENERAL]/[CONTROLS]
+    # sections, and a few shipped files have an encrypted gMb payload.
+    if ext == ".svm":
+        if b.startswith(b"//[[gMa1.000f"):
+            return MediaInfo(str(p), size, "svm-rf1", {"plain_text": True})
+        if b.startswith(b"//[[gMb1.000f") or b.startswith(b"//[[gMb1.002f"):
+            return MediaInfo(str(p), size, "svm-encrypted", {"header": b[:14].decode("latin-1", "replace")})
+        prefix = b[:4096]
+        if (b.lstrip().startswith((b"[GENERAL]", b"[CONTROLS]", b"[BODYAERO]",
+                                   b"VehicleClassSetting"))
+                or b"VehicleClassSetting=" in prefix
+                or b"[GENERAL]" in prefix):
+            return MediaInfo(str(p), size, "svm-gtr2", {"plain_text": True})
+        if b[:2] == b"\x1f\x8b":
+            return MediaInfo(str(p), size, "svm-gzip", {})
     # gzip-wrapped .hat track data (GTR2/GTL gMb header, Race07 ver008)
     if ext == ".hat" and b[:2] == b"\x1f\x8b":
         hat = hat_decompress(p)
