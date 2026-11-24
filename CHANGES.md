@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-25 04:00:00 -0500 - Split corpus-deep test module
+- Split the 19-test / ~120 s full-only `test_corpus_deep.py` into two modules for balance; all 19 tests pass. Full tier is now 52 modules / 423 tests.
+
 ## 2026-11-25 03:45:00 -0500 - .rfm mod descriptor parser
 - Added `parse_rfm()`/`validate_rfm()` for all 10 rF1 mod descriptors (37 universal keys, 0 problems) and `rfactor-rfm` identification. Full-tier regression test added.
 

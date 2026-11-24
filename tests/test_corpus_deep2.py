@@ -1,0 +1,240 @@
+"""Deep corpus checks: full-tier only (slow, multi-game archive scans)."""
+import glob
+import struct
+import sys
+import unittest
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+
+import collections
+import re
+import anm_format  # noqa: E402
+import simbin_text_tool as stt  # noqa: E402
+import mas_tool  # noqa: E402
+
+
+def _anm_samples(root, limit=None):
+    for p in glob.glob(str(ROOT.parent / root / "**" / "*"), recursive=True):
+        if not p.lower().endswith((".mas", ".exe", ".gtr", ".gtl", ".bmw")):
+            continue
+        try:
+            _, entries = mas_tool.read_archive(p)
+        except Exception:
+            continue
+        for e in entries:
+            if e.name.lower().endswith(".anm") and e.data:
+                yield e.name, e.data
+                if limit is not None:
+                    limit -= 1
+                    if limit <= 0:
+                        return
+
+
+class CorpusDeep2Test(unittest.TestCase):
+
+    def test_eng_parser_corpus(self):
+        """All 333 .eng files validate with rising RPMTorque curves."""
+        import glob
+        import media_tool
+        n = pts = 0
+        for p in glob.glob(str(ROOT.parent / "**" / "*.eng"), recursive=True):
+            text = media_tool.decrypt_jca_text(Path(p).read_bytes()).decode("latin-1")
+            info = stt.parse_eng(text)
+            self.assertEqual(stt.validate_eng(info), [], p)
+            rpms = [q[0] for q in info.torque_curve]
+            self.assertTrue(all(a < b for a, b in zip(rpms, rpms[1:])), p)
+            pts += len(info.torque_curve)
+            n += 1
+        self.assertGreaterEqual(n, 333)
+        self.assertGreaterEqual(pts, 12771)
+
+    def test_grb_parser_corpus(self):
+        """All 248 .grb files (incl. 77 JCA) validate with b/a ratio semantics."""
+        import glob
+        import media_tool
+        n = gears = 0
+        commented = matched = 0
+        for p in glob.glob(str(ROOT.parent / "**" / "*.grb"), recursive=True):
+            text = media_tool.decrypt_jca_text(Path(p).read_bytes()).decode("latin-1")
+            info = stt.parse_grb(text)
+            self.assertEqual(stt.validate_grb(info), [], p)
+            gears += len(info.gear_ratios)
+            n += 1
+            for line in text.splitlines():
+                m = re.match(r"^\s*ratio\s*=\s*\(\s*(\d+)\s*,\s*(\d+)\s*\)", line, re.I)
+                c = re.search(r"//.*?\(([-\d.]+)\)", line)
+                if m and c and int(m.group(1)) != 0:
+                    commented += 1
+                    if abs(int(m.group(2)) / int(m.group(1)) - float(c.group(1))) < 0.02:
+                        matched += 1
+        self.assertGreaterEqual(n, 248)
+        self.assertGreaterEqual(gears, 6929)
+        self.assertEqual(matched, commented)  # 214+ commented ratios all b/a
+
+    def test_raceroom_jca_gmt_corpus(self):
+        """RaceRoom games ship JCA v1 GMTs decryptable with the volvo key."""
+        import glob
+        import media_tool
+        for root in ("RaceRoomTheGame", "RaceRoomTheGame2"):
+            paths = glob.glob(str(ROOT.parent / root / "**" / "*.gmt"), recursive=True)
+            self.assertGreater(len(paths), 1000, root)
+            n = 0
+            for path in paths[:20]:
+                info = media_tool.identify(path)
+                self.assertEqual(info.format, "gmt-jca", path)
+                self.assertEqual(info.details["jca_key"], "volvo", path)
+                n += 1
+            self.assertEqual(n, 20)
+
+    def test_rfm_corpus(self):
+        """All 10 rF1 .rfm mod descriptors carry 37 universal keys."""
+        import glob
+        import media_tool
+        n = 0
+        for root in ("LexusIsfTrackTime", "TC2000", "SimuladorTopRace2009",
+                     "SuperleagueFormula2009", "RF1Vanilla"):
+            for p in glob.glob(str(ROOT.parent / root / "**" / "*.rfm"), recursive=True):
+                keys = stt.parse_rfm(Path(p).read_bytes())
+                self.assertEqual(stt.validate_rfm(keys), [], p)
+                self.assertEqual(media_tool.identify(p).format, "rfactor-rfm", p)
+                n += 1
+        self.assertEqual(n, 10)
+
+    def test_raceroom_shader_corpus(self):
+        """All 226 RaceRoom JCA shaders decrypt to ISI shader sources."""
+        import glob
+        import os
+        import media_tool
+        n = 0
+        for root in ("RaceRoomTheGame", "RaceRoomTheGame2"):
+            for ext in ("vsh", "gfx", "psh"):
+                for p in glob.glob(str(ROOT.parent / root / "**" / "*"), recursive=True):
+                    if not os.path.isfile(p) or not p.lower().endswith("." + ext):
+                        continue
+                    info = media_tool.identify(p)
+                    self.assertEqual(info.format, "shader-jca", p)
+                    self.assertTrue(info.details["shader_source"])
+                    n += 1
+        self.assertEqual(n, 226)
+
+    def test_rcs_and_utf16_dic(self):
+        """.rcs control configs and UTF-16 .dic identification."""
+        import glob
+        import media_tool
+        n = 0
+        for root in ("RaceRoomTheGame", "RaceRoomTheGame2"):
+            for p in glob.glob(str(ROOT.parent / root / "**" / "*.rcs"), recursive=True):
+                info = stt.parse_rcs(Path(p).read_bytes())
+                self.assertEqual(stt.validate_rcs(info), [], p)
+                n += 1
+        self.assertEqual(n, 36)
+        dics = [p for p in glob.glob(str(ROOT.parent / "**" / "*.dic"), recursive=True)
+                if Path(p).read_bytes()[:2] == b"\xff\xfe"]
+        self.assertGreater(len(dics), 0)
+        for p in dics:
+            self.assertEqual(media_tool.identify(p).format, "utf16-text", p)
+
+    def test_tdf_corpus(self):
+        """All 57 .tdf terrain configs carry 12 universal keys, 3 sections."""
+        import glob
+        import media_tool
+        n = 0
+        for root in ("TC2000", "SuperleagueFormula2009", "SimuladorTopRace2009"):
+            for p in glob.glob(str(ROOT.parent / root / "**" / "*.tdf"), recursive=True):
+                info = stt.parse_tdf(Path(p).read_bytes())
+                self.assertEqual(stt.validate_tdf(info), [], p)
+                self.assertEqual(media_tool.identify(p).format, "rfactor-tdf", p)
+                n += 1
+        self.assertEqual(n, 57)
+
+    def test_tc2000_superleague_rf1_config_corpus(self):
+        """Shared universal keys in TC2000/Superleague .gdb/.cam/.aiw."""
+        import os
+        import re
+        import media_tool
+        for root in ("TC2000", "SuperleagueFormula2009"):
+            for ext in (".gdb", ".cam", ".aiw"):
+                n = 0
+                for p in glob.glob(str(ROOT.parent / root / "**" / "*"), recursive=True):
+                    if not os.path.isfile(p) or not p.lower().endswith(ext):
+                        continue
+                    text = media_tool.decrypt_jca_text(
+                        Path(p).read_bytes()).decode("latin-1")
+                    keys = set(x.lower() for x in re.findall(
+                        r"(?m)^\s*([A-Za-z_][\w]*)\s*=", text))
+                    self.assertEqual(stt.validate_rf1_config(keys, ext), [], p)
+                    n += 1
+                self.assertGreater(n, 0, f"{root} {ext}")
+
+    def test_tc2000_superleague_veh_svm_corpus(self):
+        """TC2000/Superleague .veh core keys and TC2000 6-speed .svm keys."""
+        import os
+        for root, family in (("TC2000", "core"),
+                             ("SuperleagueFormula2009", "superleague")):
+            n = 0
+            for p in glob.glob(str(ROOT.parent / root / "**" / "*"), recursive=True):
+                if not os.path.isfile(p) or not p.lower().endswith(".veh"):
+                    continue
+                keys = set(stt.parse_veh(Path(p).read_bytes()))
+                self.assertEqual(stt.validate_veh_core(keys, family), [], p)
+                n += 1
+            self.assertGreaterEqual(n, 19)
+        n = 0
+        for p in glob.glob(str(ROOT.parent / "TC2000" / "**" / "*.svm"), recursive=True):
+            keys = stt.parse_svm(Path(p).read_bytes()).keys
+            self.assertEqual(stt.validate_svm_tc2000(keys), [], p)
+            n += 1
+        self.assertEqual(n, 12)
+
+    def test_rcd_parser_corpus(self):
+        """All 5,047 .rcd configs classify and validate."""
+        import glob
+        fam = collections.Counter()
+        n = 0
+        for p in glob.glob(str(ROOT.parent / "**" / "*.rcd"), recursive=True):
+            info = stt.parse_rcd(Path(p).read_bytes())
+            self.assertEqual(stt.validate_rcd(info), [], p)
+            fam[info.family] += 1
+            n += 1
+        self.assertGreaterEqual(n, 5047)
+        self.assertGreaterEqual(fam["driver"], 3038)
+        self.assertGreaterEqual(fam["event"], 1830)
+        self.assertEqual(fam["nascar"], 178)
+
+    def test_corpus_decode_rate(self):
+        """Archived ANM members decode across every ANM-bearing corpus.
+
+        The full 2,436-member survey (F1C/F12001/F12002/NT2003/NT2004/
+        NascarSimRacing/GTR1) yields 2,435 decodes; the sole exception is a
+        degenerate quaternion in F12001 CATSTEER.ANM. Sample a bounded number
+        per corpus here to keep the test fast.
+        """
+        corpora = ("F1C", "F12001", "F12002", "NT2003", "NT2004",
+                   "NascarSimRacing", "GTR1Vanilla")
+        per_corpus = {}
+        for root in corpora:
+            ok = bad = 0
+            for name, data in _anm_samples(root, 120):
+                try:
+                    anm_format.read_anm(data)
+                    ok += 1
+                except ValueError as ex:
+                    # Only degenerate quaternions are acceptable failures.
+                    self.assertIn("quaternion norm", str(ex), f"{root}/{name}")
+                    bad += 1
+            per_corpus[root] = (ok, bad)
+            self.assertGreater(ok, 0, root)
+        # At least 7 corpora and >400 sampled decodes overall.
+        self.assertEqual(len(per_corpus), 7)
+        self.assertGreater(sum(o for o, _ in per_corpus.values()), 400)
+
+
+
+if __name__ == "__main__":
+    unittest.main()
+
+
+if __name__ == "__main__":
+    unittest.main()
