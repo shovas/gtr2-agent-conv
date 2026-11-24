@@ -13,6 +13,7 @@ import re
 import anm_format  # noqa: E402
 import simbin_text_tool as stt  # noqa: E402
 import media_tool  # noqa: E402
+import gsc_survey  # noqa: E402
 import mas_tool  # noqa: E402
 
 
@@ -327,6 +328,30 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertEqual(len(per_corpus), 7)
         self.assertGreater(sum(o for o, _ in per_corpus.values()), 400)
 
+
+
+    def test_gsc_survey_cache_incremental(self):
+        """Cache keys are stable and incremental survey skips cached members."""
+        import glob
+        import json
+        import tempfile
+        arc = glob.glob(str(ROOT.parent / "Automobilista" / "**" / "*.mas"), recursive=True)[0]
+        _, entries = mas_tool.read_archive(arc, read_data=False)
+        entry = next(e for e in entries if e.name.lower().endswith(".gmt"))
+        key1 = gsc_survey.member_key(Path(arc), entry)
+        key2 = gsc_survey.member_key(Path(arc), entry)
+        self.assertEqual(key1, key2)
+        self.assertIn(entry.name, key1)
+        data = mas_tool.read_member(arc, entry)
+        result = gsc_survey.classify(data)
+        self.assertEqual(result["sig"], "Game Stock Car")
+        self.assertEqual(result["decrypt"], "ok")
+        with tempfile.TemporaryDirectory() as td:
+            cp = Path(td) / "cache.json"
+            gsc_survey.save_cache(cp, {key1: result})
+            loaded = gsc_survey.load_cache(cp)
+            self.assertEqual(loaded, {key1: result})
+            self.assertTrue((cp).is_file())
 
 
 if __name__ == "__main__":

@@ -6,3 +6,5 @@ modding-tools-and-tutorials/
 # Editor swap/backup files
 *.swp
 *~
+# Incremental survey caches (derived metadata, not game data)
+.cache/

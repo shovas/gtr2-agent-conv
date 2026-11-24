@@ -294,7 +294,28 @@ def read_signature(path: str | os.PathLike) -> bytes:
         return f.read(16)
 
 
-def read_archive(path: str | os.PathLike) -> tuple[int, list[Entry]]:
+def read_member(path: str | os.PathLike, entry: Entry) -> bytes | None:
+    """Read and decompress one member at its absolute offset (lazy access).
+
+    Enables incremental surveys over huge archives: read the table once, then
+    fetch only the members that need classification. ``entry.offset`` is the
+    absolute on-disk offset produced by :func:`read_archive` (or with
+    ``read_data=False``).
+    """
+    with open(path, "rb") as f:
+        f.seek(entry.offset)
+        blob = f.read(entry.zsize or entry.size)
+    if len(blob) != (entry.zsize or entry.size):
+        return None
+    if entry.size == entry.zsize or not entry.zsize:
+        return blob
+    try:
+        return zlib.decompress(blob)
+    except zlib.error:
+        return None
+
+
+def read_archive(path: str | os.PathLike, read_data: bool = True) -> tuple[int, list[Entry]]:
     with open(path, "rb") as f:
         sig = f.read(16)
         try:
@@ -338,6 +359,8 @@ def read_archive(path: str | os.PathLike) -> tuple[int, list[Entry]]:
         base = f.tell()
         for e in entries:
             e.offset += base
+            if not read_data:
+                continue
             f.seek(e.offset)
             blob = f.read(e.zsize)
             e.data = zlib.decompress(blob) if e.size != e.zsize else blob

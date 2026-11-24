@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-25 06:45:00 -0500 - Incremental GSC classification cache
+- Added lazy MAS member reads (`read_member`, `read_archive(read_data=False)`) and `gsc_survey.py` with a persistent archive+member classification cache in gitignored `.cache/`. Quick/normal/full modes bound runtime; verified 200→400→2,260 cache growth with 100% cached-hit reuse. Added a regression test.
+
 ## 2026-11-25 06:30:00 -0500 - GSC geometry validated at scale
 - Applied `is_gsc_decodable()` + `read_gsc_geometry()` across 1,969 GMT members in 155 archives from Automobilista/StockCarExtreme/GameStockCar/Copa: 53 decodable (2.7%), 48 finite / 22 plausible, 76 UV==vertex submeshes, 62 in-range face sets — all invariants held. Full-corpus scan of huge archives is time-limited; small/medium archives covered.
 
