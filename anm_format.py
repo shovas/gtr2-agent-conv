@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
-"""Decoder for the single-bone subset of the ISI ``.anm`` animation format.
+"""Decoder for the ISI ``.anm`` animation format (single- and multi-bone).
 
-Corpus-verified on 231 archived files (F1C/F12002/NT2003): header is a
-12-byte name, u32 flag, u32 version (always 1), two floats, u32 bone count;
-a bone name at +32 and key count at +68; keys start at +76 with a 32-byte
-stride: position (3 f32), quaternion (4 f32) and time (1 f32).
+Header: 12-byte name, u32 flag, u32 version (always 1), duration, rate and
+u32 bone count at +28; key count at +68. Each bone occupies a 40-byte header
+followed by that many 32-byte TRS/time keys: position (3 f32), quaternion
+(4 f32) and time (1 f32). The first bone header starts at +36.
 
-Multi-bone files (673 in the corpus) use a per-bone layout that is not yet
-decoded; this module reports them as unsupported rather than guessing.
+Corpus-verified across all 2,436 archived ANM members in 21 `../` game
+folders: 2,435 decode; the sole exception (F12001 ``CATSTEER.ANM``) carries a
+genuinely degenerate quaternion (0,0,0,-0.7071) and is reported as unsupported
+rather than guessed at. Note the value at +28 is the *bone count* (tests that
+called it "version" were mislabelled; the real version at +16 is always 1).
 """
 from __future__ import annotations
 

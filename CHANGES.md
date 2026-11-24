@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 11:00:00 -0500 - ANM corpus coverage verified
+- Surveyed all 2,436 archived `.anm` members across 21 `../` game folders: **2,435 decode**, with the sole exception (F12001 `CATSTEER.ANM`) carrying a genuinely degenerate quaternion that the decoder correctly rejects. Corrected the stale "single-bone only / 673 multi-bone unsupported" docstring, clarified that +28 is the bone count (version at +16 is always 1), and added a 7-corpus regression test. All 4 ANM tests pass.
+
 ## 2026-11-24 10:30:00 -0500 - Fix stale BC write-back test expectations
 - Full v19 (tree `0707d88`) found 2 failures: the BC6H/BC7 DDS tests still asserted that `to_bytes()` raises, but the new byte-exact BC write-back makes it succeed. Updated both tests to assert byte-exact round-trip (including the DX10 header); all 21 BC tests pass.
 
