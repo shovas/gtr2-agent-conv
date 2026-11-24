@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-25 17:30:00 -0500 - VRL to GTR2 GMT conversion
+- Added `vrl_to_gmt.py`: converts decoded SCGT `.vrl` meshes to GTR2-layout GMTs using an in-memory real GTR2 GMT as a structural template. Positions from VRL 16-byte records (4th field zero in 300/300 files), normals computed from triangulated geometry, indices as u16. Output is re-parsed and verified; full-tier round-trip test over 25 VRL meshes. UV-like coordinates are not transferred because packed UV field semantics remain unconfirmed.
+
 ## 2026-11-25 17:00:00 -0500 - More rF1-era reference non-applicability
 - Documented that LexusIsfTrackTime and SimuladorTopRace2009 have no `.aud`/`.car` files (media-only archives, loose WAVs, encrypted TR2009 configs). Extended the full-tier corpus-fact test to cover four installs.
 

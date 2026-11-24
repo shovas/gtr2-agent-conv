@@ -2,6 +2,15 @@
 
 End-user guide to what you can ask an agent to do with this repository. This project is WIP; features marked **partial** have known gaps.
 
+## Convert ancestral SCGT track meshes to GTR2 GMT (partial)
+
+**What it does**: Converts decoded Sports Car GT `.vrl` meshes into GTR2-layout `.gmt` files. Positions come from the corpus-verified VRL vertex streams, normals are computed from triangulated geometry, and the result is re-parsed to verify vertex/index counts and data before writing.
+
+**How to ask**:
+- "Convert this `.vrl` to a GTR2 `.gmt` using a real GTR2 GMT as a structural template."
+
+**Known gap**: VRL UV-like coordinate pairs are not transferred because the GTR2 vertex layout's packed UV fields are not corpus-confirmed.
+
 ## 1. Inspect MAS archives (`.gtr`, `.gtl`, `.mas`)
 
 **What it does**: Lists, extracts, creates, and modifies GMOTORMAS10 MAS archives used by GTR2/GT Legends.

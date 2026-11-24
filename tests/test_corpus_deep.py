@@ -141,6 +141,45 @@ class CorpusDeepTest(unittest.TestCase):
                 break
         self.assertGreater(n, 1000)
 
+    def test_vrl_to_gtr2_gmt_roundtrip(self):
+        """Converted VRL meshes reparse as valid GTR2 GMTs."""
+        import glob
+        import gmt_format
+        import mas_tool
+        import simbin_text_tool as stt
+        import vrl_to_gmt
+        template = None
+        for q in glob.glob(str(ROOT.parent / "GTR2Steam" / "**" / "*.gmt"),
+                           recursive=True)[:500]:
+            try:
+                if gmt_format.parse_gmt(q).meshes:
+                    template = Path(q).read_bytes()
+                    break
+            except Exception:
+                continue
+        self.assertIsNotNone(template)
+        n = 0
+        for arc in glob.glob(str(ROOT.parent / "SportsCarGtUsa" / "**" / "*.mas"),
+                             recursive=True)[:10]:
+            try:
+                _, entries = mas_tool.read_archive(arc)
+            except Exception:
+                continue
+            for e in entries:
+                if not e.name.lower().endswith(".vrl") or not e.data:
+                    continue
+                vrl = stt.read_vrl(e.data)
+                if not vrl or vrl["vertex_count"] == 0:
+                    continue
+                data = vrl_to_gmt.vrl_to_gmt(vrl, template)
+                self.assertEqual(vrl_to_gmt.verify_gmt(data, vrl), [], e.name)
+                n += 1
+                if n >= 25:
+                    break
+            if n >= 25:
+                break
+        self.assertGreater(n, 20)
+
     def test_scgt_vrl_uv_quad_score(self):
         """VRL coordinates show quad-corner UV reuse above random baseline."""
         import glob
