@@ -66,6 +66,20 @@ class SimbinTextToolTest(unittest.TestCase):
         self.assertGreater(parsed, 0)
 
 
+    def test_cas_uses_scn_parser(self):
+        """.cas car graphics descriptors share the .scn key family."""
+        import glob
+        n = with_mas = 0
+        for p in glob.glob(str(ROOT.parent / "**" / "*.cas"), recursive=True):
+            if Path(p).read_bytes()[:4] == b"\x0f\xb1\xff\xff":
+                continue
+            info = stt.parse_scn(stt.read_text(p))
+            self.assertIsInstance(info.mas_files, list)
+            with_mas += bool(info.mas_files)
+            n += 1
+        self.assertEqual(n, 417)
+        self.assertGreater(with_mas, 300)
+
     def test_inccar_uses_veh_parser(self):
         """.inccar configs share the .veh key=value syntax (96 keys)."""
         import collections

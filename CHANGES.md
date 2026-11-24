@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 21:30:00 -0500 - .cas parser reuse confirmed
+- Corpus-verified that all 417 plain `.cas` car-graphics descriptors parse with `parse_scn()` (378 with MASFile references), sharing the `.gen`/`.trk` key family. Added a regression test; all 14 simbin text tests pass.
+
 ## 2026-11-24 21:00:00 -0500 - .inccar parser reuse confirmed
 - Corpus-verified that all 42 plain `.inccar` vehicle-include configs use the `.veh` key=value syntax and are fully parsed by `parse_veh()` (100 keys, 17 near-universal). Added a regression test; all 13 simbin text tests pass.
 
