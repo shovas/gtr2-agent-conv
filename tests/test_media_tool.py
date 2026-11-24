@@ -867,6 +867,20 @@ class MediaToolTest(unittest.TestCase):
             self.assertEqual(a.rgba[3], 255)
 
 
+    def test_rfactor_text_config_identification(self):
+        """Plain .cas/.sp/.inccar configs are identified (JCA ones are text-jca)."""
+        import glob
+        for ext, fmt in ((".cas", "rfactor-cas"), (".sp", "rfactor-sp"),
+                         (".inccar", "rfactor-inccar")):
+            n = 0
+            for p in glob.glob(str(ROOT.parent / "**" / ("*" + ext)), recursive=True):
+                if open(p, "rb").read(4) == b"\x0f\xb1\xff\xff":
+                    continue
+                got = media_tool.identify(p).format
+                if got == fmt:
+                    n += 1
+            self.assertGreater(n, 30, ext)
+
     def test_gmt_variant_identification(self):
         """Plain GMT (magic @8), JCA-wrapped and RaceGMT variants identified."""
         import glob

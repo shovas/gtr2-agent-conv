@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 18:00:00 -0500 - rFactor text-config identification
+- `media_tool.identify()` now labels plain `.cas` (417), `.sp` (172) and `.inccar` (39) text configs; their JCA-wrapped counterparts (147/93/119) all decrypt to key=value text and remain `text-jca`. Added a corpus regression test; all 61 media tests pass.
+
 ## 2026-11-24 17:30:00 -0500 - GMT variant identification
 - `media_tool.identify()` now reports plain GMT (ISI magic at +8), `gmt-gtr1` (third magic at +4), `racegmt` (`RaceGMT\0`) and JCA-wrapped GMT by content; corpus survey found 21,180 plain + 45,359 JCA + 643 RaceGMT loose files. Added a regression test; all 60 media tests pass.
 

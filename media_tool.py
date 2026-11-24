@@ -280,6 +280,13 @@ def identify(path: str | Path) -> MediaInfo:
     if b.startswith(b"CUBEASF"):
         return MediaInfo(str(p), size, "cubeasf", {"family": "rFactor scene",
                                                    "extension": ext})
+    # rFactor text-config families (plain variants; JCA ones reported above)
+    if ext == ".cas" and (b"MeshFile=" in b[:8192] or b"SearchPath=" in b[:8192]):
+        return MediaInfo(str(p), size, "rfactor-cas", {"extension": ext})
+    if ext == ".sp" and b"[BODY]" in b[:8192]:
+        return MediaInfo(str(p), size, "rfactor-sp", {"extension": ext})
+    if ext == ".inccar" and (b"Graphics=" in b[:8192] or b"Eyepoint=" in b[:8192]):
+        return MediaInfo(str(p), size, "rfactor-inccar", {"extension": ext})
     # rFactor .veh vehicle descriptor (key=value with Graphics=/HDVehicle=)
     if ext == ".veh" and (b"Graphics=" in b[:8192] or b"HDVehicle=" in b[:8192]):
         return MediaInfo(str(p), size, "rfactor-veh", {"extension": ext})
