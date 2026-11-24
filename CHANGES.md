@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-25 21:00:00 -0500 - Batch mesh archive conversion
+- Added `batch_convert.py`: walks SCGT/GTR1 archives, converts all decodable meshes with the dedicated converters, re-parses and material-checks every output, and writes only verified GMTs to an explicit output directory. `--limit` supports bounded runs; full-tier regression test over 8 members per family.
+
 ## 2026-11-25 20:30:00 -0500 - SCGT text .ani parser
 - Added `simbin_text_tool.parse_ani_text()` and `validate_ani_text()` for SCGT's CRLF text animation-rule format (distinct from binary ANM). Corpus-verified on the single shipped `.ani` member: 12 rule blocks with matching frame counts, in-range sequences, positive rates and known methods. Full-tier regression test added.
 

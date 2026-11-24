@@ -259,6 +259,35 @@ class CorpusDeepTest(unittest.TestCase):
         self.assertGreater(meshes, 30)
         self.assertGreater(colors, 10000)
 
+    def test_batch_convert_archives(self):
+        """Batch conversion writes only reparseable, material-clean GMTs."""
+        import glob
+        import tempfile
+        import batch_convert
+        import gmt_format
+        import validate_materials
+        template_path = None
+        for q in glob.glob(str(ROOT.parent / "GTR2Steam" / "**" / "*.gmt"),
+                           recursive=True)[:500]:
+            try:
+                if gmt_format.parse_gmt(q).meshes:
+                    template_path = Path(q)
+                    break
+            except Exception:
+                continue
+        self.assertIsNotNone(template_path)
+        with tempfile.TemporaryDirectory() as td:
+            out = Path(td)
+            report = batch_convert.batch_convert(template_path.read_bytes(), out, limit=8)
+            self.assertEqual(report["vrl_scanned"], 8)
+            self.assertEqual(report["gtr1_scanned"], 8)
+            files = list(out.rglob("*.gmt"))
+            self.assertGreaterEqual(len(files), 8)
+            for f in files:
+                data = f.read_bytes()
+                self.assertGreater(len(gmt_format.parse_gmt(f).meshes), 0, f.name)
+                self.assertEqual(validate_materials.check_gmt(data, f.name), [], f.name)
+
     def test_gtr1_to_gtr2_gmt_roundtrip(self):
         """Converted GTR1 third-magic GMTs reparse as valid GTR2 GMTs."""
         import glob

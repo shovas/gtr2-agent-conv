@@ -105,6 +105,8 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 
 - **SCGT text `.ani` rules**: `simbin_text_tool.parse_ani_text()` / `validate_ani_text()` parse CRLF text animation rule blocks (name, base, frames, sequence, method, rate). Corpus-verified on the single shipped member (12 rules, all invariants clean); full-tier regression test. Binary `anm_format.read_anm()` does not apply to this text format.
 
+- **Batch mesh conversion**: `batch_convert.py` walks `SportsCarGtUsa` `.mas` files for `.vrl` members and `GTR1Vanilla` archives for third-magic `.gmt` members, converts them with the dedicated converters, verifies each output via `gmt_format.parse_gmt()` and `validate_materials.check_gmt()`, and writes only verified GMTs to an explicit output directory. `--limit` bounds each family; full-tier test over 8 members per family using a temporary output directory.
+
 ## Coverage gaps (documented, not yet addressed)
 - **GTR 2004 corpus** (`../GTR1Vanilla`, third GMT magic `...bba6bf90` at 0x04) is fully decoded by `gmt_semantic.py` (descriptor grid + descriptor-less object-mesh path; 33,477/33,477 files). `gmt_format.py` itself still targets the GTL/GTR2 layout only; use `gmt_semantic.py` for GTR1. See `docs/binary-formats.md`.
 - **Untested ISI signatures**: `isi_crypt.GAMES` supports 8 signatures but real corpora exist only for rFactor and Game Stock Car; ARCA Sim Racing, Simulador Turismo Carretera, Top Race 2009, Superleague Formula, STC 2012 and Formula Truck have no local corpus.

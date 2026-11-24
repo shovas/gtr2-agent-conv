@@ -20,6 +20,18 @@ End-user guide to what you can ask an agent to do with this repository. This pro
 
 **Known gap**: UV-like descriptor fields remain untransferred pending semantic confirmation.
 
+## Batch-convert mesh archives
+
+**What it does**: Walks SportsCarGtUsa and GTR1Vanilla archives, converts every decoded mesh with the converters above, verifies each output by re-parsing and material checks, and writes only verified GMTs to a directory you choose.
+
+**How to ask**:
+- "Batch-convert the SCGT and GTR1 meshes into `/tmp/gtr2_meshes` using this GTR2 GMT as a template."
+
+**Commands**:
+```bash
+python3 batch_convert.py --template template.gmt --out /tmp/gtr2_meshes --limit 10
+```
+
 ## 1. Inspect MAS archives (`.gtr`, `.gtl`, `.mas`)
 
 **What it does**: Lists, extracts, creates, and modifies GMOTORMAS10 MAS archives used by GTR2/GT Legends.
