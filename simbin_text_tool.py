@@ -719,6 +719,34 @@ def validate_grb(info: GrbInfo) -> list[str]:
     return problems
 
 
+VEH_CORE_KEYS = frozenset((
+    "cameras", "category", "classes", "cockpit", "defaultlivery", "description",
+    "driver", "engine", "fullteamname", "genstring", "graphics", "hdvehicle",
+    "headphysics", "manufacturer", "number", "pitgroup", "sounds", "spinner",
+    "team", "teamfounded", "teamheadquarters", "teampoles", "teamstarts",
+    "teamwins", "teamworldchampionships",
+))
+VEH_SL_CORE_KEYS = VEH_CORE_KEYS - frozenset((
+    "cockpit", "aiupgradeclass", "upgrades", "spinner", "cameras"))
+SVM_TC2000_KEYS = frozenset((
+    "balance", "custom", "downforce", "gear1setting", "gear2setting",
+    "gear3setting", "gear4setting", "gear5setting", "gear6setting", "gearing",
+    "notes", "ride", "symmetric", "upgradesetting", "vehicleclasssetting",
+))
+
+
+def validate_veh_core(keys: set[str], family: str = "core") -> list[str]:
+    """Validate the corpus-verified core key set of an rF1 `.veh` file."""
+    required = VEH_SL_CORE_KEYS if family == "superleague" else VEH_CORE_KEYS
+    return [f"missing veh key {key}" for key in sorted(required) if key not in keys]
+
+
+def validate_svm_tc2000(keys: set[str]) -> list[str]:
+    """Validate the 15 universal keys of TC2000 6-speed `.svm` setups."""
+    return [f"missing svm key {key}" for key in sorted(SVM_TC2000_KEYS)
+            if key not in keys]
+
+
 RCD_CORE_STATS = ("aggression", "reputation", "courtesy", "composure",
                   "speed", "crash", "recovery", "completedlaps", "minracingskill")
 RCD_NASCAR_STATS = ("speed", "concentration", "fitness", "intimidation",

@@ -216,6 +216,26 @@ class CorpusDeepTest(unittest.TestCase):
                 n += 1
             self.assertEqual(n, 20)
 
+    def test_tc2000_superleague_veh_svm_corpus(self):
+        """TC2000/Superleague .veh core keys and TC2000 6-speed .svm keys."""
+        import os
+        for root, family in (("TC2000", "core"),
+                             ("SuperleagueFormula2009", "superleague")):
+            n = 0
+            for p in glob.glob(str(ROOT.parent / root / "**" / "*"), recursive=True):
+                if not os.path.isfile(p) or not p.lower().endswith(".veh"):
+                    continue
+                keys = set(stt.parse_veh(Path(p).read_bytes()))
+                self.assertEqual(stt.validate_veh_core(keys, family), [], p)
+                n += 1
+            self.assertGreaterEqual(n, 19)
+        n = 0
+        for p in glob.glob(str(ROOT.parent / "TC2000" / "**" / "*.svm"), recursive=True):
+            keys = stt.parse_svm(Path(p).read_bytes()).keys
+            self.assertEqual(stt.validate_svm_tc2000(keys), [], p)
+            n += 1
+        self.assertEqual(n, 12)
+
     def test_rcd_parser_corpus(self):
         """All 5,047 .rcd configs classify and validate."""
         import glob
