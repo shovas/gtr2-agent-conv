@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-25 17:00:00 -0500 - More rF1-era reference non-applicability
+- Documented that LexusIsfTrackTime and SimuladorTopRace2009 have no `.aud`/`.car` files (media-only archives, loose WAVs, encrypted TR2009 configs). Extended the full-tier corpus-fact test to cover four installs.
+
 ## 2026-11-25 16:30:00 -0500 - NASCAR-era reference non-applicability
 - Documented that NascarSimRacing and NT2003 have no `.aud`/`.car` files (audio is loose WAV plus `.djs`; configs are `.veh`/`.hdv`). Added a full-tier corpus-fact test; no reference validator applies.
 

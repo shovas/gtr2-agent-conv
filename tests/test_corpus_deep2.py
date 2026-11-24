@@ -462,12 +462,13 @@ class CorpusDeep2Test(unittest.TestCase):
                 archived += os.path.splitext(e.name)[1].lower() in (".aud", ".car")
         self.assertEqual(archived, 0)
 
-    def test_nascar_eras_have_no_aud_or_car(self):
-        """NASCAR SimRacing/NT2003 have no .aud/.car; configs are .veh/.hdv."""
+    def test_rf1_era_has_no_aud_or_car(self):
+        """Four rF1-era installs have no .aud/.car (media-only archives)."""
         import glob
         import os
         import mas_tool
-        for root in ("NascarSimRacing", "NT2003"):
+        for root in ("NascarSimRacing", "NT2003", "LexusIsfTrackTime",
+                     "SimuladorTopRace2009"):
             base = ROOT.parent / root
             loose = [p for p in glob.glob(str(base / "**" / "*"), recursive=True)
                      if os.path.isfile(p) and p.lower().endswith((".aud", ".car"))]
