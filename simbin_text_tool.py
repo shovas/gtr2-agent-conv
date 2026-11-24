@@ -297,6 +297,116 @@ def parse_veh(data: bytes | str) -> dict[str, str]:
 
 
 @dataclass
+class SknLayer:
+    texture: str = ""
+    color: tuple[float, ...] | None = None
+
+
+@dataclass
+class SknWord:
+    text: str = ""
+    font: str = ""
+    color: tuple[float, ...] | None = None
+    pos: tuple[float, ...] | None = None
+    ori: tuple[float, ...] | None = None
+    size: tuple[float, ...] | None = None
+
+
+@dataclass
+class SknInfo:
+    name: str = ""
+    model: str = ""
+    style: str = ""
+    stamps: list[str] = field(default_factory=list)
+    decals: list[str] = field(default_factory=list)
+    alpha_stamps: list[str] = field(default_factory=list)
+    layers: list[SknLayer] = field(default_factory=list)
+    words: list[SknWord] = field(default_factory=list)
+    mas_file: str = ""
+
+
+def parse_skn(data: bytes | str) -> SknInfo:
+    """Parse an rFactor ``.skn`` skin descriptor.
+
+    Corpus-verified on 262 files: ``Skin``/``Model``/``Style``/``Stamp`` are
+    universal; every one of 788 ``Layer`` blocks carries exactly ``Color`` and
+    every one of 786 ``Word`` blocks carries ``Font``/``Color``/``Pos``/``Ori``/
+    ``Size``. ``Decal`` (261) and ``AlphaStamp`` (231) are optional scalars.
+    """
+    text = data if isinstance(data, str) else data.decode("latin-1")
+    info = SknInfo()
+    current = ""
+    for line in text.splitlines():
+        code = line.split("//", 1)[0].strip()
+        if not code:
+            continue
+        m = re.match(r'^(Skin|Layer|Word)\s*=\s*"([^"]*)"', code)
+        if m:
+            key, value = m.group(1).lower(), m.group(2)
+            current = key
+            if key == "skin":
+                info.name = value
+            elif key == "layer":
+                info.layers.append(SknLayer(texture=value))
+            elif key == "word":
+                info.words.append(SknWord(text=value))
+            continue
+        if code == "{" or code == "}":
+            continue
+        m = re.match(r'^([A-Za-z_][\w]*)\s*=\s*(.*)$', code)
+        if not m:
+            continue
+        key, raw = m.group(1).lower(), m.group(2).strip()
+        value = raw.strip('"')
+        nums = _all_floats(raw)
+        if key == "model":
+            info.model = value
+        elif key == "style":
+            info.style = value
+        elif key == "stamp":
+            info.stamps.append(value)
+        elif key == "decal":
+            info.decals.append(value)
+        elif key == "alphastamp":
+            info.alpha_stamps.append(value)
+        elif key == "masfile":
+            info.mas_file = value
+        elif current == "layer" and info.layers and key == "color":
+            info.layers[-1].color = nums
+        elif current == "word" and info.words:
+            word = info.words[-1]
+            if key == "font":
+                word.font = value
+            elif key == "color":
+                word.color = nums
+            elif key == "pos":
+                word.pos = nums
+            elif key == "ori":
+                word.ori = nums
+            elif key == "size":
+                word.size = nums
+    return info
+
+
+def validate_skn(info: SknInfo) -> list[str]:
+    """Check corpus-verified .skn invariants; return a list of problems."""
+    problems: list[str] = []
+    for field in ("name", "model", "style"):
+        if not getattr(info, field):
+            problems.append(f"missing {field}")
+    if not info.stamps:
+        problems.append("missing Stamp")
+    for i, layer in enumerate(info.layers):
+        if layer.color is None:
+            problems.append(f"layer {i}: missing Color")
+    for i, word in enumerate(info.words):
+        for field in ("font", "color", "pos", "ori", "size"):
+            if getattr(word, field) is None:
+                problems.append(f"word {i}: missing {field}")
+    return problems
+
+
+@dataclass
 class HedSpring:
     kind: str = ""
     direction: tuple[float, ...] | None = None

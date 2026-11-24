@@ -66,6 +66,21 @@ class SimbinTextToolTest(unittest.TestCase):
         self.assertGreater(parsed, 0)
 
 
+    def test_skn_nested_fields(self):
+        info = stt.parse_skn(
+            'Skin="Ritual"\n{\nModel="Ford"\nStyle="Ritual"\n'
+            'Layer="Base.tga"\n{\nColor=(0, 0, 255)\n}\n'
+            'Word="101"\n{\nFont="Standard"\nColor=(255, 255, 255)\n'
+            'Pos=(0.5, 0.2)\nOri=(180.0)\nSize=(0.15, 0.15)\n}\n'
+            'Stamp="Detail.tga"\nDecal="Small"\n}\n')
+        self.assertEqual(info.name, "Ritual")
+        self.assertEqual(info.model, "Ford")
+        self.assertEqual(info.layers[0].color, (0.0, 0.0, 255.0))
+        self.assertEqual(info.words[0].font, "Standard")
+        self.assertEqual(info.words[0].pos, (0.5, 0.2))
+        self.assertEqual(info.stamps, ["Detail.tga"])
+        self.assertEqual(info.decals, ["Small"])
+
     def test_hed_parser_corpus(self):
         """.hed: 88 files, 5 springs in fixed order, all invariants hold."""
         import glob
@@ -244,33 +259,6 @@ class SimbinTextToolTest(unittest.TestCase):
         for k in ("classes", "driver", "number", "team", "sounds", "hdvehicle"):
             self.assertGreaterEqual(counts[k], n - 2)
 
-    def test_svm_key_subset_corpus(self):
-        """rF1 .svm keys are a strict subset of the GTR2 setup vocabulary."""
-        import glob
-        rf_keys = set()
-        gtr_keys = set()
-        rf_sections = set()
-        gtr_sections = set()
-        n_rf = n_gtr = 0
-        for p in glob.glob(str(ROOT.parent / "**" / "*.svm"), recursive=True):
-            info = stt.parse_svm(Path(p).read_bytes())
-            if info.variant == "encrypted":
-                continue
-            if info.variant == "rf1":
-                rf_keys |= info.keys
-                rf_sections |= info.sections
-                n_rf += 1
-            else:
-                gtr_keys |= info.keys
-                gtr_sections |= info.sections
-                n_gtr += 1
-        self.assertGreater(n_rf, 400)
-        self.assertGreater(n_gtr, 10000)
-        self.assertEqual(len(rf_keys), 77)
-        self.assertEqual(rf_keys - gtr_keys, set())
-        # Section names are identical across rF1 and GTR2 setups.
-        self.assertEqual(rf_sections, gtr_sections)
-        self.assertEqual(len(rf_sections), 15)
 
 
 if __name__ == "__main__":

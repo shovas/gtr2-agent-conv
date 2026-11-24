@@ -50,6 +50,48 @@ class CorpusDeepTest(unittest.TestCase):
         self.assertEqual(len(stt.SP_UNIVERSAL_BODIES), 9)
         self.assertEqual(len(stt.SP_UNIVERSAL_BARS), 6)
 
+    def test_skn_parser_corpus(self):
+        """.skn skins: 262 files, 788 layers, 786 words, 0 validation problems."""
+        import glob
+        n = tl = tw = ts = 0
+        for p in glob.glob(str(ROOT.parent / "**" / "*.skn"), recursive=True):
+            info = stt.parse_skn(Path(p).read_bytes())
+            self.assertEqual(stt.validate_skn(info), [], p)
+            tl += len(info.layers)
+            tw += len(info.words)
+            ts += len(info.stamps)
+            n += 1
+        self.assertEqual(n, 262)
+        self.assertEqual((tl, tw, ts), (788, 786, 262))
+
+    def test_svm_key_subset_corpus(self):
+        """rF1 .svm keys are a strict subset of the GTR2 setup vocabulary."""
+        import glob
+        rf_keys = set()
+        gtr_keys = set()
+        rf_sections = set()
+        gtr_sections = set()
+        n_rf = n_gtr = 0
+        for p in glob.glob(str(ROOT.parent / "**" / "*.svm"), recursive=True):
+            info = stt.parse_svm(Path(p).read_bytes())
+            if info.variant == "encrypted":
+                continue
+            if info.variant == "rf1":
+                rf_keys |= info.keys
+                rf_sections |= info.sections
+                n_rf += 1
+            else:
+                gtr_keys |= info.keys
+                gtr_sections |= info.sections
+                n_gtr += 1
+        self.assertGreater(n_rf, 400)
+        self.assertGreater(n_gtr, 10000)
+        self.assertEqual(len(rf_keys), 77)
+        self.assertEqual(rf_keys - gtr_keys, set())
+        # Section names are identical across rF1 and GTR2 setups.
+        self.assertEqual(rf_sections, gtr_sections)
+        self.assertEqual(len(rf_sections), 15)
+
     def test_corpus_decode_rate(self):
         """Archived ANM members decode across every ANM-bearing corpus.
 

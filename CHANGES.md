@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 23:30:00 -0500 - .skn skin parser and final tier rebalance
+- Added `simbin_text_tool.parse_skn()` / `validate_skn()` for all 262 skin descriptors (788 layers, 786 words, 262 stamps, 0 validation problems). Moved the 3.9 s `.svm` key-subset check to full-only `tests/test_corpus_deep.py`, keeping Quick at 57.0 s (142 tests). All 19 corpus-deep/simbin-text tests pass.
+
 ## 2026-11-24 23:00:00 -0500 - .hed head-physics parser
 - Added `simbin_text_tool.parse_hed()` / `validate_hed()` for all 88 `.hed` files (incl. 56 JCA-wrapped via `decrypt_jca_text()`). Corpus-verified 11 universal keys and a fixed 5-spring order (Sliding×3, FreeDamping×2) with 0 validation problems; FreeDamping legitimately omits SpringDir. Added 2 regression tests; all 15 simbin text tests pass.
 
