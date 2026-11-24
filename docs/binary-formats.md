@@ -44,6 +44,7 @@ These are usually text but may contain null-padded SimBin headers: `.aiw`, `.svm
 ### Reference-material mining and loose-extension survey (task plan #1/#2/#4)
 - `docs/reuse-rfactortools.md` records ready-made parsers in `../rfactortools` (AIW, SCN, SFX, VEH, full rFactor→GSC2013 conversion pipeline) and the RacerM/GTL2GTR2 tutorial rules: material prefixes `GRAS`/`GRVL`/`ROAD`, SCN→TRK SearchPath/MASFile rewrites, SkyBoxI block replacement, DDS-only textures.
 - JCA is not limited to GMTs: Race 07 has 64 encrypted `.cam`, 47 `.gdb`, 41 `.trk`, 41 `.scn`; Volvo has 11/9/2/1 of the same. All decrypt with `jca_crypt.py` (volvo key for Volvo) to valid text (`CUBEASF`, `StaticCam=`, `ApplicationTitle=`).
+- All 188 `.hat` files are gzip-wrapped track data: `//[[gMb1.000f`/`gMb1.002f` header in GTR2/GTL, bare `Ver 0.08` in Race07; `media_tool.hat_decompress()` handles both.
 - Loose-extension survey: `.pf` (5) are ICC colour profiles (`KCMS`); `.map` (16) start with GUID bytes; `.sdt` (51) high-entropy audio tables; `.tgq` (22) `SCHl` header; `.cch` (20) SimBin text; `.dat` (475) MPEG audio (`fff3c4c4`); `.hdr` (1,763) audio headers with varied `0xffff00XX` prefixes.
 - Verification: `tests/test_fixtures.py`, expanded `tests/test_race07.py` / `tests/test_volvo.py`.
 

@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 12:00:00 -0500 - Gzip .hat track-data reader
+- Added `media_tool.hat_decompress()`, `hat-gzip` identification and a `hat-decompress` CLI command. All 188 local `.hat` files are valid gzip streams; GTR2/GTL use a `gMb1.000f/1.002f` header and Race07 a bare `Ver 0.08` header. Added a corpus regression test; all 54 media tests pass.
+
 ## 2026-11-24 11:30:00 -0500 - NASCAR-era .hdr/.dat audio decoder
 - Added `media_tool.hdr_dat_mp3()` and the `hdr-dat-decode` CLI command: the small `.hdr` is an index and its companion `.dat` is a plain MP3 stream, decodable to PCM WAV via the existing ffmpeg path. Corpus-verified on 1,982 pairs (476 NT2003 + 1,506 NascarSimRacing); the `.hdr` block count is exact for all 476 NT2003 pairs. `identify()` now reports such headers as `hdr-dat`. Added 2 regression tests; all 53 media tests pass.
 

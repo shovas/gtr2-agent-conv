@@ -867,6 +867,25 @@ class MediaToolTest(unittest.TestCase):
             self.assertEqual(a.rgba[3], 255)
 
 
+    def test_hat_gzip_corpus(self):
+        """All local .hat files are gzip track data with a classified header."""
+        import glob
+        checked = 0
+        variants = set()
+        for p in glob.glob(str(ROOT.parent / "**" / "*.hat"), recursive=True):
+            result = media_tool.hat_decompress(p)
+            self.assertIsNotNone(result, p)
+            data, info = result
+            self.assertGreater(len(data), 1000, p)
+            self.assertIn(info["variant"], ("gMb1.000f", "gMb1.002f", "ver008"), p)
+            self.assertEqual(info["decompressed_size"], len(data))
+            self.assertEqual(media_tool.identify(p).format, "hat-gzip")
+            variants.add(info["variant"])
+            checked += 1
+        self.assertGreaterEqual(checked, 180)
+        self.assertIn("gMb1.000f", variants)
+        self.assertIn("ver008", variants)
+
     def test_hdr_dat_audio_pairs(self):
         """NASCAR-era .hdr/.dat pairs are MP3 streams with a block index."""
         import glob
