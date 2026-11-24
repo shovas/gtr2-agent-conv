@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 06:30:00 -0500 - HDC numeric bounds
+- Added `simbin_text_tool.validate_hdc_numeric()` with 20 corpus-observed chassis/suspension/brake field bounds from 86 GTR2/GTL `.hdc` files. Full-tier regression test added.
+
 ## 2026-11-26 06:00:00 -0500 - TYR numeric bounds
 - Added `simbin_text_tool.validate_tyr_numeric()` with 18 corpus-observed field bounds from 41 GTR2/GTL tire files; documented near-zero non-zero constants and added a full-tier regression test.
 

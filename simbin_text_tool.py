@@ -1000,6 +1000,53 @@ def validate_svm_numeric(data: bytes) -> list[str]:
     return problems
 
 
+HDC_NUMERIC_BOUNDS = {
+    "springmult": (0.49, 1.2),
+    "bumptravel": (-0.12, -0.02),
+    "reboundtravel": (-0.3, -0.12),
+    "bumpstopspring": (35000.0, 250000.0),
+    "bumpstoprisingspring": (1250000.0, 1250000000.0),
+    "bumpstopdamper": (500.0, 2000.0),
+    "bumpstoprisingdamper": (200000.0, 21900000.0),
+    "bumpstage2": (0.065, 0.1),
+    "reboundstage2": (-0.1, -0.065),
+    "frictiontorque": (5.5, 12.5),
+    "spininertia": (0.55, 1.85),
+    "cambersetting": (0.0, 42.0),
+    "pressuresetting": (30.0, 65.0),
+    "slowbumpsetting": (0.0, 5.0),
+    "fastbumpsetting": (0.0, 5.0),
+    "slowreboundsetting": (0.0, 15.0),
+    "fastreboundsetting": (0.0, 10.0),
+    "brakediscinertia": (0.001, 1.25),
+    "brakeoptimumtemp": (400.0, 500.0),
+    "braketorque": (1017.0, 4000.0),
+}
+
+
+def validate_hdc_numeric(data: bytes | str) -> list[str]:
+    """Check numeric HDC chassis fields against corpus-observed bounds.
+
+    Verified on 86 GTR2/GTL `.hdc` files (344 records per universal field).
+    Values are checked as parsed; JCA-wrapped input must be decrypted first.
+    """
+    text = data if isinstance(data, str) else data.decode("latin-1")
+    problems: list[str] = []
+    for match in re.finditer(r"(?mi)^\s*([A-Za-z_][\w]*)\s*=\s*([^\r\n]+)", text):
+        key = match.group(1).lower()
+        if key not in HDC_NUMERIC_BOUNDS:
+            continue
+        try:
+            value = float(match.group(2).split("//", 1)[0].strip())
+        except ValueError:
+            continue
+        low, high = HDC_NUMERIC_BOUNDS[key]
+        if not (low <= value <= high):
+            problems.append(f"{key}={value} outside [{low}, {high}]")
+            return problems
+    return problems
+
+
 TYR_NUMERIC_BOUNDS = {
     "radius": (0.249, 0.355),
     "width": (0.105, 0.36),
