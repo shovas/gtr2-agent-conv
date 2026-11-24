@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-25 06:15:00 -0500 - GTR1 descriptor corpus validation
+- Corpus-verified 132 GTR1 third-magic GMT descriptors across 60 files have plausible counts/offsets; full-tier regression test added. Also recorded the PHS sibling-XOR negative (no PAR2 magic or entropy reduction).
+
 ## 2026-11-25 06:00:00 -0500 - GSC geometry invariants validated
 - Corpus-validated decoded GSC GMT geometry: UV count equals vertex count (23/23 submeshes) and all face indices are in range (15/15). Quality flags separate plausible from degenerate geometry. Full-tier regression test added.
 

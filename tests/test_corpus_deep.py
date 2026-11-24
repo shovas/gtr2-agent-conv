@@ -111,6 +111,40 @@ class CorpusDeepTest(unittest.TestCase):
         self.assertGreater(good, 0)
         self.assertGreater(flagged, 0)  # degenerate files are flagged
 
+    def test_gtr1_descriptor_invariants(self):
+        """GTR1 third-magic GMT descriptors have plausible counts/offsets."""
+        import glob
+        import mas_tool
+        import gmt_semantic
+        files = descs = 0
+        for arc in glob.glob(str(ROOT.parent / "GTR1Vanilla" / "**" / "*.gtr"), recursive=True)[:12]:
+            try:
+                _, entries = mas_tool.read_archive(arc)
+            except Exception:
+                continue
+            for e in entries:
+                if not e.name.lower().endswith(".gmt") or not e.data:
+                    continue
+                ds = gmt_semantic.read_gtr1_descriptors(e.data)
+                if not ds:
+                    continue
+                files += 1
+                for desc in ds:
+                    self.assertGreater(desc["v_count"], 0)
+                    self.assertLess(desc["v_count"], 200000)
+                    self.assertGreater(desc["i_count"], 0)
+                    self.assertLess(desc["i_count"], 600000)
+                    self.assertGreater(desc["v_off"], 0)
+                    self.assertLessEqual(desc["v_off"] + 4 + desc["v_count"] * 48,
+                                         len(e.data))
+                    descs += 1
+                if files >= 50:
+                    break
+            if files >= 50:
+                break
+        self.assertGreater(files, 30)
+        self.assertGreater(descs, 100)
+
     def test_gsc_gmt_prefilter(self):
         """0x1D4 near-magic predicts GSC GMT decodability (recall 1.0)."""
         import glob
