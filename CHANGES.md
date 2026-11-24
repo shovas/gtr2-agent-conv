@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-25 07:45:00 -0500 - SCGT .vrl header/vertex decoder
+- Added `simbin_text_tool.read_vrl()`: decodes the corpus-verified 24-u32 header table and N x 16-byte vertex block of Sports Car GT `.vrl` meshes. Verified arithmetic on 4,000/4,000 files and plausible vertices on 2,000/2,000; full-tier regression test. Section payloads are documented as undecoded (426/2,000 files have out-of-range u32 values, not vertex indices).
+
 ## 2026-11-25 07:30:00 -0500 - SCGT .vrl structural validator
 - Added `simbin_text_tool.validate_vrl()` with corpus-verified invariants for 1,500 Sports Car GT `.vrl` members: 60-byte zero header and valid first u32 offset at +60. Deeper mesh tables remain undocumented. Full-tier regression test added.
 

@@ -279,3 +279,7 @@ No issue is fully runtime-resolved without launching GTR2/GTL. The highest-value
 offline work is complete: a reusable offline validator, exact semantic-bridge
 proof, and several decoded residual fields. Defer further PHS/runtime work; pursue
 GTR1 coverage is now complete: a full `../GTR1Vanilla` scan (33,477 GMTs with the GTR1 magic) is decoded by `read_gtr1_descriptors()` (10,359) or `read_gtr1_object_mesh()` (23,118), with 0 undecoded files. Revisit MTS rig semantics only if new evidence appears.
+
+## Coverage gaps (documented, not yet addressed)
+- **SCGT `.vrl` section payloads**: the 24-u32 header table arithmetic is fully corpus-verified (4,000/4,000 files), and the N x 16-byte vertex block yields plausible XYZ (2,000/2,000). The six N*4 sections after the vertex block are **not** vertex-index lists: 426/2,000 files have u32 values >= N (the value 15 recurs constantly). Their semantics remain undecoded; the decoder exposes only table + vertices.
+

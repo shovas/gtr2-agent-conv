@@ -868,7 +868,60 @@ def validate_vrl(data: bytes) -> list[str]:
     first = struct.unpack_from("<I", data, 60)[0]
     if not (0 < first < len(data)):
         problems.append(f"invalid first offset {first}")
+    if len(data) >= 160:
+        problems.extend(_vrl_table_problems(data))
     return problems
+
+
+def _vrl_table_problems(data: bytes) -> list[str]:
+    """Arithmetic invariants of the 24-u32 table at +60.
+
+    Verified on 4,000 SCGT .vrl members: the vertex block at +64 holds N
+    16-byte records; the following six offsets are spaced N*4 bytes; the
+    second count M at +96 governs three offsets spaced M*4 bytes.
+    """
+    table = struct.unpack_from("<24I", data, 60)
+    count, vertex_off = table[0], table[1]
+    problems: list[str] = []
+    if not (0 < count < 100000) or vertex_off + count * 16 > len(data):
+        return ["invalid vertex block"]
+    if table[2] != vertex_off + count * 16:
+        problems.append("vertex block end mismatch")
+    if table[3] - table[2] != count * 32:
+        problems.append("first section stride mismatch")
+    if any(table[i + 1] - table[i] != count * 4 for i in range(3, 8)):
+        problems.append("N*4 section stride mismatch")
+    second = table[9]
+    if not (0 < second < 100000):
+        problems.append("invalid second count")
+    elif any(table[i + 1] - table[i] != second * 4 for i in (10, 11)):
+        problems.append("M*4 section stride mismatch")
+    if any(table[i] >= len(data) for i in range(13) if table[i]):
+        problems.append("table offset outside file")
+    return problems
+
+
+def read_vrl(data: bytes) -> dict | None:
+    """Decode the corpus-verified header table and vertex positions of a VRL.
+
+    Only structurally verified parts are exposed: the 24-u32 table, the
+    N x 16-byte vertex block (first three floats = position), and the sizes
+    of the following sections. Index/section payload semantics are not decoded
+    (their u32 values are often constant 15, not vertex indices).
+    """
+    if len(data) < 160 or any(data[:60]) or _vrl_table_problems(data):
+        return None
+    table = struct.unpack_from("<24I", data, 60)
+    count, vertex_off = table[0], table[1]
+    vertices = [struct.unpack_from("<4f", data, vertex_off + i * 16)
+                for i in range(count)]
+    sections = []
+    for start, size in ((2, 1), (3, 6), (10, 3)):
+        for i in range(start, start + size):
+            sections.append({"offset": table[i],
+                             "next": table[i + 1] if i + 1 < 24 else None})
+    return {"vertex_count": count, "vertices": vertices, "table": table,
+            "sections": sections}
 
 
 RCD_CORE_STATS = ("aggression", "reputation", "courtesy", "composure",

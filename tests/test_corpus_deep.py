@@ -84,6 +84,11 @@ class CorpusDeepTest(unittest.TestCase):
                 if not e.name.lower().endswith(".vrl") or not e.data:
                     continue
                 self.assertEqual(stt_local.validate_vrl(e.data), [], f"{arc}/{e.name}")
+                v = stt_local.read_vrl(e.data)
+                self.assertIsNotNone(v, f"{arc}/{e.name}")
+                self.assertEqual(len(v["vertices"]), v["vertex_count"])
+                self.assertTrue(all(all(abs(c) < 1e6 for c in pos[:3])
+                                    for pos in v["vertices"]))
                 n += 1
             if n >= 1200:
                 break
