@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-25 06:30:00 -0500 - GSC geometry validated at scale
+- Applied `is_gsc_decodable()` + `read_gsc_geometry()` across 1,969 GMT members in 155 archives from Automobilista/StockCarExtreme/GameStockCar/Copa: 53 decodable (2.7%), 48 finite / 22 plausible, 76 UV==vertex submeshes, 62 in-range face sets — all invariants held. Full-corpus scan of huge archives is time-limited; small/medium archives covered.
+
 ## 2026-11-25 06:15:00 -0500 - GTR1 descriptor corpus validation
 - Corpus-verified 132 GTR1 third-magic GMT descriptors across 60 files have plausible counts/offsets; full-tier regression test added. Also recorded the PHS sibling-XOR negative (no PAR2 magic or entropy reduction).
 
