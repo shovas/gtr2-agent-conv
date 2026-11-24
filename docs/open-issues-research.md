@@ -3,6 +3,16 @@
 All work here is **offline**: no game was launched. "Runtime-dependent" means
 conclusively establishing it requires actual game execution.
 
+## Encrypted `.svm` setups (2026-11-24)
+
+10 shipped `.svm` files (only **2 distinct payloads**, duplicated across corpora: `Toban Long.svm` 558 B and `Orchard Lake Oval.svm` 449 B) carry `//[[gMb1.000f ...]]` headers followed by a high-entropy payload beginning `5b 79 6d 98 7f 80 a9 e0` (221 distinct byte values, ~11 short ASCII runs, implausible f32 alignments). The two payloads share a 20-byte prefix. Exhausted offline hypotheses:
+- single-byte XOR (0..255): best printability 0.45, no valid plaintext.
+- XOR with filename / `gMb1.000f` / `gMa1.000f` / `ISI` / `gtr2` / `rFactor` repeating keys: 0.33-0.40 printability, no valid plaintext.
+- gzip / raw-deflate / bz2 / lzma: all fail.
+- `isi_crypt` forced enctypes 0/1 with skips 0..64: best 0.475 printability, no valid decrypt.
+- JCA with all known keys: no valid decrypt.
+Known-plaintext XOR against typical GTR2 setup prefixes (`[GENERAL]\r\n`, `VehicleClassSetting=`) yields no repeating keystream or recognisable pattern. **Undecoded** — likely a proprietary compiled/encrypted setup format; needs the originating tool or source. No speculative decoder added.
+
 ## 1. In-game validation alternatives
 - **Understanding/confidence**: structural validation existed; runtime correctness unproven.
 - **Hypothesis**: exact semantic equality between source and converted geometry, plus an independent parser cross-check, provides strong offline compatibility confidence.
