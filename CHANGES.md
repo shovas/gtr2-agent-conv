@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-25 12:30:00 -0500 - Volvo .car/.aud reference resolution
+- Corpus-verified all VolvoTheGame configs decrypt with the non-default `volvo` JCA key: 453/483 `.aud` WAV refs (93.8%) resolve, with 10 missing C30 audio basenames; 16/16 `.car` `Include=..\*.inccar` references resolve. Full-tier regression test added.
+
 ## 2026-11-25 12:00:00 -0500 - Race07Complete .car reference resolution
 - Corpus-verified all 823 Race07Complete `.car` files (621 JCA-encrypted) with 262/262 HDVehicle/Graphics/Sounds/Camera references resolving locally. Documented that the 114 `.gdb` files have no active path references. Full-tier regression tests added.
 

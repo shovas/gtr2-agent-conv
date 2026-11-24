@@ -259,6 +259,43 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertGreater(checked, 7000)
         self.assertGreater(resolved / checked, 0.97)
 
+    def test_volvo_reference_resolution(self):
+        """Volvo (volvo JCA key) .car/.aud references resolve locally."""
+        import glob
+        import os
+        import re
+        base = ROOT.parent / "VolvoTheGame"
+        wavs = {os.path.basename(p).lower()
+                for p in glob.glob(str(base / "**" / "*.wav"), recursive=True)}
+        incs = {os.path.basename(p).lower()
+                for p in glob.glob(str(base / "**" / "*.inccar"), recursive=True)}
+        checked = resolved = 0
+        for p in glob.glob(str(base / "**" / "*.aud"), recursive=True):
+            raw = Path(p).read_bytes()
+            self.assertEqual(raw[:4], media_tool.JCA_MAGIC)
+            text = media_tool.decrypt_jca_text(raw).decode("latin-1")
+            for _k, v in re.findall(r"(?m)^\s*([A-Za-z_][\w]*)\s*=\s*(.*)$", text):
+                m = re.search(r"([^\\/]+\.wav)$", v.strip().strip('"'), re.I)
+                if m:
+                    checked += 1
+                    resolved += m.group(1).lower() in wavs
+        self.assertGreater(checked, 400)
+        self.assertGreater(resolved / checked, 0.93)
+        cars = includes = 0
+        for p in glob.glob(str(base / "**" / "*.car"), recursive=True):
+            raw = Path(p).read_bytes()
+            self.assertEqual(raw[:4], media_tool.JCA_MAGIC)
+            text = media_tool.decrypt_jca_text(raw).decode("latin-1")
+            m = re.search(r"(?mi)^\s*Include\s*=\s*([^\r\n]+)", text)
+            cars += 1
+            if m:
+                q = re.search(r"([^\\/]+\.inccar)$", m.group(1).strip().strip('"'), re.I)
+                if q:
+                    includes += 1
+                    self.assertIn(q.group(1).lower(), incs, p)
+        self.assertEqual(cars, 16)
+        self.assertEqual(includes, 16)
+
     def test_rfm_corpus(self):
         """All 10 rF1 .rfm mod descriptors carry 37 universal keys."""
         import glob

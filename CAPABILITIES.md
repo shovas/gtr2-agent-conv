@@ -85,6 +85,8 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 
 - **Race07Complete `.car` reference resolution**: all 823 `.car` files (621 JCA-wrapped) decrypt and parse; 262/262 `HDVehicle`/`Graphics`/`Sounds`/`Camera` references resolve to local files. The 114 `.gdb` files are either physics tweaks or addon metadata with no active path references (one commented-out example), so no `.gdb` reference validation applies. Full-tier regression tests.
 
+- **Volvo reference resolution (volvo JCA key)**: all 9 `.aud` files decrypt with the non-default `volvo` key; 453/483 WAV references (93.8%) resolve locally (10 missing C30 audio basenames account for the gaps). All 16 `.car` files decrypt and their 16 `Include=..\*.inccar` references resolve. Full-tier regression test.
+
 ## Coverage gaps (documented, not yet addressed)
 - **GTR 2004 corpus** (`../GTR1Vanilla`, third GMT magic `...bba6bf90` at 0x04) is fully decoded by `gmt_semantic.py` (descriptor grid + descriptor-less object-mesh path; 33,477/33,477 files). `gmt_format.py` itself still targets the GTL/GTR2 layout only; use `gmt_semantic.py` for GTR1. See `docs/binary-formats.md`.
 - **Untested ISI signatures**: `isi_crypt.GAMES` supports 8 signatures but real corpora exist only for rFactor and Game Stock Car; ARCA Sim Racing, Simulador Turismo Carretera, Top Race 2009, Superleague Formula, STC 2012 and Formula Truck have no local corpus.
