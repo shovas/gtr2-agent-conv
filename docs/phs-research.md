@@ -70,6 +70,7 @@ New angles tried that were not in the first investigation:
 | Byte-overlap with sibling PAR2 recovery data | full 13,064-byte blob and all 204 64-byte chunks absent from both `DRIVERS.PHS` (445 KB) and `CARS.PHS` (803 KB) | **Excluded** as a plain subset of sibling recovery slices |
 | Reed-Solomon slice-window probe | 816 aligned 16-byte windows of PHYSICS.PHS absent from the 384,000-byte `RecvSlic` payload (exponent 53) in `CARS.PHS`; length is 3.4% of slice size | **Excluded** as a partial/embedded slice of the sibling set |
 | 256-byte window entropy scan | every aligned 256-byte window (51 total) has entropy 7.08-7.31 — uniform, no low-entropy plaintext header (the earlier 0x3200 "7.12" was typical, not special) | **No plaintext header region** |
+| XOR against sibling `RecvSlic` payloads at all alignments 0..2000 | no `PAR2\0PKT` magic appears in any XOR result; best entropy only 7.938/7.939 vs 7.986 baseline (negligible reduction) | **Excluded** as a simple XOR of sibling recovery data |
 | PAR2 slice-exponent probe | sibling `RecvSlic` bodies start with a small u32 exponent (53/58/59) then 384,000 bytes of slice data; PHYSICS.PHS starts with u32 1,615,901,797 | **Excluded** as a bare PAR2 recovery slice (no plausible exponent) |
 
 Excluded by this pass: a literal PAR2-aware loader in the GTL binaries; a feasible
