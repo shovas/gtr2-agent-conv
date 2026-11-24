@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 01:00:00 -0500 - GDB filter class resolution
+- Added `parse_gdb_filter_tags()` and `car_class_tags()` with a full-tier test: 163/166 event filter tags resolve to local `.car` class declarations across 252 GTR2/GTL/Race07 GDB files. Three missing class tags documented as content gaps.
+
 ## 2026-11-26 00:30:00 -0500 - SCN reference resolution
 - Corpus-verified 131/132 `.scn` MASFile references resolving across four rF1-era corpora and documented 13/83 SearchPath resolution (stale NT2003 Season03 paths). Full-tier regression test added.
 

@@ -117,6 +117,8 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 
 - **`.scn` reference resolution**: across four rF1-era corpora, 131/132 MASFile refs resolve to local archives; only 13/83 SearchPath entries resolve to existing directories (stale NT2003 `SEASON03` paths). Full-tier regression test documents both rates; no SearchPath validator promoted.
 
+- **`.gdb` filter class resolution**: `parse_gdb_filter_tags()` and `car_class_tags()` extract event filter tags and `.car` class declarations; 163/166 tags resolve across 252 GTR2/GTL/Race07 event files, with three content gaps documented. Full-tier regression test.
+
 ## Coverage gaps (documented, not yet addressed)
 - **GTR 2004 corpus** (`../GTR1Vanilla`, third GMT magic `...bba6bf90` at 0x04) is fully decoded by `gmt_semantic.py` (descriptor grid + descriptor-less object-mesh path; 33,477/33,477 files). `gmt_format.py` itself still targets the GTL/GTR2 layout only; use `gmt_semantic.py` for GTR1. See `docs/binary-formats.md`.
 - **Untested ISI signatures**: `isi_crypt.GAMES` supports 8 signatures but real corpora exist only for rFactor and Game Stock Car; ARCA Sim Racing, Simulador Turismo Carretera, Top Race 2009, Superleague Formula, STC 2012 and Formula Truck have no local corpus.
