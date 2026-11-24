@@ -278,22 +278,22 @@ def validate_aiw_waypoints(aiw: AIW) -> list[str]:
 def validate_aiw_pointers(aiw: AIW) -> list[str]:
     """Check corpus-verified waypoint pointer/path bounds.
 
-    Verified on 64,766 waypoints across 66 Race07Vanilla/GTLSteam AIWs:
-    ``WP_PTRS[0]`` and ``[1]`` (previous/next) are always valid waypoint
-    indices, ``[2]`` is either -1 or a valid index, and ``wp_path`` always
-    carries two finite lateral offsets with |value| < 100.
+    Verified on 201,855 waypoints across 193 AIWs from Race07Vanilla,
+    GTLSteam, GTR2Steam and Race07Complete: every pointer is either -1
+    ("no link") or a valid waypoint index, and ``wp_path`` always carries two
+    finite lateral offsets with |value| < 100. Pointer 2 is -1 in 172,129
+    records; pointers 0/1 are -1 in only 7 records, all in the addon track
+    ``Hill.AIW``.
     """
     problems: list[str] = []
     count = len(aiw.waypoints)
     for i, wp in enumerate(aiw.waypoints):
         if wp.ptrs is not None:
-            for j in (0, 1):
-                if not (0 <= wp.ptrs[j] < count):
-                    problems.append(f"waypoint {i}: pointer {j} {wp.ptrs[j]} out of range")
+            for j in range(3):
+                value = wp.ptrs[j]
+                if value != -1 and not (0 <= value < count):
+                    problems.append(f"waypoint {i}: pointer {j} {value} out of range")
                     return problems
-            if wp.ptrs[2] != -1 and not (0 <= wp.ptrs[2] < count):
-                problems.append(f"waypoint {i}: pointer 2 {wp.ptrs[2]} out of range")
-                return problems
         if wp.path is not None:
             if len(wp.path) != 2 or not all(math.isfinite(x) and abs(x) < 100
                                            for x in wp.path):

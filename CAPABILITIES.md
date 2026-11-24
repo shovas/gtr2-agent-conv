@@ -89,7 +89,7 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 
 - **Race07Vanilla reference resolution**: all 43 `.aud` files are JCA-wrapped; 4,783/4,830 WAV references (99.0%) resolve locally (47 missing Caterham audio basenames). All 335 `.car` files are JCA-wrapped; 262/262 HDVehicle/Graphics/Sounds/Camera references resolve. Full-tier regression test.
 
-- **AIW waypoint pointer/path validator**: `simbin_text_tool.validate_aiw_pointers()` enforces corpus-verified bounds on 64,766 waypoints across 66 Race07Vanilla/GTLSteam AIWs: `WP_PTRS[0]`/`[1]` are valid waypoint indices, `[2]` is -1 or a valid index, and every `wp_path` holds two finite lateral offsets with |value| < 100. `parse_aiw()` now exposes `wp_path`; full-tier regression test.
+- **AIW waypoint pointer/path validator**: `simbin_text_tool.validate_aiw_pointers()` enforces corpus-verified bounds on **201,855 waypoints across 193 AIWs** (Race07Vanilla, GTLSteam, GTR2Steam, Race07Complete): every `WP_PTRS` entry is -1 ("no link") or a valid waypoint index, and every `wp_path` holds two finite lateral offsets with |value| < 100. Only the addon track `Hill.AIW` uses -1 for pointers 0/1 (7 records). `parse_aiw()` exposes `wp_path`; full-tier regression test. The stricter `validate_aiw_waypoints()` still flags two malformed addon tracks in Race07Complete (`Hill.AIW`, `Nurburg.AIW`).
 
 ## Coverage gaps (documented, not yet addressed)
 - **GTR 2004 corpus** (`../GTR1Vanilla`, third GMT magic `...bba6bf90` at 0x04) is fully decoded by `gmt_semantic.py` (descriptor grid + descriptor-less object-mesh path; 33,477/33,477 files). `gmt_format.py` itself still targets the GTL/GTR2 layout only; use `gmt_semantic.py` for GTR1. See `docs/binary-formats.md`.

@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-25 14:00:00 -0500 - AIW pointer validator extended
+- Extended `validate_aiw_pointers()` to GTR2Steam and Race07Complete: corpus-verified on 201,855 waypoints across 193 AIWs. Pointer -1 is treated as a documented "no link" sentinel (7 occurrences confined to addon track `Hill.AIW`); two malformed addon tracks remain flagged by the stricter waypoint validator. Full-tier regression test updated.
+
 ## 2026-11-25 13:30:00 -0500 - AIW waypoint pointer validator
 - Added `simbin_text_tool.validate_aiw_pointers()` and `wp_path` parsing. Corpus-verified on 64,766 waypoints across 66 Race07Vanilla/GTLSteam AIWs: previous/next pointers always in range, third pointer -1 or in range, and all `wp_path` offsets finite with |value| < 100. Full-tier regression test added.
 
