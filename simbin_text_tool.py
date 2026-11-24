@@ -452,8 +452,36 @@ def parse_aud(data: bytes | str) -> AudInfo:
     return info
 
 
+AUD_NUMERIC_BOUNDS = {
+    "enginerpmpowerinside": (0.0, 4.0),
+    "enginerpmpoweroutside": (0.0, 4.0),
+    "enginerpmcoastinside": (0.0, 4.0),
+    "enginerpmcoastoutside": (0.0, 4.0),
+    "enginerpmfreeinside": (0.0, 4.0),
+    "enginerpmfreeoutside": (0.0, 4.0),
+    "backfireamount": (0.0, 50.0),
+    "splutteramount": (0.0, 50.0),
+    "othershape": (0.7, 1.0),
+    "shiftshape": (0.9, 1.0),
+    "engineshape": (0.9, 1.0),
+    "engineambient": (1.0, 6.0),
+    "shiftambient": (1.0, 6.0),
+    "otherambient": (0.5, 6.0),
+    "shiftrange": (60.0, 100.0),
+    "enginerange": (60.0, 100.0),
+    "otherrange": (20.0, 90.0),
+    "maximumrpm": (1500.0, 30590.0),
+    "minimumrpm": (1.0, 15452.4),
+    "naturalrpm": (1000.0, 11050.0),
+}
+
+
 def validate_aud_map(info: AudInfo) -> list[str]:
-    """Check corpus-verified .aud invariants; return a list of problems."""
+    """Check corpus-verified .aud invariants; return a list of problems.
+
+    Numeric bounds were derived from 202 maps in GTR2/GTL/Race07/Volvo
+    (4,665 numeric path-key values across 34 keys).
+    """
     problems: list[str] = []
     for key in sorted(info.path_keys & info.numeric_keys):
         problems.append(f"key {key} mixes path and numeric values")
@@ -461,6 +489,15 @@ def validate_aud_map(info: AudInfo) -> list[str]:
         for value in info.values[key]:
             if "/" in value and "\\" not in value:
                 problems.append(f"key {key}: forward-slash path {value}")
+    for key, (low, high) in sorted(AUD_NUMERIC_BOUNDS.items()):
+        for value in info.values.get(key, []):
+            try:
+                number = float(value)
+            except ValueError:
+                continue
+            if not (low <= number <= high):
+                problems.append(f"key {key}: value {number} outside [{low}, {high}]")
+                return problems
     return problems
 
 

@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 05:30:00 -0500 - AUD numeric event bounds
+- Extended `validate_aud_map()` with `AUD_NUMERIC_BOUNDS` for 20 high-frequency numeric keys, derived from all 202 GTR2/GTL/Race07/Volvo `.aud` maps. Full-tier regression test added.
+
 ## 2026-11-26 05:00:00 -0500 - SVM numeric bounds
 - Added `simbin_text_tool.validate_svm_numeric()` with corpus-observed inclusive bounds for 11 high-frequency setup keys; verified on all 21,183 plain `.svm` files with encrypted payloads skipped. Full-tier regression test added.
 

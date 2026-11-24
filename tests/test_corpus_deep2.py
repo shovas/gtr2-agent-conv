@@ -616,6 +616,24 @@ class CorpusDeep2Test(unittest.TestCase):
                         checked += 1
         self.assertGreater(checked, 1100)
 
+    def test_aud_numeric_bounds(self):
+        """AUD numeric event values stay within corpus-observed bounds."""
+        import glob
+        import os
+        checked = numeric = 0
+        for root in ("GTR2Steam", "GTLSteam", "Race07Complete", "VolvoTheGame"):
+            for p in glob.glob(str(ROOT.parent / root / "**" / "*.aud"), recursive=True):
+                if not os.path.isfile(p):
+                    continue
+                info = stt.parse_aud(media_tool.decrypt_jca_text(Path(p).read_bytes())
+                                     .decode("latin-1"))
+                self.assertEqual(stt.validate_aud_map(info), [], p)
+                checked += 1
+                numeric += sum(len(info.values[k]) for k in stt.AUD_NUMERIC_BOUNDS
+                               if k in info.values)
+        self.assertEqual(checked, 202)
+        self.assertGreater(numeric, 6000)
+
     def test_svm_numeric_bounds(self):
         """Plain .svm numeric values stay within corpus-observed bounds."""
         import glob
