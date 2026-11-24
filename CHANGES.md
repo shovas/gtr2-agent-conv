@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-25 06:00:00 -0500 - GSC geometry invariants validated
+- Corpus-validated decoded GSC GMT geometry: UV count equals vertex count (23/23 submeshes) and all face indices are in range (15/15). Quality flags separate plausible from degenerate geometry. Full-tier regression test added.
+
 ## 2026-11-25 05:45:00 -0500 - GSC GMT geometry decoder
 - Added `gmt_semantic.read_gsc_geometry()` for the ~5% decodable GSC GMTs: extracts vertices/UVs/faces from the 0x2e4 old-layout submesh headers with a quality flag. Corpus-verified on 18 files (16 finite, 11 plausible, 12 with faces). Full-tier regression test added.
 

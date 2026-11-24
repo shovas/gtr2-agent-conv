@@ -33,6 +33,41 @@ def _anm_samples(root, limit=None):
 
 
 class CorpusDeepTest(unittest.TestCase):
+    def test_gsc_geometry_invariants(self):
+        """GSC geometry: UV count == vertex count, face indices in range."""
+        import glob
+        import isi_crypt
+        import mas_tool
+        import gmt_semantic
+        subs = faces = 0
+        for root in ("Automobilista", "StockCarExtreme", "GameStockCar",
+                     "CopaPetrobrasdeMarcas"):
+            for arc in glob.glob(str(ROOT.parent / root / "**" / "*.mas"), recursive=True)[:3]:
+                try:
+                    _, entries = mas_tool.read_archive(arc)
+                except Exception:
+                    continue
+                for e in entries:
+                    if not e.name.lower().endswith(".gmt") or not e.data:
+                        continue
+                    try:
+                        d = isi_crypt.decrypt_bytes(e.data)
+                    except Exception:
+                        continue
+                    if not gmt_semantic.is_gsc_decodable(d):
+                        continue
+                    g = gmt_semantic.read_gsc_geometry(d)
+                    for sub in g["submeshes"]:
+                        vc = len(sub["positions"])
+                        self.assertEqual(len(sub["uvs"]), vc, e.name)
+                        if sub["faces"]:
+                            self.assertTrue(all(0 <= i < vc for f in sub["faces"] for i in f),
+                                            e.name)
+                            faces += 1
+                        subs += 1
+        self.assertGreater(subs, 15)
+        self.assertGreater(faces, 10)
+
     def test_gsc_geometry_decoder(self):
         """read_gsc_geometry decodes real geometry with quality flags."""
         import glob
