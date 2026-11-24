@@ -3,6 +3,10 @@
 All work here is **offline**: no game was launched. "Runtime-dependent" means
 conclusively establishing it requires actual game execution.
 
+## GTTF slot +32 structural finding (2026-11-24)
+
+The 4 bytes at +32 are **not** a meaningful f32: byte +35 is 0x00 in 860/860 sampled frames, forcing every float interpretation to 0.0. The first three bytes instead form a varying **24-bit integer** (46/128/55 distinct byte values at +32/+33/+34), with a near-constant maximum ~5,873,825–5,873,841 across files. The integer is upward-monotonic in only 68% of consecutive pairs (0.64-0.74 across 29 files) and shows no meaningful correlation with inter-frame distance (median r=-0.019), elapsed time (-0.024) or speed. Reinterpreting bytes +31..+34 as f32 yields mostly near-zero values with rare enormous outliers and no kinematic correlation (median r=-0.011). Recorded as a structural characterisation only; no semantic decoder promoted.
+
 ## GTTF slot +40 quantized-field structure (2026-11-24)
 
 The 4-byte field at frame offset +40 is zero in 740/860 sampled frames (86%) and takes only 94 distinct f32 values, dominated by ±28.x and ±7.x. Unlike slot +36, both byte pairs vary (251 distinct at +40/+42, 312 at +42/+44), so it is a genuinely varying signal. Tested against position-derived kinematics across all 29 GTT files: correlation with unwrapped heading delta has median r=-0.002 (max 0.063), with lateral acceleration median -0.004 (max 0.103), and with longitudinal acceleration median -0.002 (max 0.037). No file exceeds |r|=0.5 for any of the three. Recorded as a negative result — no semantic decoder promoted.
