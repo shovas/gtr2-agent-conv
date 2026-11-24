@@ -174,7 +174,7 @@ python3 media_tool.py info <file.svm|file.hat|file.hdr|file.veh|file.scn>
 python3 -c "import simbin_text_tool as s; print(s.parse_veh(open('car.veh','rb').read()))"
 ```
 
-**Decoded**: `parse_veh()` (2,763 files, 57 keys; also handles 42 `.inccar` configs with 100 keys), `parse_hdv()` (156 files, 17 sections/496 keys), `parse_svm()` (21,141 setups classified), `parse_set()` (22 CUBEASF camera files), `parse_sp()` (172 suspension files with body-reference validation), `parse_scn()` (also handles 417 `.cas` and 294 `.gen` descriptors), `hat_decompress()` (188 gzip files) and `hdr_dat_mp3()` (1,982 pairs). **Limitations**: 10 encrypted `.svm` payloads, the `.hdr` index table, and the GTTF/PHYSICS opaque fields remain undecoded.
+**Decoded**: `parse_veh()` (2,763 files, 57 keys; also handles 42 `.inccar` configs with 100 keys), `parse_hdv()` (156 files, 17 sections/496 keys), `parse_svm()` (21,141 setups classified), `parse_set()` (22 CUBEASF camera files), `parse_sp()` (172 suspension files with body-reference validation), `parse_hed()` (88 head-physics files, fixed 5-spring order), `parse_skn()` (262 skin descriptors with nested Layer/Word validation), `parse_scn()` (also handles 417 `.cas` and 294 `.gen` descriptors), `hat_decompress()` (188 gzip files) and `hdr_dat_mp3()` (1,982 pairs). **Limitations**: 10 encrypted `.svm` payloads, the `.hdr` index table, and the GTTF/PHYSICS opaque fields remain undecoded.
 
 ## 11. Consult format documentation
 
