@@ -7,6 +7,10 @@ conclusively establishing it requires actual game execution.
 
 Tested whether the varying byte +31 marks discrete track events: it changes between consecutive frames in **47.3%** of 44,573 transitions (far too frequent for pit/lap markers), and speed near changes (median 22.3) is just the naturally higher speed where quantization steps toggle. A bounded search over lags 0-20 and EMA smoothing alphas 0.1-0.9 found best speed correlation only r=0.34 (lag 20, alpha 0.1), with most files below 0.25. Byte +31 is therefore neither a rare event flag nor a smoothed speed signal; its quantized magnitude semantics remain unresolved.
 
+## GTTF field +16 pitch hypothesis (2026-11-25)
+
+Tested whether the small angle f32 at frame offset +16 encodes pitch/vertical motion: correlation with position-derived vertical velocity across all 29 GTT files gave median r=0.003 (max |r|=0.298), and smoothing the vertical velocity (alpha 0.2/0.5) did not help (median ~0.002). Field +16 is not a pitch/vertical-velocity signal.
+
 ## GTTF slot +32 structural finding (2026-11-24)
 
 The 4 bytes at +32 are **not** a meaningful f32: byte +35 is 0x00 in 860/860 sampled frames, forcing every float interpretation to 0.0. The first three bytes instead form a varying **24-bit integer** (46/128/55 distinct byte values at +32/+33/+34), with a near-constant maximum ~5,873,825–5,873,841 across files. The integer is upward-monotonic in only 68% of consecutive pairs (0.64-0.74 across 29 files) and shows no meaningful correlation with inter-frame distance (median r=-0.019), elapsed time (-0.024) or speed. Reinterpreting bytes +31..+34 as f32 yields mostly near-zero values with rare enormous outliers and no kinematic correlation (median r=-0.011). Recorded as a structural characterisation only; no semantic decoder promoted.
