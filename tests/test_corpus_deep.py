@@ -9,6 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 import anm_format  # noqa: E402
+import simbin_text_tool as stt  # noqa: E402
 import mas_tool  # noqa: E402
 
 
@@ -30,6 +31,25 @@ def _anm_samples(root, limit=None):
 
 
 class CorpusDeepTest(unittest.TestCase):
+    def test_sp_parser_corpus(self):
+        """.sp suspension geometry: field presence and body refs hold."""
+        import glob
+        n = totals = 0
+        tb = tbar = tj = 0
+        for p in glob.glob(str(ROOT.parent / "**" / "*.sp"), recursive=True):
+            if Path(p).read_bytes()[:4] == b"\x0f\xb1\xff\xff":
+                continue
+            info = stt.parse_sp(Path(p).read_bytes())
+            self.assertEqual(stt.validate_sp(info), [], p)
+            tb += len(info.bodies)
+            tbar += len(info.bars)
+            tj += len(info.joints)
+            n += 1
+        self.assertEqual(n, 172)
+        self.assertEqual((tb, tbar, tj), (1872, 3320, 688))
+        self.assertEqual(len(stt.SP_UNIVERSAL_BODIES), 9)
+        self.assertEqual(len(stt.SP_UNIVERSAL_BARS), 6)
+
     def test_corpus_decode_rate(self):
         """Archived ANM members decode across every ANM-bearing corpus.
 

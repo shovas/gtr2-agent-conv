@@ -100,25 +100,6 @@ class SimbinTextToolTest(unittest.TestCase):
                 "transmission", "torque", "valves"}
         self.assertTrue(all(c[k] >= 39 for k in core))
 
-    def test_sp_parser_corpus(self):
-        """.sp suspension geometry: field presence and body refs hold."""
-        import glob
-        n = totals = 0
-        tb = tbar = tj = 0
-        for p in glob.glob(str(ROOT.parent / "**" / "*.sp"), recursive=True):
-            if Path(p).read_bytes()[:4] == b"\x0f\xb1\xff\xff":
-                continue
-            info = stt.parse_sp(Path(p).read_bytes())
-            self.assertEqual(stt.validate_sp(info), [], p)
-            tb += len(info.bodies)
-            tbar += len(info.bars)
-            tj += len(info.joints)
-            n += 1
-        self.assertEqual(n, 172)
-        self.assertEqual((tb, tbar, tj), (1872, 3320, 688))
-        self.assertEqual(len(stt.SP_UNIVERSAL_BODIES), 9)
-        self.assertEqual(len(stt.SP_UNIVERSAL_BARS), 6)
-
     def test_sp_parser_reference_validation(self):
         """A dangling posbody reference is flagged."""
         bodies = "".join(f"[BODY]\nname={n} mass=(0.0) inertia=(0,0,0) pos=(0,0,0)\n"
