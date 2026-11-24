@@ -3,6 +3,10 @@
 All work here is **offline**: no game was launched. "Runtime-dependent" means
 conclusively establishing it requires actual game execution.
 
+## GTTF slot +40 quantized-field structure (2026-11-24)
+
+The 4-byte field at frame offset +40 is zero in 740/860 sampled frames (86%) and takes only 94 distinct f32 values, dominated by ±28.x and ±7.x. Unlike slot +36, both byte pairs vary (251 distinct at +40/+42, 312 at +42/+44), so it is a genuinely varying signal. Tested against position-derived kinematics across all 29 GTT files: correlation with unwrapped heading delta has median r=-0.002 (max 0.063), with lateral acceleration median -0.004 (max 0.103), and with longitudinal acceleration median -0.002 (max 0.037). No file exceeds |r|=0.5 for any of the three. Recorded as a negative result — no semantic decoder promoted.
+
 ## GTTF slot +36 quantized-field structure (2026-11-24)
 
 The 4-byte field at frame offset +36 is **not** a free f32: bytes +36/+37 are `00 00` in 853/860 sampled frames (99.2%; only 3 distinct patterns, including `00 40`). All variation lives in bytes +38/+39 (54 distinct patterns). f32 interpretation yields only **82 distinct values** across 44,631 samples, dominated by ±34·4^k (34, 136, 544, 2176, 8704, 34816 and negative counterparts) plus ±8.5/±8.8 — a heavily quantized signal. A second hypothesis (v = ±38·4^k) fits only 27/44,631 and was rejected. The big-endian u16 at +38 shows only weak correlation with position-derived speed (median r=0.146, max 0.359 across 29 files; no file exceeds |r|=0.5). Recorded as a structural characterisation; no semantic decoder promoted.
