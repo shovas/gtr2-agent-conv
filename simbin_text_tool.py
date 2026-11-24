@@ -723,6 +723,9 @@ RCD_CORE_STATS = ("aggression", "reputation", "courtesy", "composure",
                   "speed", "crash", "recovery", "completedlaps", "minracingskill")
 RCD_NASCAR_STATS = ("speed", "concentration", "fitness", "intimidation",
                     "aggression", "status", "courtesy", "script")
+RCD_TALENT_STATS = ("aggression", "completedlaps", "composure", "crash",
+                    "dateofbirth", "driverschampionships", "minracingskill",
+                    "nationality", "poles", "speed", "starts", "wins")
 RCD_EVENT_KEYS = ("crash", "nationality", "passing", "qualifyingability",
                   "raceability", "rainability", "recovery", "startsdry",
                   "startstalls", "startswet")
@@ -763,6 +766,8 @@ def parse_rcd(data: bytes | str) -> RcdInfo:
         info.family = "event"
     elif "concentration" in lower or "fitness" in lower:
         info.family = "nascar"
+    elif "dateofbirth" in lower and "reputation" not in lower:
+        info.family = "talent"
     elif "basefuelusage" in lower:
         info.family = "fueluse"
     elif "aggression" in lower or "nationality" in lower:
@@ -790,6 +795,10 @@ def validate_rcd(info: RcdInfo) -> list[str]:
         for required in RCD_NASCAR_STATS:
             if required not in keys:
                 problems.append(f"nascar: missing {required}")
+    elif info.family == "talent":
+        for required in RCD_TALENT_STATS:
+            if required not in keys:
+                problems.append(f"talent: missing {required}")
     elif info.family == "fueluse":
         pass  # single fuel-usage table, no driver/event schema
     else:

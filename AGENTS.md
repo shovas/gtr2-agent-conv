@@ -48,6 +48,9 @@ All `../` game installs below are **read-only references** — do not copy game 
 - `../rF2SharedMemoryMapPlugin/` - GPLv3 rF2 internals shared-memory plugin (3.1M, 71 files). **Reference only**: `Include/rF2State.h` documents rF2 runtime telemetry fields/ranges (mEngineRPM, mFilteredThrottle 0..1, mFilteredSteering −1..1, mGear −1/0/1+). Relevant to GTTF telemetry-field hypotheses, but it documents runtime state, not the `.VCR` file bit layout; apply only as units/range evidence.
 - `~/tmp/tools.unsorted.irrelevant/` - remaining large/generated/irrelevant items (installers, caches, etc.).
 
+- `../RaceRoomTheGame/` (497M, 6,756 files), `../RaceRoomTheGame2/` (1.1G, 15,163): early RaceRoom ISIMotor sims; 14,603 loose JCA v1 GMTs decryptable with the **volvo** key (see `media_tool.detect_jca_key()`), plus `.car/.gdb/.aiw/.cam/.aud/.rcs` configs; `docs/corpus-reference.md` has details.
+- `../LexusIsfTrackTime/` (233M, 412), `../TC2000/` (1.4G, 938), `../SimuladorTopRace2009/` (2.1G, 1,084): rF1-era single-series sims; type-1 MAS archives, `.veh/.hdv/.rcd/.svm/.scn/.aiw`, `.rfm`. TC2000 introduces a 12-key "talent" `.rcd` driver family; TR2009 uses the known Top Race 2009 ISI signature on 118 uppercase GMTs that decrypt but expose no submeshes. See `docs/corpus-reference.md`.
+
 ## Reference corpora index
 - `docs/corpus-reference.md` is the condensed quick-lookup index of all `../` folders (sizes, counts, key formats, licenses, and what each is useful for). The per-folder notes below remain authoritative for caveats. These folders are always available for reference during tasks; record newly verified findings in the relevant docs and update that index when roles change.
 

@@ -24,16 +24,24 @@ class MediaInfo:
 JCA_MAGIC = b"\x0f\xb1\xff\xff"
 
 
+GMT_MAGIC_ISI = bytes.fromhex("c8cfd2d8ced8e6c3d6ded8bebba7bf90")
+GMT_MAGIC_GTR1 = bytes.fromhex("c8cfd2d8ced8e6c3d6ded8bdbba6bf90")
+
+
 def _looks_like_media(data: bytes) -> bool:
     return (data[:4] in (b"DDS ", b"RIFF") or
-            (len(data) >= 18 and data[1] == 0 and data[2] in (2, 3, 10)))
+            (len(data) >= 18 and data[1] == 0 and data[2] in (2, 3, 10)) or
+            (len(data) >= 24 and (data[8:24] == GMT_MAGIC_ISI or
+                                  data[4:20] == GMT_MAGIC_GTR1)))
 
 
 def detect_jca_key(data: bytes) -> str | None:
     """Try each known JCA key and return the name that yields a valid payload.
 
-    Corpus-verified: Race07/GTL/Volvo default vs Volvo's custom key. Returns
-    ``None`` if no key produces a recognisable DDS/WAV/TGA payload.
+    Corpus-verified: Race07/GTL/Volvo default vs Volvo's custom key, and
+    RaceRoomTheGame/RaceRoomTheGame2 JCA GMTs (v1, volvo key) whose decrypted
+    ISI GMT magic sits at offset 8. Returns ``None`` if no key produces a
+    recognisable DDS/WAV/TGA/GMT payload.
     """
     import jca_crypt
     for name in [None] + sorted(jca_crypt.CUSTOM_KEYS):
@@ -108,6 +116,12 @@ def identify(path: str | Path) -> MediaInfo:
             plain = decrypt_jca_bytes(b, key)
             details["jca_key"] = key
             details["decrypted_size"] = len(plain)
+            if len(plain) >= 24 and plain[8:24] == GMT_MAGIC_ISI:
+                details["gmt_magic_at"] = 8
+                return MediaInfo(str(p), size, "gmt-jca", details)
+            if len(plain) >= 20 and plain[4:20] == GMT_MAGIC_GTR1:
+                details["gmt_magic_at"] = 4
+                return MediaInfo(str(p), size, "gmt-gtr1-jca", details)
             if plain[:4] == b"DDS " and len(plain) >= 128:
                 w, h = struct.unpack_from("<II", plain, 12)
                 details.update({"width": w, "height": h,

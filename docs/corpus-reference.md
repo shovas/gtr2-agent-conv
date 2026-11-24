@@ -27,6 +27,16 @@ the quick-lookup index. Sizes/counts are approximate (surveyed 2026-11-23/24).
 | `Automobilista/` | 35G / 14,796 | 470 type-1 archives, 111,943 members, 91,974 old-layout GMTs (91,962 GSC-encrypted). |
 | `NascarSimRacing/` | 1.9G / 7,965 | 311 type-3 archives, 26,473 CUBE MTS meshes incl. `CUBE_MTS_4.20` variant. 1,506 `.hdr`/`.dat` MP3 audio pairs (decoded by `media_tool.hdr_dat_mp3()`); 748 archived `.anm` animations. |
 
+## Newly added ISIMotor-era reference folders (reviewed 2026-11-25)
+
+| Folder | Size / files | Key facts |
+|---|---|---|
+| `RaceRoomTheGame/` | 497M / 6,756 | Early RaceRoom sim; 4,226 loose GMTs all **JCA-wrapped** (v1) and decryptable with the **volvo** key (not the `raceroom` keys) to plain ISI-magic@8 GMTs; `gmt_semantic.read_gmt()` finds real submeshes. 1,218 DDS, 645 TGA, 245 WAV, `.car/.gdb/.aiw/.cam/.aud/.lma/.fxm/.psh/.vsh`, `.rcs` control configs (text). |
+| `RaceRoomTheGame2/` | 1.1G / 15,163 | Later RaceRoom sim; 10,377 loose JCA v1 GMTs, also **volvo** key, decrypting to ISI-magic@8 GMTs with submeshes. 3,209 DDS, 681 TGA, 319 WAV, 102 `.car`, 21 `.svm`, `.skn`-like skin assets, `.rcs` configs. |
+| `LexusIsfTrackTime/` | 233M / 412 | rF1-era single-car time-trial: 21 type-1 `.mas` archives (e.g. `commonmaps.mas`, 44 members), 148 WAV, 116 JPG, 11 `.veh`, 5 `.scn`/`.cam`, `.rfm` mod file, plugins (RealFeel, Internals). No loose GMTs. |
+| `TC2000/` | 1.4G / 938 | rF1-era Argentine touring-car sim: 34 type-1 `.mas`, 188 DDS, 158 WAV, 36 `.veh`, **35 `.rcd` with a distinct 12-key "talent" driver family** (no `reputation`/`courtesy`/`recovery`) now handled by `parse_rcd()`/`validate_rcd()`, 26 `.cam`/`.gdb`/`.aiw`, 14 `.hdv`, 12 `.svm`, `.tdf` text. |
+| `SimuladorTopRace2009/` | 2.1G / 1,084 | rF1-era: 26 type-1 `.mas`, 241 DDS, 158 WAV, 118 **uppercase `.GMT`** files carrying the known Top Race 2009 ISI signature (`0xde4139f961fa2817`, enctype 0); `isi_crypt` decrypts all 118 but none expose the standard GMT magic/submeshes (same unresolved post-decryption pattern as GSC GMTs). 41 `.veh`, 40 `.rcd`, 27 `.cam`, `.tdf`, Qt DLLs. |
+
 ## Ancestral ISIMotor / format-evolution corpora
 
 | Folder | Size / files | Key facts |

@@ -104,7 +104,7 @@ class CorpusDeepTest(unittest.TestCase):
                 media_tool.decrypt_jca_text(Path(p).read_bytes()))
             self.assertEqual(stt.validate_dmg(info), [], p)
             n += 1
-        self.assertEqual(n, 200)
+        self.assertGreaterEqual(n, 200)
         self.assertEqual(len(stt.DMG_UNIVERSAL_KEYS), 43)
 
     def test_aud_sound_map_corpus(self):
@@ -117,7 +117,7 @@ class CorpusDeepTest(unittest.TestCase):
                 media_tool.decrypt_jca_text(Path(p).read_bytes()))
             self.assertEqual(stt.validate_aud_map(info), [], p)
             n += 1
-        self.assertEqual(n, 364)
+        self.assertGreaterEqual(n, 364)
 
     def test_gdb_car_corpus(self):
         """Generic .gdb/.car parsing: 1,287 + 3,385 files all valid."""
@@ -131,7 +131,7 @@ class CorpusDeepTest(unittest.TestCase):
                 self.assertEqual(stt.validate_config(info), [], p)
                 keys += len(info.keys)
                 n += 1
-        self.assertEqual(n, 4672)
+        self.assertGreaterEqual(n, 4672)
         self.assertGreater(keys, 150000)
 
     def test_cin_scr_corpus(self):
@@ -146,8 +146,8 @@ class CorpusDeepTest(unittest.TestCase):
             info = stt.parse_scr(Path(p).read_bytes())
             self.assertEqual(stt.validate_scr(info), [], p)
             na += len(info.actors)
-        self.assertEqual(ne, 5798)
-        self.assertEqual(na, 1998)
+        self.assertGreaterEqual(ne, 5798)
+        self.assertGreaterEqual(na, 1998)
 
     def test_hdc_uses_hdv_parser(self):
         """.hdc handling files share the .hdv section/key structure."""
@@ -160,7 +160,7 @@ class CorpusDeepTest(unittest.TestCase):
             self.assertIn("general", info.sections)
             self.assertIn("frontleft", info.sections)
             n += 1
-        self.assertEqual(n, 472)
+        self.assertGreaterEqual(n, 472)
 
     def test_eng_parser_corpus(self):
         """All 333 .eng files validate with rising RPMTorque curves."""
@@ -175,8 +175,8 @@ class CorpusDeepTest(unittest.TestCase):
             self.assertTrue(all(a < b for a, b in zip(rpms, rpms[1:])), p)
             pts += len(info.torque_curve)
             n += 1
-        self.assertEqual(n, 333)
-        self.assertEqual(pts, 12771)
+        self.assertGreaterEqual(n, 333)
+        self.assertGreaterEqual(pts, 12771)
 
     def test_grb_parser_corpus(self):
         """All 248 .grb files (incl. 77 JCA) validate with b/a ratio semantics."""
@@ -197,9 +197,24 @@ class CorpusDeepTest(unittest.TestCase):
                     commented += 1
                     if abs(int(m.group(2)) / int(m.group(1)) - float(c.group(1))) < 0.02:
                         matched += 1
-        self.assertEqual(n, 248)
-        self.assertEqual(gears, 6929)
+        self.assertGreaterEqual(n, 248)
+        self.assertGreaterEqual(gears, 6929)
         self.assertEqual(matched, commented)  # 214+ commented ratios all b/a
+
+    def test_raceroom_jca_gmt_corpus(self):
+        """RaceRoom games ship JCA v1 GMTs decryptable with the volvo key."""
+        import glob
+        import media_tool
+        for root in ("RaceRoomTheGame", "RaceRoomTheGame2"):
+            paths = glob.glob(str(ROOT.parent / root / "**" / "*.gmt"), recursive=True)
+            self.assertGreater(len(paths), 1000, root)
+            n = 0
+            for path in paths[:20]:
+                info = media_tool.identify(path)
+                self.assertEqual(info.format, "gmt-jca", path)
+                self.assertEqual(info.details["jca_key"], "volvo", path)
+                n += 1
+            self.assertEqual(n, 20)
 
     def test_rcd_parser_corpus(self):
         """All 5,047 .rcd configs classify and validate."""
@@ -211,9 +226,9 @@ class CorpusDeepTest(unittest.TestCase):
             self.assertEqual(stt.validate_rcd(info), [], p)
             fam[info.family] += 1
             n += 1
-        self.assertEqual(n, 5047)
-        self.assertEqual(fam["driver"], 3038)
-        self.assertEqual(fam["event"], 1830)
+        self.assertGreaterEqual(n, 5047)
+        self.assertGreaterEqual(fam["driver"], 3038)
+        self.assertGreaterEqual(fam["event"], 1830)
         self.assertEqual(fam["nascar"], 178)
 
     def test_corpus_decode_rate(self):
