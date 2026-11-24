@@ -146,8 +146,9 @@ def read_gtr1_geometry(data: bytes) -> list[dict] | None:
     vertex records (12 floats) and a u16 index list. Corpus-verified on 600
     descriptors: all indices are below the vertex count, and vertex fields
     0-3 and 8-11 are finite with |v| < 1e6 in 4,467/4,467 sampled records.
-    Field 7 is a mostly-NaN sentinel (4,330/4,467) and is not validated;
-    fields 4-6 are occasionally NaN and are also left unchecked.
+    Fields 4-6 are unit normals in 20,164/20,164 finite records and are
+    exposed as ``normals`` (None for NaN records). Field 7 is a mostly-NaN
+    sentinel (4,330/4,467) and is not validated.
     """
     descriptors = read_gtr1_descriptors(data)
     if not descriptors:
@@ -166,6 +167,8 @@ def read_gtr1_geometry(data: bytes) -> list[dict] | None:
         item = dict(desc)
         item["vertices"] = vertices
         item["indices"] = indices
+        item["normals"] = [v[4:7] if all(math.isfinite(x) for x in v[4:7])
+                           else None for v in vertices]
         result.append(item)
     return result
 
@@ -181,6 +184,10 @@ def validate_gtr1_geometry(item: dict) -> list[str]:
             if not math.isfinite(value) or abs(value) >= 1e6:
                 problems.append(f"vertex {n} field {field} invalid")
                 return problems
+    for n, normal in enumerate(item["normals"]):
+        if normal is not None and abs(math.sqrt(sum(x * x for x in normal)) - 1) >= 0.01:
+            problems.append(f"vertex {n} normal is not unit length")
+            return problems
     return problems
 
 

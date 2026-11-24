@@ -125,6 +125,7 @@ class CorpusDeepTest(unittest.TestCase):
                     self.assertEqual(gmt_semantic.validate_gtr1_geometry(item), [], e.name)
                     self.assertEqual(len(item["vertices"]), item["v_count"])
                     self.assertEqual(len(item["indices"]), item["i_count"])
+                    self.assertEqual(len(item["normals"]), item["v_count"])
                     descs += 1
                 if files >= 50:
                     break

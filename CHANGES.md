@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-25 09:40:00 -0500 - GTR1 vertex normals identified
+- Corpus-confirmed vertex fields 4–6 of GTR1 third-magic GMTs as unit normals (20,164/20,164 finite records) and exposed them as `normals` in `read_gtr1_geometry()`, with a unit-length validator check and full-tier regression test. Remaining vertex fields are still unclassified.
+
 ## 2026-11-25 09:20:00 -0500 - GTR1 descriptor geometry decoder
 - Added `gmt_semantic.read_gtr1_geometry()` and `validate_gtr1_geometry()`: decodes GTR1 third-magic GMT descriptor vertex records and u16 index lists. Corpus-verified on 600 descriptors (indices in range) and 4,467 sampled vertex records (fields 0–3/8–11 finite and bounded); full-tier regression test. Vertex field semantics remain unconfirmed.
 
