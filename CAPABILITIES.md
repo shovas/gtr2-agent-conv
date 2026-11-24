@@ -121,6 +121,8 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 
 - **`.gdb` SpecialClasses resolution**: `parse_gdb_class_blocks()` extracts SpecialClasses/Short keys; 112/117 resolve to local `.car` tags, with all five misses confined to one DLC event file. Full-tier regression test.
 
+- **rF1-era GDB format boundary**: rF1-era GDBs use `Filter Properties`, not SimBin `SpecialClasses`/`Game Filter`; 0/154 tokens match `.veh`/`.hdv` class tags. Full-tier corpus-fact test documents that no cross-era class validator applies.
+
 ## Coverage gaps (documented, not yet addressed)
 - **GTR 2004 corpus** (`../GTR1Vanilla`, third GMT magic `...bba6bf90` at 0x04) is fully decoded by `gmt_semantic.py` (descriptor grid + descriptor-less object-mesh path; 33,477/33,477 files). `gmt_format.py` itself still targets the GTL/GTR2 layout only; use `gmt_semantic.py` for GTR1. See `docs/binary-formats.md`.
 - **Untested ISI signatures**: `isi_crypt.GAMES` supports 8 signatures but real corpora exist only for rFactor and Game Stock Car; ARCA Sim Racing, Simulador Turismo Carretera, Top Race 2009, Superleague Formula, STC 2012 and Formula Truck have no local corpus.

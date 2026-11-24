@@ -108,6 +108,33 @@ class CorpusDeepTest(unittest.TestCase):
         self.assertGreater(subs, 15)
         self.assertGreater(faces, 10)
 
+    def test_rf1_gdb_filter_format_differs(self):
+        """rF1-era GDBs use Filter Properties, not SimBin class filters."""
+        import glob
+        import re
+        import simbin_text_tool as stt_local
+        gdbs = tokens = resolved = 0
+        for root in ("RF1Vanilla", "F1C", "F12002", "NT2003"):
+            base = ROOT.parent / root
+            car_tags: set[str] = set()
+            for p in glob.glob(str(base / "**" / "*"), recursive=True):
+                if Path(p).is_file() and p.lower().endswith((".veh", ".hdv")):
+                    car_tags.update(stt_local.car_class_tags(stt_local.read_text(p)))
+            for p in glob.glob(str(base / "**" / "*.gdb"), recursive=True):
+                if not Path(p).is_file():
+                    continue
+                text = stt_local.read_text(p)
+                self.assertNotIn("SpecialClasses", text, p)
+                self.assertNotIn("Game Filter", text, p)
+                gdbs += 1
+                for m in re.finditer(r"(?mi)^[ \t]*Filter Properties[ \t]*=[ \t]*(.*)$", text):
+                    for tag in m.group(1).split():
+                        tokens += 1
+                        resolved += tag.strip().lower() in car_tags
+        self.assertGreater(gdbs, 70)
+        self.assertGreater(tokens, 100)
+        self.assertLess(resolved / tokens, 0.01)  # documented negative
+
     def test_gdb_special_class_resolution(self):
         """GDB SpecialClasses keys resolve against local .car class tags."""
         import glob

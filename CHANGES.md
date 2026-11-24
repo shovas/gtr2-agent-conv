@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 02:00:00 -0500 - rF1 GDB format boundary
+- Documented that rF1-era GDBs have no SimBin class-filter sections; their 154 `Filter Properties` tokens do not match `.veh`/`.hdv` class tags. Full-tier corpus-fact test added; no cross-era class validator promoted.
+
 ## 2026-11-26 01:30:00 -0500 - GDB SpecialClasses resolution
 - Added `parse_gdb_class_blocks()` and a full-tier test: 112/117 SpecialClasses keys resolve to local `.car` tags; five misses confined to one Race07 DLC event file. Documented alongside the existing GDB filter-class check.
 
