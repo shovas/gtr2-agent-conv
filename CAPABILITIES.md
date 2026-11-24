@@ -89,7 +89,7 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 - **Verification**: `tests/test_media_tool.py` (PCM round-trip; real MP3-in-WAV format 0x55 and extra-chunk WAV byte-identical round-trips when present).
 - **Tool**: `media_tool.py`.
 - **JCA-wrapped textures**: 33,351 JCA-encrypted `.dds` and 4,415 `.tga` found across 7 corpora; `jca-decrypt` and `dds-jca`/`tga-jca` identification added and verified on Race07 samples.
-- **Compressed payloads**: `media_tool.py wav-decode <src> <dst>` decodes ADPCM and MP3-in-WAV to 16-bit PCM via ffmpeg; `wav-encode <src> <dst> [--codec adpcm_ima_wav|libmp3lame]` encodes back. Both verified on corpus samples.
+- **Compressed payloads**: a 360-file sample of decrypted JCA WAVs (Race07/Volvo) found only PCM format 1 — no unsupported codecs in the encrypted corpus. `media_tool.py wav-decode <src> <dst>` decodes ADPCM and MP3-in-WAV to 16-bit PCM via ffmpeg; `wav-encode <src> <dst> [--codec adpcm_ima_wav|libmp3lame]` encodes back. Both verified on corpus samples.
 - **JCA keys**: `detect_jca_key()` auto-detects `default` (Race07/Copa) vs `volvo` from decrypted-payload magic; `jca-decrypt --key auto` is the CLI default, verified on both corpora. Re-encryption is semantically lossless (25/25 sampled WAV files decrypt→encrypt→decrypt exactly) but not byte-identical, because zlib output differs; preserve original JCA files by copying rather than decrypt/re-encrypt.
 - **Gaps**: ADPCM/MP3 re-encoding is lossy (74.8% sample-exact on the round-trip); no in-repo MP3/ADPCM codec.
 
