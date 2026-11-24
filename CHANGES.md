@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-25 09:00:00 -0500 - SimBin encrypted-config family identified
+- Added `media_tool.gmb_encrypted_config()` to identify `gMb1.00xx` encrypted-config headers and flag high-entropy payloads; corpus-verified on 19 `gMb1.002f` files across TC2000/TR2009/Superleague with a full-tier regression test. Documented fresh TR2009 `.hdv` negatives (header field is not an ISI signature; raw ISI/JCA, compression and known-plaintext keystreams all fail). No decoder promoted.
+
 ## 2026-11-25 08:40:00 -0500 - HDR pair bounds validator
 - Added `media_tool.validate_hdr_dat_pair()` enforcing corpus-verified bounds on all 1,982 NASCAR `.hdr`/`.dat` pairs (header alignment/size, block count fits payload) with a full-tier regression test. Documented that the remaining header fields are category flags, not data offsets (only 1.8% chance-level sync hits; 789/829 nonzero +12 values out of bounds).
 

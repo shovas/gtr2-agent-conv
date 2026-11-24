@@ -330,6 +330,26 @@ class CorpusDeep2Test(unittest.TestCase):
 
 
 
+    def test_gmb_encrypted_config_family(self):
+        """gMb1.002f encrypted configs share the same header structure."""
+        import glob
+        import os
+        n = encrypted = 0
+        for root in ("TC2000", "SimuladorTopRace2009", "SuperleagueFormula2009"):
+            for p in glob.glob(str(ROOT.parent / root / "**" / "*"), recursive=True):
+                if not os.path.isfile(p):
+                    continue
+                with open(p, "rb") as f:
+                    info = media_tool.gmb_encrypted_config(f.read(4096))
+                if not info or info["version"] != "gMb1.002f":
+                    continue
+                n += 1
+                if info["encrypted"]:
+                    encrypted += 1
+                    self.assertEqual(len(info["field"]), 12, p)
+        self.assertEqual(n, 19)
+        self.assertEqual(encrypted, 18)
+
     def test_hdr_dat_index_bounds(self):
         """HDR index bounds match the companion MP3 .dat on all pairs."""
         import glob

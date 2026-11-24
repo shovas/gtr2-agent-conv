@@ -552,6 +552,36 @@ def hdr_dat_mp3(hdr_path: str | Path) -> tuple[bytes, dict] | None:
     return payload, info
 
 
+def gmb_encrypted_config(data: bytes) -> dict | None:
+    """Identify a SimBin ``gMb1.00xx`` encrypted-config payload.
+
+    Corpus-verified on 19 files carrying the ``gMb1.002f`` header across
+    `../TC2000`, `../SimuladorTopRace2009` and `../SuperleagueFormula2009`
+    (18 encrypted configs plus one IRSR replay that only mentions the tag).
+    The 12-byte bracket field is **not** an ISI signature and no decoder is
+    known; this helper only exposes the structure for further research.
+    """
+    if not data.startswith(b"//[[gMb1."):
+        return None
+    nl = data.find(b"\n")
+    if nl < 0 or nl > 512:
+        return None
+    head = data[:nl]
+    first_end = head.find(b"]]")
+    field_start = head.find(b"[[", first_end + 2) if first_end >= 0 else -1
+    field_end = head.find(b"]]", field_start + 2) if field_start >= 0 else -1
+    if field_start < 0 or field_end < 0:
+        return None
+    version = head[head.find(b"gMb1."):head.find(b"gMb1.") + 9].decode("latin-1")
+    field = head[field_start + 2:field_end]
+    payload = data[nl + 1:]
+    sample = payload[:256]
+    printable = (sum(32 <= c < 127 or c in (9, 10, 13) for c in sample)
+                 / len(sample)) if sample else 0.0
+    return {"version": version, "field": field, "payload": payload,
+            "encrypted": printable < 0.6, "printable": round(printable, 3)}
+
+
 def validate_hdr_dat_pair(hdr_path: str | Path) -> list[str]:
     """Check corpus-verified bounds of a NASCAR-era ``.hdr``/``.dat`` pair.
 
