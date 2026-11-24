@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 19:30:00 -0500 - Aud key coverage confirmed on encrypted corpus
+- All 17 GTR2-only `.aud` keys used by `validate_aud()` are present in every corpus, including 101 decrypted JCA Race07 and 9 Volvo files — no audio-key addition is needed for Race07 sources. Documented as a no-gap confirmation.
+
 ## 2026-11-24 19:00:00 -0500 - Config text identification
 - `media_tool.identify()` now labels plain `.rcd/.gdb/.car/.aiw/.cam/.hed/.dmg/.grb` configs by distinctive key signatures; JCA-wrapped variants stay `text-jca`. Added a corpus regression test; all 63 media tests pass.
 
