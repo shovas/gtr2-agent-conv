@@ -186,6 +186,51 @@ class CorpusDeep2Test(unittest.TestCase):
                             checked += 1
             self.assertGreater(checked, 1000)
 
+    def test_car_reference_resolution_race07complete(self):
+        """Race07Complete .car HDVehicle/Graphics/Sounds refs resolve."""
+        import glob
+        import os
+        import re
+        base = ROOT.parent / "Race07Complete"
+        files = {e: {os.path.basename(p).lower()
+                     for p in glob.glob(str(base / "**" / ("*" + e)), recursive=True)}
+                 for e in (".hdc", ".cas", ".aud", ".cam")}
+        checked = resolved = jca = n = 0
+        pattern = r"(?m)^\s*([A-Za-z_][\w]*)\s*=\s*(.*)$"
+        for p in glob.glob(str(base / "**" / "*"), recursive=True):
+            if not os.path.isfile(p) or not p.lower().endswith(".car"):
+                continue
+            raw = Path(p).read_bytes()
+            jca += raw[:4] == media_tool.JCA_MAGIC
+            text = media_tool.decrypt_jca_text(raw).decode("latin-1")
+            d = {k.lower(): v.strip().strip('"') for k, v in re.findall(pattern, text)}
+            n += 1
+            for key, ext in (("hdvehicle", ".hdc"), ("graphics", ".cas"),
+                             ("sounds", ".aud"), ("camera", ".cam")):
+                m = re.search(r"([^\\/]+\.\w+)$", d.get(key, ""), re.I)
+                if m:
+                    checked += 1
+                    resolved += m.group(1).lower() in files[ext]
+        self.assertEqual(n, 823)
+        self.assertGreater(jca, 600)
+        self.assertGreater(checked, 250)
+        self.assertEqual(resolved, checked)
+
+    def test_race07complete_gdb_has_no_path_refs(self):
+        """Race07Complete .gdb files are physics tweaks without path refs."""
+        import glob
+        n = 0
+        for p in glob.glob(str(ROOT.parent / "Race07Complete" / "**" / "*"),
+                           recursive=True):
+            if not p.lower().endswith(".gdb") or not Path(p).is_file():
+                continue
+            text = media_tool.decrypt_jca_text(Path(p).read_bytes()).decode("latin-1")
+            active = "\n".join(line for line in text.splitlines()
+                               if not line.lstrip().startswith("//"))
+            self.assertNotIn("\\", active, p)
+            n += 1
+        self.assertEqual(n, 114)
+
     def test_aud_wav_references_race07complete(self):
         """Race07Complete .aud WAV refs resolve (including JCA-wrapped files)."""
         import glob

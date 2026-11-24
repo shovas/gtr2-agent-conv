@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-25 12:00:00 -0500 - Race07Complete .car reference resolution
+- Corpus-verified all 823 Race07Complete `.car` files (621 JCA-encrypted) with 262/262 HDVehicle/Graphics/Sounds/Camera references resolving locally. Documented that the 114 `.gdb` files have no active path references. Full-tier regression tests added.
+
 ## 2026-11-25 11:30:00 -0500 - Race07Complete .aud reference resolution
 - Corpus-verified all 137 Race07Complete `.aud` files (101 JCA-encrypted) parse cleanly and 7,147/7,264 WAV references (98.4%) resolve locally; 43 missing basenames are DLC/shared-file gaps. Full-tier regression test added.
 
