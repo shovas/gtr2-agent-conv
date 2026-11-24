@@ -81,6 +81,24 @@ class SimbinTextToolTest(unittest.TestCase):
         self.assertEqual(info.stamps, ["Detail.tga"])
         self.assertEqual(info.decals, ["Small"])
 
+    def test_rcd_parser_families(self):
+        """.rcd classification and validation on small fixtures."""
+        event = ("CJames\r\n{\r\nNationality=German\r\nStartsDry=10\r\n"
+                 "StartsWet=5\r\nStartStalls=2\r\nCrash=6.5\r\nPassing=70\r\n"
+                 "QualifyingAbility=80\r\nRaceAbility=75\r\nRainAbility=60\r\n"
+                 "Recovery=68\r\n}\r\n")
+        info = stt.parse_rcd(event)
+        self.assertEqual(info.family, "event")
+        self.assertEqual(info.name, "CJames")
+        self.assertEqual(info.values["nationality"], "German")
+        self.assertEqual(stt.validate_rcd(info), [])
+        nascar = ("Bill\n{\nSpeed=92\nConcentration=80\nFitness=70\n"
+                  "Intimidation=50\nAggression=86\nStatus=1\nCourtesy=74\n"
+                  "Script=0\n}\n")
+        info = stt.parse_rcd(nascar)
+        self.assertEqual(info.family, "nascar")
+        self.assertEqual(stt.validate_rcd(info), [])
+
     def test_hed_parser_corpus(self):
         """.hed: 88 files, 5 springs in fixed order, all invariants hold."""
         import glob

@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 23:45:00 -0500 - .rcd race-config parser
+- Added `simbin_text_tool.parse_rcd()` / `validate_rcd()`: all 5,047 `.rcd` files classify into driver (3,038), event (1,830), NASCAR driver (178) and fueluse (1) families with 0 validation problems. Added 2 regression tests; all 21 simbin-text/corpus-deep tests pass, Quick stays at 56.1 s.
+
 ## 2026-11-24 23:30:00 -0500 - .skn skin parser and final tier rebalance
 - Added `simbin_text_tool.parse_skn()` / `validate_skn()` for all 262 skin descriptors (788 layers, 786 words, 262 stamps, 0 validation problems). Moved the 3.9 s `.svm` key-subset check to full-only `tests/test_corpus_deep.py`, keeping Quick at 57.0 s (142 tests). All 19 corpus-deep/simbin-text tests pass.
 

@@ -296,6 +296,84 @@ def parse_veh(data: bytes | str) -> dict[str, str]:
     return out
 
 
+RCD_CORE_STATS = ("aggression", "reputation", "courtesy", "composure",
+                  "speed", "crash", "recovery", "completedlaps", "minracingskill")
+RCD_NASCAR_STATS = ("speed", "concentration", "fitness", "intimidation",
+                    "aggression", "status", "courtesy", "script")
+RCD_EVENT_KEYS = ("crash", "nationality", "passing", "qualifyingability",
+                  "raceability", "rainability", "recovery", "startsdry",
+                  "startstalls", "startswet")
+
+
+@dataclass
+class RcdInfo:
+    name: str = ""
+    family: str = ""  # driver | event | unknown
+    values: dict[str, str] = field(default_factory=dict)
+
+
+def parse_rcd(data: bytes | str) -> RcdInfo:
+    """Parse an rFactor/GTR2 ``.rcd`` race-config descriptor.
+
+    Corpus-verified on 5,047 files (all plain text): the first non-comment
+    line before ``{`` is the driver/event name; key/value lines carry the
+    fields. Two families occur — driver records (3,038 files carry all nine
+    core stat keys) and event records (1,830 files with StartsDry/StartsWet).
+    """
+    text = data if isinstance(data, str) else data.decode("latin-1")
+    info = RcdInfo()
+    for line in text.splitlines():
+        stripped = line.strip()
+        if not stripped or stripped.startswith("//"):
+            continue
+        if stripped == "{":
+            continue
+        m = re.match(r"^([A-Za-z_][\w]*)\s*=\s*(.*)$", stripped)
+        if m:
+            value = m.group(2).split("//", 1)[0].strip().strip('"')
+            info.values[m.group(1).lower()] = value
+            continue
+        if not info.name and "{" not in stripped:
+            info.name = stripped
+    lower = set(info.values)
+    if "startswet" in lower or "startsdry" in lower or "passing" in lower:
+        info.family = "event"
+    elif "concentration" in lower or "fitness" in lower:
+        info.family = "nascar"
+    elif "basefuelusage" in lower:
+        info.family = "fueluse"
+    elif "aggression" in lower or "nationality" in lower:
+        info.family = "driver"
+    else:
+        info.family = "unknown"
+    return info
+
+
+def validate_rcd(info: RcdInfo) -> list[str]:
+    """Check corpus-verified .rcd invariants; return a list of problems."""
+    problems: list[str] = []
+    if not info.name:
+        problems.append("missing name")
+    keys = set(info.values)
+    if info.family == "event":
+        for required in RCD_EVENT_KEYS:
+            if required not in keys:
+                problems.append(f"event: missing {required}")
+    elif info.family == "driver":
+        for required in RCD_CORE_STATS:
+            if required not in keys:
+                problems.append(f"driver: missing {required}")
+    elif info.family == "nascar":
+        for required in RCD_NASCAR_STATS:
+            if required not in keys:
+                problems.append(f"nascar: missing {required}")
+    elif info.family == "fueluse":
+        pass  # single fuel-usage table, no driver/event schema
+    else:
+        problems.append(f"unknown family (keys: {sorted(keys)[:5]})")
+    return problems
+
+
 @dataclass
 class SknLayer:
     texture: str = ""

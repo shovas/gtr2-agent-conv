@@ -8,6 +8,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
+import collections
 import anm_format  # noqa: E402
 import simbin_text_tool as stt  # noqa: E402
 import mas_tool  # noqa: E402
@@ -91,6 +92,21 @@ class CorpusDeepTest(unittest.TestCase):
         # Section names are identical across rF1 and GTR2 setups.
         self.assertEqual(rf_sections, gtr_sections)
         self.assertEqual(len(rf_sections), 15)
+
+    def test_rcd_parser_corpus(self):
+        """All 5,047 .rcd configs classify and validate."""
+        import glob
+        fam = collections.Counter()
+        n = 0
+        for p in glob.glob(str(ROOT.parent / "**" / "*.rcd"), recursive=True):
+            info = stt.parse_rcd(Path(p).read_bytes())
+            self.assertEqual(stt.validate_rcd(info), [], p)
+            fam[info.family] += 1
+            n += 1
+        self.assertEqual(n, 5047)
+        self.assertEqual(fam["driver"], 3038)
+        self.assertEqual(fam["event"], 1830)
+        self.assertEqual(fam["nascar"], 178)
 
     def test_corpus_decode_rate(self):
         """Archived ANM members decode across every ANM-bearing corpus.
