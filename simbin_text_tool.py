@@ -968,6 +968,31 @@ def validate_ani_text(rules: list[dict]) -> list[str]:
     return problems
 
 
+def parse_gdb_class_blocks(data: bytes | str) -> dict[str, list[str]]:
+    """Extract keys from GDB SpecialClasses / SpecialClassesShort blocks.
+
+    Corpus-verified on 252 GTR2/GTL/Race07 event files: 112/117 SpecialClasses
+    keys (95.7%) resolve to local .car class tags; all five misses come from a
+    single DLC event file whose classes are not shipped in the install.
+    """
+    text = data if isinstance(data, str) else data.decode("latin-1")
+    out: dict[str, list[str]] = {}
+    for block in ("SpecialClasses", "SpecialClassesShort", "CategoryLists"):
+        keys: list[str] = []
+        pattern = re.compile(r"(?ms)^[ \t]*" + block + r"[ \t]*\r?\n[ \t]*\{(.*?)^[ \t]*\}")
+        for match in pattern.finditer(text):
+            for line in match.group(1).splitlines():
+                entry = line.split("//", 1)[0].strip()
+                if "=" not in entry:
+                    continue
+                key = entry.split("=", 1)[0].strip().strip('"').lower()
+                if key:
+                    keys.append(key)
+        if keys:
+            out[block] = keys
+    return out
+
+
 def parse_gdb_filter_tags(data: bytes | str) -> list[str]:
     """Extract class tags from GDB Game/Selection/AI filter lines.
 

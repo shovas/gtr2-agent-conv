@@ -108,6 +108,30 @@ class CorpusDeepTest(unittest.TestCase):
         self.assertGreater(subs, 15)
         self.assertGreater(faces, 10)
 
+    def test_gdb_special_class_resolution(self):
+        """GDB SpecialClasses keys resolve against local .car class tags."""
+        import glob
+        import media_tool
+        import simbin_text_tool as stt_local
+        checked = resolved = 0
+        for root in ("GTR2Steam", "GTLSteam", "Race07Complete"):
+            base = ROOT.parent / root
+            tags: set[str] = set()
+            for p in glob.glob(str(base / "**" / "*"), recursive=True):
+                if not Path(p).is_file() or not p.lower().endswith(".car"):
+                    continue
+                text = media_tool.decrypt_jca_text(Path(p).read_bytes()).decode("latin-1")
+                tags.update(stt_local.car_class_tags(text))
+            for p in glob.glob(str(base / "**" / "*.gdb"), recursive=True):
+                if not Path(p).is_file():
+                    continue
+                text = media_tool.decrypt_jca_text(Path(p).read_bytes()).decode("latin-1")
+                for key in stt_local.parse_gdb_class_blocks(text).get("SpecialClasses", []):
+                    checked += 1
+                    resolved += key in tags
+        self.assertGreater(checked, 110)
+        self.assertGreater(resolved / checked, 0.95)
+
     def test_gdb_filter_class_resolution(self):
         """GDB filter class tags resolve against local .car declarations."""
         import glob
