@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-25 18:30:00 -0500 - Converter output material validation
+- Both VRL→GMT and GTR1→GMT round-trip tests now also run `validate_materials.check_gmt()` on converted output (clean). Documented that `validate_conversion.independent_read()` targets the old-layout submesh format and does not apply to new-layout GTR2 output.
+
 ## 2026-11-25 18:00:00 -0500 - GTR1 to GTR2 GMT conversion
 - Added `gtr1_to_gmt.py`, built on the shared `vrl_to_gmt.build_gmt()` writer: merges GTR1 third-magic descriptor submeshes into one GTR2 mesh with corpus-verified positions/normals and rebased triangles. Output is re-parsed and verified; full-tier round-trip test over 25 GTR1 GMTs. UV-like fields remain untransferred.
 

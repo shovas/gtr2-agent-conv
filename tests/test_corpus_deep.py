@@ -13,6 +13,7 @@ import re
 import anm_format  # noqa: E402
 import simbin_text_tool as stt  # noqa: E402
 import mas_tool  # noqa: E402
+import validate_materials  # noqa: E402
 
 
 def _anm_samples(root, limit=None):
@@ -175,6 +176,7 @@ class CorpusDeepTest(unittest.TestCase):
                 data = gtr1_to_gmt.gtr1_to_gmt(e.data, template)
                 self.assertEqual(vrl_to_gmt.verify_gmt_geometry(
                     data, positions, triangles, normals), [], e.name)
+                self.assertEqual(validate_materials.check_gmt(data, e.name), [], e.name)
                 n += 1
                 if n >= 25:
                     break
@@ -214,6 +216,7 @@ class CorpusDeepTest(unittest.TestCase):
                     continue
                 data = vrl_to_gmt.vrl_to_gmt(vrl, template)
                 self.assertEqual(vrl_to_gmt.verify_gmt(data, vrl), [], e.name)
+                self.assertEqual(validate_materials.check_gmt(data, e.name), [], e.name)
                 n += 1
                 if n >= 25:
                     break
