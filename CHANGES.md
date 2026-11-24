@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-25 09:20:00 -0500 - GTR1 descriptor geometry decoder
+- Added `gmt_semantic.read_gtr1_geometry()` and `validate_gtr1_geometry()`: decodes GTR1 third-magic GMT descriptor vertex records and u16 index lists. Corpus-verified on 600 descriptors (indices in range) and 4,467 sampled vertex records (fields 0–3/8–11 finite and bounded); full-tier regression test. Vertex field semantics remain unconfirmed.
+
 ## 2026-11-25 09:00:00 -0500 - SimBin encrypted-config family identified
 - Added `media_tool.gmb_encrypted_config()` to identify `gMb1.00xx` encrypted-config headers and flag high-entropy payloads; corpus-verified on 19 `gMb1.002f` files across TC2000/TR2009/Superleague with a full-tier regression test. Documented fresh TR2009 `.hdv` negatives (header field is not an ISI signature; raw ISI/JCA, compression and known-plaintext keystreams all fail). No decoder promoted.
 

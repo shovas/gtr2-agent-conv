@@ -102,6 +102,37 @@ class CorpusDeepTest(unittest.TestCase):
                 break
         self.assertGreater(n, 1000)
 
+    def test_gtr1_descriptor_geometry(self):
+        """GTR1 third-magic descriptor vertices/indices decode cleanly."""
+        import glob
+        import gmt_semantic
+        import mas_tool
+        files = descs = 0
+        for arc in glob.glob(str(ROOT.parent / "GTR1Vanilla" / "**" / "*.gtr"),
+                             recursive=True)[:12]:
+            try:
+                _, entries = mas_tool.read_archive(arc)
+            except Exception:
+                continue
+            for e in entries:
+                if not e.name.lower().endswith(".gmt") or not e.data:
+                    continue
+                geom = gmt_semantic.read_gtr1_geometry(e.data)
+                if not geom:
+                    continue
+                files += 1
+                for item in geom:
+                    self.assertEqual(gmt_semantic.validate_gtr1_geometry(item), [], e.name)
+                    self.assertEqual(len(item["vertices"]), item["v_count"])
+                    self.assertEqual(len(item["indices"]), item["i_count"])
+                    descs += 1
+                if files >= 50:
+                    break
+            if files >= 50:
+                break
+        self.assertGreater(files, 30)
+        self.assertGreater(descs, 80)
+
     def test_gsc_geometry_decoder(self):
         """read_gsc_geometry decodes real geometry with quality flags."""
         import glob

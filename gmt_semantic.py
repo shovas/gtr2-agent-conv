@@ -139,6 +139,51 @@ def read_gmt(data: bytes) -> dict:
             "face_count": sum(len(s["faces"]) for s in subs)}
 
 
+def read_gtr1_geometry(data: bytes) -> list[dict] | None:
+    """Decode geometry behind GTR1 third-magic GMT descriptors.
+
+    Each descriptor from :func:`read_gtr1_descriptors` points to 48-byte
+    vertex records (12 floats) and a u16 index list. Corpus-verified on 600
+    descriptors: all indices are below the vertex count, and vertex fields
+    0-3 and 8-11 are finite with |v| < 1e6 in 4,467/4,467 sampled records.
+    Field 7 is a mostly-NaN sentinel (4,330/4,467) and is not validated;
+    fields 4-6 are occasionally NaN and are also left unchecked.
+    """
+    descriptors = read_gtr1_descriptors(data)
+    if not descriptors:
+        return None
+    result = []
+    for desc in descriptors:
+        vc, ic = desc["v_count"], desc["i_count"]
+        if vc <= 0 or ic < 0 or desc["v_off"] + vc * 48 > len(data) or \
+                desc["i_off"] + ic * 2 > len(data):
+            return None
+        vertices = [struct.unpack_from("<12f", data, desc["v_off"] + i * 48)
+                    for i in range(vc)]
+        indices = struct.unpack_from(f"<{ic}H", data, desc["i_off"])
+        if any(i >= vc for i in indices):
+            return None
+        item = dict(desc)
+        item["vertices"] = vertices
+        item["indices"] = indices
+        result.append(item)
+    return result
+
+
+def validate_gtr1_geometry(item: dict) -> list[str]:
+    """Check the corpus-verified invariants of one decoded descriptor."""
+    problems: list[str] = []
+    if any(i >= item["v_count"] for i in item["indices"]):
+        problems.append("vertex index out of range")
+    for n, vertex in enumerate(item["vertices"]):
+        for field in (0, 1, 2, 3, 8, 9, 10, 11):
+            value = vertex[field]
+            if not math.isfinite(value) or abs(value) >= 1e6:
+                problems.append(f"vertex {n} field {field} invalid")
+                return problems
+    return problems
+
+
 def read_gsc_geometry(data: bytes) -> dict | None:
     """Decode geometry from an ISI-decrypted, decodable GSC old-layout GMT.
 
