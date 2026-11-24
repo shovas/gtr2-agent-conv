@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 23:00:00 -0500 - .hed head-physics parser
+- Added `simbin_text_tool.parse_hed()` / `validate_hed()` for all 88 `.hed` files (incl. 56 JCA-wrapped via `decrypt_jca_text()`). Corpus-verified 11 universal keys and a fixed 5-spring order (Sliding×3, FreeDamping×2) with 0 validation problems; FreeDamping legitimately omits SpringDir. Added 2 regression tests; all 15 simbin text tests pass.
+
 ## 2026-11-24 22:30:00 -0500 - Second test-tier rebalance
 - Moved the 172-file `.sp` corpus check to full-only `tests/test_corpus_deep.py`, keeping Quick at 59.6 s (≤60 s budget, 140 tests). Full tier remains 51 modules / 396 tests; all tests pass.
 

@@ -297,6 +297,98 @@ def parse_veh(data: bytes | str) -> dict[str, str]:
 
 
 @dataclass
+class HedSpring:
+    kind: str = ""
+    direction: tuple[float, ...] | None = None
+    head: tuple[float, ...] | None = None
+    body: tuple[float, ...] | None = None
+    coll_len: tuple[float, ...] | None = None
+    params: tuple[float, ...] | None = None
+
+
+@dataclass
+class HedInfo:
+    head_mass: float | None = None
+    head_inertia: tuple[float, ...] | None = None
+    min_pos: tuple[float, ...] | None = None
+    max_pos: tuple[float, ...] | None = None
+    min_ori: tuple[float, ...] | None = None
+    max_ori: tuple[float, ...] | None = None
+    springs: list[HedSpring] = field(default_factory=list)
+
+
+HED_SPRING_TYPES = ("Sliding", "Sliding", "Sliding",
+                    "FreeDamping", "FreeDamping")
+
+
+def parse_hed(data: bytes | str) -> HedInfo:
+    """Parse an ISIMotor ``.hed`` head-physics file.
+
+    Corpus-verified on 88 files (31 plain ``gMb1.000f``, 56 JCA-wrapped, 1
+    rF2 comment-header): 11 global keys are universal and every file has
+    exactly five springs in the fixed order Sliding x3 then FreeDamping x2.
+    Pass decrypted bytes for JCA-wrapped files (see ``media_tool.decrypt_jca_text``).
+    """
+    text = data if isinstance(data, str) else data.decode("latin-1")
+    info = HedInfo()
+    for line in text.splitlines():
+        code = line.split("//", 1)[0].strip()
+        m = re.match(r"^([A-Za-z_]\w*)\s*=\s*(.*)$", code)
+        if not m:
+            continue
+        key, raw = m.group(1).lower(), m.group(2).strip()
+        nums = _all_floats(raw)
+        if key == "headmass":
+            scalar = _floats(raw, 1)
+            info.head_mass = scalar[0] if scalar else None
+        elif key == "headinertia":
+            info.head_inertia = nums
+        elif key == "minpos":
+            info.min_pos = nums
+        elif key == "maxpos":
+            info.max_pos = nums
+        elif key == "minori":
+            info.min_ori = nums
+        elif key == "maxori":
+            info.max_ori = nums
+        elif key == "spring":
+            info.springs.append(HedSpring(kind=raw.strip('"')))
+        elif info.springs:
+            spring = info.springs[-1]
+            if key == "springdir":
+                spring.direction = nums
+            elif key == "springhead":
+                spring.head = nums
+            elif key == "springbody":
+                spring.body = nums
+            elif key == "springcolllen":
+                spring.coll_len = nums
+            elif key == "springparams":
+                spring.params = nums
+    return info
+
+
+def validate_hed(info: HedInfo) -> list[str]:
+    """Check corpus-verified .hed invariants; return a list of problems."""
+    problems: list[str] = []
+    for field in ("head_mass", "head_inertia", "min_pos", "max_pos",
+                  "min_ori", "max_ori"):
+        if getattr(info, field) is None:
+            problems.append(f"missing {field}")
+    kinds = tuple(s.kind for s in info.springs)
+    if kinds != HED_SPRING_TYPES:
+        problems.append(f"spring sequence {kinds} != {HED_SPRING_TYPES}")
+    for i, spring in enumerate(info.springs):
+        # SpringDir is documented as invalid for FreeDamping springs.
+        fields = ("direction", "head", "body", "params") if spring.kind == "Sliding" \
+            else ("head", "body", "params")
+        for field in fields:
+            if getattr(spring, field) is None:
+                problems.append(f"spring {i}: missing {field}")
+    return problems
+
+
+@dataclass
 class SpBody:
     name: str = ""
     mass: tuple[float, ...] | None = None

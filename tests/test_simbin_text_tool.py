@@ -66,6 +66,35 @@ class SimbinTextToolTest(unittest.TestCase):
         self.assertGreater(parsed, 0)
 
 
+    def test_hed_parser_corpus(self):
+        """.hed: 88 files, 5 springs in fixed order, all invariants hold."""
+        import glob
+        import media_tool
+        n = 0
+        for p in glob.glob(str(ROOT.parent / "**" / "*.hed"), recursive=True):
+            plain = media_tool.decrypt_jca_text(Path(p).read_bytes())
+            info = stt.parse_hed(plain)
+            self.assertEqual(stt.validate_hed(info), [], p)
+            self.assertEqual(tuple(s.kind for s in info.springs),
+                             stt.HED_SPRING_TYPES, p)
+            self.assertEqual(len(info.springs), 5)
+            n += 1
+        self.assertEqual(n, 88)
+
+    def test_hed_plain_fields(self):
+        p = ROOT.parent / "GTR2Steam/GameData/Locations/Vehicles/headphysics.hed"
+        if not p.is_file():
+            import glob
+            cand = glob.glob(str(ROOT.parent / "**" / "headphysics.hed"), recursive=True)
+            if not cand:
+                self.skipTest("no plain headphysics.hed")
+            p = Path(cand[0])
+        info = stt.parse_hed(p.read_bytes())
+        self.assertEqual(info.head_mass, 6.0)
+        self.assertEqual(info.head_inertia, (0.032, 0.028, 0.029))
+        self.assertEqual(info.springs[0].direction, (0.0, 1.0, 0.0))
+        self.assertEqual(info.springs[0].params, (1000.0, 225.0))
+
     def test_cas_uses_scn_parser(self):
         """.cas car graphics descriptors share the .scn key family."""
         import glob
