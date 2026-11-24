@@ -186,6 +186,34 @@ class CorpusDeep2Test(unittest.TestCase):
                             checked += 1
             self.assertGreater(checked, 1000)
 
+    def test_aud_wav_references_race07complete(self):
+        """Race07Complete .aud WAV refs resolve (including JCA-wrapped files)."""
+        import glob
+        import os
+        import re
+        base = ROOT.parent / "Race07Complete"
+        wavs = {os.path.basename(p).lower()
+                for p in glob.glob(str(base / "**" / "*.wav"), recursive=True)}
+        self.assertGreater(len(wavs), 2000)
+        checked = resolved = jca = files = 0
+        for p in glob.glob(str(base / "**" / "*.aud"), recursive=True):
+            raw = Path(p).read_bytes()
+            jca += raw[:4] == media_tool.JCA_MAGIC
+            info = stt.parse_aud(
+                media_tool.decrypt_jca_text(raw).decode("latin-1"))
+            self.assertEqual(stt.validate_aud_map(info), [], p)
+            files += 1
+            for key in info.path_keys:
+                for value in info.values[key]:
+                    m = re.search(r"([^\\/]+\.wav)$", value, re.I)
+                    if m:
+                        checked += 1
+                        resolved += m.group(1).lower() in wavs
+        self.assertEqual(files, 137)
+        self.assertGreater(jca, 90)
+        self.assertGreater(checked, 7000)
+        self.assertGreater(resolved / checked, 0.97)
+
     def test_rfm_corpus(self):
         """All 10 rF1 .rfm mod descriptors carry 37 universal keys."""
         import glob

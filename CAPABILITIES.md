@@ -81,6 +81,8 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 
 - **Opaque GSC GMT header marker**: `gmt_semantic.opaque_gsc_flags()` reads the u32 at +4 of ISI-decrypted opaque GSC GMTs; corpus-verified values are `0x04000020` / `0x20` / `0` in 782/800 sampled members. Full-tier regression test. No decoder implied.
 
+- **Race07Complete `.aud` reference resolution**: all 137 `.aud` files (101 JCA-wrapped) parse cleanly via `decrypt_jca_text()` + `parse_aud()`; 7,147 of 7,264 WAV references (98.4%) resolve to local files. The 43 unresolved basenames are DLC/shared-file gaps (dominated by `limiter.wav`, 70 occurrences). Full-tier regression test.
+
 ## Coverage gaps (documented, not yet addressed)
 - **GTR 2004 corpus** (`../GTR1Vanilla`, third GMT magic `...bba6bf90` at 0x04) is fully decoded by `gmt_semantic.py` (descriptor grid + descriptor-less object-mesh path; 33,477/33,477 files). `gmt_format.py` itself still targets the GTL/GTR2 layout only; use `gmt_semantic.py` for GTR1. See `docs/binary-formats.md`.
 - **Untested ISI signatures**: `isi_crypt.GAMES` supports 8 signatures but real corpora exist only for rFactor and Game Stock Car; ARCA Sim Racing, Simulador Turismo Carretera, Top Race 2009, Superleague Formula, STC 2012 and Formula Truck have no local corpus.

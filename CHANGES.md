@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-25 11:30:00 -0500 - Race07Complete .aud reference resolution
+- Corpus-verified all 137 Race07Complete `.aud` files (101 JCA-encrypted) parse cleanly and 7,147/7,264 WAV references (98.4%) resolve locally; 43 missing basenames are DLC/shared-file gaps. Full-tier regression test added.
+
 ## 2026-11-25 11:00:00 -0500 - Opaque GSC GMT header marker
 - Added `gmt_semantic.opaque_gsc_flags()` with a corpus-verified header marker at +4 (`0x04000020`, `0x20` or `0` in 782/800 opaque GSC GMTs) and a full-tier regression test. Documented that member lengths show no fixed-record alignment, so no size-based framing decoder follows.
 
