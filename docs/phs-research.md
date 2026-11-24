@@ -126,6 +126,23 @@ files. None of these contradict the recovery-container conclusion.
   gameplay** — consistent with leftover update/recovery artifacts bundled in the
   install. This is a resource-identification result, not a decoded consumer routine.
 
+## User-requested "open the encryption" campaign (2026-11-25)
+
+Fresh attempts beyond every earlier negative, all ending in documented failure:
+
+| Attempt | Result |
+|---|---|
+| Web search for the exact MD5/SHA256, the 13,064-byte size, `PHYSICS.PHS`, SimBin PHS format | No public spec or matching artifact; search results are unrelated domains (Port-Hamiltonian systems, crystallography, other games' ragdoll `.phs` files) |
+| Repeating-XOR / add / subtract with every sibling PAR2 identifier (3 set IDs, file ID, hash16k, packet hash, the blob's own first 8 bytes) | Best printability 0.394 vs 0.384 baseline; entropy unchanged; no `PAR2\0PKT` |
+| Known-plaintext: force the first 8 bytes to `PAR2\0PKT`, derive the 8-byte key, apply it everywhere and at every 8-byte-aligned offset | Header length/set ID/type fields remain random; no hit |
+| Bit transforms: reverse bits, nibble swap, byte reverse, whole-stream rotations 1–7 | Best printability 0.392; no structure |
+| RC4 with 14 game/file-derived keys; raw JCA Blowfish with all versions/keys | Best 0.392; no known prefix |
+| Position-dependent keystreams (`c ^ (i*K)`, `(i>>8)*K`, additive variants, K=0..255) | Best 0.399; no PAR2 magic |
+| Hash-manifest hypothesis: MD5/SHA1/SHA256 prefixes of all 28,965 GTL loose files and archive members searched in the blob | Zero matches |
+| ZIP/7z/RAR/MSCF central-directory/trailing-index scan | Zero signatures; 0/64 trailing u32 values point inward |
+
+**Genuine blocker**: with no public format spec, no consumer routine, no key material in the corpus, and bytes statistically indistinguishable from uniform PAR2 parity data, the blob cannot be decoded from local evidence alone. It is not demonstrably encrypted physics: four siblings are provably PAR2 update data, and no gameplay consumer references any PHS file. To make further progress one would need `GTL_Update_0901.exe` (the PAR2 target), a complete matching PAR2 slice set, the updater/consumer executable with its key material, or a source-level tool spec. None exist in `../`.
+
 ## Recommendation
 
 **Defer further decoding.** The recovery-data hypothesis is structurally validated;
