@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-25 08:00:00 -0500 - SCGT .vrl index and coordinate arrays decoded
+- Extended `simbin_text_tool.read_vrl()` to expose the M u32 vertex-index buffer and two M-float coordinate arrays. Corpus-verified: indices below vertex count and coordinates finite/bounded on 3,000/3,000 members; full-tier regression test. Corrected the earlier note that these sections were "not vertex indices" — that conclusion came from sampling the preceding N*4 flags block.
+
 ## 2026-11-25 07:45:00 -0500 - SCGT .vrl header/vertex decoder
 - Added `simbin_text_tool.read_vrl()`: decodes the corpus-verified 24-u32 header table and N x 16-byte vertex block of Sports Car GT `.vrl` meshes. Verified arithmetic on 4,000/4,000 files and plausible vertices on 2,000/2,000; full-tier regression test. Section payloads are documented as undecoded (426/2,000 files have out-of-range u32 values, not vertex indices).
 

@@ -898,16 +898,25 @@ def _vrl_table_problems(data: bytes) -> list[str]:
         problems.append("M*4 section stride mismatch")
     if any(table[i] >= len(data) for i in range(13) if table[i]):
         problems.append("table offset outside file")
+    # M u32 vertex indices at +100 followed by two M-float coordinate arrays.
+    if second >= len(data) or table[12] + second * 4 > len(data):
+        return ["invalid index/coordinate blocks"]
+    indices = struct.unpack_from(f"<{second}I", data, table[10])
+    if any(i >= count for i in indices):
+        problems.append("vertex index out of range")
+    coords = struct.unpack_from(f"<{second * 2}f", data, table[11])
+    if not all(math.isfinite(x) and abs(x) < 1e5 for x in coords):
+        problems.append("non-finite or implausible coordinate")
     return problems
 
 
 def read_vrl(data: bytes) -> dict | None:
     """Decode the corpus-verified header table and vertex positions of a VRL.
 
-    Only structurally verified parts are exposed: the 24-u32 table, the
-    N x 16-byte vertex block (first three floats = position), and the sizes
-    of the following sections. Index/section payload semantics are not decoded
-    (their u32 values are often constant 15, not vertex indices).
+    Exposes the 24-u32 table, the N x 16-byte vertex block (first three
+    floats = position), the M u32 vertex-index buffer, and the two M-float
+    coordinate arrays. The six N*4 flag sections and the exact coordinate
+    semantics remain undecoded.
     """
     if len(data) < 160 or any(data[:60]) or _vrl_table_problems(data):
         return None
@@ -920,8 +929,12 @@ def read_vrl(data: bytes) -> dict | None:
         for i in range(start, start + size):
             sections.append({"offset": table[i],
                              "next": table[i + 1] if i + 1 < 24 else None})
+    second = table[9]
+    indices = struct.unpack_from(f"<{second}I", data, table[10])
+    coords = struct.unpack_from(f"<{second * 2}f", data, table[11])
     return {"vertex_count": count, "vertices": vertices, "table": table,
-            "sections": sections}
+            "sections": sections, "index_count": second, "indices": indices,
+            "coords": list(zip(coords[:second], coords[second:]))}
 
 
 RCD_CORE_STATS = ("aggression", "reputation", "courtesy", "composure",
