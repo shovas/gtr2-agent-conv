@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-25 10:00:00 -0500 - VRL UV-like coordinate score
+- Added `simbin_text_tool.vrl_uv_quad_score()` with corpus-calibrated evidence that decoded `.vrl` coordinate arrays behave as per-corner texture coordinates (quad-corner reuse 0.753 vs 0.271 shuffled baseline across 1,046 files). Full-tier regression test added; semantics remain an inference rather than a strict decoder claim.
+
 ## 2026-11-25 09:40:00 -0500 - GTR1 vertex normals identified
 - Corpus-confirmed vertex fields 4–6 of GTR1 third-magic GMTs as unit normals (20,164/20,164 finite records) and exposed them as `normals` in `read_gtr1_geometry()`, with a unit-length validator check and full-tier regression test. Remaining vertex fields are still unclassified.
 

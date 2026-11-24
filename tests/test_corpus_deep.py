@@ -102,6 +102,41 @@ class CorpusDeepTest(unittest.TestCase):
                 break
         self.assertGreater(n, 1000)
 
+    def test_scgt_vrl_uv_quad_score(self):
+        """VRL coordinates show quad-corner UV reuse above random baseline."""
+        import glob
+        import random
+        import simbin_text_tool as stt_local
+        random.seed(7)
+        scores = baseline = 0
+        n = 0
+        for arc in glob.glob(str(ROOT.parent / "SportsCarGtUsa" / "**" / "*.mas"),
+                             recursive=True):
+            try:
+                _, entries = mas_tool.read_archive(arc)
+            except Exception:
+                continue
+            for e in entries:
+                if not e.name.lower().endswith(".vrl") or not e.data:
+                    continue
+                v = stt_local.read_vrl(e.data)
+                if not v:
+                    continue
+                s = stt_local.vrl_uv_quad_score(v)
+                if s is None:
+                    continue
+                scores += s
+                uv = list(v["coords"])
+                random.shuffle(uv)
+                shuffled = dict(v, coords=uv)
+                baseline += stt_local.vrl_uv_quad_score(shuffled)
+                n += 1
+            if n >= 500:
+                break
+        self.assertGreater(n, 300)
+        self.assertGreater(scores / n, 0.6)
+        self.assertGreater(scores / n - baseline / n, 0.2)
+
     def test_gtr1_descriptor_geometry(self):
         """GTR1 third-magic descriptor vertices/indices decode cleanly."""
         import glob
