@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-25 16:00:00 -0500 - Superleague reference non-applicability
+- Documented that Superleague Formula 2009 has no `.aud`/`.car` files: 101 loose WAVs plus 5 MP3s, and opaque `gMb1.002f` encrypted vehicle configs. Added a full-tier corpus-fact test; no reference validator applies.
+
 ## 2026-11-25 15:30:00 -0500 - TC2000 reference-resolution non-applicability
 - Documented that TC2000 has no `.aud`/`.car` files: its 34 MAS archives hold 189 MP3 audio members and its configs are opaque `gMb1.002f` encrypted files. Added a full-tier corpus-fact test; no reference validator applies.
 
