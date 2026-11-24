@@ -89,6 +89,34 @@ def read_anm(data: bytes) -> AnmFile:
                    bones[0].keys, bones)
 
 
+def validate_anm(anm: AnmFile) -> list[str]:
+    """Check corpus-verified ANM keyframe invariants.
+
+    Verified on 236 F1C/F12002 archived files: every bone has strictly
+    increasing key times for non-sentinel keys, and every quaternion is unit
+    norm within 1%. A trailing sentinel key (time <= 0) is common and is
+    excluded from the monotonicity check.
+    """
+    problems: list[str] = []
+    if not anm.bones:
+        return ["no bones"]
+    if anm.version != 1:
+        problems.append(f"version {anm.version} != 1")
+    for i, bone in enumerate(anm.bones):
+        if not bone.keys:
+            problems.append(f"bone {i}: no keys")
+            continue
+        times = [k.time for k in bone.keys if k.time > 0 and math.isfinite(k.time)]
+        if any(a >= b for a, b in zip(times, times[1:])):
+            problems.append(f"bone {i}: non-monotonic key times")
+        for j, key in enumerate(bone.keys):
+            qn = sum(x * x for x in key.quaternion)
+            if abs(qn - 1.0) > 0.01:
+                problems.append(f"bone {i} key {j}: quaternion norm {math.sqrt(qn):.3f}")
+                break
+    return problems
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("file")

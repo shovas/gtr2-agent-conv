@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-25 07:15:00 -0500 - ANM keyframe validator
+- Added `anm_format.validate_anm()` with corpus-verified invariants: per-bone monotonic key times (excluding the trailing time=0 sentinel) and unit quaternions, 0 problems across 236 F1C/F12002 files. Full-tier regression test added.
+
 ## 2026-11-25 07:00:00 -0500 - Full GSC GMT survey complete
 - Completed the incremental `gsc_survey.py` survey over all 29,033 GMT members in 352 MAS archives from the four GSC corpora: 29,022 GSC-signature, 1,096 decodable (3.8%), 1,003 with submeshes, 904 finite / 414 plausible. Cache reached full coverage over 15 bounded runs with 100% cached-hit reuse.
 

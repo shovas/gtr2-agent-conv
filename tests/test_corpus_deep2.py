@@ -330,6 +330,35 @@ class CorpusDeep2Test(unittest.TestCase):
 
 
 
+    def test_anm_keyframe_corpus(self):
+        """ANM keyframes: monotonic times and unit quaternions corpus-wide."""
+        import glob
+        import os
+        import anm_format
+        n = 0
+        for root in ("F1C", "F12002"):
+            for p in glob.glob(str(ROOT.parent / root / "**" / "*"), recursive=True):
+                if not os.path.isfile(p) or not p.lower().endswith((".mas", ".exe")):
+                    continue
+                try:
+                    _, entries = mas_tool.read_archive(p)
+                except Exception:
+                    continue
+                for e in entries:
+                    if not e.name.lower().endswith(".anm") or not e.data:
+                        continue
+                    try:
+                        a = anm_format.read_anm(e.data)
+                    except Exception:
+                        continue
+                    self.assertEqual(anm_format.validate_anm(a), [], f"{root}/{e.name}")
+                    n += 1
+                if n >= 200:
+                    break
+            if n >= 200:
+                break
+        self.assertGreater(n, 150)
+
     def test_gsc_survey_cache_incremental(self):
         """Cache keys are stable and incremental survey skips cached members."""
         import glob
