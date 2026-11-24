@@ -66,6 +66,10 @@ the quick-lookup index. Sizes/counts are approximate (surveyed 2026-11-23/24).
 | `old-tmp-files/` | 49M / 68 | More prior-attempt scratch: probes, GUI screenshots, `gMa1.002f` AIW fixture. Not ruled out — revisit for field-level work. |
 | `tools.unsorted/` | — | Remaining large/irrelevant items (moved to `~/tmp/tools.unsorted.irrelevant/`). |
 
+## Verified format-identification coverage (2026-11-24)
+
+`media_tool.identify()` is now content-based across the corpora: 21,180 plain GMTs (ISI magic @8), 45,359 JCA GMTs, 643 `RaceGMT\0` meshes, 1,090 `.mas` + all `.gtr`/`.gtl`/`.bmw` archives (6 variants), 1,640 PNG, 479 GIF87a/GIF89a (plus JPEG/PNG/HTML masquerading as `.gif`), 188 gzip `.hat` track files, 1,982 NASCAR `.hdr`/`.dat` MP3 pairs, 21,141 `.svm` setups, 2,763 `.veh` / 156 `.hdv` / 294 `.gen` descriptors, 123 `.scr` / 409 `.cin` scripts, 22 CUBEASF `.set` camera files, and plain `.rcd/.gdb/.car/.aiw/.cam/.hed/.dmg/.grb/.cas/.sp/.inccar` text configs. JCA-wrapped configs decrypt via `decrypt_jca_text()`. Parsers: `parse_veh`, `parse_hdv`, `parse_svm`, `parse_set`, `parse_cam`, `parse_scn`, `read_anm`, `hdr_dat_mp3`, `hat_decompress`. Remaining opaque: GTTF frame slots 7/9, `PHYSICS.PHS`, 10 encrypted `.svm` payloads, 4 E30 wiper FXM files (MSVC debug-fill garbage).
+
 ## Practical rules
 
 - These folders are **always available** for reference, lookup, and cross-checking during any task.
