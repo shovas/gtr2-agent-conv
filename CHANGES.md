@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 20:30:00 -0500 - rFactor .sp suspension-geometry parser
+- Added `simbin_text_tool.parse_sp()` / `validate_sp()` for 172 plain `.sp` files: 1,872 bodies, 3,320 bars, 688 joints. Corpus-verified field presence and referential integrity — all 8,016 body references resolve, 0 validation problems. Added 2 regression tests; all 12 simbin text tests pass.
+
 ## 2026-11-24 20:00:00 -0500 - Test-tier rebalance
 - Moved the 21.5 s ANM full-corpus decode-rate check into a new full-only `tests/test_corpus_deep.py`, restoring the Quick tier to 58.7 s (≤60 s budget, 137 tests). Full tier is now 51 modules / 392 tests; all tests pass.
 

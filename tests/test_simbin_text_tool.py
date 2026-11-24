@@ -66,6 +66,34 @@ class SimbinTextToolTest(unittest.TestCase):
         self.assertGreater(parsed, 0)
 
 
+    def test_sp_parser_corpus(self):
+        """.sp suspension geometry: field presence and body refs hold."""
+        import glob
+        n = totals = 0
+        tb = tbar = tj = 0
+        for p in glob.glob(str(ROOT.parent / "**" / "*.sp"), recursive=True):
+            if Path(p).read_bytes()[:4] == b"\x0f\xb1\xff\xff":
+                continue
+            info = stt.parse_sp(Path(p).read_bytes())
+            self.assertEqual(stt.validate_sp(info), [], p)
+            tb += len(info.bodies)
+            tbar += len(info.bars)
+            tj += len(info.joints)
+            n += 1
+        self.assertEqual(n, 172)
+        self.assertEqual((tb, tbar, tj), (1872, 3320, 688))
+
+    def test_sp_parser_reference_validation(self):
+        """A dangling posbody reference is flagged."""
+        good = ("[BODY]\nname=body mass=(0.0) inertia=(0,0,0) pos=(0,0,0)\n"
+                "[BAR]\nposbody=body negbody=body pos=(1,0,0) neg=(2,0,0)\n")
+        self.assertEqual(stt.validate_sp(stt.parse_sp(good)), [])
+        bad = good.replace("negbody=body", "negbody=missing")
+        self.assertTrue(stt.validate_sp(stt.parse_sp(bad)))
+        info = stt.parse_sp(good)
+        self.assertEqual(info.bars[0].pos, (1.0, 0.0, 0.0))
+        self.assertEqual(info.bars[0].neg, (2.0, 0.0, 0.0))
+
     def test_set_parser_corpus(self):
         """.set files: 22 CUBEASF camera/scene descriptors parse fully."""
         import glob

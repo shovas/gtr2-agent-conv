@@ -297,6 +297,125 @@ def parse_veh(data: bytes | str) -> dict[str, str]:
 
 
 @dataclass
+class SpBody:
+    name: str = ""
+    mass: tuple[float, ...] | None = None
+    inertia: tuple[float, ...] | None = None
+    pos: tuple[float, ...] | None = None
+    ori: tuple[float, ...] | None = None
+
+
+@dataclass
+class SpBar:
+    name: str = ""
+    posbody: str = ""
+    negbody: str = ""
+    pos: tuple[float, ...] | None = None
+    neg: tuple[float, ...] | None = None
+
+
+@dataclass
+class SpJointHinge:
+    posbody: str = ""
+    negbody: str = ""
+    pos: tuple[float, ...] | None = None
+    ori: tuple[float, ...] | None = None
+    axis: tuple[float, ...] | None = None
+
+
+@dataclass
+class SpInfo:
+    bodies: list[SpBody] = field(default_factory=list)
+    bars: list[SpBar] = field(default_factory=list)
+    joints: list[SpJointHinge] = field(default_factory=list)
+    search_paths: list[str] = field(default_factory=list)
+
+
+def parse_sp(data: bytes | str) -> SpInfo:
+    """Parse an rFactor ``.sp`` suspension-geometry file.
+
+    Corpus-verified on 172 plain files: three block types occur — ``[BODY]``
+    (1,872; name/mass/inertia/pos always, ori in 1,852), ``[BAR]`` (3,320;
+    posbody/negbody/pos/neg always, name optional) and ``[JOINT&HINGE]`` (688;
+    posbody/negbody/axis always, pos or ori). All 8,016 ``posbody``/``negbody``
+    references resolve to a BODY name defined in the same file. ``axis`` is not
+    required to be a unit vector (observed norms 0.59-1.0).
+    """
+    text = data if isinstance(data, str) else data.decode("latin-1")
+    info = SpInfo()
+    block = ""
+    current: SpBody | SpBar | SpJointHinge | None = None
+    for line in text.splitlines():
+        code = line.split("//", 1)[0].strip()
+        m = re.match(r"^\[([^\]]+)\]$", code)
+        if m:
+            block = m.group(1).strip().upper()
+            if block == "BODY":
+                current = SpBody()
+                info.bodies.append(current)
+            elif block == "BAR":
+                current = SpBar()
+                info.bars.append(current)
+            elif block == "JOINT&HINGE":
+                current = SpJointHinge()
+                info.joints.append(current)
+            else:
+                current = None
+            continue
+        if not code or current is None:
+            if not code:
+                continue
+            ms = re.search(r"SearchPath\s*=\s*([^\s]+)", code)
+            if ms:
+                info.search_paths.append(ms.group(1))
+            continue
+        for key, raw in _SET_KV_RE.findall(code):
+            kl = key.lower()
+            nums = _all_floats(raw)
+            if kl == "name":
+                current.name = raw.strip('"')
+            elif kl == "mass":
+                current.mass = nums
+            elif kl == "inertia":
+                current.inertia = nums
+            elif kl == "pos":
+                current.pos = nums
+            elif kl == "ori":
+                current.ori = nums
+            elif kl == "posbody":
+                current.posbody = raw
+            elif kl == "negbody":
+                current.negbody = raw
+            elif kl == "neg":
+                current.neg = nums
+            elif kl == "axis":
+                current.axis = nums
+    return info
+
+
+def validate_sp(info: SpInfo) -> list[str]:
+    """Check corpus-verified .sp invariants; return a list of problems."""
+    problems: list[str] = []
+    names = {b.name for b in info.bodies if b.name}
+    for i, b in enumerate(info.bodies):
+        for field in ("name", "mass", "inertia", "pos"):
+            if not getattr(b, field):
+                problems.append(f"body {i}: missing {field}")
+    for label, items in (("bar", info.bars), ("joint", info.joints)):
+        for i, obj in enumerate(items):
+            for field in ("posbody", "negbody"):
+                if not getattr(obj, field):
+                    problems.append(f"{label} {i}: missing {field}")
+                elif getattr(obj, field) not in names:
+                    problems.append(f"{label} {i}: unknown {field} {getattr(obj, field)}")
+            if label == "bar" and (obj.pos is None or obj.neg is None):
+                problems.append(f"bar {i}: missing pos/neg")
+            if label == "joint" and obj.axis is None:
+                problems.append(f"joint {i}: missing axis")
+    return problems
+
+
+@dataclass
 class SetView:
     name: str = ""
     clear: str | None = None
