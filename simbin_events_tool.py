@@ -240,10 +240,12 @@ def read_frames(data: bytes, grid: dict) -> list[dict]:
         off = grid["offset"] + i * grid["stride"]
         if off + 24 > len(data):
             break
+        steering = struct.unpack_from("<f", data, off + 16)[0]
         out.append({"offset": off,
                     "position": struct.unpack_from("<3f", data, off),
                     "heading": struct.unpack_from("<f", data, off + 12)[0],
-                    "pitch": struct.unpack_from("<f", data, off + 16)[0],
+                    "pitch": steering,  # legacy alias
+                    "steering": steering,
                     "time": struct.unpack_from("<f", data, off + FRAME_TIME_OFF)[0]})
     return out
 

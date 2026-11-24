@@ -91,6 +91,7 @@ class SimbinEventsToolTest(unittest.TestCase):
         # 63-byte records marked by this 7-byte prefix; the trailing byte varies.
         mark = b"\x01\x00\x00\x34\x00\x20\x00"
         checked = 0
+        corrs = []
         for p in files:
             data = gzip.decompress(p.read_bytes())
             grid = setool.find_frame_grid(data)
@@ -110,6 +111,7 @@ class SimbinEventsToolTest(unittest.TestCase):
         if not files:
             self.skipTest("GTR2 DSI files not present")
         checked = 0
+        corrs = []
         for p in files:
             with self.subTest(path=p.name):
                 raw = p.read_bytes()
@@ -262,6 +264,43 @@ class SimbinEventsToolTest(unittest.TestCase):
             prefixes.add(data[i:i+4].hex())
         self.assertIn("0000ffff", prefixes)
         self.assertIn("00004803", prefixes)
+
+
+    def test_gtt_steering_field(self):
+        """GTTF frame +16 is steering (bounded -1..1, tracks heading rate)."""
+        import gzip
+        import struct
+        files = _files(".gtt")
+        if len(files) < 20:
+            self.skipTest("GTT corpus not present")
+        checked = 0
+        corrs = []
+        for p in files:
+            raw = Path(p).read_bytes()
+            data = gzip.decompress(raw) if raw[:2] == b"\x1f\x8b" else raw
+            grid = setool.find_frame_grid(data)
+            if not grid:
+                continue
+            frames = setool.read_frames(data, grid)
+            if len(frames) < 100:
+                continue
+            for f in frames:
+                self.assertGreaterEqual(f["steering"], -1.01, p)
+                self.assertLessEqual(f["steering"], 1.01, p)
+            head = [f["heading"] for f in frames]
+            dh = [(head[i+1]-head[i]+math.pi) % (2*math.pi)-math.pi
+                  for i in range(len(head)-1)]
+            sv = [f["steering"] for f in frames][:len(dh)]
+            # Pearson r
+            mx = sum(sv)/len(sv); my = sum(dh)/len(dh)
+            vx = sum((a-mx)**2 for a in sv); vy = sum((b-my)**2 for b in dh)
+            if vx and vy:
+                r = sum((a-mx)*(b-my) for a, b in zip(sv, dh))/math.sqrt(vx*vy)
+                corrs.append(r)
+            checked += 1
+        self.assertGreater(checked, 20)
+        # Corpus-level: most files show a clear steering/heading-rate relation.
+        self.assertGreater(sum(1 for r in corrs if abs(r) > 0.2), len(corrs)//2)
 
 
 if __name__ == "__main__":

@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-25 04:45:00 -0500 - GTTF steering field decoded
+- Breakthrough: GTTF frame offset +16 is **steering**, not pitch — bounded [-1,1] in all 29 files (matching `mUnfilteredSteering` from ccgepmonitor/rF2 runtime headers) and correlated with heading rate in most files (median r=0.628). `read_frames()` now exposes `steering` (legacy `pitch` alias preserved). Added a corpus regression test.
+
 ## 2026-11-25 04:30:00 -0500 - Lexus config corpus validation
 - Corpus-verified LexusIsfTrackTime configs: 11 `.veh` (27 universal keys), 5 `.scn`, 5 `.cam` all parse with existing rules; full-tier regression test added.
 
