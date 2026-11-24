@@ -322,6 +322,9 @@ def identify(path: str | Path) -> MediaInfo:
         head16 = b[:65536]
         if any(sig in head16 for sig in _CFG_SIGNS[ext]):
             return MediaInfo(str(p), size, "config-" + ext[1:], {"extension": ext})
+    # rF1 terrain-definition files (.tdf) carry [TRACKVARS]/[FEEDBACK]/[LOOSE]
+    if ext == ".tdf" and b"[TRACKVARS]" in b[:8192]:
+        return MediaInfo(str(p), size, "rfactor-tdf", {"extension": ext})
     # rFactor text-config families (plain variants; JCA ones reported above)
     if ext == ".cas" and (b"MeshFile=" in b[:8192] or b"SearchPath=" in b[:8192]):
         return MediaInfo(str(p), size, "rfactor-cas", {"extension": ext})

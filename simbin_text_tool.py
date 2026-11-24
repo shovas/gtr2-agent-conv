@@ -733,6 +733,28 @@ def validate_rf1_config(keys: set[str], ext: str) -> list[str]:
     return [f"missing {ext} key {key}" for key in sorted(needed) if key not in keys]
 
 
+TDF_UNIVERSAL_KEYS = frozenset((
+    "dry", "legal", "materials", "reaction", "roadbumpamp", "roadbumplen",
+    "roaddrygrip", "roadwetgrip", "rumblebumpamp", "rumblebumplen",
+    "rumbledrygrip", "rumblewetgrip",
+))
+TDF_SECTIONS = frozenset(("feedback", "trackvars", "loose"))
+
+
+def parse_tdf(data: bytes | str) -> ConfigInfo:
+    """Parse an rF1 ``.tdf`` terrain-definition file."""
+    return _parse_config(data)
+
+
+def validate_tdf(info: ConfigInfo) -> list[str]:
+    """Check corpus-verified .tdf invariants."""
+    problems = [f"missing key {k}" for k in sorted(TDF_UNIVERSAL_KEYS)
+                if k not in info.keys]
+    problems += [f"missing section [{s}]" for s in sorted(TDF_SECTIONS)
+                 if s not in info.sections]
+    return problems
+
+
 VEH_CORE_KEYS = frozenset((
     "cameras", "category", "classes", "cockpit", "defaultlivery", "description",
     "driver", "engine", "fullteamname", "genstring", "graphics", "hdvehicle",

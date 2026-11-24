@@ -216,6 +216,19 @@ class CorpusDeepTest(unittest.TestCase):
                 n += 1
             self.assertEqual(n, 20)
 
+    def test_tdf_corpus(self):
+        """All 57 .tdf terrain configs carry 12 universal keys, 3 sections."""
+        import glob
+        import media_tool
+        n = 0
+        for root in ("TC2000", "SuperleagueFormula2009", "SimuladorTopRace2009"):
+            for p in glob.glob(str(ROOT.parent / root / "**" / "*.tdf"), recursive=True):
+                info = stt.parse_tdf(Path(p).read_bytes())
+                self.assertEqual(stt.validate_tdf(info), [], p)
+                self.assertEqual(media_tool.identify(p).format, "rfactor-tdf", p)
+                n += 1
+        self.assertEqual(n, 57)
+
     def test_tc2000_superleague_rf1_config_corpus(self):
         """Shared universal keys in TC2000/Superleague .gdb/.cam/.aiw."""
         import os

@@ -53,6 +53,7 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 - **Superleague rF1-IRSR prefix variant**: `simbin_events_tool.parse_rf1_metadata()` now accepts the `0000ffff0100000000` 9-byte prefix used by 5/6 local Superleague Formula 2009 `.Vcr` replays (rF1 uses `00004803...`); all 6 replays now expose driver/car. Full-tier regression test added.
 - **TC2000/Superleague `.veh`/`.svm` families**: `simbin_text_tool.validate_veh_core()` covers TC2000's 26 universal `.veh` keys (36/36 files) and Superleague's 22-key subset (19/19); `validate_svm_tc2000()` covers 15 universal keys in TC2000's 6-speed `.svm` setups (12/12). All with 0 validation problems.
 - **TC2000/Superleague rF1 config families**: `simbin_text_tool.validate_rf1_config()` enforces universal keys shared across both corpora — 28 for `.gdb`, 10 for `.cam`, 70 for `.aiw` — with 0 validation problems across all 95 files. Seven `.aiw` sections (features/grid/altgrid/teleport/pits/aux/waypoint) are universal too.
+- **rF1 `.tdf` terrain configs**: `simbin_text_tool.parse_tdf()`/`validate_tdf()` handle all 57 files across TC2000/Superleague/TR2009 with 12 universal keys (grip, bump, materials, reaction) and 3 universal sections (trackvars/feedback/loose), 0 problems; `media_tool.identify()` reports `rfactor-tdf`.
 ## Coverage gaps (documented, not yet addressed)
 - **GTR 2004 corpus** (`../GTR1Vanilla`, third GMT magic `...bba6bf90` at 0x04) is fully decoded by `gmt_semantic.py` (descriptor grid + descriptor-less object-mesh path; 33,477/33,477 files). `gmt_format.py` itself still targets the GTL/GTR2 layout only; use `gmt_semantic.py` for GTR1. See `docs/binary-formats.md`.
 - **Untested ISI signatures**: `isi_crypt.GAMES` supports 8 signatures but real corpora exist only for rFactor and Game Stock Car; ARCA Sim Racing, Simulador Turismo Carretera, Top Race 2009, Superleague Formula, STC 2012 and Formula Truck have no local corpus.
@@ -174,7 +175,7 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 
 ## Test execution
 - **Tool**: `run_tests.py --mode quick|normal|full` (default `normal`). Deterministic module lists with progressive coverage (`Quick ⊆ Normal ⊆ Full`), end-to-end budget warnings (Quick ≤60 s, Normal ≤300 s); expensive corpus surveys (Copa Petrobras, Stock Car Extreme, Race07 Complete, Volvo, PHS tooling) are Full-only to keep Normal within budget, and a timing/result report. `--list` prints tier membership; `--coverage` adds an optional line-coverage report (gracefully skipped when the `coverage` package is absent).
-- **Measured**: Quick 21 modules / 149 tests / ~59 s; Normal 38 modules / 220 tests / ~312 s; Full 51 modules / 418 tests / ~800 s (2 skipped — external tools absent).
+- **Measured**: Quick 21 modules / 149 tests / ~59 s; Normal 38 modules / 220 tests / ~312 s; Full 51 modules / 419 tests / ~800 s (2 skipped — external tools absent).
 - **Plain full suite**: `python3 -m unittest discover -s tests -v` remains available.
 - **Verification**: `tests/test_run_tests_modes.py` checks mode selection invariants; `tests/test_gtr1_coverage.py` asserts 33,477/33,477 GTR1 GMTs decode (Normal/Full); `tests/test_gmt_relayout.py` covers relayout round-trips and growth.
 
