@@ -417,6 +417,31 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertEqual(refs, 51)
         self.assertEqual(ok, refs)
 
+    def test_tc2000_has_no_aud_or_car(self):
+        """TC2000 ships no .aud/.car; audio is archived MP3, configs encrypted."""
+        import glob
+        import os
+        import mas_tool
+        base = ROOT.parent / "TC2000"
+        loose = [p for p in glob.glob(str(base / "**" / "*"), recursive=True)
+                 if os.path.isfile(p) and p.lower().endswith((".aud", ".car"))]
+        self.assertEqual(loose, [])
+        archived = 0
+        mp3 = 0
+        arcs = glob.glob(str(base / "**" / "*.mas"), recursive=True) + \
+            glob.glob(str(base / "**" / "*.MAS"), recursive=True)
+        for p in arcs:
+            try:
+                _, entries = mas_tool.read_archive(p)
+            except Exception:
+                continue
+            for e in entries:
+                ext = os.path.splitext(e.name)[1].lower()
+                archived += ext in (".aud", ".car")
+                mp3 += ext == ".mp3"
+        self.assertEqual(archived, 0)
+        self.assertGreater(mp3, 100)
+
     def test_rfm_corpus(self):
         """All 10 rF1 .rfm mod descriptors carry 37 universal keys."""
         import glob

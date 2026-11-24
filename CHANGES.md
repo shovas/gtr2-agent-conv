@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-25 15:30:00 -0500 - TC2000 reference-resolution non-applicability
+- Documented that TC2000 has no `.aud`/`.car` files: its 34 MAS archives hold 189 MP3 audio members and its configs are opaque `gMb1.002f` encrypted files. Added a full-tier corpus-fact test; no reference validator applies.
+
 ## 2026-11-25 15:00:00 -0500 - BMW M3 Challenge reference resolution
 - Corpus-verified 186/190 `.aud` WAV refs (four `raex.wav` references absent) and 51/51 `.car` config refs in BMW M3 Challenge; its 17 `.bmw` archives hold only media. Full-tier regression test added.
 
