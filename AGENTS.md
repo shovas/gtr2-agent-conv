@@ -48,6 +48,9 @@ All `../` game installs below are **read-only references** — do not copy game 
 - `../rF2SharedMemoryMapPlugin/` - GPLv3 rF2 internals shared-memory plugin (3.1M, 71 files). **Reference only**: `Include/rF2State.h` documents rF2 runtime telemetry fields/ranges (mEngineRPM, mFilteredThrottle 0..1, mFilteredSteering −1..1, mGear −1/0/1+). Relevant to GTTF telemetry-field hypotheses, but it documents runtime state, not the `.VCR` file bit layout; apply only as units/range evidence.
 - `~/tmp/tools.unsorted.irrelevant/` - remaining large/generated/irrelevant items (installers, caches, etc.).
 
+## Reference corpora index
+- `docs/corpus-reference.md` is the condensed quick-lookup index of all `../` folders (sizes, counts, key formats, licenses, and what each is useful for). The per-folder notes below remain authoritative for caveats. These folders are always available for reference during tasks; record newly verified findings in the relevant docs and update that index when roles change.
+
 ## `../rfactortools` facts (verified)
 - Python package (`setup.py`, `setuptools`, `version=0.4.0`); C extension `rfactortools/_crypt` from `rfactortools_crypt.cpp` (`SConstruct` also builds `rfactordec.c` and shared lib).
 - Core modules: `aiw.py`, `crypt.py`, `gdb.py`, `gmt.py`, `gsc2013.py`, `gtr2.py` (currently GTR2->GSC2013 direction), `img.py`, `mas.py`, `scn.py/scn_parser.py`, `sfx.py`, `util.py`, `veh.py`; CLI entrypoints under `rfactortools/programs/`.
