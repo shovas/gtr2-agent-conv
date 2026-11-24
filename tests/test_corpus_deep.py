@@ -33,6 +33,49 @@ def _anm_samples(root, limit=None):
 
 
 class CorpusDeepTest(unittest.TestCase):
+    def test_gsc_geometry_decoder(self):
+        """read_gsc_geometry decodes real geometry with quality flags."""
+        import glob
+        import isi_crypt
+        import mas_tool
+        import gmt_semantic
+        n = good = flagged = 0
+        for root in ("Automobilista", "StockCarExtreme", "GameStockCar",
+                     "CopaPetrobrasdeMarcas"):
+            for arc in glob.glob(str(ROOT.parent / root / "**" / "*.mas"), recursive=True)[:3]:
+                try:
+                    _, entries = mas_tool.read_archive(arc)
+                except Exception:
+                    continue
+                for e in entries:
+                    if not e.name.lower().endswith(".gmt") or not e.data:
+                        continue
+                    try:
+                        d = isi_crypt.decrypt_bytes(e.data)
+                    except Exception:
+                        continue
+                    if not gmt_semantic.is_gsc_decodable(d):
+                        continue
+                    g = gmt_semantic.read_gsc_geometry(d)
+                    self.assertIsNotNone(g)
+                    self.assertIn("quality", g)
+                    if g["vertex_count"] == 0:
+                        continue  # near-magic present but no decodable submeshes
+                    if g["quality"]["plausible_positions"]:
+                        good += 1
+                    else:
+                        flagged += 1
+                    n += 1
+                    if n >= 30:
+                        break
+                if n >= 30:
+                    break
+            if n >= 30:
+                break
+        self.assertGreater(n, 10)
+        self.assertGreater(good, 0)
+        self.assertGreater(flagged, 0)  # degenerate files are flagged
+
     def test_gsc_gmt_prefilter(self):
         """0x1D4 near-magic predicts GSC GMT decodability (recall 1.0)."""
         import glob

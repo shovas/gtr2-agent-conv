@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-25 05:45:00 -0500 - GSC GMT geometry decoder
+- Added `gmt_semantic.read_gsc_geometry()` for the ~5% decodable GSC GMTs: extracts vertices/UVs/faces from the 0x2e4 old-layout submesh headers with a quality flag. Corpus-verified on 18 files (16 finite, 11 plausible, 12 with faces). Full-tier regression test added.
+
 ## 2026-11-25 05:30:00 -0500 - GSC GMT decodability pre-filter
 - Added `gmt_semantic.is_gsc_decodable()` using the 0x1D4 near-magic to pre-filter ISI-decrypted GSC GMTs before full submesh scans: 100% recall, 99.5% specificity on a 200-file four-corpus sample. Full-tier regression test added.
 

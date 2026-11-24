@@ -63,6 +63,7 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 - **`.aud` WAV reference resolution**: all WAV path values in plain GTR2 (1,094/1,094) and GTL (1,374/1,374) `.aud` files resolve to local `.wav` basenames; Race07/Race07Vanilla resolve 98% and Volvo 85% — conversion-readiness invariant with full-tier regression test.
 - **`.car` config reference resolution**: GTL `.car` HDVehicle/Graphics/Sounds references resolve 288/288 locally; GTR2 419/435 (the 16 misses are alternate Ferrari/Porsche livery `.cas` skins not shipped loose). Full-tier regression test added.
 - **GSC GMT pre-filter**: `gmt_semantic.is_gsc_decodable()` uses the 0x1D4 near-magic (byte 13 = 0xa8) to cheaply identify the ~5% of ISI-decrypted GSC GMTs that have old-layout submeshes — precision 0.91, **recall 1.00**, specificity 0.995 on a 200-file sample across four GSC corpora; full-tier regression test.
+- **GSC GMT geometry decoder**: `gmt_semantic.read_gsc_geometry()` decodes vertices/UVs/faces from the ~5% decodable ISI-encrypted GSC GMTs via the existing 0x2e4 old-layout submesh headers, adding a `quality` flag. Corpus-verified: 16/18 all-finite positions, 11/18 plausible (|v|<1e6), 12/18 with faces; degenerate files flagged rather than trusted. Full-tier regression test.
 ## Coverage gaps (documented, not yet addressed)
 - **GTR 2004 corpus** (`../GTR1Vanilla`, third GMT magic `...bba6bf90` at 0x04) is fully decoded by `gmt_semantic.py` (descriptor grid + descriptor-less object-mesh path; 33,477/33,477 files). `gmt_format.py` itself still targets the GTL/GTR2 layout only; use `gmt_semantic.py` for GTR1. See `docs/binary-formats.md`.
 - **Untested ISI signatures**: `isi_crypt.GAMES` supports 8 signatures but real corpora exist only for rFactor and Game Stock Car; ARCA Sim Racing, Simulador Turismo Carretera, Top Race 2009, Superleague Formula, STC 2012 and Formula Truck have no local corpus.
@@ -184,7 +185,7 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 
 ## Test execution
 - **Tool**: `run_tests.py --mode quick|normal|full` (default `normal`). Deterministic module lists with progressive coverage (`Quick ⊆ Normal ⊆ Full`), end-to-end budget warnings (Quick ≤60 s, Normal ≤300 s); expensive corpus surveys (Copa Petrobras, Stock Car Extreme, Race07 Complete, Volvo, PHS tooling) are Full-only to keep Normal within budget, and a timing/result report. `--list` prints tier membership; `--coverage` adds an optional line-coverage report (gracefully skipped when the `coverage` package is absent).
-- **Measured**: Quick 21 modules / 150 tests / ~59 s; Normal 38 modules / 222 tests / ~312 s; Full 52 modules / 429 tests / ~800 s (2 skipped — external tools absent).
+- **Measured**: Quick 21 modules / 150 tests / ~59 s; Normal 38 modules / 222 tests / ~312 s; Full 52 modules / 430 tests / ~800 s (2 skipped — external tools absent).
 - **Plain full suite**: `python3 -m unittest discover -s tests -v` remains available.
 - **Verification**: `tests/test_run_tests_modes.py` checks mode selection invariants; `tests/test_gtr1_coverage.py` asserts 33,477/33,477 GTR1 GMTs decode (Normal/Full); `tests/test_gmt_relayout.py` covers relayout round-trips and growth.
 
