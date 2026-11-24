@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-25 20:00:00 -0500 - SCGT .prt validator
+- Added `simbin_text_tool.validate_prt()` with a full-tier regression test over all 5 Sports Car GT `.prt` members (CRLF ASCII, balanced braces, key/value lines). Documented that none of their 977 ObjFile object names resolve to shipped content.
+
 ## 2026-11-25 19:30:00 -0500 - GTR2 f0 per-mesh marker
 - Characterized GTR2 base-vertex f0 as a per-mesh marker: across 15.6M vertices, 71,547 nonzero values occur exactly once per mesh, always on vertex 0. Added `gmt_format.mesh_marker()` and a full-tier regression test; the packed halfword semantics remain unresolved (ruled out as material index, mesh ordinal, UV or color).
 

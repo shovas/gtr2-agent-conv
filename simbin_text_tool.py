@@ -889,6 +889,39 @@ def validate_svm_tc2000(keys: set[str]) -> list[str]:
             if key not in keys]
 
 
+def validate_prt(data: bytes) -> list[str]:
+    """Check corpus-verified structure of a Sports Car GT ``.prt`` scene.
+
+    Verified on all 5 archived members: ASCII text, CRLF-only line endings,
+    balanced braces, and every non-brace line is ``Key=...``. Object names in
+    ``ObjFile`` do not resolve to shipped members or scene objects, so no
+    reference-resolution rule is asserted.
+    """
+    problems: list[str] = []
+    if b"\n" not in data:
+        return ["no line breaks"]
+    if data.count(b"\r\n") != data.count(b"\n"):
+        problems.append("mixed line endings")
+    if any(c < 9 or (13 < c < 32 and c != 27) or c > 126 for c in data):
+        problems.append("non-ASCII byte")
+    depth = 0
+    for line in data.decode("latin-1").splitlines():
+        stripped = line.strip()
+        if stripped == "{":
+            depth += 1
+        elif stripped == "}":
+            depth -= 1
+            if depth < 0:
+                problems.append("unbalanced braces")
+                break
+        elif stripped and "=" not in stripped:
+            problems.append(f"line without key=value: {stripped[:40]!r}")
+            break
+    if depth != 0:
+        problems.append("unbalanced braces")
+    return problems
+
+
 def validate_vrl(data: bytes) -> list[str]:
     """Check corpus-verified Sports Car GT ``.vrl`` track-mesh invariants.
 

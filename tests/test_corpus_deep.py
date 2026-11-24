@@ -108,6 +108,28 @@ class CorpusDeepTest(unittest.TestCase):
         self.assertGreater(subs, 15)
         self.assertGreater(faces, 10)
 
+    def test_scgt_prt_corpus(self):
+        """All SCGT .prt members are well-formed CRLF text scenes."""
+        import glob
+        import mas_tool
+        import simbin_text_tool as stt_local
+        n = objects = 0
+        for arc in glob.glob(str(ROOT.parent / "SportsCarGtUsa" / "**" / "*.mas"),
+                             recursive=True):
+            try:
+                _, entries = mas_tool.read_archive(arc)
+            except Exception:
+                continue
+            for e in entries:
+                if not e.name.lower().endswith(".prt") or not e.data:
+                    continue
+                self.assertEqual(stt_local.validate_prt(e.data), [], e.name)
+                objects += len(re.findall(r"(?mi)^\s*ObjFile\s*=",
+                                          e.data.decode("latin-1")))
+                n += 1
+        self.assertEqual(n, 5)
+        self.assertGreater(objects, 900)
+
     def test_scgt_vrl_corpus(self):
         """SCGT .vrl members: 60-byte zero header and valid first offset."""
         import glob
