@@ -216,6 +216,23 @@ class CorpusDeepTest(unittest.TestCase):
                 n += 1
             self.assertEqual(n, 20)
 
+    def test_rcs_and_utf16_dic(self):
+        """.rcs control configs and UTF-16 .dic identification."""
+        import glob
+        import media_tool
+        n = 0
+        for root in ("RaceRoomTheGame", "RaceRoomTheGame2"):
+            for p in glob.glob(str(ROOT.parent / root / "**" / "*.rcs"), recursive=True):
+                info = stt.parse_rcs(Path(p).read_bytes())
+                self.assertEqual(stt.validate_rcs(info), [], p)
+                n += 1
+        self.assertEqual(n, 36)
+        dics = [p for p in glob.glob(str(ROOT.parent / "**" / "*.dic"), recursive=True)
+                if Path(p).read_bytes()[:2] == b"\xff\xfe"]
+        self.assertGreater(len(dics), 0)
+        for p in dics:
+            self.assertEqual(media_tool.identify(p).format, "utf16-text", p)
+
     def test_tdf_corpus(self):
         """All 57 .tdf terrain configs carry 12 universal keys, 3 sections."""
         import glob

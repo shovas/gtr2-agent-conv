@@ -262,6 +262,9 @@ def identify(path: str | Path) -> MediaInfo:
         return MediaInfo(str(p), size, "png", {"width": w, "height": h,
                                                "bit_depth": depth,
                                                "color_type": ctype})
+    # UTF-16LE text starts with ff fe, which also matches an MP3 frame sync.
+    if b[:2] == b"\xff\xfe" and ext in (".dic", ".txt", ".ini"):
+        return MediaInfo(str(p), size, "utf16-text", {"bom": "ff-fe"})
     # MP3
     if head.startswith(b"ID3") or (len(head) >= 2 and head[0] == 0xFF and (head[1] & 0xE0) == 0xE0):
         details = {"id3": head.startswith(b"ID3")}

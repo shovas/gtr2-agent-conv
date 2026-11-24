@@ -733,6 +733,21 @@ def validate_rf1_config(keys: set[str], ext: str) -> list[str]:
     return [f"missing {ext} key {key}" for key in sorted(needed) if key not in keys]
 
 
+RCS_UNIVERSAL_KEYS = frozenset((
+    "name", "readonly", "device1", "device2", "device3"))
+
+
+def parse_rcs(data: bytes | str) -> ConfigInfo:
+    """Parse an rFactor ``.rcs`` control-set config (name + 3 device slots)."""
+    return _parse_config(data)
+
+
+def validate_rcs(info: ConfigInfo) -> list[str]:
+    """Check corpus-verified .rcs invariants."""
+    return [f"missing {key}" for key in sorted(RCS_UNIVERSAL_KEYS)
+            if key not in info.keys]
+
+
 TDF_UNIVERSAL_KEYS = frozenset((
     "dry", "legal", "materials", "reaction", "roadbumpamp", "roadbumplen",
     "roaddrygrip", "roadwetgrip", "rumblebumpamp", "rumblebumplen",

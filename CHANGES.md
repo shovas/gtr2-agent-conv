@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-25 03:15:00 -0500 - .rcs control sets and UTF-16 .dic fix
+- Added `parse_rcs()`/`validate_rcs()` for 36 RaceRoom control-set configs (5 universal keys) and fixed `identify()` misclassifying UTF-16LE `.dic` files as MP3 (ff fe BOM matched an MP3 sync) — now `utf16-text`. Added a full-tier regression test.
+
 ## 2026-11-25 03:00:00 -0500 - .tdf terrain config parser
 - Added `simbin_text_tool.parse_tdf()`/`validate_tdf()` for all 57 rF1 terrain-definition files: 12 universal keys and 3 sections (trackvars/feedback/loose), 0 validation problems. `media_tool.identify()` reports `rfactor-tdf`. Added a full-tier regression test.
 
