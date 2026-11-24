@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 08:00:00 -0500 - AIW width/groove validator
+- Added WP_WIDTH/WP_GALPHA parsing to `parse_aiw()` and `validate_aiw_width_galpha()` with corpus-observed bounds; documented packed legacy GALPHA values in rF1Vanilla/F1 2002 as an explicit exception. Full-tier regression test over 465 AIWs.
+
 ## 2026-11-26 07:30:00 -0500 - HED head-physics validator
 - Added `simbin_text_tool.validate_hed_numeric()` covering vector ordering and component bounds for the two shipped GTR2/GTL `.hed` files. Full-tier regression test added.
 

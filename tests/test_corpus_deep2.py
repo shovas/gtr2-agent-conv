@@ -339,6 +339,33 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertEqual(cars, 16)
         self.assertEqual(includes, 16)
 
+    def test_aiw_width_galpha_bounds(self):
+        """AIW width/groove values respect corpus bounds (legacy exception)."""
+        import glob
+        import os
+        import isi_crypt
+        n = wps = 0
+        roots = ("Race07Vanilla", "GTLSteam", "GTR2Steam", "Race07Complete",
+                 "RF1Vanilla", "Automobilista", "StockCarExtreme", "F12002")
+        for root in roots:
+            for p in glob.glob(str(ROOT.parent / root / "**" / "*"), recursive=True):
+                if not os.path.isfile(p) or not p.lower().endswith(".aiw"):
+                    continue
+                raw = Path(p).read_bytes()
+                if raw[:4] == media_tool.JCA_MAGIC:
+                    text = media_tool.decrypt_jca_text(raw).decode("latin-1")
+                else:
+                    sign, _ = isi_crypt.crypt_info(raw)
+                    text = (isi_crypt.decrypt_bytes(raw).decode("latin-1")
+                            if sign in isi_crypt.GAMES else raw.decode("latin-1"))
+                aiw = stt.parse_aiw(text)
+                self.assertEqual(stt.validate_aiw_width_galpha(
+                    aiw, root in ("RF1Vanilla", "F12002")), [], p)
+                n += 1
+                wps += len(aiw.waypoints)
+        self.assertEqual(n, 465)
+        self.assertGreater(wps, 450000)
+
     def test_aiw_has_no_camera_references(self):
         """AIW files contain no ControlPoint/camera name references."""
         import glob

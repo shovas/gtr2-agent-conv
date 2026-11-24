@@ -329,6 +329,8 @@ GTR1 coverage is now complete: a full `../GTR1Vanilla` scan (33,477 GMTs with th
 
 - **SCGT `.prt` object references (negative)**: the 5 archived `.prt` scene files are well-formed CRLF ASCII with balanced braces (7 `Group`, 940 `Instance` records, 977 `ObjFile` references), validated by `simbin_text_tool.validate_prt()` with a full-tier test. None of the 977 object names resolve to archive member basenames, `.vrl` meshes, `.scn` declarations or `.aiw` content; the references appear to be stale editor-level object IDs. No reference-resolution rule promoted.
 
+- **AIW width/groove bounds**: `WP_WIDTH` components lie in [-6.75, 100] across all 465 AIWs (1,831,328 values). `WP_GALPHA` is a groove-darkness scalar in [0,1] in six corpora, but rF1Vanilla (9 files, 3,167 values) and F1 2002 (1 file, 5 values) store packed/bit-pattern values such as -431602080.0 — they are explicitly exempted via `legacy_alpha=True`. `validate_aiw_width_galpha()` with full-tier test.
+
 - **HED head-physics scope**: only 2 `.hed` files ship (one each in GTR2/GTL), so `validate_hed_numeric()` checks vector/ordering invariants rather than overfitting tight bounds: 3-vectors for min/max position and orientation with `min < max` componentwise, spring directions in [-1,1], and broad component envelopes from the two samples. Full-tier regression test; wider numeric bounds would need more samples.
 
 - **ENG/GRB numeric field bounds**: `validate_eng_numeric()` covers 12 engine fields from 66 GTR2/GTL `.eng` files (e.g. revlimitrange 0–8900, emission −3.15..0.85, starter timing 0.2–1.5, idle RPM 1000–2250, inertia 0.08–0.345); `validate_grb_numeric()` covers gearbox `ratio` 7–51 and `bevel` 1–27 from 60 `.grb` files. Full-tier regression test.

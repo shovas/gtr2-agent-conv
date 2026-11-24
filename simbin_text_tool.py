@@ -31,6 +31,8 @@ class Waypoint:
     path: tuple[float, float] | None = None
     score_checkpoint: int | None = None
     score_distance: float | None = None
+    width: tuple[float, ...] | None = None
+    galpha: float | None = None
     perp: tuple[float, float, float] | None = None
 
     def wp_class(self) -> int | None:
@@ -90,7 +92,21 @@ def parse_aiw(data: str) -> AIW:
                     waypoint = Waypoint(pos=tuple(float(match.group(i)) for i in (1, 2, 3)))
                     aiw.waypoints.append(waypoint)
             elif waypoint is not None:
-                if key == "wp_bitfields":
+                if key == "wp_width":
+                    match = re.match(r"\(([^)]*)\)", value)
+                    if match:
+                        try:
+                            waypoint.width = tuple(float(x) for x in match.group(1).split(","))
+                        except ValueError:
+                            pass
+                elif key == "wp_galpha":
+                    match = re.match(r"\(([^)]*)\)", value)
+                    if match:
+                        try:
+                            waypoint.galpha = float(match.group(1))
+                        except ValueError:
+                            pass
+                elif key == "wp_bitfields":
                     match = INT1_RE.match(value)
                     if match:
                         waypoint.bitfields = int(match.group(1))
@@ -280,6 +296,27 @@ def validate_aiw_waypoints(aiw: AIW) -> list[str]:
             norm = math.sqrt(sum(x * x for x in wp.perp))
             if abs(norm - 1.0) > 0.01:
                 problems.append(f"waypoint {i}: track/pit wp_perp norm {norm:.4f} != 1")
+    return problems
+
+
+def validate_aiw_width_galpha(aiw: AIW, legacy_alpha: bool = False) -> list[str]:
+    """Check corpus-observed WP_WIDTH/WP_GALPHA bounds.
+
+    Across 465 AIWs, width components lie in [-6.75, 100]. WP_GALPHA is a
+    groove-darkness value in [0, 1] in six corpora; rF1Vanilla and F1 2002
+    instead store packed/bit-pattern values (e.g. -431602080.0), so callers
+    pass ``legacy_alpha=True`` for those.
+    """
+    problems: list[str] = []
+    for i, wp in enumerate(aiw.waypoints):
+        if wp.width is not None:
+            for value in wp.width:
+                if not (-6.75 <= value <= 100.0):
+                    problems.append(f"waypoint {i}: WP_WIDTH {value} out of range")
+                    return problems
+        if wp.galpha is not None and not legacy_alpha and not (0.0 <= wp.galpha <= 1.0):
+            problems.append(f"waypoint {i}: WP_GALPHA {wp.galpha} out of range")
+            return problems
     return problems
 
 
