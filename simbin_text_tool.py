@@ -266,6 +266,36 @@ def validate_aiw_waypoints(aiw: AIW) -> list[str]:
     return problems
 
 
+def parse_veh(data: bytes | str) -> dict[str, str]:
+    """Parse an rFactor ``.veh`` vehicle descriptor into key/value strings.
+
+    Corpus-verified on 2,763 files (57 distinct keys): ``Graphics`` is present
+    in all of them, and ``Classes``/``Driver``/``Number``/``Team``/``Sounds``/
+    ``HDVehicle`` in all but 2. Values are de-quoted and trailing ``//``
+    comments are stripped; quoted ``//`` inside a value is preserved.
+    """
+    text = data if isinstance(data, str) else data.decode("latin-1")
+    out: dict[str, str] = {}
+    for line in text.splitlines():
+        stripped = line.strip()
+        if not stripped or stripped.startswith("//"):
+            continue
+        m = re.match(r"^([A-Za-z_][\w]*)\s*=\s*(.*)$", stripped)
+        if not m:
+            continue
+        key, value = m.group(1).lower(), m.group(2)
+        if value.startswith('"'):
+            end = value.find('"', 1)
+            if end >= 0:
+                value = value[1:end]
+            else:
+                value = value.split("//", 1)[0].strip()
+        else:
+            value = value.split("//", 1)[0].strip()
+        out[key] = value
+    return out
+
+
 @dataclass
 class SvmInfo:
     variant: str  # rf1 | gtr2 | encrypted

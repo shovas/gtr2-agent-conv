@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 13:30:00 -0500 - rFactor .veh parser
+- Added `simbin_text_tool.parse_veh()` for rFactor vehicle descriptors. Corpus-verified on 2,763 files / 57 keys: `Graphics` is universal and six identifier keys appear in all but 2 files. Added a regression test; all 6 simbin text tests pass.
+
 ## 2026-11-24 13:00:00 -0500 - CUBEASF family identification
 - `media_tool.identify()` now recognises plain CUBEASF scene files (`.scn/.clf/.set/.trk`) as `cubeasf`; all 69 `.clf` and 417 `.scn` files parse with `simbin_text_tool.parse_scn()`. Added a corpus regression test; all 56 media tests pass.
 

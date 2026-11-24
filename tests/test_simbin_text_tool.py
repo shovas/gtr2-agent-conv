@@ -65,6 +65,24 @@ class SimbinTextToolTest(unittest.TestCase):
         self.assertGreater(parsed, 0)
 
 
+    def test_veh_parser_corpus(self):
+        """.veh descriptors: 57 keys, Graphics universal, 6 near-universal."""
+        import glob
+        counts = {}
+        n = 0
+        for p in glob.glob(str(ROOT.parent / "**" / "*.veh"), recursive=True):
+            d = stt.parse_veh(Path(p).read_bytes())
+            if not d:
+                continue
+            n += 1
+            for k in d:
+                counts[k] = counts.get(k, 0) + 1
+        self.assertGreater(n, 2000)
+        self.assertEqual(len(counts), 57)
+        self.assertEqual(counts["graphics"], n)
+        for k in ("classes", "driver", "number", "team", "sounds", "hdvehicle"):
+            self.assertGreaterEqual(counts[k], n - 2)
+
     def test_svm_key_subset_corpus(self):
         """rF1 .svm keys are a strict subset of the GTR2 setup vocabulary."""
         import glob
