@@ -68,6 +68,7 @@ New angles tried that were not in the first investigation:
 | Raw-deflate brute force at **every** byte offset 0..13,061 (wbits -15/31/47) | only 3 tiny decompressions (317/109/139 bytes) yielding repetitive garbage (`c7 c7...`, `<<<<...`) | **Excluded** as a deflate/zlib stream anywhere in the blob |
 | First 8 bytes as ISI signature (rF1 `0x38af...` / GSC `0x4b1d...`) | parsed as u64 `0x5c45fc1e6050b465`, no match; XOR byte patterns with either signature are random | **Excluded** as a standard ISI-crypt header |
 | Byte-overlap with sibling PAR2 recovery data | full 13,064-byte blob and all 204 64-byte chunks absent from both `DRIVERS.PHS` (445 KB) and `CARS.PHS` (803 KB) | **Excluded** as a plain subset of sibling recovery slices |
+| Reed-Solomon slice-window probe | 816 aligned 16-byte windows of PHYSICS.PHS absent from the 384,000-byte `RecvSlic` payload (exponent 53) in `CARS.PHS`; length is 3.4% of slice size | **Excluded** as a partial/embedded slice of the sibling set |
 | PAR2 slice-exponent probe | sibling `RecvSlic` bodies start with a small u32 exponent (53/58/59) then 384,000 bytes of slice data; PHYSICS.PHS starts with u32 1,615,901,797 | **Excluded** as a bare PAR2 recovery slice (no plausible exponent) |
 
 Excluded by this pass: a literal PAR2-aware loader in the GTL binaries; a feasible
