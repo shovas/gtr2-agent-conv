@@ -108,6 +108,42 @@ class CorpusDeepTest(unittest.TestCase):
         self.assertGreater(subs, 15)
         self.assertGreater(faces, 10)
 
+    def test_trk_reference_resolution(self):
+        """TRK MASFile/MeshFile references resolve to local content."""
+        import glob
+        import media_tool
+        import mas_tool
+        import simbin_text_tool as stt_local
+        mas_refs = mas_ok = mesh_refs = mesh_ok = 0
+        for root in ("GTR2Steam", "GTLSteam", "Race07Complete"):
+            base = ROOT.parent / root
+            available = set()
+            for p in glob.glob(str(base / "**" / "*"), recursive=True):
+                if not Path(p).is_file():
+                    continue
+                available.add(Path(p).name.lower())
+                if p.lower().endswith((".gtr", ".gtl", ".mas")):
+                    try:
+                        _, entries = mas_tool.read_archive(p, read_data=False)
+                    except Exception:
+                        continue
+                    for e in entries:
+                        available.add(Path(e.name).name.lower())
+            for p in glob.glob(str(base / "**" / "*.trk"), recursive=True):
+                if not Path(p).is_file():
+                    continue
+                refs = stt_local.parse_trk_refs(media_tool.decrypt_jca_text(Path(p).read_bytes()))
+                for name in refs["mas"]:
+                    mas_refs += 1
+                    mas_ok += name in available
+                for name in refs["mesh"]:
+                    mesh_refs += 1
+                    mesh_ok += name in available
+        self.assertGreater(mas_refs, 250)
+        self.assertEqual(mas_ok, mas_refs)
+        self.assertGreater(mesh_refs, 100000)
+        self.assertGreater(mesh_ok / mesh_refs, 0.999)
+
     def test_scgt_text_ani_corpus(self):
         """The SCGT text .ani member parses into valid animation rules."""
         import glob
