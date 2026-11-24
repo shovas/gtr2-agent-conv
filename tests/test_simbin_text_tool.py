@@ -81,6 +81,20 @@ class SimbinTextToolTest(unittest.TestCase):
         self.assertEqual(info.stamps, ["Detail.tga"])
         self.assertEqual(info.decals, ["Small"])
 
+    def test_eng_torque_curve(self):
+        """.eng RPMTorque points are (rpm, friction, torque) with rising RPM."""
+        sample = ("RPMTorque=(0, -58.40, -58.00)\n"
+                  "RPMTorque=(250, -33.00, -9.00)\n"
+                  "EngineInertia=(0.15)\n")
+        # minimal fixture: validator will flag missing universals but parser must work
+        info = stt.parse_eng(sample)
+        self.assertEqual(info.torque_curve, [(0.0, -58.4, -58.0), (250.0, -33.0, -9.0)])
+        self.assertEqual(info.values["engineinertia"], "(0.15)")
+        self.assertIn("rpmtorque", info.keys)
+        bad = stt.parse_eng("RPMTorque=(500, 0, 10)\nRPMTorque=(250, 0, 20)\n")
+        self.assertIn("RPMTorque RPM values not strictly increasing",
+                      stt.validate_eng(bad))
+
     def test_grb_ratio_semantics(self):
         """.grb gear ratio is b/a (driven/driving teeth), not a/b."""
         sample = ("[GEAR_RATIOS]\nratio=(10,40) // 4.00\n"

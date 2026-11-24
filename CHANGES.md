@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 23:59:30 -0500 - .eng engine-file parser
+- Added `simbin_text_tool.parse_eng()` / `validate_eng()` for all 333 `.eng` files: 28 universal keys and strictly increasing RPMTorque RPM values in every file (12,771 points, 0 validation problems). Added 2 regression tests (corpus full-tier); all 25 simbin-text/corpus-deep tests pass.
+
 ## 2026-11-24 23:59:00 -0500 - .grb gearbox-ratio parser
 - Added `simbin_text_tool.parse_grb()` / `validate_grb()` for all 248 `.grb` files (incl. 77 JCA-wrapped). Corpus-verified the ratio semantics as **b/a** (driven/driving teeth) against 214+ inline decimal comments, with 6,929 gear entries and 0 validation problems. Added 2 regression tests (corpus check full-tier only); all 23 simbin-text/corpus-deep tests pass.
 

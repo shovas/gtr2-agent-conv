@@ -296,6 +296,66 @@ def parse_veh(data: bytes | str) -> dict[str, str]:
     return out
 
 
+ENG_UNIVERSAL_KEYS = (
+    "startertiming", "enginemaprange", "launchrpmlogic", "revlimitlogic",
+    "rpmtorque", "lifetimeenginerpm", "lifetimeoiltemp", "fuelestimate",
+    "engineinertia", "idlerpmlogic", "radiatorcooling", "fuelconsumption",
+    "idlethrottle", "oilwaterheattransfer", "launchefficiency",
+    "enginemapsetting", "enginebrakingmapsetting", "onboardstarter",
+    "lifetimeavg", "optimumoiltemp", "combustionheat", "waterminimumcooling",
+    "enginebrakingmaprange", "engineemission", "lifetimevar",
+    "oilminimumcooling", "revlimitrange", "enginespeedheat",
+)
+
+
+@dataclass
+class EngInfo:
+    torque_curve: list[tuple[float, float, float]] = field(default_factory=list)
+    values: dict[str, str] = field(default_factory=dict)
+    keys: set[str] = field(default_factory=set)
+
+
+def parse_eng(data: bytes | str) -> EngInfo:
+    """Parse an rFactor/GTR2 ``.eng`` engine file.
+
+    Corpus-verified on 333 files (plain and JCA-wrapped): 28 scalar keys are
+    universal and every file has an ``RPMTorque`` curve with strictly
+    increasing RPM values (verified in all 333). Each curve point is
+    ``(rpm, friction_torque, torque)``; pass decrypted bytes for JCA files.
+    """
+    text = data if isinstance(data, str) else data.decode("latin-1")
+    info = EngInfo()
+    for line in text.splitlines():
+        code = line.split("//", 1)[0].strip()
+        m = re.match(r"^RPMTorque\s*=\s*\(([^)]*)\)", code, re.I)
+        if m:
+            info.keys.add("rpmtorque")
+            nums = _all_floats(m.group(1))
+            if nums and len(nums) >= 3:
+                info.torque_curve.append((nums[0], nums[1], nums[2]))
+            continue
+        m = re.match(r"^([A-Za-z_][\w]*)\s*=\s*(.*)$", code)
+        if m:
+            key = m.group(1).lower()
+            info.keys.add(key)
+            info.values[key] = m.group(2).strip().strip('"')
+    return info
+
+
+def validate_eng(info: EngInfo) -> list[str]:
+    """Check corpus-verified .eng invariants; return a list of problems."""
+    problems: list[str] = []
+    for required in ENG_UNIVERSAL_KEYS:
+        if required not in info.keys:
+            problems.append(f"missing {required}")
+    if not info.torque_curve:
+        problems.append("no RPMTorque points")
+    rpms = [p[0] for p in info.torque_curve]
+    if any(a >= b for a, b in zip(rpms, rpms[1:])):
+        problems.append("RPMTorque RPM values not strictly increasing")
+    return problems
+
+
 @dataclass
 class GrbInfo:
     gear_ratios: list[tuple[int, int]] = field(default_factory=list)

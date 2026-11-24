@@ -94,6 +94,22 @@ class CorpusDeepTest(unittest.TestCase):
         self.assertEqual(rf_sections, gtr_sections)
         self.assertEqual(len(rf_sections), 15)
 
+    def test_eng_parser_corpus(self):
+        """All 333 .eng files validate with rising RPMTorque curves."""
+        import glob
+        import media_tool
+        n = pts = 0
+        for p in glob.glob(str(ROOT.parent / "**" / "*.eng"), recursive=True):
+            text = media_tool.decrypt_jca_text(Path(p).read_bytes()).decode("latin-1")
+            info = stt.parse_eng(text)
+            self.assertEqual(stt.validate_eng(info), [], p)
+            rpms = [q[0] for q in info.torque_curve]
+            self.assertTrue(all(a < b for a, b in zip(rpms, rpms[1:])), p)
+            pts += len(info.torque_curve)
+            n += 1
+        self.assertEqual(n, 333)
+        self.assertEqual(pts, 12771)
+
     def test_grb_parser_corpus(self):
         """All 248 .grb files (incl. 77 JCA) validate with b/a ratio semantics."""
         import glob
