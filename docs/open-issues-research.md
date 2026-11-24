@@ -17,7 +17,7 @@ Cross-corpus check: `simbin_events_tool.find_frame_grid()` detects the 63-byte f
 
 ## GTTF +24/+28/+44 packed-integer hypotheses (2026-11-25)
 
-Using ccgepmonitor's `mLapDist`/`mPathLateral` semantics as a guide: slot +24 is the constant marker `01 00 00 34` in 29/29 files (no data); slot +28 begins `00 20 00 XX` (fixed low 16 bits `0x2000`) in all files, and its varying byte +31 shows no correlation with cumulative distance (median r=-0.014) or frame delta-time (-0.010). Slot +44 holds near-1e38 floats (±1.6e38 range) — not bounded lateral metres. No packed-integer or bounded-range interpretation matched any runtime field; recorded as negative.
+Using ccgepmonitor's `mLapDist`/`mPathLateral` semantics as a guide: slot +24 is the constant marker `01 00 00 34` in 29/29 files (no data); slot +28 begins `00 20 00 XX` (fixed low 16 bits `0x2000`) in all files, and its varying byte +31 shows no correlation with cumulative distance (median r=-0.014) or frame delta-time (-0.010). Slot +44 holds near-1e38 floats (±1.6e38 range) — not bounded lateral metres. A packed-half interpretation was also excluded: bytes +44 and +46 are equal in 83% of frames (clustered 227-233), and float16 decoding of either 16-bit half yields unbounded values (−3.95..3.95 and −64448..64704) with no correlation to longitudinal acceleration (median r=0.001) or heading rate (0.005) and no file confined to 0..1/[-1,1]. No packed-integer or bounded-range interpretation matched any runtime field; recorded as negative.
 
 ## GTTF slots 28/36/40 kinematic hypotheses (2026-11-25)
 
