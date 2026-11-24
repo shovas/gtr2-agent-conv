@@ -23,6 +23,10 @@ The 4-byte field at frame offset +36 is **not** a free f32: bytes +36/+37 are `0
 
 Beyond the verified +8 block count, the 4-/8-byte tables following the 16-byte `.hdr` header do not resolve to per-sound MP3 offsets with any tested interpretation: parsing the remainder as u16/u32 (little- or big-endian) yields monotonicity 0.06-0.51 (random ≈0.5), mod-3 bias at most 0.43 vs uniform 0.33, and MP3-frame-sync hit rates that merely mirror the natural 1/3 of `.dat` block boundaries that begin with a sync. `u16@0` has 125 distinct values (not a filename index; `0002.hdr` etc. all carry 0x62) and does not correlate with the MP3 sample rate (24000 Hz mono 128 kbps across sampled files). Only the block-count field is used by `hdr_dat_mp3()`; the table semantics remain undecoded. No speculative decoder added.
 
+## `.gdb`/`.car` universal-key survey (2026-11-24)
+
+Generic section/key parsing of all 1,287 `.gdb` and 3,385 `.car` files found **667 / 173 distinct keys respectively but no cross-corpus universal key**. Only family-specific universals exist: `.car` GTR2-family files (165) all carry `genstring`, `pitgroup`, `number`, `driver1`, `team` (the GTR2-only key set already used by `gtl_to_gtr2`); rF1 `.gdb` (81) all carry `racelaps`. Seven zero-length `.gdb` fixtures in `../rfactortools/tests/data` are legitimately empty. `parse_gdb()`/`parse_car()`/`validate_config()` therefore perform structural validation only — no universal key rule can be promoted beyond the existing family-specific validators.
+
 ## Encrypted `.svm` setups (2026-11-24)
 
 10 shipped `.svm` files (only **2 distinct payloads**, duplicated across corpora: `Toban Long.svm` 558 B and `Orchard Lake Oval.svm` 449 B) carry `//[[gMb1.000f ...]]` headers followed by a high-entropy payload beginning `5b 79 6d 98 7f 80 a9 e0` (221 distinct byte values, ~11 short ASCII runs, implausible f32 alignments). The two payloads share a 20-byte prefix. Exhausted offline hypotheses:

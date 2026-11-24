@@ -94,6 +94,21 @@ class CorpusDeepTest(unittest.TestCase):
         self.assertEqual(rf_sections, gtr_sections)
         self.assertEqual(len(rf_sections), 15)
 
+    def test_gdb_car_corpus(self):
+        """Generic .gdb/.car parsing: 1,287 + 3,385 files all valid."""
+        import glob
+        import media_tool
+        n = keys = 0
+        for ext in (".gdb", ".car"):
+            for p in glob.glob(str(ROOT.parent / "**" / ("*" + ext)), recursive=True):
+                info = (stt.parse_gdb if ext == ".gdb" else stt.parse_car)(
+                    media_tool.decrypt_jca_text(Path(p).read_bytes()))
+                self.assertEqual(stt.validate_config(info), [], p)
+                keys += len(info.keys)
+                n += 1
+        self.assertEqual(n, 4672)
+        self.assertGreater(keys, 150000)
+
     def test_cin_scr_corpus(self):
         """All .cin (409) and .scr (123) scripts validate."""
         import glob

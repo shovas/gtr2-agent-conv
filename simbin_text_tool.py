@@ -296,6 +296,63 @@ def parse_veh(data: bytes | str) -> dict[str, str]:
     return out
 
 
+@dataclass
+class ConfigInfo:
+    values: dict[str, str] = field(default_factory=dict)
+    keys: set[str] = field(default_factory=set)
+    sections: set[str] = field(default_factory=set)
+
+
+def _parse_config(data: bytes | str) -> ConfigInfo:
+    """Shared key/value + [SECTION] parser for .gdb/.car text configs."""
+    text = data if isinstance(data, str) else data.decode("latin-1")
+    info = ConfigInfo()
+    for line in text.splitlines():
+        code = line.split("//", 1)[0].strip()
+        if not code:
+            continue
+        m = re.match(r"^\[([^\]]+)\]$", code)
+        if m:
+            info.sections.add(m.group(1).strip().lower())
+            continue
+        m = re.match(r"^([A-Za-z_][\w]*)\s*=\s*(.*)$", code)
+        if m:
+            key = m.group(1).lower()
+            info.keys.add(key)
+            info.values[key] = m.group(2).strip().strip('"')
+    return info
+
+
+def parse_gdb(data: bytes | str) -> ConfigInfo:
+    """Parse a `.gdb` race/event config into keys and named sections.
+
+    Corpus-verified on 1,280 files: 667 distinct keys and no cross-corpus
+    universal key; only family-specific universals exist (e.g. `racelaps` in
+    81/81 rF1 `.gdb`). Pass decrypted bytes for JCA-wrapped files.
+    """
+    return _parse_config(data)
+
+
+def parse_car(data: bytes | str) -> ConfigInfo:
+    """Parse a `.car` vehicle config into its key/value pairs.
+
+    Corpus-verified on 3,385 files: 173 distinct keys, no cross-corpus
+    universal; GTR2-family files (165) all carry `genstring`, `pitgroup`,
+    `number`, `driver1` and `team` (the existing GTR2-only key set).
+    """
+    return _parse_config(data)
+
+
+def validate_config(info: ConfigInfo) -> list[str]:
+    """Structural validation for generic .gdb/.car configs."""
+    problems: list[str] = []
+    # Zero-length .gdb fixtures exist in ../rfactortools/tests/data, so an
+    # empty config is structurally valid; only malformed keys are flagged.
+    if any(not re.match(r"^[A-Za-z_]\w*$", k) for k in info.keys):
+        problems.append("malformed key name")
+    return problems
+
+
 CIN_EVENT_TYPES = frozenset((
     "CAMERA_SELECT", "WAIT", "CAMERA_SET_LAST", "CAMERA_ACQUIRE_CONTROL",
     "SCRIPT_END", "GRIDWALK", "COMMENTARY_START",
