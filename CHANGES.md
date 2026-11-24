@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-25 14:30:00 -0500 - AIW validation across eight corpora
+- Extended AIW pointer/path validation to RF1Vanilla, Automobilista, StockCarExtreme and F1 2002: 457,832 waypoints across 465 files now pass. Documented a third stricter-validator exception (`Lienz_24H.AIW`, non-unit `wp_perp`) and that F1 Challenge ships no AIWs. Full-tier regression test updated.
+
 ## 2026-11-25 14:00:00 -0500 - AIW pointer validator extended
 - Extended `validate_aiw_pointers()` to GTR2Steam and Race07Complete: corpus-verified on 201,855 waypoints across 193 AIWs. Pointer -1 is treated as a documented "no link" sentinel (7 occurrences confined to addon track `Hill.AIW`); two malformed addon tracks remain flagged by the stricter waypoint validator. Full-tier regression test updated.
 

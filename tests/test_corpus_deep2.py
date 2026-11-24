@@ -340,25 +340,37 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertEqual(includes, 16)
 
     def test_aiw_waypoint_pointer_bounds(self):
-        """AIW previous/next pointers and wp_path offsets stay in bounds."""
+        """AIW pointers and wp_path offsets stay in bounds across 8 corpora."""
         import glob
         import os
+        import isi_crypt
+        exceptions = {"Hill.AIW", "Nurburg.AIW", "Lienz_24H.AIW"}
         n = wps = 0
-        for root in ("Race07Vanilla", "GTLSteam", "GTR2Steam", "Race07Complete"):
+        roots = ("Race07Vanilla", "GTLSteam", "GTR2Steam", "Race07Complete",
+                 "RF1Vanilla", "Automobilista", "StockCarExtreme", "F12002")
+        for root in roots:
             for p in glob.glob(str(ROOT.parent / root / "**" / "*"), recursive=True):
                 if not os.path.isfile(p) or not p.lower().endswith(".aiw"):
                     continue
-                aiw = stt.parse_aiw(
-                    media_tool.decrypt_jca_text(Path(p).read_bytes()).decode("latin-1"))
-                if root != "Race07Complete":  # two malformed addon tracks there
+                raw = Path(p).read_bytes()
+                if raw[:4] == media_tool.JCA_MAGIC:
+                    text = media_tool.decrypt_jca_text(raw).decode("latin-1")
+                else:
+                    sign, _ = isi_crypt.crypt_info(raw)
+                    if sign in isi_crypt.GAMES:
+                        text = isi_crypt.decrypt_bytes(raw).decode("latin-1")
+                    else:
+                        text = raw.decode("latin-1")
+                aiw = stt.parse_aiw(text)
+                if os.path.basename(p) not in exceptions:
                     self.assertEqual(stt.validate_aiw_waypoints(aiw), [], p)
                 self.assertEqual(stt.validate_aiw_pointers(aiw), [], p)
                 for wp in aiw.waypoints:
                     self.assertIsNotNone(wp.path, p)
                 n += 1
                 wps += len(aiw.waypoints)
-        self.assertEqual(n, 193)
-        self.assertGreater(wps, 200000)
+        self.assertEqual(n, 465)
+        self.assertGreater(wps, 450000)
 
     def test_rfm_corpus(self):
         """All 10 rF1 .rfm mod descriptors carry 37 universal keys."""

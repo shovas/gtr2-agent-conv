@@ -278,12 +278,13 @@ def validate_aiw_waypoints(aiw: AIW) -> list[str]:
 def validate_aiw_pointers(aiw: AIW) -> list[str]:
     """Check corpus-verified waypoint pointer/path bounds.
 
-    Verified on 201,855 waypoints across 193 AIWs from Race07Vanilla,
-    GTLSteam, GTR2Steam and Race07Complete: every pointer is either -1
+    Verified on 457,832 waypoints across 465 AIWs from eight corpora
+    (Race07Vanilla, GTLSteam, GTR2Steam, Race07Complete, RF1Vanilla,
+    Automobilista, StockCarExtreme, F1 2002): every pointer is either -1
     ("no link") or a valid waypoint index, and ``wp_path`` always carries two
-    finite lateral offsets with |value| < 100. Pointer 2 is -1 in 172,129
-    records; pointers 0/1 are -1 in only 7 records, all in the addon track
-    ``Hill.AIW``.
+    finite lateral offsets with |value| < 100. Pointer 2 is -1 in a large
+    minority of records; pointers 0/1 are -1 in only 7 records, all in the
+    addon track ``Hill.AIW``.
     """
     problems: list[str] = []
     count = len(aiw.waypoints)
