@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-25 05:00:00 -0500 - .aud WAV reference resolution verified
+- Corpus-verified that all WAV path references in vanilla GTR2/GTL `.aud` files resolve to local WAV basenames (1,094/1,094 and 1,374/1,374); Race07/Race07Vanilla 98%, Volvo 85%. Full-tier regression test added.
+
 ## 2026-11-25 04:45:00 -0500 - GTTF steering field decoded
 - Breakthrough: GTTF frame offset +16 is **steering**, not pitch — bounded [-1,1] in all 29 files (matching `mUnfilteredSteering` from ccgepmonitor/rF2 runtime headers) and correlated with heading rate in most files (median r=0.628). `read_frames()` now exposes `steering` (legacy `pitch` alias preserved). Added a corpus regression test.
 

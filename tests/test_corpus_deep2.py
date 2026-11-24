@@ -135,6 +135,27 @@ class CorpusDeep2Test(unittest.TestCase):
                 n += 1
             self.assertEqual(n, 20)
 
+    def test_aud_wav_reference_resolution(self):
+        """Vanilla GTR2/GTL .aud WAV references all resolve to local files."""
+        import glob
+        import os
+        import media_tool
+        for root in ("GTR2Steam", "GTLSteam"):
+            base = ROOT.parent / root
+            wavs = {os.path.basename(p).lower()
+                    for p in glob.glob(str(base / "**" / "*.wav"), recursive=True)}
+            checked = 0
+            for p in glob.glob(str(base / "**" / "*.aud"), recursive=True):
+                text = media_tool.decrypt_jca_text(Path(p).read_bytes()).decode("latin-1")
+                info = stt.parse_aud(text)
+                for key in info.path_keys:
+                    for value in info.values[key]:
+                        m = re.search(r"([^\\/]+\.wav)$", value, re.I)
+                        if m:
+                            self.assertIn(m.group(1).lower(), wavs, f"{p}: {value}")
+                            checked += 1
+            self.assertGreater(checked, 1000)
+
     def test_rfm_corpus(self):
         """All 10 rF1 .rfm mod descriptors carry 37 universal keys."""
         import glob

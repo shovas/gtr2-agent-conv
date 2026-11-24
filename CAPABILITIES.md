@@ -60,6 +60,7 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 - **Test-tier rebalance (2)**: the full-only `test_corpus_deep.py` grew to 19 tests / ~120 s with the new corpora; split into `test_corpus_deep.py` + `test_corpus_deep2.py` (both full-only) for balance — 42 s / 46 s respectively, all passing.
 - **RaceRoom animations**: all 91 `.fxm`/`.fxa`/`.lma` files in the two RaceRoom games are plain (not JCA) and decode with existing `fxm_tool` parsers; 3,114 nodes all have `file_key_count` 3 (TRS) or 1 (rotation) — the cross-corpus key_count rule holds. Full-tier regression test added.
 - **LexusIsfTrackTime configs**: all 11 `.veh` (27 universal keys, strict superset of the 25-key core), 5 `.scn` and 5 `.cam` files parse with `parse_veh`/`parse_scn`/`parse_cam` and pass core validators; full-tier regression test added (uses case-insensitive extensions).
+- **`.aud` WAV reference resolution**: all WAV path values in plain GTR2 (1,094/1,094) and GTL (1,374/1,374) `.aud` files resolve to local `.wav` basenames; Race07/Race07Vanilla resolve 98% and Volvo 85% — conversion-readiness invariant with full-tier regression test.
 ## Coverage gaps (documented, not yet addressed)
 - **GTR 2004 corpus** (`../GTR1Vanilla`, third GMT magic `...bba6bf90` at 0x04) is fully decoded by `gmt_semantic.py` (descriptor grid + descriptor-less object-mesh path; 33,477/33,477 files). `gmt_format.py` itself still targets the GTL/GTR2 layout only; use `gmt_semantic.py` for GTR1. See `docs/binary-formats.md`.
 - **Untested ISI signatures**: `isi_crypt.GAMES` supports 8 signatures but real corpora exist only for rFactor and Game Stock Car; ARCA Sim Racing, Simulador Turismo Carretera, Top Race 2009, Superleague Formula, STC 2012 and Formula Truck have no local corpus.
@@ -181,7 +182,7 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 
 ## Test execution
 - **Tool**: `run_tests.py --mode quick|normal|full` (default `normal`). Deterministic module lists with progressive coverage (`Quick ⊆ Normal ⊆ Full`), end-to-end budget warnings (Quick ≤60 s, Normal ≤300 s); expensive corpus surveys (Copa Petrobras, Stock Car Extreme, Race07 Complete, Volvo, PHS tooling) are Full-only to keep Normal within budget, and a timing/result report. `--list` prints tier membership; `--coverage` adds an optional line-coverage report (gracefully skipped when the `coverage` package is absent).
-- **Measured**: Quick 21 modules / 150 tests / ~59 s; Normal 38 modules / 222 tests / ~312 s; Full 52 modules / 426 tests / ~800 s (2 skipped — external tools absent).
+- **Measured**: Quick 21 modules / 150 tests / ~59 s; Normal 38 modules / 222 tests / ~312 s; Full 52 modules / 427 tests / ~800 s (2 skipped — external tools absent).
 - **Plain full suite**: `python3 -m unittest discover -s tests -v` remains available.
 - **Verification**: `tests/test_run_tests_modes.py` checks mode selection invariants; `tests/test_gtr1_coverage.py` asserts 33,477/33,477 GTR1 GMTs decode (Normal/Full); `tests/test_gmt_relayout.py` covers relayout round-trips and growth.
 
