@@ -126,6 +126,22 @@ files. None of these contradict the recovery-container conclusion.
   gameplay** — consistent with leftover update/recovery artifacts bundled in the
   install. This is a resource-identification result, not a decoded consumer routine.
 
+## GTL.exe reverse-engineering pass (2026-11-26)
+
+At the user's suggestion, the executable itself was examined directly:
+
+| Check | Result |
+|---|---|
+| `strings` (ASCII) in `GTL.exe`, `GTLDedicated.exe`, `GTLConfig.exe`, `GTLReporter.exe`, all DLLs for `.phs`, `PHYSICS.PHS`, `Physics2.gtl`, `CARS.PHS`, etc. | **Zero hits**; only `gtlui.mnu` / `SOURCE_MAS` appear in both main executables |
+| UTF-16LE `strings -el` for `phs` | Zero hits |
+| Packer detection (`file`, rabin2, UPX strings) | Unpacked, unstripped PE32 i386 — earlier string searches were not hidden by packing |
+| Raw byte search for `53 48 50` (little-endian "PHS") with radare2 | 9 hits, all false positives: data inside strings like `CATEGORYFINISHPOINTS` or instruction-boundary coincidences such as `8b 53 48` (`mov edx,[ebx+0x48]`) followed by `50` (`push eax`). Prior `50 53 48` ("PSH") hits were likewise shader strings |
+| Search for a 3-byte extension compare (`PH` word + `S` byte) in `.text` | Zero hits |
+| `PhysicsInfoChunkProcessor1` string neighborhood | It belongs to model/node physics-chunk parsing ("ScaleMax", "phoneme sets", "Physics object type = %d"), **not** a `.phs` file reader |
+| `Source_MAS="Physics2.gtl"` in `UIData/gtlui.mnu` lines 22–27 | The archive is opened as a generic UI MAS source (`Could Not Load MAS file %s (line %d)`, `SOURCE_MAS` strings), not via any PHS-named consumer |
+
+Conclusion: reverse engineering confirms there is no PHS-specific file loader or extension dispatch in the GTL binaries. The PHS members are reached, if at all, through the generic MAS/UI loader; no operation on `PHYSICS.PHS` can be identified statically, and the earlier offline blocker stands.
+
 ## User-requested "open the encryption" campaign (2026-11-25)
 
 Fresh attempts beyond every earlier negative, all ending in documented failure:

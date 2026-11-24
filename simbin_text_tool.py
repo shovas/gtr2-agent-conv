@@ -968,6 +968,23 @@ def validate_ani_text(rules: list[dict]) -> list[str]:
     return problems
 
 
+def parse_scr_move(value: str) -> tuple[str | None, str | None]:
+    """Split a `.scr` Move value into (actor reference, animation name).
+
+    Corpus-verified on 1,177 pit-crew actor references across four rF1-era
+    corpora: the quoted actor name always resolves to another Actor or an
+    archive member, and the parent reference always resolves to an Actor or
+    ``world``. The uppercase animation token (e.g. ``FRONT_JACK_UP``) does
+    **not** resolve to a standalone `.anm` file — it is an internal sequence
+    name in the mesh and is returned for reference only.
+    """
+    quoted = re.search(r'"([^"]+)"', value)
+    actor = quoted.group(1) if quoted else None
+    remainder = value.replace(quoted.group(0), "") if quoted else value
+    anim = re.search(r"\b[A-Z][A-Z0-9_]{2,}\b", remainder)
+    return actor, anim.group(0) if anim else None
+
+
 def parse_gdb_class_blocks(data: bytes | str) -> dict[str, list[str]]:
     """Extract keys from GDB SpecialClasses / SpecialClassesShort blocks.
 

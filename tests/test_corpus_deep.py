@@ -108,6 +108,45 @@ class CorpusDeepTest(unittest.TestCase):
         self.assertGreater(subs, 15)
         self.assertGreater(faces, 10)
 
+    def test_scr_move_parent_references(self):
+        """SCR Move/Parent actor references resolve locally."""
+        import glob
+        import os
+        import simbin_text_tool as stt_local
+        actors_ok = parents_ok = actors = parents = anims = 0
+        for root in ("NT2003", "NascarSimRacing", "F12002", "RF1Vanilla"):
+            base = ROOT.parent / root
+            members: set[str] = set()
+            for p in glob.glob(str(base / "**" / "*"), recursive=True):
+                if p.lower().endswith((".mas", ".MAS")):
+                    try:
+                        _, entries = mas_tool.read_archive(p, read_data=False)
+                    except Exception:
+                        continue
+                    for e in entries:
+                        members.add(Path(e.name).stem.lower())
+            for p in glob.glob(str(base / "**" / "*.scr"), recursive=True):
+                if not Path(p).is_file():
+                    continue
+                scene = stt_local.parse_scr(stt_local.read_text(p))
+                names = {a.name.lower() for a in scene.actors}
+                for a in scene.actors:
+                    if a.parent:
+                        parents += 1
+                        parents_ok += (a.parent.lower() in names
+                                       or a.parent.lower() in ("world", "none"))
+                    if a.move:
+                        actor, anim = stt_local.parse_scr_move(a.move)
+                        if actor:
+                            actors += 1
+                            actors_ok += actor.lower() in names or actor.lower() in members
+                        anims += anim is not None
+        self.assertGreater(actors, 1100)
+        self.assertEqual(actors_ok, actors)
+        self.assertGreater(parents, 1100)
+        self.assertEqual(parents_ok, parents)
+        self.assertGreater(anims, 1100)
+
     def test_rf1_gdb_filter_format_differs(self):
         """rF1-era GDBs use Filter Properties, not SimBin class filters."""
         import glob
