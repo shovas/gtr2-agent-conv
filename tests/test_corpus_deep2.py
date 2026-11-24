@@ -462,6 +462,27 @@ class CorpusDeep2Test(unittest.TestCase):
                 archived += os.path.splitext(e.name)[1].lower() in (".aud", ".car")
         self.assertEqual(archived, 0)
 
+    def test_nascar_eras_have_no_aud_or_car(self):
+        """NASCAR SimRacing/NT2003 have no .aud/.car; configs are .veh/.hdv."""
+        import glob
+        import os
+        import mas_tool
+        for root in ("NascarSimRacing", "NT2003"):
+            base = ROOT.parent / root
+            loose = [p for p in glob.glob(str(base / "**" / "*"), recursive=True)
+                     if os.path.isfile(p) and p.lower().endswith((".aud", ".car"))]
+            self.assertEqual(loose, [], root)
+            archived = 0
+            for p in glob.glob(str(base / "**" / "*.mas"), recursive=True) + \
+                    glob.glob(str(base / "**" / "*.MAS"), recursive=True):
+                try:
+                    _, entries = mas_tool.read_archive(p)
+                except Exception:
+                    continue
+                for e in entries:
+                    archived += os.path.splitext(e.name)[1].lower() in (".aud", ".car")
+            self.assertEqual(archived, 0, root)
+
     def test_rfm_corpus(self):
         """All 10 rF1 .rfm mod descriptors carry 37 universal keys."""
         import glob

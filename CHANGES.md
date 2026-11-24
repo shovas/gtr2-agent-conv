@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-25 16:30:00 -0500 - NASCAR-era reference non-applicability
+- Documented that NascarSimRacing and NT2003 have no `.aud`/`.car` files (audio is loose WAV plus `.djs`; configs are `.veh`/`.hdv`). Added a full-tier corpus-fact test; no reference validator applies.
+
 ## 2026-11-25 16:00:00 -0500 - Superleague reference non-applicability
 - Documented that Superleague Formula 2009 has no `.aud`/`.car` files: 101 loose WAVs plus 5 MP3s, and opaque `gMb1.002f` encrypted vehicle configs. Added a full-tier corpus-fact test; no reference validator applies.
 
