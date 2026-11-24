@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import math
 import re
+import struct
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -850,6 +851,24 @@ def validate_svm_tc2000(keys: set[str]) -> list[str]:
     """Validate the 15 universal keys of TC2000 6-speed `.svm` setups."""
     return [f"missing svm key {key}" for key in sorted(SVM_TC2000_KEYS)
             if key not in keys]
+
+
+def validate_vrl(data: bytes) -> list[str]:
+    """Check corpus-verified Sports Car GT ``.vrl`` track-mesh invariants.
+
+    Verified on 1,500 archived members: the first 60 bytes are zero and the
+    u32 at +60 is a valid offset into the file. Deeper mesh-table semantics
+    (offset tables, vertex blocks) are not decoded here.
+    """
+    problems: list[str] = []
+    if len(data) < 64:
+        return ["too short"]
+    if any(data[:60]):
+        problems.append("non-zero bytes in 60-byte header")
+    first = struct.unpack_from("<I", data, 60)[0]
+    if not (0 < first < len(data)):
+        problems.append(f"invalid first offset {first}")
+    return problems
 
 
 RCD_CORE_STATS = ("aggression", "reputation", "courtesy", "composure",

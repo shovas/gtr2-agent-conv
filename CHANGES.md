@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-25 07:30:00 -0500 - SCGT .vrl structural validator
+- Added `simbin_text_tool.validate_vrl()` with corpus-verified invariants for 1,500 Sports Car GT `.vrl` members: 60-byte zero header and valid first u32 offset at +60. Deeper mesh tables remain undocumented. Full-tier regression test added.
+
 ## 2026-11-25 07:15:00 -0500 - ANM keyframe validator
 - Added `anm_format.validate_anm()` with corpus-verified invariants: per-bone monotonic key times (excluding the trailing time=0 sentinel) and unit quaternions, 0 problems across 236 F1C/F12002 files. Full-tier regression test added.
 

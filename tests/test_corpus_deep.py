@@ -68,6 +68,27 @@ class CorpusDeepTest(unittest.TestCase):
         self.assertGreater(subs, 15)
         self.assertGreater(faces, 10)
 
+    def test_scgt_vrl_corpus(self):
+        """SCGT .vrl members: 60-byte zero header and valid first offset."""
+        import glob
+        import mas_tool
+        import simbin_text_tool as stt_local
+        n = 0
+        for arc in glob.glob(str(ROOT.parent / "SportsCarGtUsa" / "**" / "*.mas"),
+                             recursive=True):
+            try:
+                _, entries = mas_tool.read_archive(arc)
+            except Exception:
+                continue
+            for e in entries:
+                if not e.name.lower().endswith(".vrl") or not e.data:
+                    continue
+                self.assertEqual(stt_local.validate_vrl(e.data), [], f"{arc}/{e.name}")
+                n += 1
+            if n >= 1200:
+                break
+        self.assertGreater(n, 1000)
+
     def test_gsc_geometry_decoder(self):
         """read_gsc_geometry decodes real geometry with quality flags."""
         import glob
