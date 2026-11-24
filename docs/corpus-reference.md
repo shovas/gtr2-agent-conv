@@ -9,7 +9,7 @@ the quick-lookup index. Sizes/counts are approximate (surveyed 2026-11-23/24).
 
 | Folder | Size / files | Key facts |
 |---|---|---|
-| `GTR2Steam/` | 1.6G / 3,964 | **Primary target reference.** Real `GameData` layout, `.car/.hdc/.eng/.tyr/.aud/.gdb/.trk/.gtr`, GMOTORMAS10 archives. 3 plain `.aiw`, 25 plain `.aud` (all text); 136 `.gdb`, 972 `.car`, 139 `.cam` JCA-encrypted in broader Race07-style installs but GTR2's own config files here are plain. |
+| `GTR2Steam/` | 1.6G / 3,964 | **Primary target reference.** 34 gzip `.hat` files (`gMb1.000f` header); 34 CUBEASF `.scn` and 34 `.clf` scene files. Real `GameData` layout, `.car/.hdc/.eng/.tyr/.aud/.gdb/.trk/.gtr`, GMOTORMAS10 archives. 3 plain `.aiw`, 25 plain `.aud` (all text); 136 `.gdb`, 972 `.car`, 139 `.cam` JCA-encrypted in broader Race07-style installs but GTR2's own config files here are plain. |
 
 ## ISIMotor source corpora (conversion inputs)
 
@@ -17,7 +17,7 @@ the quick-lookup index. Sizes/counts are approximate (surveyed 2026-11-23/24).
 |---|---|---|
 | `GTLSteam/` | 1.8G / 2,510 | GTL→GTR2 source. `.CAR` uppercase, `.gtl` type-0 archives, GTL-era GDB/classes. 3 plain `.aiw`, 31 plain `.aud`, 53 plain `.gdb`, 26 plain `.tyr`; 5 `.PHS` members (4 PAR2 recovery containers + opaque `PHYSICS.PHS`). |
 | `RF1Vanilla/` | 1.5G / 2,688 | rFactor 1 vanilla: 85 type-1 `.mas`, 9,662 GMTs (9,630 old layout), 120 ISI-encrypted GMTs (skip=4), 904 archived `.anm` files (fully decoded). |
-| `Race07Complete/` | 12G / 122k | Race 07 + DLC. Loose DDS in 3 variants incl. `RaceGMT\0`; **101/137 `.aud`, 45/77 `.dmg`, 92/124 `.eng`, 621/823 `.car`, 80/114 `.gdb`, 141/196 `.cam`, 60 `.tyr` JCA-encrypted**; 66,186 loose GMTs; 88 JCA cube maps; 192 JCA `.PSH` shaders. |
+| `Race07Complete/` | 12G / 122k | Race 07 + DLC. Loose DDS in 3 variants incl. `RaceGMT\0`; **101/137 `.aud`, 45/77 `.dmg`, 92/124 `.eng`, 621/823 `.car`, 80/114 `.gdb`, 141/196 `.cam`, 60 `.tyr` JCA-encrypted**; 66,186 loose GMTs; 88 JCA cube maps; 192 JCA `.PSH` shaders; 136 gzip `.hat` track files (bare `Ver 0.08` header); 20,889 `.svm` car setups. |
 | `Race07Vanilla/` | 2.7G / 40k | 21,687 loose JCA DDS, 2 small type-0 `.gtr`; 43/43 `.aud` JCA; 8 JCA cube maps; 192 JCA `.PSH`. |
 | `BMWM3Challenge/` | 369M / 513 | 17 `.bmw` type-0 archives, loose `.gmt/.fxm/.fxa/.lma/.car/.hdc/.eng/.tyr/.trk/.aiw`, media; 2 plain `.aud`. |
 | `VolvoTheGame/` | 504M / 4,639 | SimBin JCA with **custom `volvo` key**; 2,026 loose GMTs decrypt to GTR2 layout; 9/9 `.aud` JCA, 8 JCA cube maps. |
@@ -25,7 +25,7 @@ the quick-lookup index. Sizes/counts are approximate (surveyed 2026-11-23/24).
 | `GameStockCar/` | 2.1G / 809 | 48 type-1 archives, 19,995 members, 19,987 GSC-encrypted. |
 | `StockCarExtreme/` | 16G / 5,807 | 196 type-1 archives, 71,814 members, 62,522 encrypted members. |
 | `Automobilista/` | 35G / 14,796 | 470 type-1 archives, 111,943 members, 91,974 old-layout GMTs (91,962 GSC-encrypted). |
-| `NascarSimRacing/` | 1.9G / 7,965 | 311 type-3 archives, 26,473 CUBE MTS meshes incl. `CUBE_MTS_4.20` variant. |
+| `NascarSimRacing/` | 1.9G / 7,965 | 311 type-3 archives, 26,473 CUBE MTS meshes incl. `CUBE_MTS_4.20` variant. 1,506 `.hdr`/`.dat` MP3 audio pairs (decoded by `media_tool.hdr_dat_mp3()`); 748 archived `.anm` animations. |
 
 ## Ancestral ISIMotor / format-evolution corpora
 
