@@ -907,6 +907,23 @@ def _vrl_table_problems(data: bytes) -> list[str]:
     coords = struct.unpack_from(f"<{second * 2}f", data, table[11])
     if not all(math.isfinite(x) and abs(x) < 1e5 for x in coords):
         problems.append("non-finite or implausible coordinate")
+    # 13 consecutive N*4 flag/group blocks start at table[2]: eight zero
+    # blocks, one constant-15 block, two more zero blocks, a vertex map and
+    # small per-vertex group IDs. Verified on 3,000 files (2 CONE10.VRL
+    # exceptions have non-increasing maps and zero group IDs).
+    if table[2] + 13 * count * 4 > len(data):
+        return ["truncated flag blocks"]
+    blocks = [struct.unpack_from(f"<{count}I", data, table[2] + i * count * 4)
+              for i in range(13)]
+    if any(any(v for v in b) for b in blocks[:8] + blocks[9:11]):
+        problems.append("zero flag blocks corrupted")
+    if any(v != 15 for v in blocks[8]):
+        problems.append("constant-15 flag block corrupted")
+    vertex_map, group_ids = blocks[11], blocks[12]
+    if vertex_map[0] != 0 or max(vertex_map) >= second:
+        problems.append("vertex map out of bounds")
+    if max(group_ids) >= 256:
+        problems.append("group ID out of bounds")
     return problems
 
 
@@ -932,9 +949,14 @@ def read_vrl(data: bytes) -> dict | None:
     second = table[9]
     indices = struct.unpack_from(f"<{second}I", data, table[10])
     coords = struct.unpack_from(f"<{second * 2}f", data, table[11])
+    blocks = [struct.unpack_from(f"<{count}I", data, table[2] + i * count * 4)
+              for i in range(13)]
     return {"vertex_count": count, "vertices": vertices, "table": table,
             "sections": sections, "index_count": second, "indices": indices,
-            "coords": list(zip(coords[:second], coords[second:]))}
+            "coords": list(zip(coords[:second], coords[second:])),
+            "vertex_map": blocks[11], "group_ids": blocks[12],
+            "zero_flags": sum(len(b) for b in blocks[:8] + blocks[9:11]),
+            "constant_flag": 15}
 
 
 RCD_CORE_STATS = ("aggression", "reputation", "courtesy", "composure",

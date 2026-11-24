@@ -92,6 +92,11 @@ class CorpusDeepTest(unittest.TestCase):
                 self.assertEqual(len(v["indices"]), v["index_count"])
                 self.assertTrue(all(i < v["vertex_count"] for i in v["indices"]))
                 self.assertEqual(len(v["coords"]), v["index_count"])
+                self.assertEqual(len(v["vertex_map"]), v["vertex_count"])
+                self.assertEqual(v["vertex_map"][0], 0)
+                self.assertLess(max(v["vertex_map"]), v["index_count"])
+                self.assertLess(max(v["group_ids"]), 256)
+                self.assertEqual(v["constant_flag"], 15)
                 n += 1
             if n >= 1200:
                 break

@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-25 08:20:00 -0500 - SCGT .vrl flag and group blocks decoded
+- Extended `simbin_text_tool.read_vrl()` with the 13 consecutive N*4 blocks: eight zero blocks, one constant-15 block, two zero blocks, a sorted vertex map (< M) and small per-vertex group IDs (<256). Corpus-verified on 3,000/3,000 members with two documented `CONE10.VRL` exceptions; full-tier regression test added.
+
 ## 2026-11-25 08:00:00 -0500 - SCGT .vrl index and coordinate arrays decoded
 - Extended `simbin_text_tool.read_vrl()` to expose the M u32 vertex-index buffer and two M-float coordinate arrays. Corpus-verified: indices below vertex count and coordinates finite/bounded on 3,000/3,000 members; full-tier regression test. Corrected the earlier note that these sections were "not vertex indices" — that conclusion came from sampling the preceding N*4 flags block.
 
