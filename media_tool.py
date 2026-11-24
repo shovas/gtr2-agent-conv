@@ -296,6 +296,9 @@ def identify(path: str | Path) -> MediaInfo:
         return MediaInfo(str(p), size, "png", {"width": w, "height": h,
                                                "bit_depth": depth,
                                                "color_type": ctype})
+    # rF1 .rfm mod descriptor: "Mod Name" / "Track Filter" keys
+    if ext == ".rfm" and b"Mod Name" in b[:4096]:
+        return MediaInfo(str(p), size, "rfactor-rfm", {"extension": ext})
     # UTF-16LE text starts with ff fe, which also matches an MP3 frame sync.
     if b[:2] == b"\xff\xfe" and ext in (".dic", ".txt", ".ini"):
         return MediaInfo(str(p), size, "utf16-text", {"bom": "ff-fe"})

@@ -216,6 +216,20 @@ class CorpusDeepTest(unittest.TestCase):
                 n += 1
             self.assertEqual(n, 20)
 
+    def test_rfm_corpus(self):
+        """All 10 rF1 .rfm mod descriptors carry 37 universal keys."""
+        import glob
+        import media_tool
+        n = 0
+        for root in ("LexusIsfTrackTime", "TC2000", "SimuladorTopRace2009",
+                     "SuperleagueFormula2009", "RF1Vanilla"):
+            for p in glob.glob(str(ROOT.parent / root / "**" / "*.rfm"), recursive=True):
+                keys = stt.parse_rfm(Path(p).read_bytes())
+                self.assertEqual(stt.validate_rfm(keys), [], p)
+                self.assertEqual(media_tool.identify(p).format, "rfactor-rfm", p)
+                n += 1
+        self.assertEqual(n, 10)
+
     def test_raceroom_shader_corpus(self):
         """All 226 RaceRoom JCA shaders decrypt to ISI shader sources."""
         import glob

@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-25 03:45:00 -0500 - .rfm mod descriptor parser
+- Added `parse_rfm()`/`validate_rfm()` for all 10 rF1 mod descriptors (37 universal keys, 0 problems) and `rfactor-rfm` identification. Full-tier regression test added.
+
 ## 2026-11-25 03:30:00 -0500 - RaceRoom shader decryption and identification
 - Added `media_tool.decrypt_jca_shader()` and `shader-jca` identification for all 226 RaceRoom `.vsh`/`.gfx`/`.psh` files (JCA v1, volvo key); these decrypt to ISI HLSL/PS1.1 source with no `=` so the text detector misses them. Full-tier corpus regression test added.
 

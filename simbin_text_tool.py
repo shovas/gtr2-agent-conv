@@ -733,6 +733,60 @@ def validate_rf1_config(keys: set[str], ext: str) -> list[str]:
     return [f"missing {ext} key {key}" for key in sorted(needed) if key not in keys]
 
 
+RFM_UNIVERSAL_KEYS = frozenset((
+    "basecreditmult",
+    "driveanyunlocked",
+    "fineexpmult",
+    "finemoneymult",
+    "lapexpmult",
+    "lapmoneymult",
+    "loading bar color",
+    "matchmaker",
+    "matchmaker tcp port",
+    "matchmaker udp port",
+    "max opponents",
+    "min championship opponents",
+    "mod name",
+    "pitgroup",
+    "pointscareerexpmult",
+    "pointscareermoneymult",
+    "pointsmultiexpmult",
+    "pointsmultimoneymult",
+    "pointssingleexpmult",
+    "pointssinglemoneymult",
+    "polecareerexpmult",
+    "polecareermoneymult",
+    "polemultiexpmult",
+    "polemultimoneymult",
+    "polesingleexpmult",
+    "polesinglemoneymult",
+    "safetycar",
+    "startingmoney",
+    "startingvehicle",
+    "track filter",
+    "vehicle filter",
+    "wincareerexpmult",
+    "wincareermoneymult",
+    "winmultiexpmult",
+    "winmultimoneymult",
+    "winsingleexpmult",
+    "winsinglemoneymult",
+))
+
+
+def parse_rfm(data: bytes | str) -> set[str]:
+    """Parse an rF1 ``.rfm`` mod descriptor's key names (keys may contain spaces)."""
+    text = data if isinstance(data, str) else data.decode("latin-1")
+    return set(x.strip().lower() for x in re.findall(
+        r"(?m)^\s*([A-Za-z][^=]*?)\s*=", text))
+
+
+def validate_rfm(keys: set[str]) -> list[str]:
+    """Check corpus-verified .rfm invariants."""
+    return [f"missing {key}" for key in sorted(RFM_UNIVERSAL_KEYS)
+            if key not in keys]
+
+
 RCS_UNIVERSAL_KEYS = frozenset((
     "name", "readonly", "device1", "device2", "device3"))
 
