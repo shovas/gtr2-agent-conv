@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-24 23:59:00 -0500 - .grb gearbox-ratio parser
+- Added `simbin_text_tool.parse_grb()` / `validate_grb()` for all 248 `.grb` files (incl. 77 JCA-wrapped). Corpus-verified the ratio semantics as **b/a** (driven/driving teeth) against 214+ inline decimal comments, with 6,929 gear entries and 0 validation problems. Added 2 regression tests (corpus check full-tier only); all 23 simbin-text/corpus-deep tests pass.
+
 ## 2026-11-24 23:45:00 -0500 - .rcd race-config parser
 - Added `simbin_text_tool.parse_rcd()` / `validate_rcd()`: all 5,047 `.rcd` files classify into driver (3,038), event (1,830), NASCAR driver (178) and fueluse (1) families with 0 validation problems. Added 2 regression tests; all 21 simbin-text/corpus-deep tests pass, Quick stays at 56.1 s.
 

@@ -81,6 +81,19 @@ class SimbinTextToolTest(unittest.TestCase):
         self.assertEqual(info.stamps, ["Detail.tga"])
         self.assertEqual(info.decals, ["Small"])
 
+    def test_grb_ratio_semantics(self):
+        """.grb gear ratio is b/a (driven/driving teeth), not a/b."""
+        sample = ("[GEAR_RATIOS]\nratio=(10,40) // 4.00\n"
+                  "Ratio=( 16 , 38 ) // 2.38\n"
+                  "[FINAL_DRIVE]\nbevel=(1, 1) // 1.0\n"
+                  "ratio=(12,44) // 3.67\n")
+        info = stt.parse_grb(sample)
+        self.assertEqual(info.gear_ratios, [(10, 40), (16, 38)])
+        self.assertEqual(info.final_ratio, (12, 44))
+        self.assertEqual(info.bevel, (1, 1))
+        self.assertEqual(stt.validate_grb(info), [])
+        self.assertAlmostEqual(info.gear_ratios[0][1] / info.gear_ratios[0][0], 4.0, places=1)
+
     def test_rcd_parser_families(self):
         """.rcd classification and validation on small fixtures."""
         event = ("CJames\r\n{\r\nNationality=German\r\nStartsDry=10\r\n"

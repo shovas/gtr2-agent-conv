@@ -9,6 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 import collections
+import re
 import anm_format  # noqa: E402
 import simbin_text_tool as stt  # noqa: E402
 import mas_tool  # noqa: E402
@@ -92,6 +93,29 @@ class CorpusDeepTest(unittest.TestCase):
         # Section names are identical across rF1 and GTR2 setups.
         self.assertEqual(rf_sections, gtr_sections)
         self.assertEqual(len(rf_sections), 15)
+
+    def test_grb_parser_corpus(self):
+        """All 248 .grb files (incl. 77 JCA) validate with b/a ratio semantics."""
+        import glob
+        import media_tool
+        n = gears = 0
+        commented = matched = 0
+        for p in glob.glob(str(ROOT.parent / "**" / "*.grb"), recursive=True):
+            text = media_tool.decrypt_jca_text(Path(p).read_bytes()).decode("latin-1")
+            info = stt.parse_grb(text)
+            self.assertEqual(stt.validate_grb(info), [], p)
+            gears += len(info.gear_ratios)
+            n += 1
+            for line in text.splitlines():
+                m = re.match(r"^\s*ratio\s*=\s*\(\s*(\d+)\s*,\s*(\d+)\s*\)", line, re.I)
+                c = re.search(r"//.*?\(([-\d.]+)\)", line)
+                if m and c and int(m.group(1)) != 0:
+                    commented += 1
+                    if abs(int(m.group(2)) / int(m.group(1)) - float(c.group(1))) < 0.02:
+                        matched += 1
+        self.assertEqual(n, 248)
+        self.assertEqual(gears, 6929)
+        self.assertEqual(matched, commented)  # 214+ commented ratios all b/a
 
     def test_rcd_parser_corpus(self):
         """All 5,047 .rcd configs classify and validate."""
