@@ -616,6 +616,19 @@ class CorpusDeep2Test(unittest.TestCase):
                         checked += 1
         self.assertGreater(checked, 1100)
 
+    def test_tyr_numeric_bounds(self):
+        """TYR tire-model fields stay within corpus-observed bounds."""
+        import glob
+        import os
+        checked = 0
+        for root in ("GTR2Steam", "GTLSteam"):
+            for p in glob.glob(str(ROOT.parent / root / "**" / "*"), recursive=True):
+                if not os.path.isfile(p) or not p.lower().endswith(".tyr"):
+                    continue
+                self.assertEqual(stt.validate_tyr_numeric(Path(p).read_bytes()), [], p)
+                checked += 1
+        self.assertEqual(checked, 41)
+
     def test_aud_numeric_bounds(self):
         """AUD numeric event values stay within corpus-observed bounds."""
         import glob

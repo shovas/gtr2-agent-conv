@@ -1000,6 +1000,50 @@ def validate_svm_numeric(data: bytes) -> list[str]:
     return problems
 
 
+TYR_NUMERIC_BOUNDS = {
+    "radius": (0.249, 0.355),
+    "width": (0.105, 0.36),
+    "springbase": (30000.0, 120000.0),
+    "springkpa": (600.0, 1396.58),
+    "damper": (1000.0, 3850.0),
+    "rollingresistance": (1800.0, 3600.0),
+    "softness": (0.5, 1.0),
+    "aigripmult": (0.97, 1.17),
+    "aipeakslip": (0.105, 0.135),
+    "optimumpressurebase": (60.0, 100.0),
+    "optimumpressuremult": (0.02, 0.042),
+    "radiusrpm": (0.0, 1e-5),
+    "wearrate": (0.0, 2e-6),
+    "aiwear": (0.0, 1e-7),
+    "airtreadrate": (0.02, 0.02),
+    "step": (0.009, 0.009),
+    "wetweather": (1.0, 1.0),
+    "dropofffunction": (-1.0, 1.0),
+}
+
+
+def validate_tyr_numeric(data: bytes) -> list[str]:
+    """Check numeric tire-model fields against corpus-observed bounds.
+
+    Verified on 41 GTR2/GTL `.tyr` files (242 records per universal field).
+    """
+    text = data.decode("latin-1")
+    problems: list[str] = []
+    for match in re.finditer(r"(?mi)^\s*([A-Za-z_][\w]*)\s*=\s*([^\r\n]+)", text):
+        key = match.group(1).lower()
+        if key not in TYR_NUMERIC_BOUNDS:
+            continue
+        try:
+            value = float(match.group(2).split("//", 1)[0].strip())
+        except ValueError:
+            continue
+        low, high = TYR_NUMERIC_BOUNDS[key]
+        if not (low <= value <= high):
+            problems.append(f"{key}={value} outside [{low}, {high}]")
+            return problems
+    return problems
+
+
 def validate_svm_tc2000(keys: set[str]) -> list[str]:
     """Validate the 15 universal keys of TC2000 6-speed `.svm` setups."""
     return [f"missing svm key {key}" for key in sorted(SVM_TC2000_KEYS)
