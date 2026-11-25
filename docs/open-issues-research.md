@@ -199,6 +199,10 @@ Deep field-level probe of the minimally investigated `../Automobilista`, `../Sto
 
 Generic section/key parsing of all 1,287 `.gdb` and 3,385 `.car` files found **667 / 173 distinct keys respectively but no cross-corpus universal key**. Only family-specific universals exist: `.car` GTR2-family files (165) all carry `genstring`, `pitgroup`, `number`, `driver1`, `team` (the GTR2-only key set already used by `gtl_to_gtr2`); rF1 `.gdb` (81) all carry `racelaps`. Seven zero-length `.gdb` fixtures in `../rfactortools/tests/data` are legitimately empty. `parse_gdb()`/`parse_car()`/`validate_config()` therefore perform structural validation only — no universal key rule can be promoted beyond the existing family-specific validators.
 
+## GSC region masks: not name-derived (2026-11-27)
+
+Tested 120 masked GSC GMT members: the magic XOR key at 0x1D4 and the per-submesh masks do not match CRC32-low/high, Adler32, byte sum, basename length, first or last character of the archive member basename. Magic matches were 0/1/0/0/0/1/1 respectively (permutation baselines ≈0.1–1), with 10 total coincidences across 120×7 correlated candidates — chance level. Full-tier regression test added; mask derivation remains blocked.
+
 ## GSC region masks: no alignment counterpart (2026-11-27)
 
 Tried to derive the bulk mask by XOR-aligning region-masked GSC GMTs with plain GTR2/GTL counterparts of the same object (f0 family invariants provide mesh identity). Across **25,210** plain and **29,033** GSC GMT members (22,103 / 25,002 distinct name+size pairs) there are **zero** same-name **and** same-size pairs — meshes of the same family were re-authored with different geometry lengths across games. Whole-file or per-region byte alignment is therefore impossible, and this approach cannot recover the bulk mask schedule. Full-tier regression test added; the region-mask blocker remains.

@@ -5,6 +5,9 @@ Newest-first change log. Timestamps use repository commit dates (ISO 8601, local
 ## 2026-11-26 16:30:00 -0500 - AIW Features capacity negative
 - Documented that AIW `[Features]` numbers are capacity defaults rather than section counts (startinggrid 104 vs GRID 36 typical); full-tier corpus-fact regression test added.
 
+## 2026-11-27 20:00:00 -0500 - GSC mask not name-derived
+- Tested 120 masked GSC GMTs: magic/submesh XOR keys match member-basename hashes/length/first/last bytes only at chance level. Full-tier regression test added.
+
 ## 2026-11-27 19:00:00 -0500 - f0 raw-record hashes negative
 - CRC32/Adler/FNV/MD5 over raw material and stage records match f0 halfwords only at chance level across 20,005 meshes. Full-tier regression test added.
 

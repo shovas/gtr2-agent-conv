@@ -1006,6 +1006,52 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertEqual(checked, 204)
 
+    def test_gsc_mask_not_derived_from_member_name(self):
+        """GSC GMT XOR masks do not match name-based hashes."""
+        import glob
+        import zlib
+        import gmt_semantic
+        import isi_crypt
+        import mas_tool
+        rows = []
+        for root in ("Automobilista", "StockCarExtreme", "GameStockCar",
+                     "CopaPetrobrasdeMarcas"):
+            for archive in glob.glob(str(ROOT.parent / root / "**" / "*.mas"),
+                                     recursive=True):
+                try:
+                    _, entries = mas_tool.read_archive(archive)
+                except Exception:
+                    continue
+                for entry in entries:
+                    if not entry.name.lower().endswith(".gmt") or len(entry.data) < 0x400:
+                        continue
+                    try:
+                        decrypted = isi_crypt.decrypt_bytes(entry.data, 1)
+                    except Exception:
+                        continue
+                    mask = gmt_semantic.gsc_xor_magic_key(decrypted)
+                    if mask is None or mask == 0:
+                        continue
+                    name = entry.name.lower().replace("\\", "/").rsplit("/", 1)[-1]
+                    name = name.rsplit(".", 1)[0].encode()
+                    candidates = {
+                        zlib.crc32(name) & 0xFF,
+                        (zlib.crc32(name) >> 8) & 0xFF,
+                        zlib.adler32(name) & 0xFF,
+                        sum(name) & 0xFF,
+                        len(name) & 0xFF,
+                        name[0] if name else 0,
+                        name[-1] if name else 0,
+                    }
+                    rows.append((mask, candidates))
+                if len(rows) >= 120:
+                    break
+            if len(rows) >= 120:
+                break
+        self.assertGreaterEqual(len(rows), 100)
+        matches = sum(1 for mask, candidates in rows if mask in candidates)
+        self.assertLess(matches, 20)  # ~3 expected; non-uniform candidate fields
+
     def test_f0_not_raw_record_hash(self):
         """f0 halfwords are not hashes/CRCs of raw material/stage records."""
         import glob
