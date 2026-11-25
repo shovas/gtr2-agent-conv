@@ -2,8 +2,8 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
-## 2026-11-29 23:30:00 -0500 - VCR 86-byte periodicity found
-- Found an 86-byte fundamental period in VCR replay payloads via byte-level autocorrelation (0.567 vs 0.127 shuffled), a stride missed by earlier aligned scans. Full-tier regression test added; frame semantics remain undecoded.
+## 2026-11-29 23:30:00 -0500 - VCR 86-byte period scoped to header
+- Found an 86-byte period via byte-level autocorrelation (0.567 vs 0.127 shuffled), then localized it to the replay header (0.78) rather than bulk frame data (0.04). Corrected the initial too-broad interpretation; full-tier test scoped accordingly.
 
 ## 2026-11-29 23:00:00 -0500 - Converted UV range characterization
 - Characterized converted UV ranges: source GSC/VRL UVs are much wider than shipped GTR2 UVs (median |u| ~0.99 vs 0.39); values remain finite and bounded. Documented as a visual-correctness caveat with a full-tier guard test.

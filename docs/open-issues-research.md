@@ -146,13 +146,17 @@ tests and the five affected full-tier tests pass after the fix.
 ## VCR payload has an 86-byte fundamental period (2026-11-29)
 
 Byte-level autocorrelation (unaligned, lags 1..200) on `Anderstorp.Vcr`
-peaks at lag **86** with 0.567 matching bytes, versus 0.127 for a shuffled
-copy; harmonics appear at 172, 258 and 344. Earlier stride searches stepped
-by 4 and therefore skipped 86 entirely. Within one 12-record run starting at
-offset 1545, the f32 at record +0 increases by ~0.022 s per record and the
-f32 at +16 is constantly 10.545, but a whole-file scan finds only short runs
-(2–13 frames), so +0 is not a global replay timestamp. This is a real
-structural lead, not a decoded frame format. Full-tier periodicity test added.
+initially appeared to peak at lag **86** (0.567 matching bytes vs 0.127
+shuffled) over the window 0x400..0x3000. Localizing the measurement showed
+the periodicity is **confined to the header region** (first ~0x2000 bytes:
+0.78 at lag 86, and 0.91 in 0x800..0x1000), while the bulk data drops to
+0.04–0.06. So the 86-byte structure is a header table, not the frame grid —
+the earlier "86-byte frames" reading was too broad and is corrected here.
+Earlier 4-byte-aligned stride searches also skipped 86 because it is not a
+multiple of 4. A short 12-record run in the header has an increasing f32 at
++0 (~0.022 s steps) and a constant 10.545 at +16, but it does not extend
+across the file. Frame semantics remain undecoded. Full-tier test scoped to
+the header region.
 
 ## UV tiling ratios confirmed in Race07 (2026-11-29)
 

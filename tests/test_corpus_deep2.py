@@ -4118,14 +4118,14 @@ class CorpusDeep2Test(unittest.TestCase):
             opaque += data.find(par2) < 0
         self.assertEqual(opaque, 1)
 
-    def test_vcr_payload_has_86_byte_periodicity(self):
-        """Replay payloads repeat with an 86-byte fundamental period."""
+    def test_vcr_header_has_86_byte_periodicity(self):
+        """The replay header region repeats with an 86-byte period."""
         import gzip_simbin_tool as gz
         path = ROOT.parent / "GTR2Steam" / "ReplayData" / "Anderstorp.Vcr"
         if not path.is_file():
             self.skipTest("Anderstorp.Vcr not present")
         data = gz.decompress(str(path))
-        lo, hi = 0x400, min(len(data), 0x3000)
+        lo, hi = 0, min(len(data), 0x2000)
 
         def match_at(buffer: bytes, lag: int) -> float:
             indices = range(lo, hi - lag, 8)
