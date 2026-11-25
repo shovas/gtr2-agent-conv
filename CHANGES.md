@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 16:30:00 -0500 - AIW Features capacity negative
+- Documented that AIW `[Features]` numbers are capacity defaults rather than section counts (startinggrid 104 vs GRID 36 typical); full-tier corpus-fact regression test added.
+
 ## 2026-11-26 16:00:00 -0500 - AIW TELEPORT validator
 - Added `simbin_text_tool.validate_aiw_teleport()` covering index uniqueness, contiguous main runs, and optional pit-box indices >=100 across 447 AIWs. Full-tier regression test added.
 

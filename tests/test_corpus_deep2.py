@@ -339,6 +339,39 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertEqual(cars, 16)
         self.assertEqual(includes, 16)
 
+    def test_aiw_features_are_capacities(self):
+        """AIW Features numbers are capacities, not section counts."""
+        import glob
+        import os
+        import isi_crypt
+        n = oversized = 0
+        roots = ("Race07Vanilla", "GTLSteam", "GTR2Steam", "Race07Complete",
+                 "RF1Vanilla", "Automobilista", "StockCarExtreme", "F12002")
+        for root in roots:
+            for p in glob.glob(str(ROOT.parent / root / "**" / "*"), recursive=True):
+                if not os.path.isfile(p) or not p.lower().endswith(".aiw"):
+                    continue
+                raw = Path(p).read_bytes()
+                if raw[:4] == media_tool.JCA_MAGIC:
+                    text = media_tool.decrypt_jca_text(raw).decode("latin-1")
+                else:
+                    sign, _ = isi_crypt.crypt_info(raw)
+                    text = (isi_crypt.decrypt_bytes(raw).decode("latin-1")
+                            if sign in isi_crypt.GAMES else raw.decode("latin-1"))
+                fm = re.search(r"(?ms)^\[Features\]\r?\n(.*?)(?=^\[|\Z)", text)
+                grid = re.search(r"(?ms)^\[GRID\]\r?\n(.*?)(?=^\[|\Z)", text)
+                if not fm or not grid:
+                    continue
+                features = dict((k.lower(), v.strip()) for k, v in re.findall(
+                    r"(?m)^\s*([A-Za-z_]\w*)\s*=\s*([^\r\n]+)", fm.group(1)))
+                if "startinggrid" not in features:
+                    continue
+                n += 1
+                oversized += int(float(features["startinggrid"])) > len(
+                    re.findall(r"(?mi)^GridIndex\s*=", grid.group(1)))
+        self.assertGreater(n, 450)
+        self.assertGreater(oversized / n, 0.9)
+
     def test_aiw_teleport_consistency(self):
         """AIW TELEPORT indices are unique with a contiguous main run."""
         import glob
