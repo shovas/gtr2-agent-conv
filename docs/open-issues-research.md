@@ -31,6 +31,10 @@ Comparing 703 identically named mesh families present in two or three of GTR2Ste
 
 New invariant from a 500-file GTR2/GTL mesh sweep: among LOD/number-variant groups whose members each have ≥2 submeshes, **11/37 (29.7%)** share an *identical ordered f0 marker list* (e.g. `AMBULANCE00/01/N01.GMT` all carry `0, 0xa0009e, 0x8a008d, 0xae00af`), versus a 0% baseline under randomized grouping. Thus f0 encodes something tied to the mesh family/material setup rather than per-file or per-LOD state — a refinement of the earlier "per-mesh marker" finding. Exact halfword matches to `material_index` remain below 25% of markers in the same sweep, so the specific encoding is still unresolved. Full-tier regression test added.
 
+## GTTF steering-sign convention (2026-11-27)
+
+The ± sign of the `+8`/`+16` relation is not random across the 29 F550 ghosts: files with positive correlation have a median net unwrapped `+12` heading trend of **7.9 rad**, negative-correlation files **4.74 rad**, and the per-file correlation coefficient versus heading trend is **0.583**. AIW waypoint file order/signed area does **not** explain the split (sign agreement 12/27, correlation 0.109). So the steering sign is tied to the recorded heading evolution (likely different ghost/recording configurations), but the exact convention remains unknown. Full-tier regression test added.
+
 ## GTTF +8 vs steering +16 (2026-11-27)
 
 After detrending both fields on ghost z (+1) and a z-increment speed proxy, frame `+8` and the decoded steering-like field `+16` have a **median |correlation| of 0.585** across 29 GTR2 ghosts (24/29 above 0.3). The sign is not universal (17 positive, 12 negative), likely reflecting track/record orientation or a sign convention. So `+8` is a steering/lateral-control-related quantity rather than random padding or a world coordinate. Exact units and sign convention remain unresolved; full-tier regression test added.

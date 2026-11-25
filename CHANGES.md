@@ -5,6 +5,9 @@ Newest-first change log. Timestamps use repository commit dates (ISO 8601, local
 ## 2026-11-26 16:30:00 -0500 - AIW Features capacity negative
 - Documented that AIW `[Features]` numbers are capacity defaults rather than section counts (startinggrid 104 vs GRID 36 typical); full-tier corpus-fact regression test added.
 
+## 2026-11-27 05:00:00 -0500 - GTTF steering-sign vs heading trend
+- Found the ± sign of the +8/+16 relation tracks net ghost heading trend (median 7.9 rad positive vs 4.74 rad negative; per-file r=0.583), while AIW waypoint order does not explain it. Full-tier regression test added; exact sign convention unresolved.
+
 ## 2026-11-27 04:00:00 -0500 - GTTF +8 tracks steering
 - Detrended +8 and +16 on z/speed across 29 ghosts: median |correlation| 0.585 (24/29 >0.3), sign variable by track. +8 is steering/lateral-control-related; exact units/sign unresolved. Full-tier regression test added.
 

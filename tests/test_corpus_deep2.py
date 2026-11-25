@@ -1006,6 +1006,32 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertEqual(checked, 204)
 
+    def test_gttf_steering_sign_vs_heading_trend(self):
+        """Sign of the +8/+16 relation tracks the ghost's heading trend."""
+        import glob
+        import gzip
+        import math
+        import statistics
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        correlations = []
+        trends = []
+        for path in glob.glob(str(ROOT.parent / "GTR2Steam" / "TimeTrial" / "**" / "*.GTT"),
+                              recursive=True):
+            payload = gz.decompress(path)
+            frames = st.read_frames(payload, st.find_frame_grid(payload))
+            correlations.append(st._corr([f["position"][2] for f in frames],
+                                         [f["pitch"] for f in frames]))
+            heading = [f["heading"] for f in frames]
+            steps = [(b - a + math.pi) % (2 * math.pi) - math.pi
+                     for a, b in zip(heading, heading[1:])]
+            trends.append(sum(steps))
+        self.assertEqual(len(correlations), 29)
+        self.assertGreater(abs(st._corr(correlations, trends)), 0.4)
+        positive = [t for r, t in zip(correlations, trends) if r > 0]
+        negative = [t for r, t in zip(correlations, trends) if r < 0]
+        self.assertGreater(statistics.median(positive) - statistics.median(negative), 2)
+
     def test_gttf_frame8_tracks_steering(self):
         """+8 and the decoded steering field +16 are strongly related."""
         import glob
