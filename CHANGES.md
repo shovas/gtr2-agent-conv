@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-30 02:00:00 -0500 - GTTF tail is a track point
+- Identified a 20-byte GTTF tail whose first two floats are a per-track fixed point (median 0.6 within track vs 178 random); full-tier test added. Remaining three floats undecoded.
+
 ## 2026-11-30 01:30:00 -0500 - GTTF time field validated
 - Proved frame +20 is absolute session seconds: last-minus-first matches every ghost filename lap time (median error 0.0023 s, max 0.034 s, vs 23.59 s shuffled). Full-tier permutation-controlled test added.
 

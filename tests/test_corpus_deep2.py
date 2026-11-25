@@ -4337,6 +4337,39 @@ class CorpusDeep2Test(unittest.TestCase):
             margin = 0.25 if axis == 0 else 0.10
             self.assertGreater(observed, statistics.mean(baselines) + margin)
 
+    def test_gttf_tail_encodes_track_finish_point(self):
+        """The 20-byte GTTF tail repeats a fixed point per track."""
+        import collections
+        import glob
+        import random
+        import statistics
+        import struct
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        by_track = collections.defaultdict(list)
+        for path in glob.glob(str(ROOT.parent / "GTR2Steam" / "TimeTrial" / "**" / "*.GTT"),
+                              recursive=True):
+            payload = gz.decompress(path)
+            grid = st.find_frame_grid(payload)
+            if not grid:
+                continue
+            end = grid["offset"] + grid["count"] * grid["stride"]
+            by_track[Path(path).parent.name].append(
+                struct.unpack_from("<2f", payload, end))
+        groups = [values for values in by_track.values() if len(values) >= 2]
+        self.assertGreaterEqual(len(groups), 8)
+
+        def distance(a, b) -> float:
+            return ((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2) ** 0.5
+
+        within = [distance(a, b) for values in groups
+                  for index, a in enumerate(values) for b in values[index + 1:]]
+        random.seed(93)
+        pool = [point for values in groups for point in values]
+        between = [distance(*random.sample(pool, 2)) for _ in range(1000)]
+        self.assertLess(statistics.median(within), 2.0)
+        self.assertGreater(statistics.median(between), 100.0)
+
     def test_gttf_frame_time_span_equals_lap_time(self):
         """Frame time span reproduces the lap time encoded in ghost filenames."""
         import glob

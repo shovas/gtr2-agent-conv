@@ -263,6 +263,17 @@ round-trip preserves vertex and UV bytes. Added
 or textures are present, so this is a structural fallback/test fixture, not a
 render-ready replacement for a real template.
 
+## GTTF 20-byte tail is a track-level finish point (2026-11-30)
+
+Every GTTF payload ends with exactly 20 bytes after the frame grid. Decoding
+them as five f32s showed the first two floats are nearly identical for ghosts
+recorded on the same track (10 tracks with ≥2 ghosts, median within-track
+distance **0.594** world units) but far apart across tracks (median **178.3**
+for 1,000 random pairs). They sit close to, but are not identical to, the last
+frame's y/z (median offsets 0.007 / 0.124), consistent with a fixed
+start/finish-line coordinate. Tail floats 2/3/4 remain undecoded. Full-tier
+permutation-controlled test added.
+
 ## GTTF frame time field definitively validated (2026-11-30)
 
 The 29 ghost filenames encode lap times such as `1_23_404` (83.404 s). Frame
