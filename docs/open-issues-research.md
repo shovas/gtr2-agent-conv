@@ -3,6 +3,10 @@
 All work here is **offline**: no game was launched. "Runtime-dependent" means
 conclusively establishing it requires actual game execution.
 
+## GTTF slot +44: car-independence negative (2026-11-26)
+
+Across all 31 GTT files, slot +44 has **no car-specific ceiling** (every file's raw u32 exceeds 4.2B; F550 and BMW M3 both span ~1.4e7..4.29e9). The byte44==byte46 structure is shared: per-file equality fraction median 0.83 (range 0.752–0.901), dominant byte pairs 224–238 for both cars. The earlier packed-half/acceleration/heading-rate negatives therefore stand; this slot is not a bounded kinematic or car-calibrated field. Regression test added (`test_gttf_slot44_no_car_ceiling`); no semantic promoted.
+
 ## GTTF slot +7: car-independent exponent artifact (2026-11-26)
 
 Across all 31 GTT files, the varying byte +31 of the `00 20 00 XX` u32 at +28 has mode **64 in 28 files** and 65 in the other 3, per-file medians 63–66 (overall median 64), and 93 distinct values for the Ferrari F550 vs 59 for the BMW M3 — i.e. no car-specific invariant separates the two cars (both clusters centre on the same 0x40/0x41 exponent byte). This corroborates the earlier conclusion that slot +7 is a fixed-low-byte integer/float exponent artifact rather than a car-dependent physical signal; no semantic promoted. `test_gttf_slot7_byte31_exponent_artifact` locks the distribution bounds.

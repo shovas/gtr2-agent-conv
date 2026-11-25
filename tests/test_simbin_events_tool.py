@@ -82,6 +82,30 @@ class SimbinEventsToolTest(unittest.TestCase):
             self.skipTest("no GTTF frame grids detected")
         self.assertGreaterEqual(checked, 1)
 
+    def test_gttf_slot44_no_car_ceiling(self):
+        """Slot +44 has no car-specific ceiling; its byte-pair structure is shared."""
+        import gzip
+        import statistics
+        files = _files(".gtt")
+        if not files:
+            self.skipTest("GTR2 GTT files not present")
+        equal_fractions = []
+        maxima = []
+        for p in files:
+            data = gzip.decompress(p.read_bytes())
+            grid = setool.find_frame_grid(data)
+            if not grid:
+                continue
+            words = [data[fr["offset"] + 44:fr["offset"] + 48]
+                     for fr in setool.read_frames(data, grid)]
+            equal_fractions.append(sum(w[0] == w[2] for w in words) / len(words))
+            maxima.append(max(int.from_bytes(w, "little") for w in words))
+        if not equal_fractions:
+            self.skipTest("no GTTF frame grids detected")
+        self.assertTrue(all(0.7 < f < 0.95 for f in equal_fractions))
+        self.assertTrue(all(m > 4_200_000_000 for m in maxima))
+        self.assertLess(statistics.median(equal_fractions), 0.9)
+
     def test_gttf_slot7_byte31_exponent_artifact(self):
         """Slot +7's varying byte is car-independent and centred on 0x40."""
         import collections
