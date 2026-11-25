@@ -9,6 +9,12 @@ PAR2-style recovery containers for a single file, `GTL_Update_0901.exe`; the fif
 gameplay physics content. No evidence was found that GTL reads PHS contents as
 structured physics data.
 
+## Runtime consumer search (2026-11-28)
+
+Searched all **29** shipped `.exe`/`.dll` binaries in `GTLSteam` and `GTR2Steam` (including the unpacked `GTL.exe` and `GTR2.exe`) for `.PHS`, `.phs`, `PHS\0`, UTF-16LE `PHS`, `PHYSICS` and UTF-16LE `physics`. **Zero matches in every binary.** `GTL.exe` contains no PHS-related strings at all, so there is no evidence that the game loads these members as physics data. This closes the "find the runtime consumer / loading routine" avenue as a negative rather than an untried task; full-tier regression test added.
+
+Note: the EXEs are unpacked PE images (`GTL.exe` sections `.text`/`.rdata`/`.data`), so the negative is not explained by packing.
+
 ## PAR2 recovery-slice coverage (2026-11-26)
 
 Enumerated every PHS packet chain: `AI.PHS`, `TRACKS.PHS` and `CARS.PHS` each contain one `Main` packet and one `RecvSlic` packet; `DRIVERS.PHS` has only `FileDesc` (naming `GTL_Update_0901.exe` with file id `2f1fc214…`); `PHYSICS.PHS` has no PAR2 packets. The Main packets agree on slice size **384,000** bytes, file count 1 and the same file id. The three recovery bodies are 384,004 bytes each with exponents **53, 58, 59** and all share the same file id — total 1,152,012 bytes = **3 slices**. The 61,334,805-byte GTL 1.1 updater implies ~160 source slices at that size, so these cover ~1.9%; moreover exponents 0–52 and 54–57 are absent. **Reconstruction is infeasible** from the local PHS data even if the exact 0.9.01 executable were available. Regression test added (`tests/test_phs_tool.py`).

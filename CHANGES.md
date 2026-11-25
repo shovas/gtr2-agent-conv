@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 03:15:00 -0500 - PHS runtime consumer negative
+- Searched all 29 shipped GTL/GTR2 EXEs and DLLs (including unpacked GTL.exe) for PHS/PHYSICS strings in ASCII and UTF-16: zero matches. No runtime consumer found; full-tier regression test added.
+
 ## 2026-11-28 02:45:00 -0500 - f0 material association quantified
 - Traced GTR2.exe GMT loader/shader fixup without finding an f0 assignment path; quantified f0 association with material identity (P(f0 equal|raw material equal)=0.347 vs 0.036 otherwise). Full-tier regression test added.
 

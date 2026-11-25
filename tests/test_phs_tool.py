@@ -103,5 +103,25 @@ class PhsRecoveryCoverageTest(unittest.TestCase):
         self.assertLess(len(slices) / needed, 0.05)
 
 
+class PhsRuntimeConsumerTest(unittest.TestCase):
+    """No shipped GTL/GTR2 binary appears to reference a .PHS file."""
+
+    def test_no_binary_references_phs(self):
+        import glob
+        roots = [Path(__file__).resolve().parents[1].parent / "GTLSteam",
+                 Path(__file__).resolve().parents[1].parent / "GTR2Steam"]
+        binaries = []
+        for root in roots:
+            binaries.extend(glob.glob(str(root / "**" / "*.exe"), recursive=True))
+            binaries.extend(glob.glob(str(root / "**" / "*.dll"), recursive=True))
+        self.assertGreater(len(binaries), 20)
+        patterns = (b".PHS", b".phs", b"PHS\0", b"P\x00H\x00S\x00",
+                    b"PHYSICS", b"p\x00h\x00y\x00s\x00i\x00c\x00s\x00")
+        for path in binaries:
+            data = Path(path).read_bytes()
+            for pattern in patterns:
+                self.assertNotIn(pattern, data, f"{path}: {pattern!r}")
+
+
 if __name__ == "__main__":
     unittest.main()
