@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 15:00:00 -0500 - GTTF byte 31 further negatives
+- Recorded that gear bands explain only 2.8% of byte +31 variance and that acceleration/heading-rate/speed-change correlations are at baseline; encoding remains unresolved. Findings log updated.
+
 ## 2026-11-29 14:30:00 -0500 - GTL mesh layout confirmed
 - Verified all 2,529 sampled GTL archive GMTs use the new layout, confirming GTL→GTR2 needs no mesh relayout. Full-tier test added. Note: the fresh full-suite run exceeded the 60-minute shell timeout and produced no result; it predates recent commits.
 

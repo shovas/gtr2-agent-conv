@@ -328,7 +328,11 @@ observed byte values and their median engine speeds) gave only 0.311 vs 0.096
 permuted, 16/29 files above 3× — both byte clusters (0x12–0x1a and 0x6b–0x70)
 occur at similar engine speeds, so the byte is not a deterministic RPM code.
 The low-24-bit partner `0x002000` stays constant, confirming a structured
-bitfield whose encoding remains unexplained. Full-tier test added.
+bitfield whose encoding remains unexplained. Two further negatives: a 6-band
+gear clustering of engine speed explains only 2.8% of the byte's variance
+(0.3% shuffled), and it has no usable correlation with engine acceleration,
+heading rate, speed change or speed squared (all |r| <= 0.026 vs ~0.015
+permuted). Full-tier test added.
 
 ## GTTF frame marker prefix constant (2026-11-28)
 
