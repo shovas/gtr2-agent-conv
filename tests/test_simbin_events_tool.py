@@ -455,6 +455,20 @@ class SimbinEventsToolTest(unittest.TestCase):
         self.assertGreater(sum(1 for r in corrs if abs(r) > 0.2), len(corrs)//2)
 
 
+    def test_cli_reports_decoded_fields(self):
+        """--frames exposes world position, engine speed and recovered channels."""
+        import subprocess
+        files = _files(".gtt")
+        if not files:
+            self.skipTest("GTR2 GTT files not present")
+        result = subprocess.run(
+            [sys.executable, str(ROOT / "simbin_events_tool.py"), "--frames", str(files[0])],
+            capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        for token in ("first_world=", "engine_speed=", "slot48=", "path_controls="):
+            self.assertIn(token, result.stdout)
+
+
     def test_slot48_signed_channels(self):
         """Frame slot +48 exposes two signed channel readings."""
         import gzip

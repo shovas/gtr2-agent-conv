@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 10:45:00 -0500 - GTTF CLI fields
+- The `--frames` CLI now reports reconstructed world position, engine speed, slot-48 channels and path control values; regression test added.
+
 ## 2026-11-28 10:15:00 -0500 - f0 halves family-stable
 - Both f0 halves repeat across cross-corpus material families (16.3% / 17.3% vs 0.2% / 0.5% permuted), supporting paired authoring IDs. Full-tier permutation-controlled test added.
 

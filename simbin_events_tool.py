@@ -539,8 +539,13 @@ def main(argv=None) -> int:
         grid = find_frame_grid(raw)
         if grid:
             frames = read_frames(raw, grid)
+            first = frames[0]
             print(f"frame_grid={grid} first_time={frames[0]['time']:.3f} "
                   f"last_time={frames[-1]['time']:.3f}")
+            print(f"first_world={first['world_position']} "
+                  f"engine_speed={first['engine_speed']} "
+                  f"slot48=({first['slot48_low']},{first['slot48_high']}) "
+                  f"path_controls=({first['path_f3']},{first['path_f4']})")
         else:
             print("frame_grid=none")
     return 0
