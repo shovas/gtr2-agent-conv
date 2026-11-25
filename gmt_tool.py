@@ -258,6 +258,25 @@ def cmd_f0(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_decode_gsc(args: argparse.Namespace) -> int:
+    """Decode an ISI-encrypted GSC GMT member and write a GTR2-layout GMT."""
+    import gmt_layout
+    import gmt_semantic
+    raw = Path(args.file).read_bytes()
+    decoded = gmt_semantic.decode_gsc_member(raw)
+    if decoded is None:
+        print("error: member failed ISI/geometry validation")
+        return 1
+    out = gmt_layout.gsc_member_to_gtr2(raw)
+    Path(args.output).write_bytes(out)
+    parsed = gmt_format.parse_gmt(args.output, out)
+    quality = decoded["quality"]
+    print(f"gsc->gtr2: meshes={len(parsed.meshes)} vertices="
+          f"{sum(len(m.base_vertices) for m in parsed.meshes)} "
+          f"faces={quality['face_count']} plausible={quality['plausible_positions']}")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -277,6 +296,11 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("right")
     p.add_argument("-v", "--verbose", action="store_true")
     p.set_defaults(func=cmd_diff)
+
+    p = sub.add_parser("decode-gsc", help="convert an encrypted GSC GMT member to GTR2 layout")
+    p.add_argument("file")
+    p.add_argument("output")
+    p.set_defaults(func=cmd_decode_gsc)
 
     p = sub.add_parser("f0", help="report per-mesh f0 marker structure")
     p.add_argument("file")

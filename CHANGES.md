@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 01:00:00 -0500 - GSC decode CLI
+- Added `gmt_tool.py decode-gsc` to decrypt and convert an encrypted GSC GMT member to GTR2 layout with validation; regression test added.
+
 ## 2026-11-29 00:30:00 -0500 - GTTF complementary path controls
 - Verified path f3/f4 are complementary (median r -0.59 vs -0.001 permuted; median sum 1.0; f3 zero in 77% of frames). Full-tier test added; findings docs updated.
 

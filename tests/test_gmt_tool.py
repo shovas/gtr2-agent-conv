@@ -153,5 +153,36 @@ class GmtToolTest(unittest.TestCase):
         self.assertIn("mesh0_normally_has_large_delta", result.stdout)
 
 
+    def test_decode_gsc_command(self):
+        """The decode-gsc CLI converts an encrypted member with validation."""
+        import subprocess
+        import sys
+        sample = None
+        for path in Path(__file__).resolve().parents[1].parent.glob(
+                "CopaPetrobrasdeMarcas/**/*.mas"):
+            try:
+                _, entries = mas_tool.read_archive(str(path))
+            except Exception:
+                continue
+            sample = next((e.data for e in entries
+                           if e.name.lower().endswith(".gmt") and len(e.data) > 0x400), None)
+            if sample:
+                break
+        if sample is None:
+            self.skipTest("no GSC GMT sample")
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            source = Path(td) / "enc.gmt"
+            target = Path(td) / "out.gmt"
+            source.write_bytes(sample)
+            result = subprocess.run(
+                [sys.executable, str(Path(__file__).resolve().parents[1] / "gmt_tool.py"),
+                 "decode-gsc", str(source), str(target)], capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn("gsc->gtr2:", result.stdout)
+            self.assertGreater(target.stat().st_size, 1000)
+            self.assertTrue(gmt_format.parse_gmt(str(target)).meshes)
+
+
 if __name__ == "__main__":
     unittest.main()
