@@ -3632,6 +3632,44 @@ class CorpusDeep2Test(unittest.TestCase):
                 break
         self.assertEqual(checked, 10)
 
+    def test_converted_uv_values_are_finite_and_bounded(self):
+        """Converted GSC UVs stay finite and within plausible source ranges."""
+        import glob
+        import math
+        import gmt_format as gf
+        import gmt_layout
+        import gmt_semantic
+        import mas_tool
+        checked = 0
+        for archive in glob.glob(str(ROOT.parent / "CopaPetrobrasdeMarcas" / "**" / "*.mas"),
+                                 recursive=True)[:20]:
+            try:
+                _, entries = mas_tool.read_archive(archive)
+            except Exception:
+                continue
+            for entry in entries:
+                if not entry.name.lower().endswith(".gmt") or len(entry.data) < 0x400:
+                    continue
+                if not gmt_semantic.decode_gsc_member(entry.data):
+                    continue
+                output = gmt_layout.gsc_member_to_gtr2(entry.data)
+                if output is None:
+                    continue
+                for mesh in gf.parse_gmt("x.gmt", output).meshes:
+                    pairs = gf.read_mesh_uvs(mesh)
+                    if not pairs:
+                        continue
+                    for u, v in pairs:
+                        self.assertTrue(math.isfinite(u) and math.isfinite(v))
+                        self.assertLess(abs(u), 1e5)
+                        self.assertLess(abs(v), 1e5)
+                    checked += 1
+                if checked >= 100:
+                    break
+            if checked >= 100:
+                break
+        self.assertGreater(checked, 50)
+
     def test_gsc_conversion_preserves_uv_values(self):
         """Converted GSC members carry exactly the source UV pairs."""
         import glob

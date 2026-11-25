@@ -58,7 +58,12 @@ regression tests or an explicitly documented negative.
   and pass `validate_materials.check_gmt()`. Round-tripping 40 converted
   meshes through `gmt_format.relayout_gmt()` preserves vertex and stream bytes
   exactly.
-- **UV storage candidate located (not yet decoded):** meshes whose record has
+- **Converted UV range caveat:** shipped GTR2 UVs are mostly small (median
+  |u| 0.39, 98.6% within [-1,1]); converted GSC/VRL UVs are much wider
+  (median |u| ~0.99, ~55% within [-1,1]). Source→target UVs are exact, so this
+  reflects source content, not a conversion bug — but in-game texture tiling
+  correctness remains unverified. A finiteness/bounds guard test is included.
+ meshes whose record has
   `rec[6] < rec[7] < rec[8]` carry two extra 32-byte-per-vertex streams. In
   46.7% of 1,605 sampled meshes every 8-float stream record follows
   `[U, S, V, S, V, S, V, S]` — only three distinct values per vertex. A flat

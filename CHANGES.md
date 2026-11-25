@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 23:00:00 -0500 - Converted UV range characterization
+- Characterized converted UV ranges: source GSC/VRL UVs are much wider than shipped GTR2 UVs (median |u| ~0.99 vs 0.39); values remain finite and bounded. Documented as a visual-correctness caveat with a full-tier guard test.
+
 ## 2026-11-29 22:30:00 -0500 - UV tiling ratios in Race07
 - Confirmed the integer UV tiling-ratio rule decodes in JCA-decrypted Race07 meshes as well as GTR2; full-tier deterministic-sample test added.
 
