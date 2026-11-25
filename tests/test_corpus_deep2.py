@@ -1006,6 +1006,56 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertEqual(checked, 204)
 
+    def test_gttf_heading_vs_dsi_tangent_negative(self):
+        """Ghost +12 has no consistent DSI tangent relation in the y/z plane."""
+        import glob
+        import gzip
+        import math
+        import os
+        import statistics
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        base = ROOT.parent / "GTR2Steam"
+        coherences = []
+        for path in glob.glob(str(base / "TimeTrial" / "**" / "*.GTT"),
+                              recursive=True):
+            track = os.path.basename(os.path.dirname(path))
+            dsis = glob.glob(str(base / "GameData" / "DrivingSchool" / track
+                                 / "*Lap Challenge*.DSI"))
+            if not dsis:
+                continue
+            from pathlib import Path as _Path
+            line = st.read_ghost_line(gzip.decompress(_Path(dsis[0]).read_bytes()))
+            tangents = [(line[i], line[i + 1][1] - line[i][1],
+                         line[i + 1][2] - line[i][2]) for i in range(len(line) - 1)]
+            payload = gz.decompress(path)
+            frames = st.read_frames(payload, st.find_frame_grid(payload))
+            matches = []
+            for frame in frames:
+                y, z = frame["position"][0], frame["position"][1]
+                near = [(dy, dz) for point, dy, dz in tangents
+                        if abs(point[1] - y) < 3 and abs(point[2] - z) < 2]
+                if near:
+                    matches.append((frame["heading"],
+                                    statistics.mean(dy for dy, _ in near),
+                                    statistics.mean(dz for _, dz in near)))
+            if len(matches) < 50:
+                continue
+            best = 0
+            for sign in (1, -1):
+                for swap in (False, True):
+                    diffs = []
+                    for h, dy, dz in matches:
+                        angle = sign * math.atan2(dz, dy) if swap \
+                            else sign * math.atan2(dy, dz)
+                        diffs.append((h - angle + math.pi) % (2 * math.pi) - math.pi)
+                    c = sum(math.cos(x) for x in diffs) / len(diffs)
+                    s = sum(math.sin(x) for x in diffs) / len(diffs)
+                    best = max(best, math.hypot(c, s))
+            coherences.append(best)
+        self.assertGreater(len(coherences), 20)
+        self.assertLess(statistics.median(coherences), 0.4)
+
     def test_gttf_frame16_not_steering_rate(self):
         """The +16 derivative has no relation to +8 or heading rate."""
         import glob

@@ -5,6 +5,9 @@ Newest-first change log. Timestamps use repository commit dates (ISO 8601, local
 ## 2026-11-26 16:30:00 -0500 - AIW Features capacity negative
 - Documented that AIW `[Features]` numbers are capacity defaults rather than section counts (startinggrid 104 vs GRID 36 typical); full-tier corpus-fact regression test added.
 
+## 2026-11-27 12:00:00 -0500 - GTTF heading vs DSI tangent negative
+- Recomputed DSI tangents in the mapped y/z frame: best per-file coherence with ghost +12 is only 0.318 median across 27 tracks, with no dominant convention. Full-tier regression test added.
+
 ## 2026-11-27 11:00:00 -0500 - GTTF +16 steering-rate negative
 - Tested the +16 derivative across all 31 ghosts: median |correlation| 0.011 with +8 and 0.054 with heading rate — no steering-rate relationship. Full-tier regression test added.
 
