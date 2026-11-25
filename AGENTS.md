@@ -5,6 +5,7 @@
 - Repo is an agent-driven research project (see `README.md`); keep commands/tooling lightweight and document them here as they are added.
 
 ## Commands
+- **Testing policy — read `docs/testing-protocol.md` BEFORE running any tests.** It defines tier budgets and selection rules: quick (≤60 s, prefer ≤10 s) for targeted checks, normal (≤5 min) only when broader validation is warranted, and **full only on explicit user request** (never auto-triggered). Prefer narrowly scoped, seeded, stratified samples; report remaining uncertainty instead of escalating automatically.
 - Tests: `python3 run_tests.py --mode quick|normal|full` (default `normal`; progressive coverage, budget + timing report; `--list` shows tiers, `--coverage` adds optional line coverage). Plain full suite: `python3 -m unittest discover -s tests -v`.
 - Pre-push safety/privacy check: `python3 pre_push_check.py` (must pass before pushing; allowlists `shovas` and its noreply email)
 - Tools: `mas_tool.py`, `isi_crypt.py`, `isi_gm_crypt.py`, `gsc_exe_tool.py`, `jca_crypt.py`, `gmt_tool.py`/`gmt_format.py`, `gmt_layout.py`/`gmt_semantic.py`, `mts_format.py`, `race_gmt.py`, `phs_tool.py`, `rf1_to_gtr2.py`/`gtl_to_gtr2.py`, `text_convert.py`, `simbin_text_tool.py`, `simbin_events_tool.py`, `ghost_align.py`, `gzip_simbin_tool.py`, `fxm_tool.py`, `media_tool.py`, `anm_format.py`, `vrl_to_gmt.py`, `gtr1_to_gmt.py`, `batch_convert.py`, `validate_conversion.py`, `corpus_diff.py`, `validate_materials.py`. See `FEATURES.md` for usage.
@@ -78,6 +79,7 @@ Maintain the following Markdown files as accurate, concise, end-user-oriented do
 - **FEATURES.md** — High-level overview of implemented features, organized by end-user relevance and interest. Describe what the project offers and why it is useful, not implementation details. Keep descriptions brief and avoid listing every underlying capability.
 - **CAPABILITIES.md** — Detailed inventory of supported technical operations and behaviors, including lower-level functionality that enables features but may not be directly exposed to users. Describe what is actually possible, its scope, limitations, and relevant prerequisites.
 - **docs/format-findings.md** — Consolidated, topic-organized index of verified format and reverse-engineering findings (GMT layouts, EXEs, GTTF, f0, PHS, methodology pitfalls). Check this first when working on similar formats or binary evidence; the chronological experiment log is `docs/open-issues-research.md`.
+- **docs/testing-protocol.md** — Mandatory reference for any test run: tier policies, change/risk-based and sampling techniques, resource optimization, coverage/confidence rules, and execution discipline. Check it before selecting a test scope.
 - **DEPENDENCIES.md** — Environment setup reference listing required external software, libraries, tools, projects, services, files, and directories. Include versions or compatibility constraints when relevant, installation or acquisition instructions, configuration requirements, and distinctions between required and optional dependencies. Exclude standard components unless their presence or version matters.
 
 ### General Rules
