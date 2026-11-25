@@ -1144,6 +1144,29 @@ HED_NUMERIC_BOUNDS = {
 }
 
 
+CAM_NUMERIC_BOUNDS = {
+    "fov": (1.0, 102.0),
+    "clipplanes": (0.05, 9700.0),
+    "size": (1.0, 1.0),
+    "center": (0.5, 0.5),
+    "color": (0.0, 249.0),
+    "flags2": (0.0, 0.0),
+    "mipmaplodbias": (-1.0, 2.0),
+    "lodmultiplier": (0.75, 65536.0),
+    "orientationrate": (0.0, 999.0),
+    "radiuslimits": (0.0, 51.0),
+    "trackingrate": (0.0, 30.0),
+    "movementrate": (0.0, 20.0),
+    "shakerate": (0.0, 9.5),
+    "shakemagnitude": (0.0, 48.0),
+}
+
+
+def validate_cam_numeric(data: bytes | str) -> list[str]:
+    """Check numeric CAM fields against bounds from 258 GTR2/GTL/Race07 files."""
+    return _check_numeric_bounds(data, CAM_NUMERIC_BOUNDS)
+
+
 def parse_cam_control_points(data: bytes | str) -> list[tuple[float, float, float]]:
     """Extract XYZ ControlPoint triples from a CAM script."""
     text = data if isinstance(data, str) else data.decode("latin-1")

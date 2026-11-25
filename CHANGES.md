@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 12:30:00 -0500 - CAM numeric bounds
+- Added `simbin_text_tool.validate_cam_numeric()` with 14 corpus-observed field bounds across 258 GTR2/GTL/Race07 `.cam` files. Full-tier regression test added.
+
 ## 2026-11-26 12:00:00 -0500 - RCD numeric bounds
 - Added `simbin_text_tool.validate_rcd_numeric()` with 19 driver-stat bounds over 3,310 local `.rcd` files; widened envelopes to include generated/modded values. Full-tier regression test added.
 

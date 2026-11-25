@@ -781,6 +781,20 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertEqual(engines, 66)
         self.assertEqual(boxes, 60)
 
+    def test_cam_numeric_bounds(self):
+        """CAM numeric fields stay within corpus-observed bounds."""
+        import glob
+        import os
+        checked = 0
+        for root in ("GTR2Steam", "GTLSteam", "Race07Complete"):
+            for p in glob.glob(str(ROOT.parent / root / "**" / "*"), recursive=True):
+                if not os.path.isfile(p) or not p.lower().endswith(".cam"):
+                    continue
+                text = media_tool.decrypt_jca_text(Path(p).read_bytes())
+                self.assertEqual(stt.validate_cam_numeric(text), [], p)
+                checked += 1
+        self.assertEqual(checked, 258)
+
     def test_rcd_numeric_bounds(self):
         """RCD driver stats stay within corpus-observed bounds."""
         import glob
