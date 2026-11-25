@@ -105,6 +105,19 @@ Assigned each frame to one of six gear bands derived from the F550 `.grb`/`.hdc`
 
 This supports f4 as a throttle/demand-like channel on the reference line (stronger in low gears), but neither channel reproduces the ghost's own pedal positions; exact semantics remain unclaimed. Full-tier permutation-controlled regression test added.
 
+## GTR1 UV fields identified and transferred (2026-11-29)
+
+Previously `gtr1_to_gmt` deliberately dropped GTR1 UVs as unconfirmed.
+Inspecting 12-float GTR1 vertex records showed fields 8 and 11 are exactly
+zero in **20,017/20,017** sampled vertices, while fields 9/10 hold UV-like
+values (91.7% / 82.6% within [-2, 2], the rest tiled world-space coordinates;
+e.g. AMBULANCE00 `(0.0306, -0.6735)`, ARMCO1 `(3.0, -97.77)`). Added
+`uvs_from_gtr1()` and extended `vrl_to_gmt.build_gmt()` with an optional UV
+block written in the dominant real-GTR2 layout (u at +4, v at +8, no count
+lead). 30/30 sampled GTR1 conversions reproduce source UVs byte-exactly and
+the batch `gtr1` family now emits UV streams (e.g. 328 vertices -> 10,496
+bytes). Full-tier regression test added. VRL UV transfer remains unclaimed.
+
 ## GTR2 stream3 column 0 vs f0: sparsity artefact (2026-11-29)
 
 A per-vertex correlation between stream3's first f32 column and the base

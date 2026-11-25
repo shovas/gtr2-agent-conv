@@ -3102,6 +3102,56 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertGreater(meshes, 100)
         self.assertEqual(with_extra, 0)
 
+    def test_gtr1_conversion_preserves_uvs(self):
+        """GTR1 vertex fields 9/10 survive into the GTR2 UV block."""
+        import glob
+        import struct
+        import gmt_format
+        import gtr1_to_gmt
+        import mas_tool
+        template = ROOT.parent / "hand_selected" / "gtr1_sniffnnbe5l6i"
+        template_file = next((template / "Mesh.gtr").parent.glob("*.gmt"),
+                             None) if template.is_dir() else None
+        template_data = None
+        for candidate in (template_file, *sorted(ROOT.parent.glob("GTR2Steam/**/*.gtr"))[:1]):
+            if candidate is None or not candidate.is_file():
+                continue
+            try:
+                _, entries = mas_tool.read_archive(str(candidate))
+            except Exception:
+                continue
+            template_data = next((e.data for e in entries
+                                  if e.name.lower().endswith(".gmt") and e.data), None)
+            if template_data:
+                break
+        if template_data is None:
+            self.skipTest("no GTR2 template")
+        checked = 0
+        for archive in glob.glob(str(ROOT.parent / "GTR1Vanilla" / "**" / "*.gtr"),
+                                 recursive=True):
+            try:
+                _, entries = mas_tool.read_archive(archive)
+            except Exception:
+                continue
+            for entry in entries:
+                source_uvs = (gtr1_to_gmt.uvs_from_gtr1(entry.data)
+                              if entry.name.lower().endswith(".gmt") and entry.data else None)
+                if not source_uvs:
+                    continue
+                output = gtr1_to_gmt.gtr1_to_gmt(entry.data, template_data)
+                parsed = gmt_format.parse_gmt("x.gmt", output)
+                stream = parsed.meshes[0].stream2_data
+                self.assertEqual(len(stream), len(source_uvs) * 32)
+                recovered = [struct.unpack_from("<2f", stream, i * 32 + 4)
+                             for i in range(len(source_uvs))]
+                self.assertEqual(recovered, source_uvs)
+                checked += 1
+                if checked >= 10:
+                    break
+            if checked >= 10:
+                break
+        self.assertEqual(checked, 10)
+
     def test_gsc_conversion_uv_layout_matches_gtr2(self):
         """Converted UV blocks match the dominant real GTR2 stream layout."""
         import glob

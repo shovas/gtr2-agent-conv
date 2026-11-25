@@ -84,8 +84,13 @@ def _index_blob(triangles: list[tuple[int, int, int]]) -> bytes:
 def build_gmt(positions: list[tuple[float, float, float]],
               triangles: list[tuple[int, int, int]],
               template: bytes,
-              normals: list[tuple[float, float, float]] | None = None) -> bytes:
-    """Build a one-submesh GTR2 GMT from positions/triangles and a template."""
+              normals: list[tuple[float, float, float]] | None = None,
+              uvs: list[tuple[float, float]] | None = None) -> bytes:
+    """Build a one-submesh GTR2 GMT from positions/triangles and a template.
+
+    ``uvs``, when supplied, are written into the GTR2 UV block (u at +4,
+    v at +8 of each 32-byte record), matching the dominant real layout.
+    """
     base = gmt_format.parse_gmt("template.gmt", data=template)
     if not base.meshes:
         raise ValueError("template GMT has no mesh record to use as a default")
@@ -106,10 +111,17 @@ def build_gmt(positions: list[tuple[float, float, float]],
     record[10] = ic
     record[11] = 0
 
+    stream = b""
+    if uvs:
+        if len(uvs) != vc:
+            raise ValueError("UV count does not match vertex count")
+        stream = b"".join(bytes(4) + struct.pack("<2f", u, v) + bytes(20)
+                          for u, v in uvs)
     mesh = gmt_format.GmtMesh(
         record=gmt_format.GmtMeshRecord(raw=record),
         vertex_data=vertices,
         index_data=indices,
+        stream2_data=stream,
     )
     output = gmt_format.GmtFile(
         source_path=Path("converted.gmt"),

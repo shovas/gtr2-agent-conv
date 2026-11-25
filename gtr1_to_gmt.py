@@ -4,8 +4,9 @@
 Uses the corpus-verified parts of :func:`gmt_semantic.read_gtr1_geometry`:
 descriptor vertex fields 1-3 (position-like, triangle-adjacency evidence) and
 fields 4-6 (unit normals, 20,164/20,164 finite records). Per-descriptor index
-buffers are rebased into one combined triangle list. UV-like fields 9-11 are
-not transferred because their semantics remain unconfirmed.
+buffers are rebased into one combined triangle list. Vertex fields 9/10 are
+corpus-verified UV pairs (fields 8/11 are always zero) and are written into
+the GTR2 single-block UV layout.
 
 A real GTR2 GMT is required as a structural template at runtime; no game data
 is stored in this repository.
@@ -62,13 +63,34 @@ def geometry_from_gtr1(data: bytes) -> tuple[list, list, list] | None:
     return positions, normals, triangles
 
 
+def uvs_from_gtr1(data: bytes) -> list[tuple[float, float]] | None:
+    """Return UV pairs from GTR1 48-byte vertex fields 9/10.
+
+    Corpus-verified on 20,017 sampled GTR1 vertices: fields 8 and 11 are
+    always zero, while fields 9/10 hold UV-like values (91.7% / 82.6% within
+    [-2, 2], with tiled world-space coordinates outside). Descriptor-less
+    meshes carry no such stream and return None.
+    """
+    descriptors = gmt_semantic.read_gtr1_geometry(data)
+    if not descriptors:
+        return None
+    uvs = []
+    for item in descriptors:
+        for vertex in item["vertices"]:
+            uvs.append((vertex[9], vertex[10]))
+    return uvs or None
+
+
 def gtr1_to_gmt(data: bytes, template: bytes) -> bytes:
     """Build a one-submesh GTR2 GMT from GTR1 third-magic GMT bytes."""
     geometry = geometry_from_gtr1(data)
     if geometry is None:
         raise ValueError("no decodable GTR1 geometry")
     positions, normals, triangles = geometry
-    return vrl_to_gmt.build_gmt(positions, triangles, template, normals)
+    uvs = uvs_from_gtr1(data)
+    if uvs is not None and len(uvs) != len(positions):
+        uvs = None
+    return vrl_to_gmt.build_gmt(positions, triangles, template, normals, uvs)
 
 
 def main(argv=None) -> int:

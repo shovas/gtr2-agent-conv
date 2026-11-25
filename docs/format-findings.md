@@ -36,6 +36,10 @@ regression tests or an explicitly documented negative.
 - **Winding:** GSC, rF1 old-layout and GTR2 target meshes all show *inverted*
   face winding relative to stored normals (cross-product agreement ~0 forward,
   ~1 reversed). Do **not** flip indices during conversion.
+- GTR1 48-byte vertices carry UV pairs in fields 9/10 (fields 8/11 are always
+  zero in 20,017 sampled vertices). `gtr1_to_gmt.uvs_from_gtr1()` extracts
+  them and `gtr1_to_gmt()` writes them into the GTR2 UV block; 30/30 sampled
+  conversions reproduce source UVs exactly.
 - `batch_convert.py` includes a `gsc` family; all written meshes are re-parsed
   and pass `validate_materials.check_gmt()`. Round-tripping 40 converted
   meshes through `gmt_format.relayout_gmt()` preserves vertex and stream bytes
