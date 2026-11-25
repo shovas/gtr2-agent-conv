@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 12:30:00 -0500 - f0 scope boundary recorded
+- Recorded that GTR2/GTL f0 marker semantics do not apply to JCA-decrypted Volvo/Race07 GMTs (their rec[4] holds float-shaped data). No code change; findings docs updated.
+
 ## 2026-11-29 12:00:00 -0500 - UV inspection CLI
 - Added `gmt_tool.py uv FILE` to report UV block size, signature, decoded-triple status and sample UV pairs; regression test added.
 

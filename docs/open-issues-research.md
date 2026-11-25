@@ -105,6 +105,16 @@ Assigned each frame to one of six gear bands derived from the F550 `.grb`/`.hdc`
 
 This supports f4 as a throttle/demand-like channel on the reference line (stronger in low gears), but neither channel reproduces the ghost's own pedal positions; exact semantics remain unclaimed. Full-tier permutation-controlled regression test added.
 
+## f0 marker semantics do not transfer to Volvo/Race07 (2026-11-29)
+
+Attempted to cross-validate the f0 byte-pair rule on JCA-decrypted Volvo and
+Race07 GMTs. It did not hold (Volvo 5.5% consecutive even pairs, Race07 28%,
+versus 60% in GTR2). Inspection showed the reason: the first u32 at rec[4] in
+those games is a float-shaped value (e.g. `0xBE49F597`), not the small
+per-mesh marker seen in GTR2 (343/343 sampled GTR2 meshes had <100,000 there).
+`gmt_format.mesh_marker()` and all f0 findings are therefore scoped to the
+GTR2/GTL layout only; sibling games use a different base-vertex layout.
+
 ## UV layout confirmed across sibling SimBin games (2026-11-29)
 
 Decrypted JCA-encrypted GMTs from Volvo and Race07 with `jca_crypt.py`
