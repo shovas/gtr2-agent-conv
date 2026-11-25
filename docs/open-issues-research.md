@@ -73,6 +73,18 @@ Deep field-level probe of the minimally investigated `../Automobilista`, `../Sto
 
 Generic section/key parsing of all 1,287 `.gdb` and 3,385 `.car` files found **667 / 173 distinct keys respectively but no cross-corpus universal key**. Only family-specific universals exist: `.car` GTR2-family files (165) all carry `genstring`, `pitgroup`, `number`, `driver1`, `team` (the GTR2-only key set already used by `gtl_to_gtr2`); rF1 `.gdb` (81) all carry `racelaps`. Seven zero-length `.gdb` fixtures in `../rfactortools/tests/data` are legitimately empty. `parse_gdb()`/`parse_car()`/`validate_config()` therefore perform structural validation only — no universal key rule can be promoted beyond the existing family-specific validators.
 
+## GSC opaque GMT: region-mask schedule negative (2026-11-26)
+
+Targeted search for a derivable schedule on the remaining files (no decoder promoted):
+
+- Across 120 sampled masked GMTs, `submesh_mask - magic_mask` is zero in only 61 cases; the other 59 deltas span 20+ distinct byte values (e.g. `0xA8`, `0xF0`, `0xFF`, `0x03`, `0xFB`) with no dominant rule. Only 88/120 magic and name masks agree.
+- No correlation with file length: `mask == (size & 0xFF)` in 2/120 files and `mask == (size & 0xFF) ^ 0xFF` in 1/120.
+- Section checksums do not produce the masks (name `purchased` sum `0xBF` / XOR `0x6F` vs key `0x0B`; table sum `0x50` / XOR `0xA0` vs `0x0C`; submesh header sum `0x78` / XOR `0xA4` vs `0xFB`).
+- Applying the three known masks of `PURCHASED.GMT` (`0x0C` header, `0x0B` names/magic, `0xFB` submesh header) yields a valid table and a `0x20004011` submesh header, but the decoded mesh has **0 faces and implausible float positions** — the bulk vertex/index region uses further masks.
+- Brute-forcing one XOR key for the bulk region and ranking by plausible float count gave no distinct candidate (best 596/1024 ~ chance level).
+
+`decode_gsc_xor_gmt()` therefore deliberately returns `None` for these files; a quick-tier regression test locks in that negative. Unblock conditions remain: a spec/tool exposing the mask schedule, or a plaintext pair covering the bulk region.
+
 ## GSC opaque GMT: single-byte XOR subset decoded (2026-11-26)
 
 **Partial decoder promoted:** `gmt_semantic.decode_gsc_xor_gmt()` derives the mask from the file-level magic at `0x1D4` and XORs the whole ISI-decrypted file, then accepts the result only if `read_gmt()` finds submeshes. Verified on 60 masked members per corpus: Copa **32/60**, GameStockCar **32/60**, StockCarExtreme **35/60**, Automobilista **39/60** (plus 104/160 in an earlier Copa sample that included unmasked files). Decoded examples include `TRACKWORKERRIGHT.GMT`, `AMBULANCE_LOD001.GMT`, `STARTBOX.GMT` with real geometry (thousands of faces). Quick-tier regression test covers all four corpora. The remaining ~45% use region-specific masks and stay blocked; no speculative fallback is added.

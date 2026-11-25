@@ -35,6 +35,22 @@ class GscGmtXorTest(unittest.TestCase):
         self.assertEqual(head[0x1D4:0x1E4], gmt_semantic.OLD_GMT_MAGIC)
 
 
+    def test_region_masked_file_remains_unsupported(self):
+        """PURCHASED.GMT has region keys but no derivable bulk key."""
+        archive = ROOT.parent / "CopaPetrobrasdeMarcas" / "Gamedata" / \
+            "Vehicles" / "showroom.mas"
+        if not archive.is_file():
+            self.skipTest("showroom.mas not present")
+        _, entries = mas_tool.read_archive(str(archive))
+        entry = next((e for e in entries if e.name.lower() == "purchased.gmt"), None)
+        if entry is None:
+            self.skipTest("PURCHASED.GMT not present")
+        data = isi_crypt.decrypt_bytes(entry.data, 1)
+        self.assertEqual(gmt_semantic.gsc_xor_magic_key(data), 0x0B)
+        self.assertEqual(gmt_semantic.gsc_masked_submeshes(data),
+                         [(740, 0xFB, 0x20004011)])
+        self.assertIsNone(gmt_semantic.decode_gsc_xor_gmt(data))
+
     def test_whole_file_xor_decodes_subset(self):
         """Magic-derived masks fully decode a verified GMT subset in 4 corpora."""
         cases = (
