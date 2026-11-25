@@ -91,6 +91,35 @@ class GmtToolTest(unittest.TestCase):
         self.assertIn("halves=", result.stdout)
 
 
+    def test_info_reports_byte_pair_and_stream(self):
+        """The info CLI exposes f0 byte pairs and stream column signatures."""
+        import subprocess
+        import sys
+        import tempfile
+        sample = None
+        for path in Path(__file__).resolve().parents[1].parent.glob("GTR2Steam/**/*.gtr"):
+            try:
+                _, entries = mas_tool.read_archive(str(path))
+            except Exception:
+                continue
+            sample = next((e.data for e in entries
+                           if e.name.upper() == "ROADPITADDON.GMT"), None)
+            if sample:
+                break
+        if sample is None:
+            self.skipTest("no ROADPITADDON sample")
+        with tempfile.TemporaryDirectory() as td:
+            target = Path(td) / "sample.gmt"
+            target.write_bytes(sample)
+            result = subprocess.run(
+                [sys.executable, str(Path(__file__).resolve().parents[1] / "gmt_tool.py"),
+                 "info", "--meshes", str(target)], capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("f0_bytes=", result.stdout)
+        self.assertIn("consecutive=", result.stdout)
+        self.assertIn("stream_cols=", result.stdout)
+        self.assertIn("decoded_triples=", result.stdout)
+
     def test_f0_command(self):
         """The f0 subcommand reports marker halves and summary counts."""
         import subprocess

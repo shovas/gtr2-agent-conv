@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 06:00:00 -0500 - GMT inspect CLI shows new findings
+- `gmt_tool.py info --meshes` now reports f0 byte pairs, consecutive-pair flags, and extra-stream column signatures / decoded triples. Regression test added.
+
 ## 2026-11-29 05:30:00 -0500 - GTR2 stream column invariant
 - Verified that stream column 7 repeats column 1 in 99.73% of 2,601 GTR2 meshes (exceptions are TRACKnn meshes). Added `gmt_format.stream_column_signature()` and a full-tier test; findings docs updated.
 

@@ -153,17 +153,27 @@ def cmd_info(args: argparse.Namespace) -> int:
     print(f"mesh_table_ok: {h.mesh_table_ok}")
     print(f"sha256: {sha256(h.path)}")
     if args.meshes and h.meshes:
+        import gmt_format
+        parsed = gmt_format.parse_gmt(args.file, Path(args.file).read_bytes())
         for m in h.meshes:
             print(
                 f"mesh[{m.index}]: flags=0x{m.flags:08x} vc={m.vertex_count} vo={m.vertex_offset} "
                 f"ic={m.index_count} io={m.index_offset}"
             )
-            import gmt_format
             raw = Path(args.file).read_bytes()
             if m.vertex_offset + 4 <= len(raw):
                 marker = struct.unpack_from("<I", raw, m.vertex_offset)[0]
                 low, high, delta = gmt_format.split_f0(marker)
                 print(f"  f0=0x{marker:08x} halves=({low},{high}) delta={delta}")
+                byte_low, byte_high = gmt_format.f0_byte_pair(marker)
+                print(f"  f0_bytes=({byte_low},{byte_high}) consecutive={byte_high == byte_low + 1}")
+            if m.index < len(parsed.meshes):
+                stream = parsed.meshes[m.index].stream2_data
+                vertex_count = parsed.meshes[m.index].record.vertex_count
+                if stream and vertex_count:
+                    signature = gmt_format.stream_column_signature(stream, vertex_count)
+                    triples = gmt_format.decode_stream_records(stream, vertex_count)
+                    print(f"  stream_cols={signature} decoded_triples={triples is not None}")
     return 0
 
 
