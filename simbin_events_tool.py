@@ -201,6 +201,19 @@ def parse_file(path: str | Path) -> EventFile:
 # position/time deltas (verified across the GTR2 GTTF corpus).
 FRAME_STRIDE = 63
 FRAME_TIME_OFF = 20
+# Slot +32 is a 24-bit integer (byte +35 is always zero). Its ceiling is
+# car-specific: ~5,873,841 for the GTR2 Ferrari F550 and ~6.19M for the BMW
+# M3. Divided by 1024 those are 5736 / 6190, consistent with engine rpm and
+# abrupt downward jumps consistent with gear shifts. Exact units unverified.
+FRAME_RPM_OFF = 32
+RPM_SCALE = 1024.0
+
+
+def frame_rpm(data: bytes, offset: int) -> int | None:
+    """Return the raw 24-bit engine-speed word at a GTTF frame offset."""
+    if offset + 35 > len(data) or data[offset + 35] != 0:
+        return None
+    return int.from_bytes(data[offset + FRAME_RPM_OFF:offset + 35], "little")
 
 
 def find_frame_grid(data: bytes) -> dict | None:
@@ -246,7 +259,10 @@ def read_frames(data: bytes, grid: dict) -> list[dict]:
                     "heading": struct.unpack_from("<f", data, off + 12)[0],
                     "pitch": steering,  # legacy alias
                     "steering": steering,
-                    "time": struct.unpack_from("<f", data, off + FRAME_TIME_OFF)[0]})
+                    "time": struct.unpack_from("<f", data, off + FRAME_TIME_OFF)[0],
+                    "engine_speed": frame_rpm(data, off),
+                    "rpm": (value / RPM_SCALE if (value := frame_rpm(data, off)) is not None
+                            else None)})
     return out
 
 

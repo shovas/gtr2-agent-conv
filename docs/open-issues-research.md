@@ -3,6 +3,12 @@
 All work here is **offline**: no game was launched. "Runtime-dependent" means
 conclusively establishing it requires actual game execution.
 
+## GTTF slot +32: engine-speed hypothesis (2026-11-26)
+
+**New positive structural finding** (refines earlier "unbounded 24-bit integer" negatives): across all 31 local `.GTT` files with frame grids, the 24-bit value at `+32` (byte `+35` is always 0) has a **car-specific hard ceiling**: 21/29 Ferrari F550 files peak at exactly **5,873,841** (≈5736 when divided by 1024), while both BMW M3 files peak at 6.19–6.20M (≈6190). The remaining F550 files peak 5.66–5.81M. The signal is very smooth (median lag-1 autocorrelation 0.994) and shows abrupt downward jumps of 200k–900k (~200–900 rpm at /1024) consistent with gear shifts, including at 30–70 m/s. Correlation with speed is mildly negative (median −0.14, consistent with upshifts), and with speed-derived acceleration ≈0 (gear changes dominate).
+
+`simbin_events_tool.frame_rpm()` now exposes the raw word and a `/1024` reading; `read_frames()` includes `engine_speed`/`rpm`. **Status:** car-specific ceiling + shift-like drops are verified; the engine-speed interpretation and exact scale are strongly supported but not confirmed against runtime telemetry, so this is labelled a hypothesis rather than a decoded semantic. Regression test: 31-file ceiling bounds + ≥5 F550 files at the exact ceiling + ≥3 files with ≥10 shift-like drops. This does not rehabilitate the earlier throttle/brake/timestamp/lap-distance negatives for this slot.
+
 ## GTTF byte +31 event/smoothed-speed hypotheses (2026-11-24)
 
 Tested whether the varying byte +31 marks discrete track events: it changes between consecutive frames in **47.3%** of 44,573 transitions (far too frequent for pit/lap markers), and speed near changes (median 22.3) is just the naturally higher speed where quantization steps toggle. A bounded search over lags 0-20 and EMA smoothing alphas 0.1-0.9 found best speed correlation only r=0.34 (lag 20, alpha 0.1), with most files below 0.25. Byte +31 is therefore neither a rare event flag nor a smoothed speed signal; its quantized magnitude semantics remain unresolved.

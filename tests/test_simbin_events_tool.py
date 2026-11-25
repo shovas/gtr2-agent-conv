@@ -82,6 +82,32 @@ class SimbinEventsToolTest(unittest.TestCase):
             self.skipTest("no GTTF frame grids detected")
         self.assertGreaterEqual(checked, 1)
 
+    def test_gttf_engine_speed_ceiling(self):
+        """Frame slot +32 has a car-specific ceiling and shift-like drops."""
+        import gzip
+        files = _files(".gtt")
+        if not files:
+            self.skipTest("GTR2 GTT files not present")
+        ceilings = []
+        shift_files = 0
+        for p in files:
+            data = gzip.decompress(p.read_bytes())
+            grid = setool.find_frame_grid(data)
+            if not grid:
+                continue
+            frames = setool.read_frames(data, grid)
+            speeds = [fr["engine_speed"] for fr in frames]
+            if not speeds or any(v is None for v in speeds):
+                continue
+            ceilings.append(max(speeds))
+            drops = sum(1 for a, b in zip(speeds, speeds[1:]) if a - b > 200000)
+            shift_files += int(drops >= 10)
+        if not ceilings:
+            self.skipTest("no GTTF frame grids detected")
+        self.assertTrue(all(5_500_000 <= c <= 6_300_000 for c in ceilings))
+        self.assertGreaterEqual(sum(1 for c in ceilings if 5_860_000 <= c <= 5_890_000), 5)
+        self.assertGreaterEqual(shift_files, 3)
+
     def test_gttf_frame_count_matches_record_marker(self):
         """The 63-byte record marker independently validates the frame grid."""
         files = _files(".gtt")
