@@ -74,7 +74,7 @@ python3 gsc_exe_tool.py extract "../CopaPetrobrasdeMarcas/Marcas.exe" out/
 
 ## 3. Inspect GMT files (partial)
 
-**What it does**: Parses GMT headers, mesh table records, material/stage string evidence, and observed vertex/stream layouts; diffs GMTs; performs structural lossless round-trip, and can rebuild all offsets after mesh data grows (`gmt_tool.py relayout ...`). A subset of previously opaque GSC GMTs is recovered with `gmt_semantic.decode_gsc_xor_gmt()` (single-byte XOR mask derived from the file magic).
+**What it does**: Parses GMT headers, mesh table records, material/stage string evidence, and observed vertex/stream layouts; diffs GMTs; performs structural lossless round-trip, and can rebuild all offsets after mesh data grows (`gmt_tool.py relayout ...`). A subset of previously opaque GSC GMTs has its file/submesh structure recovered with `gmt_semantic.decode_gsc_xor_gmt()` (single-byte XOR mask derived from the file magic); decoded bulk vertices are usually still masked and need `read_gsc_geometry()` quality gating.
 
 **How to ask**:
 - "Inspect this GMT and tell me what we know about its structure."

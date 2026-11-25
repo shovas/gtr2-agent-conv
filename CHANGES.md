@@ -5,6 +5,9 @@ Newest-first change log. Timestamps use repository commit dates (ISO 8601, local
 ## 2026-11-26 16:30:00 -0500 - AIW Features capacity negative
 - Documented that AIW `[Features]` numbers are capacity defaults rather than section counts (startinggrid 104 vs GRID 36 typical); full-tier corpus-fact regression test added.
 
+## 2026-11-26 14:00:00 -0500 - GSC GMT decoder geometry caveat
+- Corrected an overstatement: the XOR-masked GMT decoder restores file/submesh *structure* only — 0/150 sampled decodes had both plausible positions and faces. Added geometry-quality regression negative and updated decoder docs; no geometry should be used from these files without `read_gsc_geometry()` gating.
+
 ## 2026-11-26 13:00:00 -0500 - GTTF slots 48/52/56/60 negatives
 - Verified sentinel-like full-range u32 values with no car-specific ceiling across all 31 files for slots +48/+52/+56/+60; +52's zero/sign clusters cover only ~17% of frames. Regression test added; no semantics promoted.
 

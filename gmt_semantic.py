@@ -284,9 +284,14 @@ def decode_gsc_xor_gmt(data: bytes) -> tuple[bytes, int] | None:
 
     Returns ``(decoded_data, mask)`` only when the file-level magic at 0x1D4
     is a constant-byte XOR of the old-layout magic **and** the fully unmasked
-    file parses to at least one submesh.  Corpus-verified on 104/160 masked
-    Copa members; the remaining files use multiple region masks and are not
-    decoded (see ``docs/open-issues-research.md``).
+    file parses to at least one submesh.  This restores the file/submesh
+    *structure*; the bulk vertex data is often still region-masked, so
+    ``read_gsc_geometry()`` reports implausible positions for most results
+    (0/150 sampled decodes had both plausible positions and faces). Callers
+    must check geometry quality before using decoded vertices. Corpus-verified
+    structurally on 104/160 masked Copa members; the remaining files use
+    multiple region masks and are not decoded (see
+    ``docs/open-issues-research.md``).
     """
     mask = gsc_xor_magic_key(data)
     if mask is None:

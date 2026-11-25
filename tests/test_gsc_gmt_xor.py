@@ -51,8 +51,35 @@ class GscGmtXorTest(unittest.TestCase):
                          [(740, 0xFB, 0x20004011)])
         self.assertIsNone(gmt_semantic.decode_gsc_xor_gmt(data))
 
+    def test_xor_decode_does_not_restore_geometry(self):
+        """A structurally decoded GMT usually still has masked bulk vertices."""
+        import mas_tool
+        for root, name in (("CopaPetrobrasdeMarcas", "TRACKWORKERRIGHT.GMT"),
+                           ("Automobilista", "AMBULANCE_LOD001.GMT")):
+            base = ROOT.parent / root
+            if not base.is_dir():
+                continue
+            found = False
+            for archive in base.glob("**/*.mas"):
+                try:
+                    _, entries = mas_tool.read_archive(str(archive))
+                except Exception:
+                    continue
+                entry = next((e for e in entries
+                              if e.name.lower().endswith(name.lower())), None)
+                if entry is None:
+                    continue
+                data = isi_crypt.decrypt_bytes(entry.data, 1)
+                result = gmt_semantic.decode_gsc_xor_gmt(data)
+                self.assertIsNotNone(result)
+                quality = gmt_semantic.read_gsc_geometry(result[0])
+                self.assertFalse(quality.get("plausible_positions"), name)
+                found = True
+                break
+            self.assertTrue(found, f"{root}/{name} not found")
+
     def test_whole_file_xor_decodes_subset(self):
-        """Magic-derived masks fully decode a verified GMT subset in 4 corpora."""
+        """Magic-derived masks restore GMT structure in 4 corpora (not geometry)."""
         cases = (
             ("CopaPetrobrasdeMarcas", "TRACKWORKERRIGHT.GMT"),
             ("GameStockCar", "TR_LF_LVL1.GMT"),
@@ -79,6 +106,8 @@ class GscGmtXorTest(unittest.TestCase):
                 decoded, mask = result
                 self.assertNotEqual(mask, 0)
                 self.assertTrue(gmt_semantic.read_gmt(decoded).get("submeshes"))
+                # Structural decode only: bulk vertices are often still masked.
+                self.assertIsInstance(gmt_semantic.read_gsc_geometry(decoded), dict)
                 found = True
                 break
             self.assertTrue(found, f"{root}/{name} not found")
