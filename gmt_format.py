@@ -147,6 +147,26 @@ def decode_stream_records(data: bytes, vertex_count: int) -> Optional[List[tuple
     return [(row[0], row[2], row[1]) for row in rows]
 
 
+def stream_column_signature(data: bytes, vertex_count: int) -> Optional[tuple[int, ...]]:
+    """Return which of a stream's 8 f32 columns repeat an earlier column.
+
+    Corpus-verified on 2,601 GTR2 meshes: the last column almost always equals
+    the second (2,594 meshes, 99.73%); the single most common signature is
+    ``(1, 2, 1, 2, 1, 2, 1)`` (46.7%).  The seven exceptions are TRACKnn meshes
+    with a distinct material scheme.  This exposes the structural layout only;
+    no UV semantics are asserted.
+    """
+    if vertex_count <= 0 or len(data) != vertex_count * 32:
+        return None
+    rows = [struct.unpack_from("<8f", data, i * 32) for i in range(vertex_count)]
+    signature = []
+    for column in range(1, 8):
+        earlier = next((k for k in range(column)
+                        if all(row[column] == row[k] for row in rows)), None)
+        signature.append(earlier if earlier is not None else column)
+    return tuple(signature)
+
+
 def unpack_vertex_color(value: int) -> tuple[int, int, int, int]:
     """Decode a GTR2 base-vertex f7 word into its four bytes.
 

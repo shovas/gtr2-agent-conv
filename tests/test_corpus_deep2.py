@@ -1873,6 +1873,42 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertGreater(max(halves), 10 * len(shaders))
         self.assertGreater(len(set(halves)), 5 * len(shaders))
 
+    def test_gmt_stream_last_column_equals_second(self):
+        """Nearly every GTR2 extra stream repeats column 1 in column 7."""
+        import glob
+        import gmt_format as gf
+        import mas_tool
+        total = 0
+        matching = 0
+        for archive in glob.glob(str(ROOT.parent / "GTR2Steam" / "**" / "*.gtr"),
+                                 recursive=True):
+            try:
+                _, entries = mas_tool.read_archive(archive)
+            except Exception:
+                continue
+            for entry in entries:
+                if not entry.name.lower().endswith(".gmt") or not entry.data:
+                    continue
+                try:
+                    parsed = gf.parse_gmt("x.gmt", entry.data)
+                except Exception:
+                    continue
+                for mesh in parsed.meshes:
+                    vertex_count = mesh.record.vertex_count
+                    if vertex_count < 8 or len(mesh.stream2_data) != vertex_count * 32:
+                        continue
+                    signature = gf.stream_column_signature(mesh.stream2_data, vertex_count)
+                    if signature is None:
+                        continue
+                    total += 1
+                    matching += signature[-1] == 1
+                if total >= 2500:
+                    break
+            if total >= 2500:
+                break
+        self.assertGreater(total, 2000)
+        self.assertGreater(matching / total, 0.99)
+
     def test_gmt_extra_stream_three_value_pattern(self):
         """Extra 32-byte vertex streams reduce to three distinct values."""
         import glob
