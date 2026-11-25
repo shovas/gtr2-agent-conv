@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 22:00:00 -0500 - GSC UV preservation at scale
+- Verified source and converted UV pairs are exactly equal on 150/150 GSC members. Full-tier regression test added; findings doc updated.
+
 ## 2026-11-29 21:30:00 -0500 - PHS cipher-header negatives
 - Confirmed no ISI/JCA/gMb header in any of the five GTL PHS members at offsets 0..64; exactly one opaque member remains. Full-tier guard test added; no speculative decoder.
 

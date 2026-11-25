@@ -3590,6 +3590,44 @@ class CorpusDeep2Test(unittest.TestCase):
                 break
         self.assertEqual(checked, 10)
 
+    def test_gsc_conversion_preserves_uv_values(self):
+        """Converted GSC members carry exactly the source UV pairs."""
+        import glob
+        import gmt_format
+        import gmt_layout
+        import gmt_semantic
+        import mas_tool
+        checked = 0
+        for archive in glob.glob(str(ROOT.parent / "CopaPetrobrasdeMarcas" / "**" / "*.mas"),
+                                 recursive=True):
+            try:
+                _, entries = mas_tool.read_archive(archive)
+            except Exception:
+                continue
+            for entry in entries:
+                if not entry.name.lower().endswith(".gmt") or len(entry.data) < 0x400:
+                    continue
+                decoded = gmt_semantic.decode_gsc_member(entry.data)
+                if not decoded:
+                    continue
+                output = gmt_layout.gsc_member_to_gtr2(entry.data)
+                if output is None:
+                    continue
+                source = [tuple(float(value) for value in uv)
+                          for sub in decoded["submeshes"] for uv in sub["uvs"]]
+                converted = []
+                for mesh in gmt_format.parse_gmt("x.gmt", output).meshes:
+                    pairs = gmt_format.read_mesh_uvs(mesh)
+                    if pairs:
+                        converted.extend(pairs)
+                self.assertEqual(converted, source)
+                checked += 1
+                if checked >= 150:
+                    break
+            if checked >= 150:
+                break
+        self.assertEqual(checked, 150)
+
     def test_gsc_conversion_uv_layout_matches_gtr2(self):
         """Converted UV blocks match the dominant real GTR2 stream layout."""
         import glob

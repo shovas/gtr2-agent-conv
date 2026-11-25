@@ -40,7 +40,8 @@ regression tests or an explicitly documented negative.
   vertex/face counts, original `f0` markers, normals and `f7` colours are
   preserved (raw 32-byte vertex records are copied, not rebuilt). Index
   integrity verified on 40 converted meshes / 56,273 triangles: no out-of-range
-  indices and no degenerate faces.
+  indices and no degenerate faces. UVs are preserved exactly on 150/150
+  sampled members (source vs converted pairs compared byte-for-byte).
 - **Winding:** GSC, rF1 old-layout and GTR2 target meshes all show *inverted*
   face winding relative to stored normals (cross-product agreement ~0 forward,
   ~1 reversed). Do **not** flip indices during conversion.
