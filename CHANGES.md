@@ -5,6 +5,9 @@ Newest-first change log. Timestamps use repository commit dates (ISO 8601, local
 ## 2026-11-26 16:30:00 -0500 - AIW Features capacity negative
 - Documented that AIW `[Features]` numbers are capacity defaults rather than section counts (startinggrid 104 vs GRID 36 typical); full-tier corpus-fact regression test added.
 
+## 2026-11-27 07:00:00 -0500 - GTTF steering vs DSI curvature
+- Correlated ghost +16 with DSI instructor-line curvature across 27 matched tracks: median r −0.171, median |r| 0.241, 17/27 above 0.2 — modest curvature relationship supporting steering semantics, exact units/sign unresolved. Full-tier regression test added.
+
 ## 2026-11-27 06:00:00 -0500 - f0 stage-type matches refuted
 - Showed that f0 halfwords matching stage types (478/3006) is a small-integer artifact: permutation baseline 434 vs 440 observed. No stage-derived f0 semantics; full-tier regression test added.
 

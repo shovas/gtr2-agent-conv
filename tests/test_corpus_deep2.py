@@ -1006,6 +1006,48 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertEqual(checked, 204)
 
+    def test_gttf_steering_vs_dsi_curvature(self):
+        """Ghost +16 shows a modest relation to DSI instructor-line curvature."""
+        import glob
+        import gzip
+        import math
+        import os
+        import statistics
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        base = ROOT.parent / "GTR2Steam"
+        correlations = []
+        for path in glob.glob(str(base / "TimeTrial" / "**" / "*.GTT"), recursive=True):
+            track = os.path.basename(os.path.dirname(path))
+            dsis = glob.glob(str(base / "GameData" / "DrivingSchool" / track
+                                 / "*Lap Challenge*.DSI"))
+            if not dsis:
+                continue
+            line = st.read_ghost_line(gzip.decompress(
+                (Path(dsis[0])).read_bytes()))
+            curvature = []
+            for i in range(1, len(line) - 1):
+                ax, az = line[i][0] - line[i - 1][0], line[i][2] - line[i - 1][2]
+                bx, bz = line[i + 1][0] - line[i][0], line[i + 1][2] - line[i][2]
+                la, lb = math.hypot(ax, az), math.hypot(bx, bz)
+                k = (ax * bz - az * bx) / (la * lb) if la > 1e-9 and lb > 1e-9 else 0
+                curvature.append((line[i], k))
+            payload = gz.decompress(path)
+            frames = st.read_frames(payload, st.find_frame_grid(payload))
+            pairs = []
+            for frame in frames:
+                y, z = frame["position"][0], frame["position"][1]
+                near = [k for point, k in curvature
+                        if abs(point[1] - y) < 3 and abs(point[2] - z) < 2]
+                if near:
+                    pairs.append((frame["pitch"], statistics.mean(near)))
+            if len(pairs) >= 50:
+                correlations.append(st._corr([a for a, b in pairs],
+                                             [b for a, b in pairs]))
+        self.assertEqual(len(correlations), 27)
+        self.assertGreater(statistics.median(abs(v) for v in correlations), 0.2)
+        self.assertGreaterEqual(sum(1 for v in correlations if abs(v) > 0.2), 15)
+
     def test_f0_halfwords_not_stage_types(self):
         """f0 halfwords matching stage types is a small-integer artifact."""
         import glob

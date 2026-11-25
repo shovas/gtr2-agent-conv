@@ -35,6 +35,10 @@ Comparing 703 identically named mesh families present in two or three of GTR2Ste
 
 New invariant from a 500-file GTR2/GTL mesh sweep: among LOD/number-variant groups whose members each have ≥2 submeshes, **11/37 (29.7%)** share an *identical ordered f0 marker list* (e.g. `AMBULANCE00/01/N01.GMT` all carry `0, 0xa0009e, 0x8a008d, 0xae00af`), versus a 0% baseline under randomized grouping. Thus f0 encodes something tied to the mesh family/material setup rather than per-file or per-LOD state — a refinement of the earlier "per-mesh marker" finding. Exact halfword matches to `material_index` remain below 25% of markers in the same sweep, so the specific encoding is still unresolved. Full-tier regression test added.
 
+## GTTF steering vs DSI curvature (2026-11-27)
+
+Matched 27 ghosts to their track's DSI lap-instructor line by y/z and compared `+16` with signed curvature of the DSI polyline in the x/z plane. Median correlation is **−0.171** (median |r| **0.241**; 17/27 files above |0.2|; 20/27 negative). This is a modest but consistent curvature relationship, weaker than the +8/+16 link (0.585) because the DSI line is a different racing line and matching uses a ±2–3 m z/y window. It supports +16 being steering/curvature-related but does not establish exact units or sign; full-tier regression test added.
+
 ## GTTF steering-sign convention (2026-11-27)
 
 The ± sign of the `+8`/`+16` relation is not random across the 29 F550 ghosts: files with positive correlation have a median net unwrapped `+12` heading trend of **7.9 rad**, negative-correlation files **4.74 rad**, and the per-file correlation coefficient versus heading trend is **0.583**. AIW waypoint file order/signed area does **not** explain the split (sign agreement 12/27, correlation 0.109). So the steering sign is tied to the recorded heading evolution (likely different ghost/recording configurations), but the exact convention remains unknown. Full-tier regression test added.
