@@ -88,6 +88,8 @@ regression tests or an explicitly documented negative.
     23/29 ghosts) — an association, not a simple throttle interpretation;
   - `+48` low i16 tracks steering/path f3; high i16 tracks engine +32;
   - `+36` is an exact quantized float lattice but its semantics are unresolved;
+  - the varying byte at `+31` (high byte of the `+28` u32) tracks path y
+    (median |r| 0.164 vs 0.020 permuted) — it is not merely a random exponent;
   - frame `+16` has a weak, non-clamp-driven engine coupling (|r| 0.152).
 - **Corrected artefacts — never repeat these interpretations:**
   - `+8` ↔ `+16` correlation (0.675) collapses to 0.146 when `+16`'s ±1.0
