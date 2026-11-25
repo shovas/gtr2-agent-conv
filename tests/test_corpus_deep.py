@@ -316,6 +316,21 @@ class CorpusDeepTest(unittest.TestCase):
         self.assertGreater(checked, 160)
         self.assertGreater(resolved / checked, 0.97)
 
+    def test_trk_view_field_bounds(self):
+        """TRK View-block numeric fields stay within corpus bounds."""
+        import glob
+        import media_tool
+        import simbin_text_tool as stt_local
+        checked = 0
+        for root in ("GTR2Steam", "GTLSteam", "Race07Complete"):
+            for p in glob.glob(str(ROOT.parent / root / "**" / "*.trk"), recursive=True):
+                if not Path(p).is_file():
+                    continue
+                text = media_tool.decrypt_jca_text(Path(p).read_bytes()).decode("latin-1")
+                self.assertEqual(stt_local.validate_trk_view_fields(text), [], p)
+                checked += 1
+        self.assertEqual(checked, 152)
+
     def test_trk_reference_resolution(self):
         """TRK MASFile/MeshFile references resolve to local content."""
         import glob

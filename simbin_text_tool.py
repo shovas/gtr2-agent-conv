@@ -1193,6 +1193,36 @@ def validate_cam_numeric(data: bytes | str) -> list[str]:
     return _check_numeric_bounds(data, CAM_NUMERIC_BOUNDS)
 
 
+TRK_VIEW_BOUNDS = {
+    "fov": (62.5, 77.75),
+    "clipplanes": (0.5, 10000.0),
+    "color": (0.0, 254.0),
+    "size": (0.5, 512.0),
+}
+
+
+def validate_trk_view_fields(data: bytes | str) -> list[str]:
+    """Check numeric View-block fields and Clear flags in a TRK script.
+
+    Corpus-verified on 152 GTR2/GTL/Race07 track scripts: FOV 62.5–77.75,
+    clip planes 0.5–10000, colors 0–254, sizes 0.5–512, and Clear is
+    TRUE/FALSE.
+    """
+    text = data if isinstance(data, str) else data.decode("latin-1")
+    for key, (low, high) in sorted(TRK_VIEW_BOUNDS.items()):
+        for match in re.finditer(r"(?mi)^\s*" + key + r"\s*=\s*([^\r\n]+)", text):
+            for value_text in re.findall(r"-?\d+\.?\d*(?:e[+-]?\d+)?",
+                                         match.group(1).split("//", 1)[0]):
+                value = float(value_text)
+                if not (low <= value <= high):
+                    return [f"{key}={value} outside [{low}, {high}]"]
+    for match in re.finditer(r"(?mi)^\s*Clear\s*=\s*([^\r\n]+)", text):
+        value = match.group(1).split("//", 1)[0].strip().lower()
+        if value not in ("true", "false"):
+            return [f"Clear={value!r} not TRUE/FALSE"]
+    return []
+
+
 def parse_cam_control_points(data: bytes | str) -> list[tuple[float, float, float]]:
     """Extract XYZ ControlPoint triples from a CAM script."""
     text = data if isinstance(data, str) else data.decode("latin-1")

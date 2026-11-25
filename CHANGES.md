@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 14:00:00 -0500 - TRK view-field validator
+- Added `simbin_text_tool.validate_trk_view_fields()` with FOV/clip/color/size bounds and TRUE/FALSE Clear validation across 152 GTR2/GTL/Race07 track scripts. Full-tier regression test added.
+
 ## 2026-11-26 13:30:00 -0500 - ANM bone-name negative
 - Documented that 13,005 ANM bone names across 904 archived animations resolve to mesh member names only twice (chance level); full-tier corpus-fact regression test added.
 
