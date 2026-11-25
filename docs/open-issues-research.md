@@ -186,6 +186,10 @@ Code-first check around `fcn.005e9ab0` and the shipped shader members:
 
 So the paired near-equal halves are not indices or simple hashes of shipped shaders; they most plausibly originate from an external authoring/material identifier. Full-tier regression test added.
 
+## GTR2 f0 half-delta tracks material index (2026-11-28)
+
+Within multi-material meshes, `|high-low|` of f0 decreases as the mesh's local material index increases: Pearson r = **−0.2125** (n=15,001) vs **0.004** for distribution-preserving permuted indices. It also tracks vertex count weakly (r≈0.10) and inversely tracks material count (r≈−0.12). No semantic claim is made — the paired IDs diverge more for early material slots — but this is a verified structural relationship usable as a validator. Full-tier regression test added.
+
 ## GTR2 f0 halves are individually family-stable (2026-11-28)
 
 Across 3,153 cross-corpus groups sharing an identical normalized material/stage name set (37,814 records):

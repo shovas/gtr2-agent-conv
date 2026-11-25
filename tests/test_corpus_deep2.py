@@ -1364,6 +1364,55 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertGreater(observed, 10 * statistics.mean(baseline() for _ in range(5)))
         self.assertLess(observed, 0.25)
 
+    def test_f0_half_delta_vs_material_index(self):
+        """f0's half-delta decreases as the local material index increases."""
+        import glob
+        import random
+        import statistics
+        import gmt_format as gf
+        import mas_tool
+        rows = []
+        for root, ext in (("GTR2Steam", ".gtr"), ("GTLSteam", ".gtl")):
+            for archive in glob.glob(str(ROOT.parent / root / "**" / f"*{ext}"),
+                                     recursive=True):
+                try:
+                    _, entries = mas_tool.read_archive(archive)
+                except Exception:
+                    continue
+                for entry in entries:
+                    if not entry.name.lower().endswith(".gmt") or not entry.data:
+                        continue
+                    try:
+                        parsed = gf.parse_gmt("x.gmt", entry.data)
+                    except Exception:
+                        continue
+                    for mesh in parsed.meshes:
+                        marker = gf.mesh_marker(mesh)
+                        index = mesh.record.material_index
+                        if marker and len(parsed.materials) > 1 \
+                                and index < len(parsed.materials):
+                            rows.append((abs((marker >> 16) - (marker & 0xFFFF)), index))
+                if len(rows) >= 10000:
+                    break
+            if len(rows) >= 10000:
+                break
+        self.assertGreater(len(rows), 5000)
+
+        def pearson(xs, ys):
+            mx, my = statistics.mean(xs), statistics.mean(ys)
+            numerator = sum((x - mx) * (y - my) for x, y in zip(xs, ys))
+            denominator = (sum((x - mx) ** 2 for x in xs)
+                           * sum((y - my) ** 2 for y in ys)) ** 0.5
+            return numerator / denominator if denominator else 0.0
+        deltas = [row[0] for row in rows]
+        indices = [row[1] for row in rows]
+        observed = pearson(deltas, indices)
+        random.seed(31)
+        baseline = statistics.mean(abs(pearson(deltas, random.sample(indices, len(indices))))
+                                   for _ in range(5))
+        self.assertLess(observed, -0.1)
+        self.assertLess(observed, -10 * max(baseline, 0.001))
+
     def test_f0_halves_family_stable(self):
         """Both f0 halves repeat across cross-corpus material families."""
         import collections
