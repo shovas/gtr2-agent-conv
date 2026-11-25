@@ -2228,6 +2228,42 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertLess(statistics.median(forward), 0.1)
         self.assertGreater(statistics.median(reverse), 0.9)
 
+    def test_gttf_path_control_fields(self):
+        """Pre-frame path fields f3/f4 track steering and engine speed."""
+        import glob
+        import gzip
+        import random
+        import statistics
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        engine = []
+        engine_perm = []
+        steering = []
+        steering_perm = []
+        random.seed(9)
+        for path in glob.glob(str(ROOT.parent / "GTR2Steam" / "TimeTrial" / "**" / "*.GTT"),
+                              recursive=True):
+            payload = gz.decompress(path)
+            frames = st.read_frames(payload, st.find_frame_grid(payload))
+            f3 = [frame["path_f3"] for frame in frames]
+            f4 = [frame["path_f4"] for frame in frames]
+            if f3[0] is None:
+                continue
+            rpm = [frame["engine_speed"] for frame in frames]
+            steer = [frame["position"][2] for frame in frames]
+            engine.append(abs(st._corr(f4, rpm)))
+            steering.append(abs(st._corr(f3, steer)))
+            engine_perm.append(statistics.mean(
+                abs(st._corr(random.sample(f4, len(f4)), rpm)) for _ in range(3)))
+            steering_perm.append(statistics.mean(
+                abs(st._corr(random.sample(f3, len(f3)), steer)) for _ in range(3)))
+        self.assertEqual(len(engine), 29)
+        self.assertGreater(statistics.median(engine), 0.3)
+        self.assertGreater(statistics.median(engine), 5 * statistics.median(engine_perm))
+        self.assertGreater(statistics.median(steering), 0.06)
+        self.assertGreater(statistics.median(steering),
+                           3 * statistics.median(steering_perm))
+
     def test_gsc_member_geometry_corpus(self):
         """150 ISI-encrypted GSC GMT members decode to valid geometry with skip=4."""
         import glob

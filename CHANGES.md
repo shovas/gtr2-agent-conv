@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 07:15:00 -0500 - GTTF path control channels
+- Exposed 24-byte racing-line record fields f3/f4 as frame attributes; f4 tracks engine +32 (|r| 0.502 vs 0.020 permuted), f3 tracks steering +8 (0.097 vs 0.015). Full-tier permutation-controlled test added.
+
 ## 2026-11-28 06:45:00 -0500 - GMT winding convention verified
 - Verified that GSC, rF1 and GTR2 meshes all share inverted face winding vs stored normals (reversed agreement 1.0); conversion correctly preserves index order. Full-tier regression test added.
 

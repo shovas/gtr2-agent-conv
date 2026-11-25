@@ -75,6 +75,16 @@ Slot `+36` is **not** path curvature: median |correlation| with 3D path curvatur
 
 With reconstructed world x, ghost `+12` heading aligns with AIW pointer-chain tangents in the **world x/z plane** as **`heading = atan2(dx, dz)`**: median circular coherence **0.858** across 15 matched ghosts (dominant convention in 10/15 files; equivalent `-atan2(dz,dx)` in the rest). The earlier y/z-only test gave 0.404 and the DSI-line test 0.318 — both were degraded by the missing x. Full-tier regression test added (median >0.7 across 29 ghosts).
 
+## GTTF path records f3/f4: control-like channels (2026-11-28)
+
+The 24-byte racing-line records' 4th and 5th floats are normalized [0,1] channels with many exact 0.0/1.0 values. `read_frames()` now exposes them as `path_f3` / `path_f4` using the same monotone path mapping as x. Across all 29 ghosts (permutation baselines in parentheses):
+
+- `path_f4` vs engine `+32`: median |r| **0.502** (0.020 permuted) — ~25×;
+- `path_f3` vs steering `+8`: median |r| **0.097** (0.015 permuted) — ~6×;
+- neither channel tracks longitudinal acceleration from reconstructed speed (|r| < 0.01).
+
+These are likely driver/target inputs on the reference racing line rather than the ghost's own controls; exact semantics (throttle/brake/gear) are **not** claimed. Full-tier permutation-controlled regression test added.
+
 ## GTTF missing x RECONSTRUCTED from pre-frame path records (2026-11-28)
 
 **Breakthrough.** The 63-byte frame records store only y/z (and steering), but the **24-byte records immediately preceding the frame grid** contain a path with six f32 fields: `(y, z, heading, f3, f4, x)`. The 6th float is the missing world x. `find_preframe_records()` and `reconstruct_frame_x()` map frames onto this path in chronological order (monotone index search, small look-back window) and add `frame["x"]` / `frame["world_position"]`.

@@ -322,6 +322,28 @@ def find_preframe_records(data: bytes, grid_offset: int) -> list[tuple[float, ..
             for off in range(start, grid_offset, 24)]
 
 
+def reconstruct_path_controls(records: list[tuple[float, ...]],
+                              positions: list[tuple[float, float, float]],
+                              window: int = 30) -> list[tuple[float | None, float | None]]:
+    """Map frames to records and return the normalized path fields f3/f4.
+
+    Uses the same chronological monotone search as :func:`reconstruct_frame_x`
+    so every frame is paired with the same path record for all fields.
+    """
+    if not records:
+        return [(None, None)] * len(positions)
+    index = 0
+    out = []
+    for position in positions:
+        y, z = position[0], position[1]
+        candidates = range(max(0, index - 3), min(len(records), index + window))
+        chosen = min(candidates,
+                     key=lambda k: (records[k][0] - y) ** 2 + (records[k][1] - z) ** 2)
+        index = chosen
+        out.append((records[chosen][3], records[chosen][4]))
+    return out
+
+
 def reconstruct_frame_x(records: list[tuple[float, ...]],
                         positions: list[tuple[float, float, float]],
                         window: int = 30) -> list[float | None]:
@@ -364,11 +386,14 @@ def read_frames(data: bytes, grid: dict) -> list[dict]:
                     "rpm": (value / RPM_SCALE if (value := frame_rpm(data, off)) is not None
                             else None)})
     records = find_preframe_records(data, grid["offset"])
-    xs = reconstruct_frame_x(records, [frame["position"] for frame in out])
-    for frame, x in zip(out, xs):
+    positions = [frame["position"] for frame in out]
+    xs = reconstruct_frame_x(records, positions)
+    controls = reconstruct_path_controls(records, positions)
+    for frame, x, control in zip(out, xs, controls):
         frame["x"] = x
         frame["world_position"] = (x, frame["position"][0], frame["position"][1]) \
             if x is not None else None
+        frame["path_f3"], frame["path_f4"] = control
     return out
 
 
