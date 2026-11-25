@@ -4337,6 +4337,65 @@ class CorpusDeep2Test(unittest.TestCase):
             margin = 0.25 if axis == 0 else 0.10
             self.assertGreater(observed, statistics.mean(baselines) + margin)
 
+    def test_gttf_tail_final_frame_state(self):
+        """Tail floats 2/3/4 mirror the final frame's controls and heading."""
+        import glob
+        import random
+        import statistics
+        import struct
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        tails = []
+        headings = []
+        values16 = []
+        slots = []
+        for path in glob.glob(str(ROOT.parent / "GTR2Steam" / "TimeTrial" / "**" / "*.GTT"),
+                              recursive=True):
+            payload = gz.decompress(path)
+            grid = st.find_frame_grid(payload)
+            if not grid:
+                continue
+            frames = st.read_frames(payload, grid)
+            if not frames:
+                continue
+            end = grid["offset"] + grid["count"] * grid["stride"]
+            tails.append(struct.unpack_from("<5f", payload, end))
+            last = frames[-1]
+            headings.append(last["heading"])
+            values16.append(struct.unpack_from("<f", payload, last["offset"] + 16)[0])
+            slots.append(last["slot48_low"])
+        self.assertEqual(len(tails), 29)
+
+        def median_error(a, b):
+            return statistics.median(abs(x - y) for x, y in zip(a, b))
+
+        self.assertLess(median_error([tail[3] for tail in tails], headings), 0.01)
+        self.assertLess(median_error([tail[4] for tail in tails], values16), 0.01)
+        random.seed(97)
+        shuffled_headings = random.sample(headings, len(headings))
+        shuffled_values = random.sample(values16, len(values16))
+        self.assertGreater(
+            median_error([tail[3] for tail in tails], shuffled_headings),
+            3 * max(median_error([tail[3] for tail in tails], headings), 1e-6))
+        self.assertGreater(
+            median_error([tail[4] for tail in tails], shuffled_values),
+            2 * max(median_error([tail[4] for tail in tails], values16), 1e-6))
+
+        def correlation(a, b):
+            mean_a, mean_b = statistics.mean(a), statistics.mean(b)
+            numerator = sum((x - mean_a) * (y - mean_b) for x, y in zip(a, b))
+            denominator = (sum((x - mean_a) ** 2 for x in a)
+                           * sum((y - mean_b) ** 2 for y in b)) ** 0.5
+            return numerator / denominator if denominator else 0.0
+
+        observed = abs(correlation([tail[2] for tail in tails], slots))
+        self.assertGreater(observed, 0.9)
+        random.seed(98)
+        baseline = statistics.mean(
+            abs(correlation([tail[2] for tail in tails],
+                            random.sample(slots, len(slots)))) for _ in range(5))
+        self.assertGreater(observed, 3 * max(baseline, 0.01))
+
     def test_gttf_tail_encodes_track_finish_point(self):
         """The 20-byte GTTF tail repeats a fixed point per track."""
         import collections
