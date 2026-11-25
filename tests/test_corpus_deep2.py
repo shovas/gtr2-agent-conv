@@ -1117,6 +1117,25 @@ class CorpusDeep2Test(unittest.TestCase):
         matches = sum(1 for mask, candidates in rows if mask in candidates)
         self.assertLess(matches, 15)  # ~4 expected for 120 x 7 byte values
 
+    def test_gsc_exes_are_packed(self):
+        """GSC-family EXEs are packer stubs: static mesh-loader tracing is blocked."""
+        for root, name in (("GameStockCar", "GSC.exe"),
+                           ("CopaPetrobrasdeMarcas", "Marcas.exe"),
+                           ("StockCarExtreme", "GSC.exe"),
+                           ("Automobilista", "AMS.exe")):
+            path = ROOT.parent / root / name
+            if not path.is_file():
+                continue
+            data = path.read_bytes()
+            self.assertIn(b"VirtualAlloc", data, name)
+            self.assertIn(b"GetProcAddress", data, name)
+            if root == "GameStockCar":
+                # This EXE retains GMT loader strings inside its packed image.
+                self.assertIn(b"Error reading mesh from GMT file", data)
+            else:
+                self.assertNotIn(b"Error reading mesh from GMT file", data, name)
+                self.assertNotIn(b"GMOTOR_GMT", data, name)
+
     def test_gsc_mask_not_derived_from_member_name(self):
         """GSC GMT XOR masks do not match name-based hashes."""
         import glob

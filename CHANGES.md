@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 04:15:00 -0500 - GSC EXE static trace blocked
+- Documented that GSC-family EXEs are packer stubs (or retain loader strings without code xrefs), so static mesh-loader tracing is blocked; skip=4 validation remains empirical. Full-tier regression test added.
+
 ## 2026-11-28 03:45:00 -0500 - GTTF remaining slots study
 - Permutation-controlled study of +40/+44/+48/+52/+56/+60 vs reconstructed speed/steering/engine: only +48 shows above-chance coupling to +8 (median |r| 0.193 vs 0.018 permuted); others at chance. Full-tier regression test added.
 

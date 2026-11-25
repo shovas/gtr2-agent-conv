@@ -1,5 +1,14 @@
 # Open issues — offline research record (2026-11-23)
 
+## GSC-family EXE static loader trace — blocked by packing (2026-11-28)
+
+Tried to trace the GSC-family mesh loader statically to derive the ISI decryption skip from code. Result:
+- `CopaPetrobrasdeMarcas/Marcas.exe`, `StockCarExtreme/GSC.exe` and `Automobilista/AMS.exe` are **packer stubs** (imports `VirtualAlloc`/`GetProcAddress`; no GMT loader strings at all).
+- `GameStockCar/GSC.exe` is YMY-packed but retains an unpacked data image containing `Error reading mesh from GMT file %s` at RVA `0x128b008`; radare2 analysis finds **no code xrefs** and no immediate references to that address, so the corresponding loader code is not present in the static image.
+- The unpacked `GTR2.exe` loader (`fcn.005d68d0`) is a different-generation reader and does not establish the GSC skip parameter.
+
+So the code-first route to the GSC loader is blocked without unpacking/runtime tooling. The correct `skip=4` remains empirically validated on 150/150 sampled members. Full-tier regression test records the packing state.
+
 ## GSC GMT geometry SOLVED: wrong ISI skip, not region masks (2026-11-27)
 
 **Breakthrough.** All earlier "region-specific mask" work was an artifact of decrypting ISI-encrypted GSC GMT members with `skip=1`. The correct parameter is **`skip=4`**: `isi_crypt.decrypt_bytes(raw_member, 4)` yields the native GSC magic (`...bba8bf90`) directly with **no residual XOR**, and the bulk vertex/index data is intact.
