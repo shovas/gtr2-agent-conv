@@ -2447,6 +2447,37 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertTrue(all(value in (36000.0, 43200.0, 46800.0)
                             for value in sessions))
 
+    def test_gsc_conversion_preserves_material_names(self):
+        """Converted GSC meshes keep a parseable material library."""
+        import glob
+        import gmt_format
+        import gmt_layout
+        import gmt_semantic
+        import mas_tool
+        checked = 0
+        for archive in glob.glob(str(ROOT.parent / "CopaPetrobrasdeMarcas" / "**" / "*.mas"),
+                                 recursive=True):
+            try:
+                _, entries = mas_tool.read_archive(archive)
+            except Exception:
+                continue
+            for entry in entries:
+                if not entry.name.lower().endswith(".gmt") or len(entry.data) < 0x400:
+                    continue
+                if not gmt_semantic.decode_gsc_member(entry.data):
+                    continue
+                out = gmt_layout.gsc_member_to_gtr2(entry.data)
+                parsed = gmt_format.parse_gmt("out.gmt", out)
+                self.assertGreater(len(parsed.materials), 0, entry.name)
+                self.assertTrue(all(material.name for material in parsed.materials),
+                                entry.name)
+                checked += 1
+                if checked >= 40:
+                    break
+            if checked >= 40:
+                break
+        self.assertEqual(checked, 40)
+
     def test_gsc_converted_winding_matches_gtr2(self):
         """Converted meshes keep GTR2's inverted winding-vs-normal convention."""
         import glob

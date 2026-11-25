@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 14:45:00 -0500 - GSC material preservation
+- Verified converted GSC meshes keep a parseable material library with named materials (40/40); full-tier regression test added.
+
 ## 2026-11-28 14:15:00 -0500 - f0 index-0 threshold
 - Found a sharp f0 half-delta threshold: index-0 meshes have 13.8% near-equal halves vs 61.5% for higher material indices. Full-tier distribution-preserving permutation test added.
 
