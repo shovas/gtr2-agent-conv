@@ -2110,6 +2110,48 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertGreater(single, 2000)
         self.assertEqual(exposed, single)
 
+    def test_uv_tiling_ratios_decode_in_race07(self):
+        """The tiling-ratio rule also holds in JCA-decrypted Race07 GMTs."""
+        import glob
+        import gmt_format as gf
+        import jca_crypt
+        signature = (1, 2, 3, 4, 5, 6, 1)
+        paths = sorted(glob.glob(str(ROOT.parent / "Race07Vanilla" / "**" / "*.gmt"),
+                                 recursive=True))[:400]
+        checked = decoded = 0
+        for path in paths:
+            data = Path(path).read_bytes()
+            parsed = None
+            for key in (None, jca_crypt.CUSTOM_KEYS.get("volvo")):
+                try:
+                    candidate = jca_crypt.decrypt_bytes(data, key)
+                except Exception:
+                    continue
+                if not candidate or len(candidate) < 0x174:
+                    continue
+                try:
+                    candidate_parsed = gf.parse_gmt("x.gmt", candidate)
+                except Exception:
+                    continue
+                if candidate_parsed.meshes:
+                    parsed = candidate_parsed
+                    break
+            if parsed is None:
+                continue
+            for mesh in parsed.meshes:
+                vertex_count = mesh.record.vertex_count
+                stream = mesh.stream2_data
+                if vertex_count < 8 or len(stream) != vertex_count * 32:
+                    continue
+                if gf.stream_column_signature(stream, vertex_count) != signature:
+                    continue
+                checked += 1
+                decoded += gf.uv_tiling_factors(stream, vertex_count) is not None
+            if checked >= 16:
+                break
+        self.assertGreaterEqual(checked, 3)
+        self.assertGreaterEqual(decoded, 1)
+
     def test_gmt_uv_tiling_ratios_are_material_properties(self):
         """Meshes sharing a material usually share their UV tiling ratios."""
         import glob
