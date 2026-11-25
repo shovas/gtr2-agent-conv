@@ -2256,6 +2256,52 @@ class CorpusDeep2Test(unittest.TestCase):
             baselines.append(hist == count)
         self.assertLess(sum(baselines) / len(baselines), 0.05)
 
+    def test_f0_bytes_not_material_stage_indices(self):
+        """f0 bytes do not index material stages (chance-level match)."""
+        import glob
+        import random
+        import gmt_format as gf
+        import mas_tool
+        rows = []
+        for root, ext in (("GTR2Steam", ".gtr"), ("GTLSteam", ".gtl")):
+            for archive in glob.glob(str(ROOT.parent / root / "**" / f"*{ext}"),
+                                     recursive=True):
+                try:
+                    _, entries = mas_tool.read_archive(archive)
+                except Exception:
+                    continue
+                for entry in entries:
+                    if not entry.name.lower().endswith(".gmt") or not entry.data:
+                        continue
+                    try:
+                        parsed = gf.parse_gmt("x.gmt", entry.data)
+                    except Exception:
+                        continue
+                    for mesh in parsed.meshes:
+                        marker = gf.mesh_marker(mesh)
+                        if not marker:
+                            continue
+                        _, high = gf.f0_byte_pair(marker)
+                        material_index = mesh.record.material_index
+                        stages = (len(parsed.materials[material_index].stages)
+                                  if material_index < len(parsed.materials) else 0)
+                        rows.append((high, stages))
+                if len(rows) >= 20000:
+                    break
+            if len(rows) >= 20000:
+                break
+        self.assertGreater(len(rows), 15000)
+        observed = sum(high < stages for high, stages in rows)
+        random.seed(82)
+        baseline = []
+        shuffled_stages = [stages for _, stages in rows]
+        for _ in range(5):
+            sample = random.sample(shuffled_stages, len(shuffled_stages))
+            baseline.append(sum(high < stages for (high, _), stages
+                                in zip(rows, sample)))
+        expected = sum(baseline) / len(baseline)
+        self.assertLess(abs(observed - expected), 0.05 * max(expected, 1))
+
     def test_f0_high_byte_material_index_is_mesh0_artifact(self):
         """The hi-byte==material-index rate is confined to mesh 0."""
         import glob

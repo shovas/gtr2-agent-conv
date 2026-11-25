@@ -122,6 +122,16 @@ word. Replay frame layout is therefore a distinct, undecoded format —
 recorded as a new avenue, not claimed as solved. Full-tier header regression
 test added.
 
+## f0 bytes do not index material stages (2026-11-29)
+
+Tested whether f0's two bytes are small indices into the mesh's material stage
+list or material count. Over 26,125 meshes, the high byte was below the stage
+count in 3,935 cases versus **3,937** for a distribution-preserving shuffle of
+stage counts — exactly chance. The high byte was below the material count
+slightly more often (5,310 vs 4,859), consistent with the already-known mesh-0
+distinctness rather than an index relation. No decoder promoted; full-tier
+guard test added.
+
 ## GTR2 UV streams carry integer tiling ratios (2026-11-29)
 
 A seeded, stratified sample of streams with the `(1,2,3,4,5,6,1)` column
