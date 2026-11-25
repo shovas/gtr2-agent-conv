@@ -37,6 +37,51 @@ Verified findings from its documentation and code:
 - `isi_gm_crypt.py`'s rfactorgmdec algorithm **does not** decrypt GTL's own `gMb` files (0.34 printability with key 0), and `gtl_files.decrypt_file()` **does not** decrypt our rFactor `.svm` / `gMb1.002f` files (0.34 printability). The two algorithms share the `//[[gMb...]]` header but are unrelated — an important correction to earlier assumptions.
 - The file explicitly records that the `*.PHS` members are **not** this cipher (tested as text, binary and zlib), corroborating `docs/phs-research.md`.
 
+## Full accounting of `../aluigi-mirror-261124/` (2026-11-26)
+
+**4,405 files / 198,889,526 bytes (189.7 MiB).** Complete generated inventories:
+- `docs/aluigi-mirror-manifest.tsv` — every file: section, relative path, size, extension.
+- `docs/aluigi-mirror-archives.tsv` — all 461 ZIPs: path, size, member count, first 20 member names.
+
+| Section | Files | Bytes | Main extensions / contents |
+|---|---:|---:|---|
+| `(root)` | 52 | 4,043,865 | 19 `.htm`, 8 `.php`, 5 `.txt`, 6 `.png`; site indexes and feeds |
+| `adv/` | 881 | 4,828,755 | 875 `.txt` advisories, 3 `.pdf`; `rfactorx-adv.txt` (rFactor vulnerability) |
+| `articles/` | 6 | 262,621 | 4 `.txt` articles, 1 `.htm`, 1 `.zip` |
+| `bms/` | 2,762 | 4,711,914 | **2,757 QuickBMS scripts** + 2 `.xml`, 2 `.bat`, 1 `.txt` |
+| `misc/` | 20 | 5,647,723 | 12 `.zip`, 4 `.txt`, 2 `.png`, 1 `.pdf`, 1 `.dll` |
+| `mymusic/` | 66 | 50,098,980 | 65 `.zip` music rips + 1 `.txt` |
+| `mytoolz/` | 113 | 6,788,045 | 64 `.zip`, 36 `.png`, 10 `.h`, 3 `.c` small utilities |
+| `papers/` | 294 | 88,140,083 | **173 tool ZIPs**, 52 `.h`, 29 `.txt`, 24 `.c`, 9 `.png` |
+| `patches/` | 192 | 34,101,295 | 145 `.zip`, 41 `.lpatch`, 6 `.txt` game patches |
+| `quickbms/` | 19 | 266,245 | 16 `.png`, 3 `.htm` docs/screenshots |
+
+By extension: `.bms` 2,758 · `.txt` 925 · `.zip` 461 · `.png` 69 · `.h` 62 · `.lpatch` 41 · `.c` 27 · `.htm` 26 · `.php` 8 · `.cfg` 5 · `.pdf` 4 · `.xml` 2 · `.bat` 2 · `.html` 1 · `.css` 1.
+
+### HTML documentation (techniques and tool descriptions)
+
+| Page | What it documents |
+|---|---|
+| `papers.htm` | Tool index. Relevant entries: **rfactorgmdec 0.2b** (encrypted `//[[gM`, keynums per game), **rfactordec 0.2.2** (encrypted GMT/DDS meshes, signature list, `-y` force mode), **wtcced 0.3.5** (SimBin JCA/Blowfish for Race07/GTR Evolution/Volvo/RaceRoom), and the note that rF2 needs QuickBMS. |
+| `quickbms.htm` | QuickBMS scripting engine: `comtype` compression/decryption, `EXECUTE` external tools, scanning, generic AES/Blowfish/DES/RC4 examples. Lists `bms/mas.bms` for "ISI Gmotor engine MAS files" across rFactor, ARCA, BMW M3, **Sports Car GT**, NASCAR, F1 Challenge, Petrobras, and `rfactor2.bms` for rF2 `.MAS/.RFCMP`. |
+| `old_index.htm` | 2007–2021 news/changelog with **115 relevant lines** documenting key additions: wtcced 0.3.3 RaceRoom JCA keys, 0.3.4/0.3.5 `raceroom`/`raceroom_plr`, volvo compatibility, rfactordec signatures (Game Stock Car 2011, Carretera 2012, Formula Truck 2013), rF2 QuickBMS script (2013). |
+| `mytoolz.htm` | Small utility index (packet capture helpers, compression tools, PE/info utilities). |
+| `index.htm`, `about.htm`, `articles.htm`, `misc.htm`, `patches.htm`, `poc.htm`, `pwdrec.htm`, `fakep.htm`, `keyres.htm`, `video.htm`, etc. | Site navigation, articles, patches, proofs-of-concept, password-recovery research, cd-key research, media. Less directly relevant; all indexed in the manifest. |
+
+### Notable archives
+
+- **papers/rfactordec.zip** (30,771 B) → `rfactordec.c`, `.exe`
+- **papers/rfactorgmdec.zip** (8,983 B) → `rfactorgmdec.c`, `.exe` — source of our `isi_gm_crypt.py`
+- **papers/wtcced.zip** (87,388 B) → `wtcced.c`, `blowfish.c/.h`, `wtcc_bf.h`, `utils.c`, `.exe`
+- **papers/quickbms*.zip** (11–16 MB each) → Windows/Linux/macOS binaries and 0.12.0 source
+- Other crypto-related ZIPs: `papers/EncryptX VB.net Conversion.zip`, `dwbdcrypto.zip`, `dwcryptonet.zip`, `pbmsdown.zip`, `pbmsgs.zip` — not racing-specific.
+
+### Cross-check: `jca_crypt.py` vs wtcced 0.3.5 (verified 2026-11-26)
+
+- Magic `0xFFFFB10F` (bytes `0f b1 ff ff`), XOR byte `0xEB`, all eight version→(key,keytable,compression) mappings and all custom keys (volvo, raceroom, raceroom_plr, old_raceroom) match wtcced source exactly.
+- `jca_tables.py` contains the **first 3,090 identical 32-bit constants** of `wtcc_bf.h` (wtcced has 3 trailing zeros); regression test `test_jca_matches_wtcced_constants` verifies this from the mirror ZIP.
+- Functional spot-check: `banner001.tga` (Race07Complete, JCA v3) reported by wtcced as version 3 / keytable 1 / 72,112 encrypted bytes / 262,188 output bytes; our `jca_crypt.decrypt_bytes()` produced 262,188 bytes with a valid TGA header (`00 00 02 00 ...`).
+
 ## Practical rules
 
 - Read these mirrors for format specs, signatures and algorithm details; prefer native Python in this repo for pipeline integration.

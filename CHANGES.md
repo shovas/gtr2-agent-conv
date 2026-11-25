@@ -2,12 +2,15 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 16:30:00 -0500 - AIW Features capacity negative
+- Documented that AIW `[Features]` numbers are capacity defaults rather than section counts (startinggrid 104 vs GRID 36 typical); full-tier corpus-fact regression test added.
+
+## 2026-11-26 00:30:00 -0500 - Full tool-mirror accounting; JCA cross-check
+- Completed a full accounting of `../aluigi-mirror-261124/`: 4,405 files / 189.7 MiB indexed in `docs/aluigi-mirror-manifest.tsv` and 461 ZIPs in `docs/aluigi-mirror-archives.tsv`; HTML tool descriptions and techniques documented in `docs/tools-reference.md`. Cross-checked `jca_crypt.py`/`jca_tables.py` against wtcced 0.3.5 (magic, XOR byte, keys, version mapping, 3,090 identical Blowfish constants) with a regression test.
+
 ## 2026-11-25 23:30:00 -0500 - Encrypted ISI configs decrypted; tool mirrors indexed
 - **Solved the encrypted `.svm` and gMb1.002f backlog**: added `isi_gm_crypt.py` implementing the rfactorgmdec stream cipher with documented game keynums; all 10 encrypted `.svm` files and all 18 gMb1.002f configs now decode to 100% printable text. Full-tier regression test over every encrypted file.
 - Indexed `../aluigi-mirror-261124/` (202M/4,405 files), `../quickbms-mirror/` (99M/1,025 files) and `../gtl-tools/` in new `docs/tools-reference.md`, plus `DEPENDENCIES.md`/`AGENTS.md`/`docs/corpus-reference.md`. Confirmed GTL's gMb 'Encryptomatic' cipher is distinct from rfactorgmdec and does not decrypt our files (nor vice versa).
-
-## 2026-11-26 16:30:00 -0500 - AIW Features capacity negative
-- Documented that AIW `[Features]` numbers are capacity defaults rather than section counts (startinggrid 104 vs GRID 36 typical); full-tier corpus-fact regression test added.
 
 ## 2026-11-26 16:00:00 -0500 - AIW TELEPORT validator
 - Added `simbin_text_tool.validate_aiw_teleport()` covering index uniqueness, contiguous main runs, and optional pit-box indices >=100 across 447 AIWs. Full-tier regression test added.

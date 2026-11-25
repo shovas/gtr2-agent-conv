@@ -957,6 +957,28 @@ class CorpusDeep2Test(unittest.TestCase):
                 checked += 1
         self.assertEqual(checked, 371)
 
+    def test_jca_matches_wtcced_constants(self):
+        """jca_tables/jca_crypt match the wtcced 0.3.5 source constants."""
+        import re
+        import zipfile
+        import jca_crypt
+        archive = ROOT.parent / "aluigi-mirror-261124" / "mirror.aluigi.org" / \
+            "papers" / "wtcced.zip"
+        if not archive.is_file():
+            archive = ROOT.parent / "quickbms-mirror" / "aluigi.altervista.org" / \
+                "papers" / "wtcced.zip"
+        if not archive.is_file():
+            self.skipTest("wtcced source ZIP not present")
+        with zipfile.ZipFile(archive) as zf:
+            source = zf.read("wtcc_bf.h").decode("latin-1")
+        pattern = r"0x[0-9a-fA-F]{8}"
+        ours = [int(x, 16) for x in re.findall(pattern,
+                (ROOT / "jca_tables.py").read_text())]
+        theirs = [int(x, 16) for x in re.findall(pattern, source)]
+        self.assertEqual(ours, theirs[:len(ours)])
+        self.assertEqual(jca_crypt.MAGIC, 0xFFFFB10F)
+        self.assertEqual(jca_crypt.XOR_BYTE, 0xEB)
+
     def test_encrypted_gm_configs(self):
         """Every encrypted .svm / gMb config decrypts to real text."""
         import glob
