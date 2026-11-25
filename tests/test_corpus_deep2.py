@@ -4246,6 +4246,22 @@ class CorpusDeep2Test(unittest.TestCase):
             replays += 1
         self.assertEqual(replays, 9)
 
+    def test_gtl_replays_use_irsr_v101(self):
+        """GTL .Vcr replays parse as IRSR v1.01 and rewrap byte-identically."""
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        checked = 0
+        for path in (ROOT.parent / "GTLSteam" / "ReplayData").glob("*.Vcr"):
+            original = path.read_bytes()
+            payload = gz.decompress(str(path))
+            event = st.parse_payload(payload)
+            self.assertEqual(event.kind, "IRSR")
+            self.assertAlmostEqual(event.version, 1.01, places=2)
+            self.assertTrue(event.trk.lower().endswith(".trk"))
+            self.assertEqual(gz.compress_simbin(payload), original)
+            checked += 1
+        self.assertEqual(checked, 4)
+
     def test_vcr_replay_headers_parse(self):
         """All shipped .Vcr replays parse as IRSR with known session values."""
         import gzip

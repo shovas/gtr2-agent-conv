@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-30 05:30:00 -0500 - GTL replay coverage
+- Verified the four GTL .Vcr replays parse as IRSR v1.01 (vs GTR2 v1.05) and rewrap byte-identically. Full-tier test added.
+
 ## 2026-11-30 05:00:00 -0500 - GTTF frame-time editor
 - Added `simbin_events_tool.shift_frame_times()`; verified a +64 s shift preserves all other frame fields with only f32 rounding error (≤7.6e-6 s). Full-tier test added.
 

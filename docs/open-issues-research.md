@@ -287,6 +287,14 @@ rounding at session-time magnitudes (values up to ~650 s), not a decoder
 error. This confirms the time words are independent f32 fields and can be
 edited without disturbing other frame data. Full-tier test added.
 
+## GTL replays use IRSR v1.01 (2026-11-30)
+
+The four shipped `GTLSteam/ReplayData/*.Vcr` files use the same gzip/gMb +
+IRSR container as GTR2 replays but carry version **1.01** instead of **1.05**.
+All four parse with the existing reader (TRK/AIW names, driver, session
+seconds) and rewrap byte-identically with `compress_simbin()`. No frame-grid
+detection was attempted for them. Full-tier test added.
+
 ## GTTF session-field editor (2026-11-30)
 
 With containers reproducible, added `session_field_offset()` and
