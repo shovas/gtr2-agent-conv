@@ -2110,6 +2110,63 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertGreater(single, 2000)
         self.assertEqual(exposed, single)
 
+    def test_gmt_uv_tiling_ratios_are_material_properties(self):
+        """Meshes sharing a material usually share their UV tiling ratios."""
+        import glob
+        import random
+        import statistics
+        import gmt_format as gf
+        import mas_tool
+        groups = {}
+        for archive in glob.glob(str(ROOT.parent / "GTR2Steam" / "**" / "*.gtr"),
+                                 recursive=True):
+            try:
+                _, entries = mas_tool.read_archive(archive)
+            except Exception:
+                continue
+            for entry in entries:
+                if not entry.name.lower().endswith(".gmt") or not entry.data:
+                    continue
+                try:
+                    parsed = gf.parse_gmt("x.gmt", entry.data)
+                except Exception:
+                    continue
+                for mesh in parsed.meshes:
+                    vertex_count = mesh.record.vertex_count
+                    stream = mesh.stream2_data
+                    if vertex_count < 8 or len(stream) != vertex_count * 32:
+                        continue
+                    ratios = gf.uv_tiling_factors(stream, vertex_count)
+                    if ratios is None:
+                        continue
+                    material_index = mesh.record.material_index
+                    if material_index >= len(parsed.materials):
+                        continue
+                    name = parsed.materials[material_index].name
+                    groups.setdefault(name, []).append(
+                        tuple(round(value, 4) for value in ratios))
+            if sum(len(values) for values in groups.values()) >= 8000:
+                break
+        multi = {name: values for name, values in groups.items()
+                 if len(values) >= 3}
+        self.assertGreater(len(multi), 300)
+        observed = statistics.mean(len(set(values)) == 1
+                                   for values in multi.values())
+        self.assertGreater(observed, 0.8)
+        random.seed(84)
+        pool = [ratio for values in multi.values() for ratio in values]
+        baselines = []
+        for _ in range(5):
+            shuffled = random.sample(pool, len(pool))
+            offset = 0
+            consistent = 0
+            for values in multi.values():
+                chunk = shuffled[offset:offset + len(values)]
+                offset += len(values)
+                consistent += len(set(chunk)) == 1
+            baselines.append(consistent / len(multi))
+        self.assertGreater(observed, 5 * max(statistics.mean(baselines), 0.01))
+
     def test_gmt_uv_tiling_ratios(self):
         """Some GTR2 UV streams encode integer tiling ratios on columns 4/6."""
         import glob

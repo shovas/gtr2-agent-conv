@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 18:30:00 -0500 - UV tiling ratios are material properties
+- Found meshes sharing a material share UV tiling ratios (91.6% of 487 groups vs 4.8% shuffled). Full-tier permutation-controlled test added; findings docs updated.
+
 ## 2026-11-29 18:00:00 -0500 - UV parser fallback fix
 - Fixed an overly broad single-block UV fallback that exposed misaligned streams on some meshes; the parser now requires exact vc*32 length. Scoped the stream column-7 invariant to two-stream meshes. All 35 gmt_format module tests and 5 affected full-tier tests pass.
 

@@ -122,6 +122,16 @@ word. Replay frame layout is therefore a distinct, undecoded format —
 recorded as a new avenue, not claimed as solved. Full-tier header regression
 test added.
 
+## UV tiling ratios are material properties (2026-11-29)
+
+Grouping 8,816 meshes with decoded tiling ratios by their material name found
+487 groups with at least three meshes. In **91.6%** of those groups every mesh
+had the same `(ratio4, ratio6)` pair, versus **4.8%** when the same ratio pool
+was shuffled across groups (distribution-preserving). So the tiling ratios
+are a material-level property rather than per-mesh noise, which is promising
+for transferring UV scaling during conversion once a source material is known.
+Full-tier permutation-controlled regression test added.
+
 ## UV parser fallback tightened after regression (2026-11-29)
 
 The earlier change exposing single-block UV blocks whenever `rec[7]==0` was
