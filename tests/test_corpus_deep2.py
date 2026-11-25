@@ -781,6 +781,18 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertEqual(engines, 66)
         self.assertEqual(boxes, 60)
 
+    def test_tdf_numeric_bounds(self):
+        """TDF surface grip/bump fields stay within corpus bounds."""
+        import glob
+        import os
+        checked = 0
+        for p in glob.glob(str(ROOT.parent / "**" / "*"), recursive=True):
+            if not os.path.isfile(p) or not p.lower().endswith(".tdf"):
+                continue
+            self.assertEqual(stt.validate_tdf_numeric(stt.read_text(p)), [], p)
+            checked += 1
+        self.assertGreater(checked, 200)
+
     def test_cam_numeric_bounds(self):
         """CAM numeric fields stay within corpus-observed bounds."""
         import glob

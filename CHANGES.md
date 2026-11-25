@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 13:00:00 -0500 - TDF surface bounds
+- Added `simbin_text_tool.validate_tdf_numeric()` with 17 surface grip/bump bounds from 203 local `.tdf` files. Full-tier regression test added.
+
 ## 2026-11-26 12:30:00 -0500 - CAM numeric bounds
 - Added `simbin_text_tool.validate_cam_numeric()` with 14 corpus-observed field bounds across 258 GTR2/GTL/Race07 `.cam` files. Full-tier regression test added.
 

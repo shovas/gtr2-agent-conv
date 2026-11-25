@@ -167,6 +167,8 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 
 - **CAM numeric validation**: `validate_cam_numeric()` checks 14 FOV/clip/rate/shake fields across 258 GTR2/GTL/Race07 cameras. Full-tier regression test.
 
+- **TDF surface validation**: `validate_tdf_numeric()` checks 17 grip/bump field bounds across 203 local `.tdf` files. Full-tier regression test.
+
 ## Coverage gaps (documented, not yet addressed)
 - **GTR 2004 corpus** (`../GTR1Vanilla`, third GMT magic `...bba6bf90` at 0x04) is fully decoded by `gmt_semantic.py` (descriptor grid + descriptor-less object-mesh path; 33,477/33,477 files). `gmt_format.py` itself still targets the GTL/GTR2 layout only; use `gmt_semantic.py` for GTR1. See `docs/binary-formats.md`.
 - **Untested ISI signatures**: `isi_crypt.GAMES` supports 8 signatures but real corpora exist only for rFactor and Game Stock Car; ARCA Sim Racing, Simulador Turismo Carretera, Top Race 2009, Superleague Formula, STC 2012 and Formula Truck have no local corpus.

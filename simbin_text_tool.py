@@ -1162,6 +1162,32 @@ CAM_NUMERIC_BOUNDS = {
 }
 
 
+TDF_NUMERIC_BOUNDS = {
+    "roaddrygrip": (0.7, 1.04),
+    "roadwetgrip": (0.7, 0.8),
+    "roadmetalgrip": (0.7, 0.8),
+    "roaddustgrip": (0.7, 0.9),
+    "roadbumpamp": (0.0, 0.1),
+    "roadbumplen": (0.0, 54.0),
+    "rumbledrygrip": (0.64, 0.99),
+    "rumblewetgrip": (0.6, 0.75),
+    "rumblebumpamp": (0.0025, 0.027),
+    "rumblebumplen": (0.5, 14.0),
+    "miscbumpamp": (0.02, 0.1),
+    "miscbumplen": (4.0, 5.0),
+    "cretebumpamp": (0.0025, 0.025),
+    "cretebumplen": (0.5, 1.25),
+    "rumblebumpamphigh": (0.01, 0.025),
+    "rumbleilbumpamp": (0.0015, 0.0025),
+    "rumbleilbumplen": (0.75, 1.5),
+}
+
+
+def validate_tdf_numeric(data: bytes | str) -> list[str]:
+    """Check surface grip/bump bounds across 203 local `.tdf` files."""
+    return _check_numeric_bounds(data, TDF_NUMERIC_BOUNDS)
+
+
 def validate_cam_numeric(data: bytes | str) -> list[str]:
     """Check numeric CAM fields against bounds from 258 GTR2/GTL/Race07 files."""
     return _check_numeric_bounds(data, CAM_NUMERIC_BOUNDS)
