@@ -297,8 +297,57 @@ def find_frame_grid(data: bytes) -> dict | None:
     return {"offset": best_start, "stride": FRAME_STRIDE, "count": best_run + 1}
 
 
+def find_preframe_records(data: bytes, grid_offset: int) -> list[tuple[float, ...]]:
+    """Return the 24-byte path records immediately preceding a frame grid.
+
+    Each record is six f32 values: ``(y, z, heading, f3, f4, x)``.  The 6th
+    float is the world x coordinate missing from the 63-byte frame records.
+    Records are found by walking backwards from the grid while all floats are
+    finite and bounded; the chain is verified by a non-empty result.
+    """
+    end = grid_offset
+    start = None
+    limit = max(0, grid_offset - 24 * 3000)
+    for cursor in range(grid_offset, limit, -24):
+        chunk = data[cursor - 24:cursor]
+        if len(chunk) < 24:
+            break
+        values = struct.unpack("<6f", chunk)
+        if not all(math.isfinite(value) and abs(value) < 1e6 for value in values):
+            break
+        start = cursor - 24
+    if start is None:
+        return []
+    return [struct.unpack("<6f", data[off:off + 24])
+            for off in range(start, grid_offset, 24)]
+
+
+def reconstruct_frame_x(records: list[tuple[float, ...]],
+                        positions: list[tuple[float, float, float]],
+                        window: int = 30) -> list[float | None]:
+    """Map frames onto the pre-frame path and return the reconstructed x.
+
+    Frames follow the path in order, so the search index only advances (with a
+    small look-back window).  This avoids mixing spatially close but
+    chronologically distant parts of the track.
+    """
+    if not records:
+        return [None] * len(positions)
+    index = 0
+    out = []
+    index = 0
+    for position in positions:
+        y, z = position[0], position[1]
+        candidates = range(max(0, index - 3), min(len(records), index + window))
+        chosen = min(candidates,
+                     key=lambda k: (records[k][0] - y) ** 2 + (records[k][1] - z) ** 2)
+        index = chosen
+        out.append(records[chosen][5])
+    return out
+
+
 def read_frames(data: bytes, grid: dict) -> list[dict]:
-    """Decode frame positions and timestamps from a located grid."""
+    """Decode frame positions, timestamps and reconstructed world x."""
     out = []
     for i in range(grid["count"]):
         off = grid["offset"] + i * grid["stride"]
@@ -314,6 +363,12 @@ def read_frames(data: bytes, grid: dict) -> list[dict]:
                     "engine_speed": frame_rpm(data, off),
                     "rpm": (value / RPM_SCALE if (value := frame_rpm(data, off)) is not None
                             else None)})
+    records = find_preframe_records(data, grid["offset"])
+    xs = reconstruct_frame_x(records, [frame["position"] for frame in out])
+    for frame, x in zip(out, xs):
+        frame["x"] = x
+        frame["world_position"] = (x, frame["position"][0], frame["position"][1]) \
+            if x is not None else None
     return out
 
 

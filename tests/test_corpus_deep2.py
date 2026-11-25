@@ -1681,6 +1681,48 @@ class CorpusDeep2Test(unittest.TestCase):
                 break
         self.assertEqual(converted, 150)
 
+    def test_gttf_missing_x_reconstructed(self):
+        """Pre-frame path records yield plausible world x and speeds."""
+        import glob
+        import gzip
+        import math
+        import statistics
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        speeds = []
+        span_ratios = []
+        aiws = {}
+        for path in glob.glob(str(ROOT.parent / "GTR2Steam" / "**" / "*.AIW"),
+                              recursive=True):
+            aiws.setdefault(path.lower().rsplit("/", 1)[-1], path)
+        for path in glob.glob(str(ROOT.parent / "GTR2Steam" / "TimeTrial" / "**" / "*.GTT"),
+                              recursive=True):
+            payload = gz.decompress(path)
+            grid = st.find_frame_grid(payload)
+            if not grid:
+                continue
+            frames = st.read_frames(payload, grid)
+            if not frames or any(f["x"] is None for f in frames):
+                continue
+            world = [f["world_position"] for f in frames]
+            speeds.append(statistics.median(
+                math.dist(p0, p1) / max(f1["time"] - f0["time"], 1e-6)
+                for p0, p1, f0, f1 in zip(world, world[1:], frames, frames[1:])))
+            event = st.parse_payload(payload)
+            aiw = aiws.get((event.aiw or "").lower())
+            if aiw:
+                import simbin_text_tool as stt
+                xw = [w.pos[0] for w in stt.parse_aiw(stt.read_text(aiw)).waypoints
+                      if w.pos and w.wp_class() in (0, 1)]
+                if xw:
+                    span = max(p[0] for p in world) - min(p[0] for p in world)
+                    span_ratios.append(span / (max(xw) - min(xw)))
+        self.assertEqual(len(speeds), 29)
+        self.assertGreater(statistics.median(speeds), 10)
+        self.assertLess(statistics.median(speeds), 60)
+        self.assertGreater(statistics.median(span_ratios), 0.6)
+        self.assertLess(statistics.median(span_ratios), 1.4)
+
     def test_event_header_fields_from_gtr2_code(self):
         """Code-derived header fields hold across 29 ghosts and 13 replays."""
         import glob

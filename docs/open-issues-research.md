@@ -16,6 +16,18 @@ Evidence:
 All work here is **offline**: no game was launched. "Runtime-dependent" means
 conclusively establishing it requires actual game execution.
 
+## GTTF missing x RECONSTRUCTED from pre-frame path records (2026-11-28)
+
+**Breakthrough.** The 63-byte frame records store only y/z (and steering), but the **24-byte records immediately preceding the frame grid** contain a path with six f32 fields: `(y, z, heading, f3, f4, x)`. The 6th float is the missing world x. `find_preframe_records()` and `reconstruct_frame_x()` map frames onto this path in chronological order (monotone index search, small look-back window) and add `frame["x"]` / `frame["world_position"]`.
+
+Evidence across all 29 GTR2 ghosts:
+- nearest-record y/z distance median **0.73 m**;
+- reconstructed world speed median **30.0 m/s** (per-file range 16.1–49.9 m/s), versus **~0.1 m/s** when x was absent;
+- reconstructed x span agrees with AIW x span within 0.6–1.4× (median) across matched tracks;
+- the records' 3rd float is a heading in `[-π, π]` coherent with the (y,z) path tangent (best circular coherence 0.652), confirming they are a racing-line path, not padding.
+
+This resolves the long-standing "position transform" blocker: earlier failures came from treating the 63-byte triple as world XYZ. Full-tier regression test added.
+
 ## GTTF header fields recovered from GTR2.exe (2026-11-27)
 
 Static analysis of the unpacked `GTR2.exe` (`.text` at RVA `0x401000`) located the `GTTF`/`IRSR` pointer table at RVA `0x6ead90`, the validator `fcn.00527000` (version constants 1.0/1.02/1.03/1.04/1.05) and the reader `fcn.0052be30` / writer `fcn.0052a540`. The reader's field order confirms that the five bytes after the TRK/AIW filenames are `u8, u8, f32, u8, u32` — now exposed as `simbin_events_tool.EventFile.flags_a/flags_b/session_seconds/flags_c/flags_u`.
