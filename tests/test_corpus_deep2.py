@@ -2083,6 +2083,59 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertGreater(single, 2000)
         self.assertEqual(exposed, single)
 
+    def test_gmt_uv_tiling_ratios(self):
+        """Some GTR2 UV streams encode integer tiling ratios on columns 4/6."""
+        import glob
+        import random
+        import struct
+        import gmt_format as gf
+        import mas_tool
+        random.seed(80)
+        streams = []
+        for archive in glob.glob(str(ROOT.parent / "GTR2Steam" / "**" / "*.gtr"),
+                                 recursive=True):
+            try:
+                _, entries = mas_tool.read_archive(archive)
+            except Exception:
+                continue
+            for entry in entries:
+                if not entry.name.lower().endswith(".gmt") or not entry.data:
+                    continue
+                try:
+                    parsed = gf.parse_gmt("x.gmt", entry.data)
+                except Exception:
+                    continue
+                for mesh in parsed.meshes:
+                    vertex_count = mesh.record.vertex_count
+                    stream = mesh.stream2_data
+                    if vertex_count < 8 or len(stream) != vertex_count * 32:
+                        continue
+                    if gf.stream_column_signature(stream, vertex_count) != (1, 2, 3, 4, 5, 6, 1):
+                        continue
+                    streams.append((stream, vertex_count))
+                if len(streams) >= 500:
+                    break
+            if len(streams) >= 500:
+                break
+        self.assertGreaterEqual(len(streams), 500)
+        streams = streams[:500]
+        matching = sum(gf.uv_tiling_factors(stream, count) is not None
+                       for stream, count in streams)
+        self.assertGreater(matching, 200)
+
+        baseline = 0
+        for stream, count in streams:
+            rows = [struct.unpack_from("<8f", stream, i * 32) for i in range(count)]
+            column2 = [row[2] for row in rows]
+            column4 = [row[4] for row in rows]
+            shuffled = random.sample(column2, len(column2))
+            if abs(shuffled[0]) < 1e-9:
+                continue
+            ratio = column4[0] / shuffled[0]
+            baseline += all(abs(y - ratio * x) <= 1e-3 * max(1.0, abs(y))
+                            for x, y in zip(shuffled, column4))
+        self.assertEqual(baseline, 0)
+
     def test_gmt_flag_bit20_predicts_stream_layout(self):
         """Mesh flag bit 0x20 exactly marks the two-stream UV layout."""
         import glob

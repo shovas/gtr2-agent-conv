@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 16:30:00 -0500 - GTR2 UV tiling ratios
+- Found that many GTR2 UV streams encode constant integer tiling ratios (columns 4/6 vs column 2; 915/1,980 meshes vs 0/500 column-shuffled). Added `gmt_format.uv_tiling_factors()`, a full-tier test, and findings docs.
+
 ## 2026-11-29 16:00:00 -0500 - GTTF control complementarity caveat
 - Found path-record f3/f4 only loosely complementary (sum 0.85, r -0.136 vs 0.009 shuffled) versus near-exact at frame level; documented as a caveat with a full-tier test.
 

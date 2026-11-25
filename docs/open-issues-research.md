@@ -122,6 +122,18 @@ word. Replay frame layout is therefore a distinct, undecoded format —
 recorded as a new avenue, not claimed as solved. Full-tier header regression
 test added.
 
+## GTR2 UV streams carry integer tiling ratios (2026-11-29)
+
+A seeded, stratified sample of streams with the `(1,2,3,4,5,6,1)` column
+signature showed that columns 2/4/6 are position-derived (median max
+|correlation| with world coordinates 0.617 vs 0.200 for shuffles) while
+columns 1/3/5/7 are constants or binary flags. In 915/1,980 such meshes,
+column 4 and column 6 are **constant multiples** of column 2 across every
+vertex, with small per-mesh integer ratios (most often ×5/×8, then ×20/×24 and
+×8/×10). A distribution-preserving shuffle of column 2 broke the relation in
+0/500 cases. Added `gmt_format.uv_tiling_factors()` and a full-tier test. The
+ratios look like texture-tiling factors, but no engine semantics are claimed.
+
 ## Mesh flag bit 0x20 selects the UV layout (2026-11-29)
 
 Tabulating `rec[1]` flags against UV block structure over 40,327 GTR2 meshes

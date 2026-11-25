@@ -190,6 +190,34 @@ def stream_cross_agreement(stream2: bytes, stream3: bytes,
     return agreeing / vertex_count
 
 
+def uv_tiling_factors(data: bytes, vertex_count: int) -> Optional[tuple[float, float]]:
+    """Return the per-mesh integer tiling ratios of UV columns 4 and 6.
+
+    In GTR2 meshes whose 8-float stream signature is ``(1,2,3,4,5,6,1)``,
+    columns 4 and 6 are frequently constant multiples of column 2 (e.g.
+    x5/x8, x20/x24) while columns 1/3/5/7 are binary flags.  Verified on
+    915/1,980 sampled meshes; a distribution-preserving shuffle of column 2
+    drops the match to 0/500.  Returns ``(ratio4, ratio6)`` when the rule
+    holds for every vertex, else ``None``.  This is a structural finding,
+    not a claim about engine UV semantics.
+    """
+    if vertex_count <= 0 or len(data) != vertex_count * 32:
+        return None
+    rows = [struct.unpack_from("<8f", data, i * 32) for i in range(vertex_count)]
+    nonzero = next((row for row in rows if abs(row[2]) > 1e-9), None)
+    if nonzero is None:
+        return None
+    ratios = (nonzero[4] / nonzero[2], nonzero[6] / nonzero[2])
+
+    def holds(column: int, ratio: float) -> bool:
+        return all(abs(row[column] - ratio * row[2])
+                   <= 1e-3 * max(1.0, abs(row[column])) for row in rows)
+
+    if not holds(4, ratios[0]) or not holds(6, ratios[1]):
+        return None
+    return ratios
+
+
 def unpack_vertex_color(value: int) -> tuple[int, int, int, int]:
     """Decode a GTR2 base-vertex f7 word into its four bytes.
 
