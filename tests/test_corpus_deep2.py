@@ -1006,6 +1006,36 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertEqual(checked, 204)
 
+    def test_sce_embedded_config_bounds(self):
+        """All 131 SCE embedded vehicle configs satisfy their own bounds."""
+        import gsc_exe_tool as gsc
+        import simbin_text_tool as stt
+        exe = ROOT.parent / "StockCarExtreme" / "GSC.exe"
+        if not exe.is_file():
+            self.skipTest("StockCarExtreme GSC.exe not present")
+        container = gsc.read_container(exe)
+        keys = container.key_list()
+        index = 0
+        checked = 0
+        for res in container.resources:
+            key = None
+            if gsc.resource_encrypted(res):
+                if res.kind == 1:
+                    key = keys[index + 11]
+                    index += 1
+                else:
+                    continue
+            ext = res.name.lower().rsplit(".", 1)[-1]
+            if ext not in stt.SCE_EMBEDDED_NUMERIC_BOUNDS:
+                continue
+            data, ok = gsc.decode_resource(res, key)
+            self.assertTrue(ok, res.name)
+            self.assertEqual(stt.validate_sce_embedded_config(data, ext), [], res.name)
+            checked += 1
+        self.assertEqual(checked, 131)
+        self.assertEqual(stt.validate_sce_embedded_config(b"x=1", "car"),
+                         ["unsupported SCE config extension car"])
+
     def test_sce_vehicle_vocabularies(self):
         """SCE embedded vehicle configs have their own universal key sets."""
         import re

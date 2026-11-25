@@ -5,6 +5,9 @@ Newest-first change log. Timestamps use repository commit dates (ISO 8601, local
 ## 2026-11-26 16:30:00 -0500 - AIW Features capacity negative
 - Documented that AIW `[Features]` numbers are capacity defaults rather than section counts (startinggrid 104 vs GRID 36 typical); full-tier corpus-fact regression test added.
 
+## 2026-11-26 17:00:00 -0500 - SCE embedded numeric validators
+- Derived 245 numeric bounds from the 131 embedded StockCarExtreme vehicle configs and added `validate_sce_embedded_config()` with family-specific sentinel keys; all 131 files pass. Full-tier regression test.
+
 ## 2026-11-26 16:00:00 -0500 - SCE embedded reference/vocabulary checks
 - Parsed all 70 `.scn` files decoded from `StockCarExtreme/GSC.exe`: 543 MAS references all resolve (65 only via the EXE-embedded `AdPackStockcar.MAS`, with two capitalisations). Documented 131 embedded vehicle configs with family-specific vocabularies; added quick/full-tier regression tests.
 
