@@ -422,7 +422,7 @@ def parse_gmt(path: str | Path, data: bytes | None = None) -> GmtFile:
             # index array (86% of sampled GTR2 meshes). Expose both so the UV
             # candidate stream is visible to decoders.
             end = rec.stream2_end if rec.stream2_end > rec.raw[6] else rec.index_offset
-            if end > rec.raw[6] and end <= len(d):
+            if end - rec.raw[6] == rec.vertex_count * 32 and end <= len(d):
                 s2 = d[rec.raw[6]:end]
             if rec.stream3_end > rec.stream2_end and rec.stream2_end > 0:
                 s3 = (d[rec.stream2_end:rec.stream3_end]

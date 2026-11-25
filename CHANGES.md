@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 18:00:00 -0500 - UV parser fallback fix
+- Fixed an overly broad single-block UV fallback that exposed misaligned streams on some meshes; the parser now requires exact vc*32 length. Scoped the stream column-7 invariant to two-stream meshes. All 35 gmt_format module tests and 5 affected full-tier tests pass.
+
 ## 2026-11-29 17:30:00 -0500 - Template-free GMT container
 - Added `gmt_format.build_synthetic_gmt()` to build a structurally valid GTR2 GMT without a game-data template. Parses, round-trips and passes material validation; full-tier test added. No materials/textures are included, so it is a fallback/test container only.
 

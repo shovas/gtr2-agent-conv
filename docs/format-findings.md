@@ -87,7 +87,10 @@ regression tests or an explicitly documented negative.
   end markers (`rec[6] < rec[7] < rec[8]`, ~18%) or a single `vc*32` block at
   `rec[6]` running up to the index array (~86%). `parse_gmt()` now exposes
   both as `stream2_data`, and repacking preserves vertex and UV bytes on
-  563/563 sampled single-block meshes. Which layout is used is **exactly**
+  563/563 sampled single-block meshes. The single-block fallback is exposed
+  **only** when `index_offset - rec[6] == vertex_count*32`; an earlier broader
+  fallback exposed misaligned blocks and broke an existing stream-stride test.
+  Which layout is used is **exactly**
   predicted by mesh flag bit `0x20` (`rec[1] & 0x20`): 40,327/40,327 sampled
   meshes agree. All converted outputs use the single-block form with the bit
   clear, so their flags are consistent. In the single-block layout the UV pair sits at

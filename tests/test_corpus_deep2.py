@@ -2218,7 +2218,13 @@ class CorpusDeep2Test(unittest.TestCase):
                     continue
                 for mesh in parsed.meshes:
                     vertex_count = mesh.record.vertex_count
-                    if vertex_count < 8 or len(mesh.stream2_data) != vertex_count * 32:
+                    record = mesh.record.raw
+                    # The column-7/column-1 invariant is specific to the
+                    # two-stream layout; single-block UVs end in zeros.
+                    two_streams = record[7] > record[6] and record[8] > record[7]
+                    if not two_streams or vertex_count < 8:
+                        continue
+                    if len(mesh.stream2_data) != vertex_count * 32:
                         continue
                     signature = gf.stream_column_signature(mesh.stream2_data, vertex_count)
                     if signature is None:

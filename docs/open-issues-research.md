@@ -122,6 +122,17 @@ word. Replay frame layout is therefore a distinct, undecoded format —
 recorded as a new avenue, not claimed as solved. Full-tier header regression
 test added.
 
+## UV parser fallback tightened after regression (2026-11-29)
+
+The earlier change exposing single-block UV blocks whenever `rec[7]==0` was
+too permissive: a few meshes have `index_offset - rec[6]` larger than
+`vertex_count*32`, producing a misaligned `stream2_data`. A targeted run of
+`tests.test_gmt_format` caught this (`448 != 256`). The parser now exposes the
+fallback block only when its length is exactly `vertex_count*32`. The
+column-7/column-1 stream invariant was also re-scoped to the two-stream layout
+(it does not hold for single-block UVs, which end in zeros). All 35 module
+tests and the five affected full-tier tests pass after the fix.
+
 ## Template-free GMT container verified (2026-11-29)
 
 All converters currently require a real GTR2 GMT as a structural template.
