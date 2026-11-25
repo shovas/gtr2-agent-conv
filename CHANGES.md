@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 14:00:00 -0500 - f0 material-index artefact
+- Recorded that the apparent f0-high/material-index link (13.3% vs 4.2% shuffled) is a mesh-0 artefact (44.9% for mesh 0, 0.5–2.1% later). Full-tier guard test added; findings docs updated.
+
 ## 2026-11-29 13:30:00 -0500 - VCR frame layout negative
 - Recorded that no fixed-stride monotonic time field exists in .Vcr payloads (strides 20..2040 scanned), so replay frame decoding remains blocked. Findings log updated.
 

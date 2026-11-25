@@ -122,6 +122,16 @@ word. Replay frame layout is therefore a distinct, undecoded format —
 recorded as a new avenue, not claimed as solved. Full-tier header regression
 test added.
 
+## f0 high byte vs material index: mesh-0 artefact (2026-11-29)
+
+A byte-level test found the f0 high byte equals the mesh's material index in
+**13.3%** of 26,125 meshes versus **4.2%** for a distribution-preserving
+shuffle — apparently a material link. Splitting by mesh ordinal showed the
+association is almost entirely mesh 0: 44.9% of mesh-0 markers have high byte 0
+and material index 0, while later meshes match at only 0.5–2.1%. No material
+index mapping exists; the corpus-wide signal is just the already-known
+mesh-0 distinctness. Full-tier guard test added.
+
 ## f0 marker semantics do not transfer to Volvo/Race07 (2026-11-29)
 
 Attempted to cross-validate the f0 byte-pair rule on JCA-decrypted Volvo and

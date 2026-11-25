@@ -2170,6 +2170,44 @@ class CorpusDeep2Test(unittest.TestCase):
             baselines.append(hist == count)
         self.assertLess(sum(baselines) / len(baselines), 0.05)
 
+    def test_f0_high_byte_material_index_is_mesh0_artifact(self):
+        """The hi-byte==material-index rate is confined to mesh 0."""
+        import glob
+        import gmt_format as gf
+        import mas_tool
+        first = [0, 0]
+        later = [0, 0]
+        for root, ext in (("GTR2Steam", ".gtr"), ("GTLSteam", ".gtl")):
+            for archive in glob.glob(str(ROOT.parent / root / "**" / f"*{ext}"),
+                                     recursive=True):
+                try:
+                    _, entries = mas_tool.read_archive(archive)
+                except Exception:
+                    continue
+                for entry in entries:
+                    if not entry.name.lower().endswith(".gmt") or not entry.data:
+                        continue
+                    try:
+                        parsed = gf.parse_gmt("x.gmt", entry.data)
+                    except Exception:
+                        continue
+                    for index, mesh in enumerate(parsed.meshes):
+                        marker = gf.mesh_marker(mesh)
+                        if not marker:
+                            continue
+                        _, high = gf.f0_byte_pair(marker)
+                        bucket = first if index == 0 else later
+                        bucket[0] += 1
+                        bucket[1] += high == mesh.record.material_index
+                if first[0] + later[0] >= 25000:
+                    break
+            if first[0] + later[0] >= 25000:
+                break
+        self.assertGreater(first[0], 5000)
+        self.assertGreater(later[0], 10000)
+        self.assertGreater(first[1] / first[0], 0.35)
+        self.assertLess(later[1] / later[0], 0.05)
+
     def test_f0_byte_pair_consecutive_even(self):
         """f0's two meaningful bytes are usually consecutive (n, n+1)."""
         import glob
