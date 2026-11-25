@@ -8,6 +8,7 @@ read as latin-1 with CRLF preserved; writers keep the original bytes.
 from __future__ import annotations
 
 import argparse
+import collections
 import math
 import os
 import re
@@ -325,6 +326,41 @@ def validate_aiw_waypoints(aiw: AIW) -> list[str]:
             norm = math.sqrt(sum(x * x for x in wp.perp))
             if abs(norm - 1.0) > 0.01:
                 problems.append(f"waypoint {i}: track/pit wp_perp norm {norm:.4f} != 1")
+    return problems
+
+
+def validate_aiw_grid_pits(data: bytes | str,
+                            allow_team_mismatch: bool = False) -> list[str]:
+    """Check GRID/PITS index and position-count invariants.
+
+    Corpus-verified on 465 AIWs: GRID Pos count always equals GridIndex count;
+    PITS garage position/orientation counts are equal and are either 2x or 3x
+    the pit count; optional SCR counts match garage counts. The single
+    `Brianza_JR.AIW` has one extra TeamIndex entry.
+    """
+    text = data if isinstance(data, str) else data.decode("latin-1")
+    problems: list[str] = []
+    grid = re.search(r"(?ms)^\[GRID\]\r?\n(.*?)(?=^\[|\Z)", text)
+    if grid:
+        indices = re.findall(r"(?mi)^GridIndex\s*=\s*(\d+)", grid.group(1))
+        positions = re.findall(r"(?mi)^Pos\s*=", grid.group(1))
+        if indices and len(indices) != len(positions):
+            problems.append("GRID Pos count != GridIndex count")
+    pits = re.search(r"(?ms)^\[PITS\]\r?\n(.*?)(?=^\[|\Z)", text)
+    if pits:
+        keys = collections.Counter(
+            match.group(1).lower()
+            for match in re.finditer(r"(?m)^\s*([A-Za-z_]\w*)\s*=", pits.group(1)))
+        if keys["garpos"] != keys["garori"]:
+            problems.append("garage Pos/Ori counts differ")
+        if keys["pitpos"] and keys["garpos"] not in (2 * keys["pitpos"], 3 * keys["pitpos"]):
+            problems.append("garage count is not 2x or 3x pit count")
+        if keys["scrpos"] and (keys["scrpos"] != keys["garpos"]
+                               or keys["scrori"] != keys["garori"]):
+            problems.append("SCR counts differ from garage counts")
+        if (keys["teamindex"] and keys["teamindex"] != keys["pitpos"]
+                and not allow_team_mismatch):
+            problems.append("TeamIndex count != pit count")
     return problems
 
 

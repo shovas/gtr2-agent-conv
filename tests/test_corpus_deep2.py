@@ -339,6 +339,30 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertEqual(cars, 16)
         self.assertEqual(includes, 16)
 
+    def test_aiw_grid_pits_consistency(self):
+        """AIW GRID/PITS index and position counts are consistent."""
+        import glob
+        import os
+        import isi_crypt
+        n = 0
+        roots = ("Race07Vanilla", "GTLSteam", "GTR2Steam", "Race07Complete",
+                 "RF1Vanilla", "Automobilista", "StockCarExtreme", "F12002")
+        for root in roots:
+            for p in glob.glob(str(ROOT.parent / root / "**" / "*"), recursive=True):
+                if not os.path.isfile(p) or not p.lower().endswith(".aiw"):
+                    continue
+                raw = Path(p).read_bytes()
+                if raw[:4] == media_tool.JCA_MAGIC:
+                    text = media_tool.decrypt_jca_text(raw).decode("latin-1")
+                else:
+                    sign, _ = isi_crypt.crypt_info(raw)
+                    text = (isi_crypt.decrypt_bytes(raw).decode("latin-1")
+                            if sign in isi_crypt.GAMES else raw.decode("latin-1"))
+                self.assertEqual(stt.validate_aiw_grid_pits(
+                    text, Path(p).name.lower() == "brianza_jr.aiw"), [], p)
+                n += 1
+        self.assertEqual(n, 465)
+
     def test_aiw_event_bounds(self):
         """AIW WP_EVENT/WP_SCORE values obey corpus bounds."""
         import glob

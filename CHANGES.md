@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 15:30:00 -0500 - AIW GRID/PITS validator
+- Added `simbin_text_tool.validate_aiw_grid_pits()` with GRID index/position parity and 2×/3× garage-to-pit ratios across 465 AIWs; documented single Brianza TeamIndex exception. Full-tier regression test added.
+
 ## 2026-11-26 15:00:00 -0500 - GDB texture-reference negative
 - Documented that 252 GTR2/GTL/Race07 event GDB files contain no sky/texture/image references (Weather is a numeric 0–4 index). Full-tier corpus-fact regression test added.
 
