@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 08:00:00 -0500 - GTR2 two-stream UV duplication
+- Found that GTR2 two-stream meshes duplicate one UV-like pair (96% per-vertex agreement, 1.0 vs 0.023 shuffled; stream3 tail always zero). Added `gmt_format.stream_cross_agreement()`, a full-tier test, and findings docs updates.
+
 ## 2026-11-29 07:30:00 -0500 - GTTF byte 31 not an RPM code
 - Recorded a negative: the +31 byte is not a deterministic monotonic engine-RPM code (rank |rho| 0.311 vs 0.096 permuted; both byte clusters occur at similar RPM). Findings log updated.
 
