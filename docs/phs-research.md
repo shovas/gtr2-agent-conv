@@ -9,6 +9,10 @@ PAR2-style recovery containers for a single file, `GTL_Update_0901.exe`; the fif
 gameplay physics content. No evidence was found that GTL reads PHS contents as
 structured physics data.
 
+## Updater acquisition attempt (2026-11-26)
+
+A direct GTL 1.1 updater was obtained from the Patches Scrolls page: the download link resolves to `download.php?g=GT+Legends&f=gtl_update_1100.zip`, then a session-cookie `GET /get.php` serves a **60,724,988-byte** ZIP. Its three members are `GTL_Update_1.1.0.0.exe` (61,334,805 B), `Readme 1.1.0.0.txt` and `Game Patches.url`; the readme's 35 changes contain no PHS/physics entries. A full `strings` scan of the executable found **zero** occurrences of `0901`, `PHYSICS.PHS` or `.phs`. Probing the same site for `gtl_update_0901.zip` / `GTL_Update_0901.exe` (and variants) returns **404**; a web search for the exact filename returns no results. The artifact was kept under `/tmp` only and is **not** committed (third-party executable, read-only reference). This closes the most promising acquisition lead: the missing `GTL_Update_0901.exe` and its PAR2 set are still unavailable, so the PHS blocker remains genuine. Unblock conditions now require a different archive/source for the 0.9.01 updater or a PAR2 spec enabling reconstruction from the four local PHS containers.
+
 ## Mirror reassessment (2026-11-26)
 
 Searched `../aluigi-mirror-261124/mirror.aluigi.org/` in full: `patches/` (192 files, 145 ZIPs, 41 `.lpatch`) has **zero** filenames or ZIP members matching GTL/Legend/0901/PHYSICS/PAR2; all 461 ZIPs in the mirror likewise contain zero matching member names. A wider `../` filename search for `*0901*`, `*gtl*update*`, `*gtl*patch*`, `*.par2` found nothing relevant. The new tool mirrors added format knowledge (rfactordec/rfactorgmdec/wtcced) but **no missing update executable or PAR2 set**, so the PHS blocker remains genuine.
