@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 13:15:00 -0500 - GTTF slot 44 packed signal
+- Decoded remaining GTTF slots as signed 16-bit halves: slot +44 tracks path_f4 (median |r| 0.071 vs 0.013 permuted); others at chance. Full-tier permutation-controlled test added.
+
 ## 2026-11-28 12:45:00 -0500 - f0 material index baseline corrected
 - A f0/material-index association was traced to a flawed permutation baseline (uniform instead of index-distribution-preserving); corrected baseline shows no signal. Probe discarded.
 

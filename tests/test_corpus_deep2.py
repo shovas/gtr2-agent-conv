@@ -2413,6 +2413,39 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertLess(statistics.median(forward), 0.1)
         self.assertGreater(statistics.median(reverse), 0.9)
 
+    def test_gttf_slot44_halves_path_f4(self):
+        """Slot +44's packed halves carry a path_f4-related signal."""
+        import glob
+        import gzip
+        import random
+        import statistics
+        import struct
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        observed = []
+        baseline = []
+        random.seed(29)
+        for path in glob.glob(str(ROOT.parent / "GTR2Steam" / "TimeTrial" / "**" / "*.GTT"),
+                              recursive=True):
+            payload = gz.decompress(path)
+            frames = st.read_frames(payload, st.find_frame_grid(payload))
+            words = [int.from_bytes(payload[frame["offset"] + 44:
+                                            frame["offset"] + 48], "little")
+                     for frame in frames]
+            lows = [struct.unpack("<h", struct.pack("<H", value & 0xFFFF))[0]
+                    for value in words]
+            highs = [struct.unpack("<h", struct.pack("<H", (value >> 16) & 0xFFFF))[0]
+                     for value in words]
+            values = lows + highs
+            reference = [frame["path_f4"] for frame in frames] * 2
+            observed.append(abs(st._corr(values, reference)))
+            baseline.append(statistics.mean(
+                abs(st._corr(random.sample(values, len(values)), reference))
+                for _ in range(3)))
+        self.assertEqual(len(observed), 29)
+        self.assertGreater(statistics.median(observed), 3 * statistics.median(baseline))
+        self.assertGreater(sum(o > 2 * b for o, b in zip(observed, baseline)), 20)
+
     def test_gttf_path_f4_decreases_with_gear(self):
         """Racing-line f4 falls as the engine/gear band rises."""
         import glob

@@ -83,6 +83,15 @@ Slot `+36` is **not** path curvature: median |correlation| with 3D path curvatur
 
 With reconstructed world x, ghost `+12` heading aligns with AIW pointer-chain tangents in the **world x/z plane** as **`heading = atan2(dx, dz)`**: median circular coherence **0.858** across 15 matched ghosts (dominant convention in 10/15 files; equivalent `-atan2(dz,dx)` in the rest). The earlier y/z-only test gave 0.404 and the DSI-line test 0.318 — both were degraded by the missing x. Full-tier regression test added (median >0.7 across 29 ghosts).
 
+## GTTF slots +40/+44/+52/+56/+60 packed-half study (2026-11-28)
+
+Decoded each sentinel-like u32 slot as two signed i16 halves and tested them against engine, path controls, steering and speed with permutation baselines:
+- **slot +44** halves vs `path_f4`: median |r| **0.071** vs **0.013** permuted (5.4×; 26/29 files >2× baseline); vs engine 0.126 vs 0.021.
+- slot +40 halves vs `path_f3`: median |r| 0.024 vs 0.015 — weak, not promoted.
+- slots +52/+56/+60: at chance.
+
+Slot +44 therefore carries a weak but reproducible path/engine-related packed signal; exact units remain unknown. Full-tier permutation-controlled regression test added.
+
 ## GTTF path_f4 vs gear bands (2026-11-28)
 
 Assigned each frame to one of six gear bands derived from the F550 `.grb`/`.hdc`/`.tyr` setup (as in the +32 study) and compared `path_f4`:
