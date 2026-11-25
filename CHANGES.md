@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 03:45:00 -0500 - GTTF remaining slots study
+- Permutation-controlled study of +40/+44/+48/+52/+56/+60 vs reconstructed speed/steering/engine: only +48 shows above-chance coupling to +8 (median |r| 0.193 vs 0.018 permuted); others at chance. Full-tier regression test added.
+
 ## 2026-11-28 03:15:00 -0500 - PHS runtime consumer negative
 - Searched all 29 shipped GTL/GTR2 EXEs and DLLs (including unpacked GTL.exe) for PHS/PHYSICS strings in ASCII and UTF-16: zero matches. No runtime consumer found; full-tier regression test added.
 

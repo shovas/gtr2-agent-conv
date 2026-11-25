@@ -16,6 +16,21 @@ Evidence:
 All work here is **offline**: no game was launched. "Runtime-dependent" means
 conclusively establishing it requires actual game execution.
 
+## GTTF remaining slots vs reconstructed kinematics (2026-11-28)
+
+Permutation-controlled study across all 29 ghosts using reconstructed world speed, steering `+8`/`+16` and engine `+32`:
+
+| Slot | median \|r\| with +8 | with +16 | with engine | with speed | verdict |
+|---|---:|---:|---:|---:|---|
+| +40 | ~0.05 | ~0.05 | ~0.04 | ~0.03 | at chance |
+| +44 | ~0.04 | ~0.01 | ~0.03 | ~0.02 | at chance |
+| **+48** | **0.193** | 0.08 | 0.168 | 0.03 | **modest steering/engine coupling** |
+| +52 | ~0.05 | ~0.06 | ~0.05 | ~0.04 | at chance |
+| +56 | ~0.02 | ~0.03 | ~0.04 | ~0.02 | at chance |
+| +60 | ~0.05 | ~0.03 | ~0.04 | ~0.06 | at chance |
+
+For +48, the permuted baseline for the +8 coupling is 0.018 (≈10× lower) and 19/29 files exceed twice their own baseline; the sign varies by track. This is a weak but real association, not a decoded semantic — exact units remain unknown. Full-tier permutation-controlled regression test added.
+
 ## GTTF +32 gear-ratio bands and +36 curvature negative (2026-11-28)
 
 With reconstructed world positions and 5-frame smoothing, `+32 / speed` clusters near the F550's gear-ratio-derived bands. Bands were computed **from the actual setup files**: `HewlandLS200.grb` ratios, `BMS550.hdc` gear settings (0/3/7/11/17/22), final drive 3.10 and `Michelin_GT.tyr` rear radius 0.355 m, scaled by the observed `1024` engine-speed factor → ~85.5k/97.5k/111k/138k/177k/250k raw per m/s. Across 7,047 samples from 8 ghosts the median relative distance to a band is **0.0496**, versus **0.1247** for six random log-uniform bands (permutation p≈0.01). This strongly supports an engine-speed interpretation but the exact scale remains unconfirmed; full-tier regression test added.
