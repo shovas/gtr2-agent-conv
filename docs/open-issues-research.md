@@ -278,6 +278,16 @@ frame's `slot48_low` (|r| 0.993 vs 0.24 shuffled). These are near-copies, not
 bit-exact, so the tail is a summary of final car state. Full-tier
 permutation-controlled test added.
 
+## SimBin gzip containers are byte-identically reproducible (2026-11-30)
+
+Compared shipped `.GTT`/`.Vcr` gzip bytes against Python's deterministic
+`gzip.GzipFile` output: only header bytes 8/9 differ (XFL/OS `00 02 ff` vs
+shipped `00 0b`); the compressed stream and CRC/size trailer are identical.
+`gzip_simbin_tool.compress_simbin()` patches those two bytes and reproduces
+all 29 ghosts and all 9 replays byte-for-byte. This removes the container
+barrier for a future ghost writer (payload semantics are largely decoded).
+Full-tier regression test added.
+
 ## GTTF path f3 vs AIW attributes and curvature (2026-11-30)
 
 A systematic scan of path f3 against all decoded AIW waypoint attributes

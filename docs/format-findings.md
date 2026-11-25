@@ -148,6 +148,9 @@ regression tests or an explicitly documented negative.
 
 - Container: gzip with `//[[gMb…]]` wrapper; magic `GTTF`/`IRSR`, f32 version,
   u32-length TRK and AIW filenames. `simbin_events_tool.py` is the reader.
+  `gzip_simbin_tool.compress_simbin()` writes byte-identical containers by
+  patching the XFL/OS header bytes to `00 0b` (verified on 29 GTT + 9 VCR
+  files), so a payload-level ghost writer is feasible.
 - Header fields after filenames: `u8, u8, f32, u8, u32`; the f32 is one of
   **36000/43200/46800** (10/12/13 h in seconds — strong inference) across 42
   files. Exposed as `EventFile.session_seconds` etc.

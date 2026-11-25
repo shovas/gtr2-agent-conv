@@ -4180,6 +4180,25 @@ class CorpusDeep2Test(unittest.TestCase):
             replay_flags.add((event.flags_a, event.flags_b, event.flags_c, event.flags_u))
         self.assertGreater(len(replay_flags), 3)
 
+    def test_gttf_container_roundtrips_byte_identically(self):
+        """SimBin gzip headers can be reproduced byte-for-byte."""
+        import glob
+        import gzip_simbin_tool as gz
+        checked = 0
+        for path in glob.glob(str(ROOT.parent / "GTR2Steam" / "TimeTrial" / "**" / "*.GTT"),
+                              recursive=True):
+            original = Path(path).read_bytes()
+            payload = gz.decompress(path)
+            self.assertEqual(gz.compress_simbin(payload), original, path)
+            checked += 1
+        self.assertEqual(checked, 29)
+        replays = 0
+        for path in (ROOT.parent / "GTR2Steam" / "ReplayData").glob("*.Vcr"):
+            original = path.read_bytes()
+            self.assertEqual(gz.compress_simbin(gz.decompress(str(path))), original, path)
+            replays += 1
+        self.assertEqual(replays, 9)
+
     def test_vcr_replay_headers_parse(self):
         """All shipped .Vcr replays parse as IRSR with known session values."""
         import gzip

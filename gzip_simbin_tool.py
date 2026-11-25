@@ -29,6 +29,19 @@ def compress_bytes(data: bytes, mtime: int = 0) -> bytes:
     return buf.getvalue()
 
 
+def compress_simbin(data: bytes) -> bytes:
+    """Write a SimBin-style gzip container byte-identically.
+
+    The shipped GTT ghosts use standard zlib gzip with the XFL/OS header
+    bytes set to ``00 0b`` instead of Python's ``02 ff``; patching those two
+    bytes makes recompressed payloads byte-identical to the originals on
+    29/29 sampled ghosts. No game data is embedded here.
+    """
+    output = bytearray(compress_bytes(data))
+    output[8:10] = b"\x00\x0b"
+    return bytes(output)
+
+
 def cmd_info(args: argparse.Namespace) -> int:
     raw = read_bytes(args.file)
     dec = gzip.decompress(raw)

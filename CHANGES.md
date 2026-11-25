@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-30 04:00:00 -0500 - Byte-identical SimBin containers
+- Added `gzip_simbin_tool.compress_simbin()` which reproduces shipped GTT/VCR gzip containers byte-for-byte (29 ghosts + 9 replays). Removes the container barrier for a future ghost writer. Full-tier test added.
+
 ## 2026-11-30 03:30:00 -0500 - GTTF path f3 vs AIW curvature
 - Found f3 tracks AIW-derived curvature (median |r| 0.142 vs 0.068 shuffled) while raw AIW attributes are chance-level. Full-tier permutation-controlled test added.
 
