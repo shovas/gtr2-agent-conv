@@ -5,6 +5,9 @@ Newest-first change log. Timestamps use repository commit dates (ISO 8601, local
 ## 2026-11-26 16:30:00 -0500 - AIW Features capacity negative
 - Documented that AIW `[Features]` numbers are capacity defaults rather than section counts (startinggrid 104 vs GRID 36 typical); full-tier corpus-fact regression test added.
 
+## 2026-11-27 18:00:00 -0500 - f0 set-hash negative
+- Tested sorted-concatenation CRC32/Adler/MD5 and XOR/sum of per-name CRC16 on 20,000 meshes: at most 4 matches to f0 halfwords, at chance level. The material-name group signal is not a simple set hash. Full-tier regression test added.
+
 ## 2026-11-27 17:00:00 -0500 - f0 material-name group signal
 - Permutation-controlled test over 74,547 meshes found same-f0 meshes share rare normalized material/stage name hashes 60× above baseline (8.06% vs 0.13%), though no simple hash reproduces the halfwords. f0 groups by material identity; encoding still unknown. Full-tier regression test added.
 

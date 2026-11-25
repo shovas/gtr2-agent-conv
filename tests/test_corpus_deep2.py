@@ -1006,6 +1006,66 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertEqual(checked, 204)
 
+    def test_f0_not_order_independent_name_hash(self):
+        """f0 halfwords are not set hashes of normalized material/stage names."""
+        import functools
+        import glob
+        import hashlib
+        import random
+        import re
+        import statistics
+        import zlib
+        import gmt_format as gf
+        import mas_tool
+        rows = []
+        for root, ext in (("GTR2Steam", ".gtr"), ("GTLSteam", ".gtl"),
+                          ("BMWM3Challenge", ".bmw")):
+            for archive in glob.glob(str(ROOT.parent / root / "**" / f"*{ext}"),
+                                     recursive=True):
+                try:
+                    _, entries = mas_tool.read_archive(archive)
+                except Exception:
+                    continue
+                for entry in entries:
+                    if not entry.name.lower().endswith(".gmt") or not entry.data:
+                        continue
+                    try:
+                        parsed = gf.parse_gmt("x.gmt", entry.data)
+                    except Exception:
+                        continue
+                    for mesh in parsed.meshes:
+                        marker = gf.mesh_marker(mesh)
+                        index = mesh.record.material_index
+                        material = (parsed.materials[index]
+                                    if index < len(parsed.materials) else None)
+                        if not marker or material is None:
+                            continue
+                        names = [material.name] + [s.name for s in material.stages]
+                        normalized = sorted(set(
+                            re.sub(r"[^a-z0-9]", "", name.lower())
+                            for name in names if name))
+                        if not normalized:
+                            continue
+                        joined = "|".join(normalized).encode()
+                        part = [zlib.crc32(n.encode()) & 0xFFFF for n in normalized]
+                        rows.append((marker & 0xFFFF, marker >> 16, {
+                            "crc": zlib.crc32(joined) & 0xFFFF,
+                            "adler": zlib.adler32(joined) & 0xFFFF,
+                            "md5": int.from_bytes(hashlib.md5(joined).digest()[:2],
+                                                  "little"),
+                            "xor": functools.reduce(lambda a, b: a ^ b, part, 0),
+                            "sum": sum(part) & 0xFFFF,
+                        }))
+                if len(rows) >= 12000:
+                    break
+            if len(rows) >= 12000:
+                break
+        self.assertGreater(len(rows), 8000)
+        for name in ("crc", "adler", "md5", "xor", "sum"):
+            observed = sum(1 for lo, hi, values in rows
+                           for half in (lo, hi) if half == values[name])
+            self.assertLess(observed, 10)  # chance level for 2 x 12k halfwords
+
     def test_f0_groups_material_name_hashes(self):
         """Same-f0 meshes share rare normalized material/stage name hashes."""
         import collections
