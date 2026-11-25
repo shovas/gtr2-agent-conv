@@ -105,6 +105,16 @@ Assigned each frame to one of six gear bands derived from the F550 `.grb`/`.hdc`
 
 This supports f4 as a throttle/demand-like channel on the reference line (stronger in low gears), but neither channel reproduces the ghost's own pedal positions; exact semantics remain unclaimed. Full-tier permutation-controlled regression test added.
 
+## GTR2 stream column signature (2026-11-29)
+
+Extending the stream-pattern study: a column-signature analysis of 2,601
+GTR2 meshes shows the final f32 column repeats the second in **2,594**
+(99.73%). The dominant signature `(1,2,1,2,1,2,1)` (747/1,601) is the
+three-value pattern; other recurring signatures are `(1,2,3,4,5,6,1)` (542)
+and `(1,2,3,4,3,4,1)` (139). Seven TRACKnn meshes are the only cases where
+column 7 does not equal column 1. Added `gmt_format.stream_column_signature()`
+and a full-tier regression test; no UV semantics claimed.
+
 ## GTR2 extra vertex streams: located, not decoded (2026-11-29)
 
 Investigated where GTR2 GMTs keep UV-like data. Meshes whose 108-byte record

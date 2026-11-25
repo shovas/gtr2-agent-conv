@@ -48,6 +48,9 @@ regression tests or an explicitly documented negative.
   4/6 as ×10/×15 copies, but this is not general (only 39/447 meshes), so UV
   *semantics* remain unassigned. `gmt_format.decode_stream_records()` exposes
   the verified triples; no UV correctness claim is made.
+  A broader invariant: `gmt_format.stream_column_signature()` shows column 7
+  equals column 1 in 2,594/2,601 (99.73%) stream meshes; the seven exceptions
+  are all TRACKnn meshes with a distinct scheme.
 
 ## 3. EXE / embedded-resource code
 
