@@ -3,6 +3,10 @@
 All work here is **offline**: no game was launched. "Runtime-dependent" means
 conclusively establishing it requires actual game execution.
 
+## GTTF slot +40: counter/state negative (2026-11-26)
+
+Across all 31 GTT files the raw u32 at +40 is neither a monotonic counter nor a stable two-state flag: monotonic fraction median 0.555 (range 0.503–0.586), |correlation with frame time| median 0.025 (max 0.119), and the two exponent clusters (raw >2³⁰ vs lower) flip in a median 26.6% of consecutive frames (range 0.4–29.6%). The hi fraction varies by file (0.475–0.997), so it is not a car-invariant state either. The earlier quantized-float kinematics negatives for this slot stand; `simbin_events_tool.frame_s40_word()` and a regression test lock in these bounds. No semantic promoted.
+
 ## GTTF slot +36: exact quantized-float shape (2026-11-26)
 
 Across all 47,239 frames in 31 GTT files, slot +36's u32 has its low 16 bits zero in 46,529 frames (**98.5%**) and the mantissa's high 7 bits take only two values, **8 or 12** (`0x08`/`0x0C`). The float can therefore only be zero or ±(17/8 or 35/16)·4ᵏ — an exact quantization lattice, not a free measurement. By car: the Ferrari F550 files use mantissas 8/12 with exponents centred at 134; the two BMW M3 files use the same mantissas with exponents centred at 162 (a car-specific scale shift). `simbin_events_tool.is_quantized_s36()` detects this and a regression test checks ≥98% of frames. Earlier negatives still hold: no meaningful correlation with speed, acceleration, heading rate, steering or the +32 engine-speed word (|r|≤0.27 across files). No semantic promoted — this is a structural characterization of a car-scaled quantized field.

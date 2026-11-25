@@ -82,6 +82,35 @@ class SimbinEventsToolTest(unittest.TestCase):
             self.skipTest("no GTTF frame grids detected")
         self.assertGreaterEqual(checked, 1)
 
+    def test_gttf_slot40_not_counter_or_state(self):
+        """Slot +40 is neither monotonic nor a stable hi/lo state across files."""
+        import gzip
+        import statistics
+        files = _files(".gtt")
+        if not files:
+            self.skipTest("GTR2 GTT files not present")
+        monotonic = []
+        transitions = []
+        time_correlations = []
+        for p in files:
+            data = gzip.decompress(p.read_bytes())
+            grid = setool.find_frame_grid(data)
+            if not grid:
+                continue
+            rows = setool.read_frames(data, grid)
+            values = [setool.frame_s40_word(data, r["offset"]) for r in rows]
+            clusters = ["hi" if v > 2 ** 30 else "lo" for v in values]
+            monotonic.append(sum(b >= a for a, b in zip(values, values[1:]))
+                             / (len(values) - 1))
+            transitions.append(sum(a != b for a, b in zip(clusters, clusters[1:]))
+                               / (len(clusters) - 1))
+            time_correlations.append(abs(setool._corr(values, [r["time"] for r in rows])))
+        if not monotonic:
+            self.skipTest("no GTTF frame grids detected")
+        self.assertLess(statistics.median(monotonic), 0.6)
+        self.assertGreater(statistics.median(transitions), 0.2)
+        self.assertLess(statistics.median(time_correlations), 0.05)
+
     def test_gttf_slot36_quantized_shape(self):
         """Frame slot +36 is a quantized float with only two mantissa classes."""
         import gzip

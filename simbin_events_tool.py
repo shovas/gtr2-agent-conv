@@ -214,6 +214,11 @@ def frame_s36_word(data: bytes, offset: int) -> int:
     return struct.unpack_from("<I", data, offset + 36)[0]
 
 
+def frame_s40_word(data: bytes, offset: int) -> int:
+    """Return the raw u32 at frame offset +40 (unresolved field)."""
+    return struct.unpack_from("<I", data, offset + 40)[0]
+
+
 def is_quantized_s36(word: int) -> bool:
     """Whether +36 has the corpus-invariant quantized-float shape.
 
