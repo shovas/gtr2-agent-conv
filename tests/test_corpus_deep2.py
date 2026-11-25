@@ -2935,6 +2935,27 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertLess(statistics.median(observed), -0.1)
         self.assertLess(statistics.median(observed), 2 * statistics.median(baseline))
 
+    def test_gttf_path_record_count_ratio(self):
+        """Frame count is a bounded multiple of pre-frame path record count."""
+        import glob
+        import gzip
+        import statistics
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        ratios = []
+        for path in glob.glob(str(ROOT.parent / "GTR2Steam" / "TimeTrial" / "**" / "*.GTT"),
+                              recursive=True):
+            payload = gz.decompress(path)
+            grid = st.find_frame_grid(payload)
+            if not grid:
+                continue
+            records = st.find_preframe_records(payload, grid["offset"])
+            if records:
+                ratios.append(grid["count"] / len(records))
+        self.assertEqual(len(ratios), 29)
+        self.assertTrue(all(1.5 < value < 4.0 for value in ratios))
+        self.assertLess(statistics.median(ratios), 3.0)
+
     def test_gttf_path_heading_is_xz_tangent(self):
         """The 24-byte path heading is the world x/z tangent of its own points."""
         import glob

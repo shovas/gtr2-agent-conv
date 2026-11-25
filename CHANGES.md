@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 20:00:00 -0500 - GTTF path count ratio
+- Verified frame/path-record count ratio is bounded (median 2.44, range 1.93–3.49) across 29 ghosts; full-tier validator added.
+
 ## 2026-11-28 19:30:00 -0500 - f0 invariant warnings
 - `gmt_tool.py f0` now warns on unexpected mesh-0 near-equal markers and large later-mesh half-deltas; regression test added.
 

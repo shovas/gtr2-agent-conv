@@ -105,6 +105,10 @@ Assigned each frame to one of six gear bands derived from the F550 `.grb`/`.hdc`
 
 This supports f4 as a throttle/demand-like channel on the reference line (stronger in low gears), but neither channel reproduces the ghost's own pedal positions; exact semantics remain unclaimed. Full-tier permutation-controlled regression test added.
 
+## GTTF path record count ratio (2026-11-28)
+
+Across all 29 ghosts, the number of 63-byte frames divided by the number of 24-byte pre-frame path records is bounded: median **2.44**, range **1.93–3.49** (10th–90th percentile 2.08–3.05). This is a useful structural validator for path-grid detection, not a semantic decoding. Full-tier regression test added.
+
 ## GTTF path records: heading validates the x field (2026-11-28)
 
 The 24-byte racing-line record's third float is a heading following the same convention as ghost `+12`: **`heading = atan2(dx, dz)`** using its own x (field 5) and z (field 1). Median circular coherence across 15 ghosts is **0.973** vs **0.086** permuted; 13/15 files prefer this sign/axis convention outright. This independently confirms that field 5 is world x and removes the earlier ambiguity about the missing coordinate. Full-tier regression test added.
