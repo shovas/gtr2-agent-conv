@@ -1006,6 +1006,41 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertEqual(checked, 204)
 
+    def test_gsc_gmt_no_alignment_counterpart(self):
+        """No GSC GMT has a same-name/same-size plain GTR2/GTL counterpart."""
+        import glob
+        import mas_tool
+        plain = set()
+        gsc = set()
+        for root in ("GTR2Steam", "GTLSteam"):
+            pattern = str(ROOT.parent / root / "**" / "*")
+            for path in glob.glob(pattern, recursive=True):
+                if not path.lower().endswith((".gtr", ".gtl")):
+                    continue
+                try:
+                    _, entries = mas_tool.read_archive(path)
+                except Exception:
+                    continue
+                for entry in entries:
+                    if entry.name.lower().endswith(".gmt") and entry.data:
+                        plain.add((entry.name.lower().replace("\\", "/")
+                                   .rsplit("/", 1)[-1], len(entry.data)))
+        for root in ("Automobilista", "StockCarExtreme", "GameStockCar",
+                     "CopaPetrobrasdeMarcas"):
+            pattern = str(ROOT.parent / root / "**" / "*.mas")
+            for path in glob.glob(pattern, recursive=True):
+                try:
+                    _, entries = mas_tool.read_archive(path)
+                except Exception:
+                    continue
+                for entry in entries:
+                    if entry.name.lower().endswith(".gmt") and entry.data:
+                        gsc.add((entry.name.lower().replace("\\", "/")
+                                 .rsplit("/", 1)[-1], len(entry.data)))
+        self.assertGreater(len(plain), 20000)
+        self.assertGreater(len(gsc), 20000)
+        self.assertEqual(len(plain & gsc), 0)
+
     def test_gttf_steering_vs_dsi_curvature(self):
         """Ghost +16 shows a modest relation to DSI instructor-line curvature."""
         import glob

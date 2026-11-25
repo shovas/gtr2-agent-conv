@@ -5,6 +5,9 @@ Newest-first change log. Timestamps use repository commit dates (ISO 8601, local
 ## 2026-11-26 16:30:00 -0500 - AIW Features capacity negative
 - Documented that AIW `[Features]` numbers are capacity defaults rather than section counts (startinggrid 104 vs GRID 36 typical); full-tier corpus-fact regression test added.
 
+## 2026-11-27 08:00:00 -0500 - GSC GMT alignment approach blocked
+- Found zero same-name+same-size GMT pairs among 25,210 plain GTR2/GTL and 29,033 GSC members, so masked GSC meshes cannot be byte-aligned with plain counterparts to derive the bulk region mask. Full-tier regression test added.
+
 ## 2026-11-27 07:00:00 -0500 - GTTF steering vs DSI curvature
 - Correlated ghost +16 with DSI instructor-line curvature across 27 matched tracks: median r −0.171, median |r| 0.241, 17/27 above 0.2 — modest curvature relationship supporting steering semantics, exact units/sign unresolved. Full-tier regression test added.
 
