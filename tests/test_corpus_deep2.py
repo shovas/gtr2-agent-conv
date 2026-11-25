@@ -979,6 +979,37 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertEqual(jca_crypt.MAGIC, 0xFFFFB10F)
         self.assertEqual(jca_crypt.XOR_BYTE, 0xEB)
 
+    def test_decrypted_gm_config_vocabularies(self):
+        """Decrypted SVM/GMB configs match corpus key and numeric invariants."""
+        import glob
+        import os
+        import isi_gm_crypt as gm
+        svm = gmb = 0
+        for root in ("hand_selected", "TC2000", "SimuladorTopRace2009",
+                     "SuperleagueFormula2009"):
+            paths = []
+            for ext in ("*.svm", "*.hdv", "*.ini", "*.tbc", "*.pm"):
+                paths.extend(glob.glob(str(ROOT.parent / root / "**" / ext),
+                                       recursive=True))
+            for p in paths:
+                if not os.path.isfile(p):
+                    continue
+                data = Path(p).read_bytes()
+                if not data.startswith(b"//[[gM"):
+                    continue
+                name = gm.detect_keynum(data)
+                if name is None:
+                    continue
+                text = gm.decrypt_gm_file(data, gm.GM_KEYNUMS[name])
+                variant = "svm" if data[7:12].startswith(b"1.000") else "gmb"
+                self.assertEqual(stt.validate_decrypted_gm_config(text, variant), [], p)
+                if variant == "svm":
+                    svm += 1
+                else:
+                    gmb += 1
+        self.assertEqual(svm, 8)
+        self.assertEqual(gmb, 18)
+
     def test_encrypted_gm_configs(self):
         """Every encrypted .svm / gMb config decrypts to real text."""
         import glob

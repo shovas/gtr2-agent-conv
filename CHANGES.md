@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 01:00:00 -0500 - Decrypted config invariants
+- Surveyed all 26 distinct decrypted gM configs and added `validate_decrypted_gm_config()`: 8 rFactor setups share 15 universal keys with tight gear/aero bounds; 18 GTR-family configs have per-family vocabularies and 24 bounded chassis/brake fields. Full-tier regression test, targeted run 1 s.
+
 ## 2026-11-26 16:30:00 -0500 - AIW Features capacity negative
 - Documented that AIW `[Features]` numbers are capacity defaults rather than section counts (startinggrid 104 vs GRID 36 typical); full-tier corpus-fact regression test added.
 

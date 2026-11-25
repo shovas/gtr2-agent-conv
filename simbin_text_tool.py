@@ -1347,6 +1347,75 @@ RCD_NUMERIC_BOUNDS = {
 }
 
 
+DECRYPTED_SVM_KEYS = ("vehicleclasssetting", "upgradesetting", "notes",
+                      "symmetric", "rwsetting", "gear1setting", "gear2setting",
+                      "gear3setting", "gear4setting", "gear5setting",
+                      "downforce", "balance", "ride", "gearing", "custom")
+
+DECRYPTED_SVM_BOUNDS = {
+    "symmetric": (1.0, 1.0),
+    "rwsetting": (0.0, 35.0),
+    "gear1setting": (1.0, 3.0),
+    "gear2setting": (10.0, 18.0),
+    "gear3setting": (16.0, 26.0),
+    "gear4setting": (20.0, 33.0),
+    "gear5setting": (22.0, 39.0),
+    "downforce": (0.5, 0.5),
+    "balance": (0.5, 0.5),
+    "ride": (0.5, 0.5),
+    "gearing": (0.5, 0.5),
+    "custom": (1.0, 1.0),
+}
+
+DECRYPTED_GMB_BOUNDS = {
+    "bumptravel": (-0.04, -0.005),
+    "reboundtravel": (-0.158, -0.043),
+    "bumpstopspring": (50000.0, 180000.0),
+    "bumpstoprisingspring": (7000000.0, 45000000.0),
+    "bumpstopdamper": (2000.0, 2500.0),
+    "bumpstoprisingdamper": (700000.0, 5000000.0),
+    "bumpstage2": (0.06, 0.095),
+    "reboundstage2": (-0.09, -0.06),
+    "frictiontorque": (1.5, 9.78),
+    "spininertia": (1.039, 1.727),
+    "cgoffsetx": (-0.03, 0.03),
+    "cambersetting": (2.0, 24.0),
+    "pressuresetting": (10.0, 103.0),
+    "packersetting": (0.0, 14.0),
+    "springsetting": (0.0, 16.0),
+    "rideheightsetting": (0.0, 8.0),
+    "slowbumpsetting": (3.0, 14.0),
+    "fastbumpsetting": (1.0, 8.0),
+    "slowreboundsetting": (1.0, 14.0),
+    "fastreboundsetting": (1.0, 8.0),
+    "brakediscsetting": (0.0, 1.0),
+    "brakepadsetting": (1.0, 2.0),
+    "brakediscinertia": (0.8, 1.25),
+    "braketorque": (1700.0, 3650.0),
+}
+
+
+def validate_decrypted_gm_config(data: bytes | str, variant: str) -> list[str]:
+    """Validate corpus-observed vocabulary/bounds of decrypted gM configs.
+
+    ``variant='svm'`` covers the 8 distinct decrypted rFactor setups;
+    ``variant='gmb'`` covers the 18 decrypted GTR-family config files.
+    """
+    text = data if isinstance(data, str) else data.decode("latin-1")
+    keys: dict[str, list[str]] = {}
+    for match in re.finditer(r"(?mi)^\s*([A-Za-z_][\w]*)\s*=\s*([^\r\n]+)", text):
+        keys.setdefault(match.group(1).lower(), []).append(
+            match.group(2).split("//", 1)[0].strip())
+    if variant == "svm":
+        missing = [k for k in DECRYPTED_SVM_KEYS if k not in keys]
+        if missing:
+            return [f"missing decrypted SVM key {missing[0]}"]
+        return _check_numeric_bounds(text, DECRYPTED_SVM_BOUNDS)
+    if variant == "gmb":
+        return _check_numeric_bounds(text, DECRYPTED_GMB_BOUNDS)
+    return [f"unknown variant {variant}"]
+
+
 def validate_rcd_numeric(data: bytes | str) -> list[str]:
     """Check driver-stat bounds across 2,144 rF1-era `.rcd` files."""
     text = data if isinstance(data, str) else data.decode("latin-1")
