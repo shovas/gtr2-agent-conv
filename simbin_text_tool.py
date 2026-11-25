@@ -1158,6 +1158,46 @@ def parse_cam_control_points(data: bytes | str) -> list[tuple[float, float, floa
     return points
 
 
+RCD_NUMERIC_BOUNDS = {
+    "aggression": (20.0, 99.94),
+    "speed": (43.0, 100.31),
+    "courtesy": (23.0, 99.0),
+    "crash": (0.0, 60.7),
+    "recovery": (1.0, 100.0),
+    "composure": (0.01, 99.79),
+    "completedlaps": (0.0, 102.03),
+    "minracingskill": (0.9, 99.64),
+    "reputation": (8.08, 99.24),
+    "tiremanagement": (20.0, 100.0),
+    "startskill": (0.0, 95.0),
+    "starts": (0.0, 265.0),
+    "poles": (0.0, 43.0),
+    "wins": (0.0, 53.0),
+    "driverschampionships": (0.0, 4.0),
+    "concentration": (50.0, 97.0),
+    "fitness": (55.0, 95.0),
+    "intimidation": (35.0, 99.0),
+    "status": (42.0, 98.0),
+}
+
+
+def validate_rcd_numeric(data: bytes | str) -> list[str]:
+    """Check driver-stat bounds across 2,144 rF1-era `.rcd` files."""
+    text = data if isinstance(data, str) else data.decode("latin-1")
+    for match in re.finditer(r"(?mi)^\s*([A-Za-z_][\w]*)\s*=\s*([^\r\n]+)", text):
+        key = match.group(1).lower()
+        if key not in RCD_NUMERIC_BOUNDS:
+            continue
+        try:
+            value = float(match.group(2).split("//", 1)[0].strip())
+        except ValueError:
+            continue
+        low, high = RCD_NUMERIC_BOUNDS[key]
+        if not (low <= value <= high):
+            return [f"{key}={value} outside [{low}, {high}]"]
+    return []
+
+
 def validate_gen_numeric(data: bytes | str) -> list[str]:
     """Check numeric vector bounds in rF1-era `.gen` mesh configs.
 

@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 12:00:00 -0500 - RCD numeric bounds
+- Added `simbin_text_tool.validate_rcd_numeric()` with 19 driver-stat bounds over 3,310 local `.rcd` files; widened envelopes to include generated/modded values. Full-tier regression test added.
+
 ## 2026-11-26 11:30:00 -0500 - CAM ControlPoint negative
 - Added `parse_cam_control_points()` and documented that 290 ControlPoint coordinates in GTR2/GTL/Race07 CAM files are camera-path spline nodes, not AIW waypoint references. Full-tier corpus-fact regression test added.
 

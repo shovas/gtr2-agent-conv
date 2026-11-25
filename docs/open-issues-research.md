@@ -355,6 +355,8 @@ GTR1 coverage is now complete: a full `../GTR1Vanilla` scan (33,477 GMTs with th
 
 - **GDB TerrainDataFile references**: `parse_gdb_terrain_refs()` extracts `.tdf` overrides from rF1-era event files. RF1Vanilla has 26 references, all resolving to loose or archived `.tdf` files; F1C/F12002/NT2003 event files contain no `TerrainDataFile` keys. Full-tier regression test; no exceptions.
 
+- **RCD numeric bounds**: `RCD_NUMERIC_BOUNDS` covers 19 driver-stat keys across 3,310 `.rcd` files in the full local corpus. Initial envelopes from game installs were too tight for generated/modded trees (`minracingskill=0.9`, `composure=0.01`, `crash=60.7`, `recovery=100.0`), so they were widened to the global observed range. Full-tier regression test passes.
+
 - **CAM ControlPoint vs AIW waypoints (negative)**: `parse_cam_control_points()` extracts 290 XYZ ControlPoint triples from GTR2/GTL/Race07 `.cam` files with sibling AIWs. None lies within 2 m of any AIW waypoint (nearest examples 14–17 m), with or without the documented X/Z sign flip. ControlPoints are camera-path spline nodes, not waypoint references; full-tier corpus-fact regression test.
 
 - **GEN numeric fields**: `.gen` mesh configs are rF1-era (272 files across ten corpora; none in GTR2/GTL installs). `LODIn` components are 0..350, `LODOut` 0..3000, and all 167 `ReflectPlane` values are unit 3-vectors with a zero fourth component. `validate_gen_numeric()` with full-tier regression test.

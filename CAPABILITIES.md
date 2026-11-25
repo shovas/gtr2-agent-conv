@@ -163,6 +163,8 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 
 - **CAM ControlPoint scope**: `parse_cam_control_points()` extracts camera-path spline nodes; 290 sampled points do not map to AIW waypoints. Full-tier corpus-fact test.
 
+- **RCD numeric validation**: `validate_rcd_numeric()` checks 19 driver-stat bounds across all 3,310 local `.rcd` files, including widened envelopes for generated/modded setups. Full-tier regression test.
+
 ## Coverage gaps (documented, not yet addressed)
 - **GTR 2004 corpus** (`../GTR1Vanilla`, third GMT magic `...bba6bf90` at 0x04) is fully decoded by `gmt_semantic.py` (descriptor grid + descriptor-less object-mesh path; 33,477/33,477 files). `gmt_format.py` itself still targets the GTL/GTR2 layout only; use `gmt_semantic.py` for GTR1. See `docs/binary-formats.md`.
 - **Untested ISI signatures**: `isi_crypt.GAMES` supports 8 signatures but real corpora exist only for rFactor and Game Stock Car; ARCA Sim Racing, Simulador Turismo Carretera, Top Race 2009, Superleague Formula, STC 2012 and Formula Truck have no local corpus.
