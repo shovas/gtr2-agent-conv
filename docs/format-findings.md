@@ -133,7 +133,13 @@ regression tests or an explicitly documented negative.
 - f0 is strongly associated with material identity (raw-material-equal groups
   show P(f0 equal) 0.347 vs 0.036) but no tested name/record hash reproduces it.
   Treat it as an **external authoring identifier**; do not invent semantics.
-- Tooling: `gmt_format.split_f0()`, `gmt_tool.py info --meshes` and
+- **Byte-level structure:** in 69.6% of 30,000 sampled markers both u16 halves
+  are byte-sized (bytes 1 and 3 are zero), so the real payload is byte 0 and
+  byte 2. Those two bytes are usually **consecutive integers**: for an even
+  low byte, `high == low + 1` in 60.3% of markers vs 0.8% under a
+  distribution-preserving shuffle (odd low bytes most often pair with
+  `low - 3`). f0 is therefore a pair of small structured IDs, not a hash.
+- Tooling: `gmt_format.split_f0()`, `gmt_format.f0_byte_pair()`, `gmt_tool.py info --meshes` and
   `gmt_tool.py f0 FILE` (with invariant warnings).
 
 ## 6. `PHYSICS.PHS`

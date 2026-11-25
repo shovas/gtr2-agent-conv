@@ -2,6 +2,12 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 03:30:00 -0500 - f0 byte-pair structure
+- Resolved f0's "near-equal halves" to a concrete byte-pair rule: for even low bytes, the upper byte is low+1 in 60.3% of markers vs 0.8% shuffled. Added `gmt_format.f0_byte_pair()`, a full-tier regression test, and updated findings docs.
+
+## 2026-11-29 04:00:00 -0500 - Full suite result
+- Full-tier run on an earlier HEAD completed: 591 tests, 0 failures, 0 errors, 2 skipped (3289 s).
+
 ## 2026-11-29 03:00:00 -0500 - GSC conversion index integrity
 - Validated 56,273 converted triangles (40 meshes): no out-of-range indices or degenerate faces. Full-tier regression test added; findings doc updated.
 

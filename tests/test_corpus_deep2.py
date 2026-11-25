@@ -1873,6 +1873,54 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertGreater(max(halves), 10 * len(shaders))
         self.assertGreater(len(set(halves)), 5 * len(shaders))
 
+    def test_f0_byte_pair_consecutive_even(self):
+        """f0's two meaningful bytes are usually consecutive (n, n+1)."""
+        import glob
+        import random
+        import statistics
+        import gmt_format as gf
+        import mas_tool
+        lows = []
+        highs = []
+        for root, ext in (("GTR2Steam", ".gtr"), ("GTLSteam", ".gtl")):
+            for archive in glob.glob(str(ROOT.parent / root / "**" / f"*{ext}"),
+                                     recursive=True):
+                try:
+                    _, entries = mas_tool.read_archive(archive)
+                except Exception:
+                    continue
+                for entry in entries:
+                    if not entry.name.lower().endswith(".gmt") or not entry.data:
+                        continue
+                    try:
+                        parsed = gf.parse_gmt("x.gmt", entry.data)
+                    except Exception:
+                        continue
+                    for mesh in parsed.meshes:
+                        marker = gf.mesh_marker(mesh)
+                        if marker:
+                            low, high = gf.f0_byte_pair(marker)
+                            lows.append(low)
+                            highs.append(high)
+                if len(lows) >= 30000:
+                    break
+            if len(lows) >= 30000:
+                break
+        self.assertGreater(len(lows), 20000)
+
+        def even_consecutive(lo_values, hi_values):
+            pairs = [(a, b) for a, b in zip(lo_values, hi_values) if a % 2 == 0]
+            return sum(b == a + 1 for a, b in pairs) / len(pairs)
+
+        observed = even_consecutive(lows, highs)
+        shuffled = highs[:]
+        random.seed(57)
+        baseline = statistics.mean(even_consecutive(lows, random.sample(shuffled,
+                                                                        len(shuffled)))
+                                   for _ in range(5))
+        self.assertGreater(observed, 0.5)
+        self.assertGreater(observed, 20 * max(baseline, 0.001))
+
     def test_f0_halves_near_equal(self):
         """f0 packs two nearly-equal 16-bit identifiers."""
         import glob

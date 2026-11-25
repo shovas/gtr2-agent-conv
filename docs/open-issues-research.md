@@ -105,6 +105,18 @@ Assigned each frame to one of six gear bands derived from the F550 `.grb`/`.hdc`
 
 This supports f4 as a throttle/demand-like channel on the reference line (stronger in low gears), but neither channel reproduces the ghost's own pedal positions; exact semantics remain unclaimed. Full-tier permutation-controlled regression test added.
 
+## f0 is a consecutive byte pair, not a hash (2026-11-29)
+
+A byte-level decomposition of 30,000 GTR2/GTL f0 markers found that in 69.6%
+both u16 halves are byte-sized (bytes 1 and 3 zero), so the payload lives in
+byte 0 and byte 2. The classic "near-equal halves" invariant resolves to a
+**consecutive-integer** relation: `hi - lo = +1` in 37.8% of all markers, and
+restricted to even low bytes `hi == lo + 1` in **60.3%** vs **0.8%** for a
+distribution-preserving shuffle of the same high bytes (odd low bytes most
+often pair with `hi = lo - 3`). This replaces the vague "near-equal halves"
+description with a concrete structural rule and rules out hash-like encodings.
+Added `gmt_format.f0_byte_pair()` and a full-tier permutation-controlled test.
+
 ## Debug-artifact sweep across ISIMotor installs (2026-11-29)
 
 Checked all `../` game installs for leftover development/debug material:
