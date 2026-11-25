@@ -1006,6 +1006,50 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertEqual(checked, 204)
 
+    def test_gsc_mask_not_derived_from_member_metadata(self):
+        """GSC GMT XOR masks do not match archive member metadata hashes."""
+        import glob
+        import zlib
+        import gmt_semantic
+        import isi_crypt
+        import mas_tool
+        rows = []
+        for root in ("Automobilista", "StockCarExtreme", "GameStockCar",
+                     "CopaPetrobrasdeMarcas"):
+            for archive in glob.glob(str(ROOT.parent / root / "**" / "*.mas"),
+                                     recursive=True):
+                try:
+                    _, entries = mas_tool.read_archive(archive)
+                except Exception:
+                    continue
+                for entry in entries:
+                    if not entry.name.lower().endswith(".gmt") or len(entry.data) < 0x400:
+                        continue
+                    try:
+                        decrypted = isi_crypt.decrypt_bytes(entry.data, 1)
+                    except Exception:
+                        continue
+                    mask = gmt_semantic.gsc_xor_magic_key(decrypted)
+                    if mask is None or mask == 0:
+                        continue
+                    crc = zlib.crc32(entry.data)
+                    candidates = {
+                        entry.size & 0xFF, entry.zsize & 0xFF,
+                        entry.flags & 0xFF, crc & 0xFF, (crc >> 8) & 0xFF,
+                        zlib.adler32(entry.data) & 0xFF,
+                        sum(entry.data[:4096]) & 0xFF,
+                    }
+                    rows.append((mask, candidates))
+                    if len(rows) >= 120:
+                        break
+                if len(rows) >= 120:
+                    break
+            if len(rows) >= 120:
+                break
+        self.assertEqual(len(rows), 120)
+        matches = sum(1 for mask, candidates in rows if mask in candidates)
+        self.assertLess(matches, 15)  # ~4 expected for 120 x 7 byte values
+
     def test_gsc_mask_not_derived_from_member_name(self):
         """GSC GMT XOR masks do not match name-based hashes."""
         import glob
