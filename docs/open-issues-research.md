@@ -355,6 +355,8 @@ GTR1 coverage is now complete: a full `../GTR1Vanilla` scan (33,477 GMTs with th
 
 - **GDB TerrainDataFile references**: `parse_gdb_terrain_refs()` extracts `.tdf` overrides from rF1-era event files. RF1Vanilla has 26 references, all resolving to loose or archived `.tdf` files; F1C/F12002/NT2003 event files contain no `TerrainDataFile` keys. Full-tier regression test; no exceptions.
 
+- **AIW TELEPORT consistency**: `validate_aiw_teleport()` checks 447 AIWs: GridIndex values are unique, with a contiguous main run 0..N-1 and optional pit-box indices >=100 appended (e.g. `100, 103` in `Curitiba_Oval`, `Macau`, `Puebla`). Pos and Ori counts always equal GridIndex counts (447/447). Full-tier regression test.
+
 - **AIW GRID/PITS consistency**: `validate_aiw_grid_pits()` checks 465 AIWs: GRID Pos count always equals GridIndex count; garage Pos/Ori counts match and are 2× or 3× pit counts (459 3×, 5 Brianza files 2×); optional SCR counts match garage counts in all 36 files that have them. `Brianza_JR.AIW` has one extra TeamIndex entry and is exempted via a flag. Full-tier regression test.
 
 - **GDB texture-reference negative**: none of the 252 GTR2/GTL/Race07 `.gdb` files contains any key mentioning sky, texture, DDS, TGA or image. `Weather` is a numeric index (0–4, 237 occurrences), not a texture filename. Sky/environment maps are selected by `.trk`/`.cam` files, not event GDBs. Full-tier corpus-fact regression test.

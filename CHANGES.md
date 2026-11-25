@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 16:00:00 -0500 - AIW TELEPORT validator
+- Added `simbin_text_tool.validate_aiw_teleport()` covering index uniqueness, contiguous main runs, and optional pit-box indices >=100 across 447 AIWs. Full-tier regression test added.
+
 ## 2026-11-26 15:30:00 -0500 - AIW GRID/PITS validator
 - Added `simbin_text_tool.validate_aiw_grid_pits()` with GRID index/position parity and 2×/3× garage-to-pit ratios across 465 AIWs; documented single Brianza TeamIndex exception. Full-tier regression test added.
 

@@ -329,6 +329,31 @@ def validate_aiw_waypoints(aiw: AIW) -> list[str]:
     return problems
 
 
+def validate_aiw_teleport(data: bytes | str) -> list[str]:
+    """Check TELEPORT index/position/orientation consistency.
+
+    Corpus-verified on 447 AIWs: indices are unique; the main run starts at 0
+    and is contiguous, with optional pit-box indices >=100 appended (e.g.
+    `100, 103`). Pos and Ori counts always equal GridIndex counts.
+    """
+    text = data if isinstance(data, str) else data.decode("latin-1")
+    match = re.search(r"(?ms)^\[TELEPORT\]\r?\n(.*?)(?=^\[|\Z)", text)
+    if not match:
+        return []
+    body = match.group(1)
+    indices = [int(x) for x in re.findall(r"(?mi)^GridIndex\s*=\s*(\d+)", body)]
+    positions = re.findall(r"(?mi)^Pos\s*=\s*\(([^)]*)\)", body)
+    orientations = re.findall(r"(?mi)^Ori\s*=\s*\(([^)]*)\)", body)
+    if not (len(indices) == len(positions) == len(orientations)):
+        return ["TELEPORT index/Pos/Ori counts differ"]
+    if len(set(indices)) != len(indices):
+        return ["TELEPORT duplicate GridIndex"]
+    main = [i for i in indices if i < 100]
+    if main != list(range(len(main))):
+        return ["TELEPORT main indices are not contiguous from 0"]
+    return []
+
+
 def validate_aiw_grid_pits(data: bytes | str,
                             allow_team_mismatch: bool = False) -> list[str]:
     """Check GRID/PITS index and position-count invariants.
