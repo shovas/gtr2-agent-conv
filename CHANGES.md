@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 21:30:00 -0500 - PHS cipher-header negatives
+- Confirmed no ISI/JCA/gMb header in any of the five GTL PHS members at offsets 0..64; exactly one opaque member remains. Full-tier guard test added; no speculative decoder.
+
 ## 2026-11-29 21:00:00 -0500 - CAM pass-through and f0 CRC negative
 - Verified the rF1→GTR2 pipeline leaves CAM files byte-identical (50/50), consistent with the cross-generation CAM/AIW convention. Recorded that f0 is not a CRC of geometry bytes. Full-tier pass-through test added.
 

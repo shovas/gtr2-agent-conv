@@ -143,6 +143,16 @@ column-7/column-1 stream invariant was also re-scoped to the two-stream layout
 (it does not hold for single-block UVs, which end in zeros). All 35 module
 tests and the five affected full-tier tests pass after the fix.
 
+## PHS cipher-header negatives (2026-11-29)
+
+Scanned all five GTL PHS members for an ISI `crypt_info` signature at byte
+offsets 0..64 (none matched any known `GAMES` signature), for the JCA magic
+`0fb1ffff` and the gMb wrapper `//[[` (absent from every member), and confirmed
+exactly one member lacks a PAR2 packet entirely — the opaque 13,064-byte
+`PHYSICS.PHS`. gzip-like byte sequences inside the large members do not
+decompress and are chance occurrences. The PHS cipher remains unidentified;
+full-tier guard test added.
+
 ## f0 is not a geometry CRC (2026-11-29)
 
 Tested CRC32 of the first vertex's 32 bytes and of the first eight vertices

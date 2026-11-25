@@ -3972,6 +3972,34 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertGreater(statistics.median(observed),
                            5 * statistics.median(baseline))
 
+    def test_phs_members_have_no_recognizable_cipher_header(self):
+        """The five GTL PHS members expose no ISI/JCA/gMb header."""
+        import isi_crypt
+        import mas_tool
+        archives = list((ROOT.parent / "GTLSteam").rglob("*.gtl"))
+        members = []
+        for archive in archives:
+            try:
+                _, entries = mas_tool.read_archive(str(archive))
+            except Exception:
+                continue
+            members.extend(entry.data for entry in entries
+                           if entry.name.lower().endswith(".phs") and entry.data)
+        self.assertEqual(len(members), 5)
+        magics = (bytes.fromhex("0fb1ffff"), bytes.fromhex("2f2f5b5b"))
+        par2 = b"PAR2\0PKT"
+        opaque = 0
+        for data in members:
+            for offset in range(0, 65):
+                if offset + 16 > len(data):
+                    break
+                sign, _ = isi_crypt.crypt_info(data[offset:])
+                self.assertNotIn(sign, isi_crypt.GAMES)
+            for magic in magics:
+                self.assertLess(data.find(magic), 0)
+            opaque += data.find(par2) < 0
+        self.assertEqual(opaque, 1)
+
     def test_vcr_replay_headers_parse(self):
         """All shipped .Vcr replays parse as IRSR with known session values."""
         import gzip
