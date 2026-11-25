@@ -105,6 +105,10 @@ Assigned each frame to one of six gear bands derived from the F550 `.grb`/`.hdc`
 
 This supports f4 as a throttle/demand-like channel on the reference line (stronger in low gears), but neither channel reproduces the ghost's own pedal positions; exact semantics remain unclaimed. Full-tier permutation-controlled regression test added.
 
+## GTTF path f4 vs curvature (2026-11-28)
+
+Complementary to f3: path `f4` has median |correlation| with racing-line curvature **0.072** vs **0.020** permuted across 29 ghosts, and the signed correlation is positive in 23/29 files (median +0.045). This is a reproducible association but does not support a simple "throttle decreases in corners" reading; curvature, gear and engine band are confounded on this reference line. Full-tier regression test added.
+
 ## GTTF path f3 vs curvature (2026-11-28)
 
 Using curvature computed from the 24-byte path records' own x/z points, path `f3` shows a mild but reproducible association: median |r| **0.060** vs **0.019** permuted across 29 ghosts, with 20/29 files above 2× baseline. Curvature is higher where `f3 > 0.9` (median 0.265 vs 0.216 overall). This is consistent with a brake-like channel but does not establish pedal semantics. Full-tier regression test added.

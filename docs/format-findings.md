@@ -84,6 +84,8 @@ regression tests or an explicitly documented negative.
   - `path_f4` decreases with gear index (r −0.200 vs −0.005) — throttle-like;
   - `path_f3` rises mildly with racing-line curvature (median |r| 0.060 vs
     0.019 permuted), consistent with a brake-like channel;
+  - `path_f4` also tracks curvature (median |r| 0.072 vs 0.020, positive in
+    23/29 ghosts) — an association, not a simple throttle interpretation;
   - `+48` low i16 tracks steering/path f3; high i16 tracks engine +32;
   - `+36` is an exact quantized float lattice but its semantics are unresolved;
   - frame `+16` has a weak, non-clamp-driven engine coupling (|r| 0.152).

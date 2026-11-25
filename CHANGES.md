@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 23:00:00 -0500 - GTTF path f4 curvature link
+- Found path f4 tracks curvature (median |r| 0.072 vs 0.020 permuted, positive in 23/29); documented as an association without pedal semantics. Full-tier test added.
+
 ## 2026-11-28 22:30:00 -0500 - GTTF path f3 curvature link
 - Found path f3 tracks racing-line curvature (median |r| 0.060 vs 0.019 permuted), supporting a brake-like interpretation. Full-tier test added; findings docs updated.
 
