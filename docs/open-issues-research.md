@@ -35,6 +35,10 @@ Comparing 703 identically named mesh families present in two or three of GTR2Ste
 
 New invariant from a 500-file GTR2/GTL mesh sweep: among LOD/number-variant groups whose members each have ≥2 submeshes, **11/37 (29.7%)** share an *identical ordered f0 marker list* (e.g. `AMBULANCE00/01/N01.GMT` all carry `0, 0xa0009e, 0x8a008d, 0xae00af`), versus a 0% baseline under randomized grouping. Thus f0 encodes something tied to the mesh family/material setup rather than per-file or per-LOD state — a refinement of the earlier "per-mesh marker" finding. Exact halfword matches to `material_index` remain below 25% of markers in the same sweep, so the specific encoding is still unresolved. Full-tier regression test added.
 
+## SCE embedded bounds vs GTR2 targets (2026-11-27)
+
+Cross-checked `SCE_EMBEDDED_NUMERIC_BOUNDS` against the GTR2 target validators: SCE `.hdv` shares 19 keys with `HDC_NUMERIC_BOUNDS` but only **3** have source ranges inside the target (16 incompatible: e.g. `bumptravel` −0.085..0.026 vs −0.12..−0.02, `pressuresetting` 1..50 vs 30..65, `braketorque` 0..4800 vs 1017..4000). SCE `.tbc` shares 15 keys with `TYR_NUMERIC_BOUNDS` with only **4** compatible (11 incompatible: `radius` 0.125..0.365 vs 0.249..0.355, `damper` 360..1100 vs 1000..3850, `step` 0.0033..0.05 vs constant 0.009). This extends the earlier Marcas negative: a GSC-era → GTR2 adapter needs explicit rescaling or target templates for both families. Full-tier regression test added.
+
 ## GTTF heading vs DSI tangents in y/z plane (2026-11-27) — negative
 
 After establishing that ghost `+0` = AIW y and `+1` = AIW z, recomputed DSI instructor-line tangents in the same (y,z) plane and compared them with ghost `+12` heading across 27 matched tracks. Even allowing four orientation conventions (`±atan2(dy,dz)`, `±atan2(dz,dy)`), the **best per-file circular coherence is only 0.318 median**, with no single convention dominant. So `+12` does not encode the DSI tangent direction despite sharing two coordinate axes; its earlier AIW-direction negative is confirmed in the correct frame. Full-tier regression test added.

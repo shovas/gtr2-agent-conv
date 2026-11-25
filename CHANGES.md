@@ -5,6 +5,9 @@ Newest-first change log. Timestamps use repository commit dates (ISO 8601, local
 ## 2026-11-26 16:30:00 -0500 - AIW Features capacity negative
 - Documented that AIW `[Features]` numbers are capacity defaults rather than section counts (startinggrid 104 vs GRID 36 typical); full-tier corpus-fact regression test added.
 
+## 2026-11-27 13:00:00 -0500 - SCE bounds vs GTR2 targets negative
+- Cross-checked SCE embedded physics bounds with GTR2 `.hdc`/`.tyr` validators: 16/19 shared HDV keys and 11/15 shared TBC keys have incompatible ranges; adapter must rescale/use templates. Full-tier regression test added.
+
 ## 2026-11-27 12:00:00 -0500 - GTTF heading vs DSI tangent negative
 - Recomputed DSI tangents in the mapped y/z frame: best per-file coherence with ghost +12 is only 0.318 median across 27 tracks, with no dominant convention. Full-tier regression test added.
 

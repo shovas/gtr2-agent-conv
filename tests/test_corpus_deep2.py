@@ -1006,6 +1006,25 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertEqual(checked, 204)
 
+    def test_sce_bounds_vs_gtr2_targets(self):
+        """SCE embedded physics ranges are incompatible with GTR2 targets."""
+        import simbin_text_tool as stt
+        for source, target, name in (
+                ("hdv", stt.HDC_NUMERIC_BOUNDS, "hdc"),
+                ("tbc", stt.TYR_NUMERIC_BOUNDS, "tyr")):
+            bounds = stt.SCE_EMBEDDED_NUMERIC_BOUNDS[source]
+            shared = set(bounds) & set(target)
+            compatible = [k for k in shared
+                          if target[k][0] <= bounds[k][0]
+                          and bounds[k][1] <= target[k][1]]
+            self.assertEqual(len(shared), 19 if source == "hdv" else 15)
+            self.assertLessEqual(len(compatible), 4)
+            self.assertGreaterEqual(len(shared) - len(compatible),
+                                    15 if source == "hdv" else 10)
+        self.assertEqual(stt.SCE_EMBEDDED_NUMERIC_BOUNDS["hdv"]["bumptravel"],
+                         (-0.085, 0.026))
+        self.assertEqual(stt.HDC_NUMERIC_BOUNDS["bumptravel"], (-0.12, -0.02))
+
     def test_gttf_heading_vs_dsi_tangent_negative(self):
         """Ghost +12 has no consistent DSI tangent relation in the y/z plane."""
         import glob
