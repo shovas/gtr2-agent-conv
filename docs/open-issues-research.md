@@ -122,6 +122,16 @@ word. Replay frame layout is therefore a distinct, undecoded format —
 recorded as a new avenue, not claimed as solved. Full-tier header regression
 test added.
 
+## GTL meshes are already new-layout (2026-11-29)
+
+Sampled 2,529 GMT members from GTL `.gtl` archives: every one carried the new
+GTR2/GTL magic at offset 0x08 and none the old magic at 0x1D4. This confirms
+that GTL→GTR2 conversion does not require mesh relayout — only the TRK/GDB/
+archive conventions handled by `gtl_to_gtr2.py`. Full-tier test added.
+
+Note: the fresh full-suite run on an older HEAD exceeded the 60-minute shell
+timeout and was terminated without a result; it is not cited as verification.
+
 ## f0 high byte vs material index: mesh-0 artefact (2026-11-29)
 
 A byte-level test found the f0 high byte equals the mesh's material index in

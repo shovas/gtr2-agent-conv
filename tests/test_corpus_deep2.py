@@ -3611,6 +3611,31 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertLess(statistics.median(observed), -0.1)
         self.assertLess(statistics.median(observed), 2 * statistics.median(baseline))
 
+    def test_gtl_gmts_already_new_layout(self):
+        """GTL archive GMTs need no old-to-new mesh relayout."""
+        import glob
+        import gmt_format as gf
+        import mas_tool
+        checked = 0
+        for archive in glob.glob(str(ROOT.parent / "GTLSteam" / "**" / "*.gtl"),
+                                 recursive=True):
+            try:
+                _, entries = mas_tool.read_archive(archive)
+            except Exception:
+                continue
+            for entry in entries:
+                if not entry.name.lower().endswith(".gmt") or not entry.data:
+                    continue
+                data = entry.data
+                if len(data) >= 24 and data[8:24] == gf.GMT_MAGIC:
+                    checked += 1
+                elif len(data) >= 0x1E4 and data[0x1D4:0x1E4] == bytes.fromhex(
+                        "c8cfd2d8ced8e6c3d6ded8bebba7bf90"):
+                    self.fail(f"old-layout GMT in GTL archive: {entry.name}")
+            if checked >= 2000:
+                break
+        self.assertGreater(checked, 1500)
+
     def test_no_debug_symbols_in_game_binaries(self):
         """Game EXEs reference PDBs but ship no usable debug symbols."""
         root = ROOT.parent

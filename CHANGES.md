@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 14:30:00 -0500 - GTL mesh layout confirmed
+- Verified all 2,529 sampled GTL archive GMTs use the new layout, confirming GTL→GTR2 needs no mesh relayout. Full-tier test added. Note: the fresh full-suite run exceeded the 60-minute shell timeout and produced no result; it predates recent commits.
+
 ## 2026-11-29 14:00:00 -0500 - f0 material-index artefact
 - Recorded that the apparent f0-high/material-index link (13.3% vs 4.2% shuffled) is a mesh-0 artefact (44.9% for mesh 0, 0.5–2.1% later). Full-tier guard test added; findings docs updated.
 

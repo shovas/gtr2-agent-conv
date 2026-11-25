@@ -14,6 +14,9 @@ regression tests or an explicitly documented negative.
   `gmt_semantic.read_gtr1_geometry()`).
 - `gmt_layout.is_old()/is_new()` detect layouts; `old_to_new_semantic()` rebuilds
   a new-layout mesh from decoded old-layout geometry.
+- GTL archives are already new-layout: 2,529 sampled GMTs from `.gtl` archives
+  all carried the new magic, so GTL→GTR2 needs no mesh relayout (only TRK/GDB/
+  archive-convention fixes). Full-tier regression test.
 - **Critical:** ISI-encrypted GSC-family GMT members must be decrypted with
   `isi_crypt.decrypt_bytes(raw, skip=4)`. `skip=1` leaves a spurious per-file XOR
   layer that *looks* like a "region mask schedule" but corrupts bulk vertices.
