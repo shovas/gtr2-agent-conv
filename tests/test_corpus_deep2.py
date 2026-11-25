@@ -1006,6 +1006,41 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertEqual(checked, 204)
 
+    def test_f0_marker_cross_corpus_invariant(self):
+        """Identical mesh families share f0 marker lists across GTR2/GTL/BMW."""
+        import collections
+        import glob
+        import re
+        import gmt_format
+        import mas_tool
+        families = {}
+        for root, ext in (("GTR2Steam", ".gtr"), ("GTLSteam", ".gtl"),
+                          ("BMWM3Challenge", ".bmw")):
+            for archive in glob.glob(str(ROOT.parent / root / "**" / f"*{ext}"),
+                                     recursive=True):
+                try:
+                    _, entries = mas_tool.read_archive(archive)
+                except Exception:
+                    continue
+                for entry in entries:
+                    name = entry.name.lower()
+                    if not name.endswith(".gmt") or not entry.data or len(entry.data) < 0x400:
+                        continue
+                    try:
+                        parsed = gmt_format.parse_gmt("x.gmt", entry.data)
+                    except Exception:
+                        continue
+                    marks = tuple(gmt_format.mesh_marker(m) or 0 for m in parsed.meshes)
+                    if not any(marks):
+                        continue
+                    base = re.sub(r"(lod)?\d+$", "", name.replace("\\", "/")
+                                  .rsplit("/", 1)[-1].rsplit(".", 1)[0])
+                    families.setdefault(base, {}).setdefault(root, marks)
+        shared = [tuple(v.values()) for v in families.values() if len(v) > 1]
+        self.assertGreater(len(shared), 500)
+        identical = sum(1 for group in shared if len(set(group)) == 1)
+        self.assertGreater(identical / len(shared), 0.35)
+
     def test_gtr2_f0_lod_family_invariant(self):
         """f0 marker lists repeat across LOD variants more than chance."""
         import collections
