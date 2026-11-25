@@ -3,6 +3,10 @@
 All work here is **offline**: no game was launched. "Runtime-dependent" means
 conclusively establishing it requires actual game execution.
 
+## GTTF slots +48/+52/+56/+60: car-independence negative (2026-11-26)
+
+Across all 31 GTT files, every one of these slots reaches sentinel-like u32 maxima (>4.0e9 in **31/31** files for each slot; medians 4.295e9 / 4.295e9 / 4.295e8 / 4.291e9). Ferrari F550 and BMW M3 show no distinguishing ceiling or range. Slot +52 has small clusters near `0x00000000` and `0x00800000` (sign-bit artifact) in both cars, together covering a median 16.7% of frames (range 5.3–30.6%) — far too little to be a bounded physical signal. The earlier per-byte smoothness and throttle/brake/acceleration negatives for these slots stand; no car-calibrated semantics promoted. Regression test added (`test_gttf_slots48_52_56_60_no_car_ceiling`).
+
 ## GTTF slot +44: car-independence negative (2026-11-26)
 
 Across all 31 GTT files, slot +44 has **no car-specific ceiling** (every file's raw u32 exceeds 4.2B; F550 and BMW M3 both span ~1.4e7..4.29e9). The byte44==byte46 structure is shared: per-file equality fraction median 0.83 (range 0.752–0.901), dominant byte pairs 224–238 for both cars. The earlier packed-half/acceleration/heading-rate negatives therefore stand; this slot is not a bounded kinematic or car-calibrated field. Regression test added (`test_gttf_slot44_no_car_ceiling`); no semantic promoted.

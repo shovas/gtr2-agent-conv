@@ -82,6 +82,35 @@ class SimbinEventsToolTest(unittest.TestCase):
             self.skipTest("no GTTF frame grids detected")
         self.assertGreaterEqual(checked, 1)
 
+    def test_gttf_slots48_52_56_60_no_car_ceiling(self):
+        """Slots +48/+52/+56/+60 are sentinel-like for both cars."""
+        import gzip
+        import statistics
+        files = _files(".gtt")
+        if not files:
+            self.skipTest("GTR2 GTT files not present")
+        maxima = {off: [] for off in (48, 52, 56, 60)}
+        clusters = []
+        for p in files:
+            data = gzip.decompress(p.read_bytes())
+            grid = setool.find_frame_grid(data)
+            if not grid:
+                continue
+            frames = setool.read_frames(data, grid)
+            for off in maxima:
+                maxima[off].append(max(
+                    int.from_bytes(data[fr["offset"] + off:fr["offset"] + off + 4],
+                                   "little") for fr in frames))
+            values = [int.from_bytes(data[fr["offset"] + 52:fr["offset"] + 56],
+                                     "little") for fr in frames]
+            clusters.append(sum(v < 10_000 or (1 << 23) - 10_000 <= v < (1 << 23) + 10_000
+                                for v in values) / len(values))
+        if not maxima[48]:
+            self.skipTest("no GTTF frame grids detected")
+        for off, values in maxima.items():
+            self.assertTrue(all(v > 4_000_000_000 for v in values), f"slot {off}")
+        self.assertLess(statistics.median(clusters), 0.35)
+
     def test_gttf_slot44_no_car_ceiling(self):
         """Slot +44 has no car-specific ceiling; its byte-pair structure is shared."""
         import gzip
