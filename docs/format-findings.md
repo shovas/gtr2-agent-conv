@@ -82,6 +82,8 @@ regression tests or an explicitly documented negative.
   - frame/path-record count ratio median 2.44, range 1.93–3.49;
   - `+32/speed` clusters near `.grb`-derived gear bands (p≈0.01);
   - `path_f4` decreases with gear index (r −0.200 vs −0.005) — throttle-like;
+  - `path_f3` rises mildly with racing-line curvature (median |r| 0.060 vs
+    0.019 permuted), consistent with a brake-like channel;
   - `+48` low i16 tracks steering/path f3; high i16 tracks engine +32;
   - `+36` is an exact quantized float lattice but its semantics are unresolved;
   - frame `+16` has a weak, non-clamp-driven engine coupling (|r| 0.152).

@@ -2983,6 +2983,61 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertLess(statistics.median(observed), -0.1)
         self.assertLess(statistics.median(observed), 2 * statistics.median(baseline))
 
+    def test_gttf_path_f3_vs_curvature(self):
+        """Path f3 rises mildly with racing-line curvature (brake-like)."""
+        import glob
+        import gzip
+        import math
+        import random
+        import statistics
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        observed = []
+        baseline = []
+        random.seed(50)
+        for path in glob.glob(str(ROOT.parent / "GTR2Steam" / "TimeTrial" / "**" / "*.GTT"),
+                              recursive=True):
+            payload = gz.decompress(path)
+            grid = st.find_frame_grid(payload)
+            if not grid:
+                continue
+            frames = st.read_frames(payload, grid)
+            records = st.find_preframe_records(payload, grid["offset"])
+            if not records or frames[0]["path_f3"] is None:
+                continue
+            curvature = []
+            for first, middle, last in zip(records, records[1:], records[2:]):
+                u = [middle[k] - first[k] for k in (0, 1, 5)]
+                v = [last[k] - middle[k] for k in (0, 1, 5)]
+                cross = (u[1] * v[2] - u[2] * v[1],
+                         u[2] * v[0] - u[0] * v[2],
+                         u[0] * v[1] - u[1] * v[0])
+                la = math.sqrt(sum(x * x for x in u))
+                lb = math.sqrt(sum(x * x for x in v))
+                curvature.append(math.sqrt(sum(x * x for x in cross)) / (la * lb)
+                                 if la * lb > 1e-9 else 0.0)
+            index = 0
+            values = []
+            bends = []
+            for frame in frames:
+                y, z = frame["position"][0], frame["position"][1]
+                candidates = range(max(0, index - 3), min(len(records) - 2, index + 30))
+                chosen = min(candidates,
+                             key=lambda k: (records[k][0] - y) ** 2
+                             + (records[k][1] - z) ** 2)
+                index = chosen
+                values.append(frame["path_f3"])
+                bends.append(curvature[chosen] if chosen < len(curvature) else 0.0)
+            observed.append(abs(st._corr(values, bends)))
+            baseline.append(statistics.mean(
+                abs(st._corr(random.sample(values, len(values)), bends))
+                for _ in range(3)))
+        self.assertEqual(len(observed), 29)
+        self.assertGreater(statistics.median(observed), 0.04)
+        self.assertGreater(statistics.median(observed),
+                           2 * statistics.median(baseline))
+        self.assertGreaterEqual(sum(o > 2 * b for o, b in zip(observed, baseline)), 15)
+
     def test_gttf_slot48_low_vs_path_f3_no_clamps(self):
         """Slot +48's low half tracks path f3 even without clamped frames."""
         import glob

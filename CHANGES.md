@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 22:30:00 -0500 - GTTF path f3 curvature link
+- Found path f3 tracks racing-line curvature (median |r| 0.060 vs 0.019 permuted), supporting a brake-like interpretation. Full-tier test added; findings docs updated.
+
 ## 2026-11-28 22:00:00 -0500 - mesh-0 f0 vs member size
 - Verified mesh-0 f0 half-sum tracks GMT member size (r 0.159 vs 0.009 permuted); full-tier test added and findings docs updated.
 
