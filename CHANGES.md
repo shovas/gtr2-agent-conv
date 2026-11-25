@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 09:45:00 -0500 - f0 shader registry negative
+- Showed f0 halves cannot index the 94 shipped .psh/.vsh shaders (f0 spans >1,000 values) and stage-name hashes match at chance. Full-tier regression test added.
+
 ## 2026-11-28 09:15:00 -0500 - f0 packed halves
 - Found f0's two u16 halves are nearly equal in 49.2% of 20,005 markers (vs 1.4% permuted; <=4 in 74.8%), indicating two closely related identifiers rather than one arbitrary number. Full-tier permutation-controlled test added.
 

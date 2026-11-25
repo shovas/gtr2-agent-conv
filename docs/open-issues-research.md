@@ -152,6 +152,15 @@ Adding the source archive stem to the normalized material/stage name set lowers 
 
 Disassembled `fcn.005e54e0` and `fcn.005e55e0`, called from the mesh fixup `fcn.005e9ab0` with stage names such as `L0DIFFUSET0`. Both take a **small stage-type enum (1/2/3 or 0x63)** selecting one of three arrays at object offsets `0x110`/`0x21c`/`0x328`, plus a name string; neither takes or derives from the per-vertex f0 marker. Corpus check: f0 spans **4,364 distinct values** in 20,005 vertices, with only 3.1% equal to one of the four enum values — so f0 is not a shader/material registry index of this kind. Full-tier regression test added.
 
+## GTR2 f0 is not a shader-registry index (2026-11-28)
+
+Code-first check around `fcn.005e9ab0` and the shipped shader members:
+- GTR2/GTL/BMW installs contain only **94 distinct `.psh`/`.vsh` names** (57/37 per game), far fewer than f0's 16-bit half range (>1,000 distinct halves, max ≫ 10× the registry size).
+- CRC32/CRC32-high/FNV/sum of individual stage and material names, including ordered stage records, match f0 halves only at permutation chance.
+- `fcn.005e54e0`/`fcn.005e55e0` select only a 1/2/3/99 stage-type enum, not an f0-derived ID.
+
+So the paired near-equal halves are not indices or simple hashes of shipped shaders; they most plausibly originate from an external authoring/material identifier. Full-tier regression test added.
+
 ## GTR2 f0 packs two nearly-equal 16-bit identifiers (2026-11-28)
 
 Across 30,000 mesh markers, the low and high u16 halves of f0 are nearly equal:

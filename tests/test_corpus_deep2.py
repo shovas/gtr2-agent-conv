@@ -1364,6 +1364,49 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertGreater(observed, 10 * statistics.mean(baseline() for _ in range(5)))
         self.assertLess(observed, 0.25)
 
+    def test_f0_not_shader_registry_index(self):
+        """Shader members are too few to explain f0's 16-bit half range."""
+        import glob
+        import gmt_format as gf
+        import mas_tool
+        shaders = set()
+        for root in ("GTR2Steam", "GTLSteam", "BMWM3Challenge"):
+            for path in glob.glob(str(ROOT.parent / root / "**" / "*"), recursive=True):
+                if not path.lower().endswith((".gtr", ".gtl", ".bmw")):
+                    continue
+                try:
+                    _, entries = mas_tool.read_archive(path)
+                except Exception:
+                    continue
+                shaders.update(e.name.lower() for e in entries
+                               if e.name.lower().endswith((".psh", ".vsh")))
+        self.assertLess(len(shaders), 200)
+        halves = []
+        for archive in glob.glob(str(ROOT.parent / "GTR2Steam" / "**" / "*.gtr"),
+                                 recursive=True):
+            try:
+                _, entries = mas_tool.read_archive(archive)
+            except Exception:
+                continue
+            for entry in entries:
+                if not entry.name.lower().endswith(".gmt") or not entry.data:
+                    continue
+                try:
+                    parsed = gf.parse_gmt("x.gmt", entry.data)
+                except Exception:
+                    continue
+                for mesh in parsed.meshes:
+                    marker = gf.mesh_marker(mesh)
+                    if marker:
+                        halves.extend((marker & 0xFFFF, marker >> 16))
+                if len(halves) >= 3000:
+                    break
+            if len(halves) >= 3000:
+                break
+        self.assertGreater(len(halves), 2000)
+        self.assertGreater(max(halves), 10 * len(shaders))
+        self.assertGreater(len(set(halves)), 5 * len(shaders))
+
     def test_f0_halves_near_equal(self):
         """f0 packs two nearly-equal 16-bit identifiers."""
         import glob
