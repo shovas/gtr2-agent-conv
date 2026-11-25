@@ -2700,6 +2700,35 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertTrue(all(value in (36000.0, 43200.0, 46800.0)
                             for value in sessions))
 
+    def test_gtr2_no_extra_vertex_block_sampled(self):
+        """Sampled GTR2 meshes do not expose a 16-byte extra UV block."""
+        import glob
+        import gmt_format as gf
+        import mas_tool
+        meshes = with_extra = 0
+        for archive in glob.glob(str(ROOT.parent / "GTR2Steam" / "**" / "*.gtr"),
+                                 recursive=True)[:100]:
+            try:
+                _, entries = mas_tool.read_archive(archive)
+            except Exception:
+                continue
+            for entry in entries:
+                if not entry.name.lower().endswith(".gmt") or not entry.data:
+                    continue
+                try:
+                    parsed = gf.parse_gmt("x.gmt", entry.data)
+                except Exception:
+                    continue
+                for mesh in parsed.meshes:
+                    meshes += 1
+                    with_extra += int(mesh.record.has_extra_vertex_block)
+                if meshes >= 1000:
+                    break
+            if meshes >= 1000:
+                break
+        self.assertGreater(meshes, 100)
+        self.assertEqual(with_extra, 0)
+
     def test_gsc_conversion_preserves_material_names(self):
         """Converted GSC meshes keep a parseable material library."""
         import glob

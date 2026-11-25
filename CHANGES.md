@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 18:30:00 -0500 - GTR2 UV block negative
+- Documented that sampled GTR2 meshes lack a 16-byte extra UV vertex block, so converted UVs cannot be validated with current parser; full-tier regression test added.
+
 ## 2026-11-28 18:00:00 -0500 - Full suite regression evidence
 - A full-tier run completed: **574 tests, 0 failures, 0 errors, 2 skipped, 3009 s** across 54 modules. Caveat: the run was started at the commit `b7fa803`-era tree; subsequent commits (f0/GTTF invariance work) have only quick-tier and targeted full-tier regression evidence, not a fresh full rerun.
 

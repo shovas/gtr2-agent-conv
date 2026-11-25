@@ -133,6 +133,10 @@ Static analysis of the unpacked `GTR2.exe` (`.text` at RVA `0x401000`) located t
 
 Across all 42 local event files (29 GTTF + 13 IRSR) the float takes only **36000 / 43200 / 46800**, exactly 10/12/13 hours in seconds — consistent with a session time limit (strong inference, not runtime-confirmed). The GTTF `+8` steering relationship and the rest of the frame field work remain separate. Full-tier regression test added.
 
+## GTR2 UV extra-block negative (2026-11-28)
+
+Sampled GTR2 meshes (n>100) expose **no** 16-byte extra vertex block (`has_extra_vertex_block` false for all); UV-like data in old-layout GSC meshes therefore cannot be validated against a parsed GTR2 UV representation. The GSC→GTR2 converter preserves the old UV region verbatim but no correctness claim is made. Full-tier regression test added.
+
 ## GTR2 mesh-0 f0 vs mesh count (2026-11-28)
 
 Mesh-0's f0 half-sum grows weakly but significantly with the number of meshes in the GMT: Pearson r ≈ **0.13–0.14** vs **0.009** for distribution-preserving permuted counts (n≈6,000). This is consistent with mesh 0 carrying a file-level/scene-level identifier related to mesh population. Full-tier regression test added.
