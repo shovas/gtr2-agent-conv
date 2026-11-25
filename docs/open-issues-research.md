@@ -207,9 +207,13 @@ has its strongest association with `engine_speed` (frame +32): median |r|
 sign (20/29). Because +32 has known gear-band clamps, the test was repeated
 after dropping the outer 2% of engine values; the signal survives at **0.198**
 vs **0.022** (22/29 files above 3× baseline), so it is not a saturation
-artefact. Path y (0.164) and f4 (0.126) are weaker companions. The byte's
-low-24-bit partner `0x002000` stays constant, so the field is a structured
-bitfield, but its encoding is still unexplained. Full-tier test added.
+artefact. Path y (0.164) and f4 (0.126) are weaker companions. A follow-up
+test of the "monotonic code" hypothesis (rank correlation between the 93
+observed byte values and their median engine speeds) gave only 0.311 vs 0.096
+permuted, 16/29 files above 3× — both byte clusters (0x12–0x1a and 0x6b–0x70)
+occur at similar engine speeds, so the byte is not a deterministic RPM code.
+The low-24-bit partner `0x002000` stays constant, confirming a structured
+bitfield whose encoding remains unexplained. Full-tier test added.
 
 ## GTTF frame marker prefix constant (2026-11-28)
 

@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 07:30:00 -0500 - GTTF byte 31 not an RPM code
+- Recorded a negative: the +31 byte is not a deterministic monotonic engine-RPM code (rank |rho| 0.311 vs 0.096 permuted; both byte clusters occur at similar RPM). Findings log updated.
+
 ## 2026-11-29 07:00:00 -0500 - GTTF byte 31 engine link
 - Found GTTF byte +31 tracks engine speed (median |r| 0.263 vs 0.021 permuted; 0.198 after removing clamps), strengthening the case that it is track/vehicle state rather than a packing exponent. Full-tier test added; findings docs updated.
 
