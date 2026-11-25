@@ -2,6 +2,10 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 18:00:00 -0500 - Full suite regression evidence
+- A full-tier run completed: **574 tests, 0 failures, 0 errors, 2 skipped, 3009 s** across 54 modules. Caveat: the run was started at the commit `b7fa803`-era tree; subsequent commits (f0/GTTF invariance work) have only quick-tier and targeted full-tier regression evidence, not a fresh full rerun.
+
+
 ## 2026-11-28 17:45:00 -0500 - mesh-0 f0 vs mesh count
 - Verified mesh-0 f0 half-sum tracks GMT mesh count (r≈0.13 vs 0.009 permuted); full-tier distribution-preserving test added.
 
