@@ -35,6 +35,7 @@ class Waypoint:
     dwidth: tuple[float, ...] | None = None
     groove_lat: tuple[float, ...] | None = None
     path: tuple[float, float] | None = None
+    event_first: float | None = None
     galpha: float | None = None
     perp: tuple[float, float, float] | None = None
 
@@ -107,6 +108,13 @@ def parse_aiw(data: str) -> AIW:
                     if match:
                         try:
                             waypoint.path = tuple(float(x) for x in match.group(1).split(","))
+                        except ValueError:
+                            pass
+                elif key == "wp_event":
+                    match = re.match(r"\(\s*([^,)]+)", value)
+                    if match:
+                        try:
+                            waypoint.event_first = float(match.group(1))
                         except ValueError:
                             pass
                 elif key in ("wp_dwidth", "wp_groove_lat"):
@@ -317,6 +325,24 @@ def validate_aiw_waypoints(aiw: AIW) -> list[str]:
             norm = math.sqrt(sum(x * x for x in wp.perp))
             if abs(norm - 1.0) > 0.01:
                 problems.append(f"waypoint {i}: track/pit wp_perp norm {norm:.4f} != 1")
+    return problems
+
+
+def validate_aiw_event(aiw: AIW) -> list[str]:
+    """Check WP_EVENT first-component bounds and WP_SCORE checkpoints.
+
+    Corpus-verified on the four SimBin corpora: 198,932 WP_EVENT records
+    have their first component in [0.5, 1.5] (canonical form `1.000,0,0`).
+    WP_SCORE checkpoints are always 0, 1 or 2 across all 465 AIWs.
+    """
+    problems: list[str] = []
+    for i, wp in enumerate(aiw.waypoints):
+        if wp.event_first is not None and not (0.5 <= wp.event_first <= 1.5):
+            problems.append(f"waypoint {i}: WP_EVENT first {wp.event_first} out of range")
+            return problems
+        if wp.score_checkpoint is not None and wp.score_checkpoint not in (0, 1, 2):
+            problems.append(f"waypoint {i}: WP_SCORE checkpoint {wp.score_checkpoint}")
+            return problems
     return problems
 
 

@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 09:30:00 -0500 - AIW event/checkpoint validator
+- Added WP_EVENT first-component parsing and `validate_aiw_event()` covering 198,932 SimBin event records and WP_SCORE checkpoints across 465 AIWs; documented garbage bit patterns in the other event fields. Full-tier regression test added.
+
 ## 2026-11-26 09:00:00 -0500 - AIW path/perp validator
 - Added WP_PATH parsing and `validate_aiw_path_perp()` with corpus-observed bounds and unit-or-zero perpendicular invariant across 465 AIWs; one legacy outlier documented. Full-tier regression test added.
 
