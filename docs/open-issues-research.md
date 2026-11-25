@@ -133,6 +133,14 @@ Static analysis of the unpacked `GTR2.exe` (`.text` at RVA `0x401000`) located t
 
 Across all 42 local event files (29 GTTF + 13 IRSR) the float takes only **36000 / 43200 / 46800**, exactly 10/12/13 hours in seconds — consistent with a session time limit (strong inference, not runtime-confirmed). The GTTF `+8` steering relationship and the rest of the frame field work remain separate. Full-tier regression test added.
 
+## GTR2 f0: mesh 0 is structurally distinct (2026-11-28)
+
+For the first mesh in each GMT, f0's halves are much larger and further apart:
+- mesh 0: median halves **542 / 678**, median `|high-low|` **314** (n=5,496);
+- later meshes: median halves **63 / 63**, median delta **1** (n=14,509).
+
+The median delta difference (313) vs 0.1 under a distribution-preserving permutation baseline makes this a strong validator. It explains the earlier "index 0 threshold" result: mesh 0 carries a different kind of identifier than subsequent meshes. Full-tier regression test added.
+
 ## Clarification: f0 "material index" is the mesh ordinal (2026-11-28)
 
 In 14,998 of 15,003 sampled meshes (99.97%), `GmtMeshRecord.material_index` equals the mesh's ordinal within the GMT. Therefore the f0 half-delta / half-sum / sign invariants described below are relationships to the **mesh's position in the GMT mesh list**, not to an independent material identifier. The wording "material index" in earlier notes should be read as "mesh ordinal (= material index in practice)". Full-tier regression test added.

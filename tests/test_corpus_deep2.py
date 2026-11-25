@@ -1492,6 +1492,52 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertLess(observed, -0.3)
         self.assertLess(observed, -10 * max(baseline, 0.001))
 
+    def test_f0_first_mesh_structurally_distinct(self):
+        """Mesh 0's f0 has much larger halves and half-delta than later meshes."""
+        import glob
+        import random
+        import statistics
+        import gmt_format as gf
+        import mas_tool
+        rows = []
+        for root, ext in (("GTR2Steam", ".gtr"), ("GTLSteam", ".gtl"),
+                          ("BMWM3Challenge", ".bmw")):
+            for archive in glob.glob(str(ROOT.parent / root / "**" / f"*{ext}"),
+                                     recursive=True):
+                try:
+                    _, entries = mas_tool.read_archive(archive)
+                except Exception:
+                    continue
+                for entry in entries:
+                    if not entry.name.lower().endswith(".gmt") or not entry.data:
+                        continue
+                    try:
+                        parsed = gf.parse_gmt("x.gmt", entry.data)
+                    except Exception:
+                        continue
+                    for ordinal, mesh in enumerate(parsed.meshes):
+                        marker = gf.mesh_marker(mesh)
+                        if marker:
+                            rows.append((ordinal == 0,
+                                         abs((marker >> 16) - (marker & 0xFFFF))))
+                if len(rows) >= 15000:
+                    break
+            if len(rows) >= 15000:
+                break
+        self.assertGreater(len(rows), 5000)
+        flags = [row[0] for row in rows]
+        deltas = [row[1] for row in rows]
+
+        def difference(values):
+            return (statistics.median(v for v, first in zip(values, flags) if first)
+                    - statistics.median(v for v, first in zip(values, flags) if not first))
+        observed = difference(deltas)
+        random.seed(36)
+        baseline = statistics.mean(abs(difference(random.sample(deltas, len(deltas))))
+                                   for _ in range(10))
+        self.assertGreater(observed, 100)
+        self.assertGreater(observed, 10 * max(baseline, 1))
+
     def test_f0_material_index_is_mesh_ordinal(self):
         """The material index used in f0 studies is the mesh's ordinal."""
         import glob
