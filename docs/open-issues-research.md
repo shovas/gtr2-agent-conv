@@ -102,6 +102,10 @@ Tested CRC32 / CRC32-high / Adler32 / FNV-1a / MD5-first-2 over the **raw** mate
 
 Tested order-independent hash constructions from normalized material/stage name sets on 20,000 meshes: CRC32 / Adler32 / MD5-first-2 of the sorted, `'|'`-joined set plus XOR and sum of per-name CRC16 halves. Matches to f0 halfwords were 3 / 2 / 0 / 3 / 4 respectively — chance level (permutation baselines 2.4 / 0 / 0.2 / 2 / 2). So the material-name grouping found above is not produced by a simple set hash; f0 likely encodes an external ID unrelated to a derivable string hash. Full-tier regression test added.
 
+## GTR2 f0 is not archive-scoped (2026-11-28)
+
+Adding the source archive stem to the normalized material/stage name set lowers f0 agreement from 28.7% to **16.2%** of 7,481 multi-member groups (permuted baseline 0.1%). So f0 is not a hash of "archive + material name"; it is more consistent with an identifier assigned outside the GMT files. Full-tier regression test added.
+
 ## GTR2 shader lookup helpers are not f0 consumers (2026-11-28)
 
 Disassembled `fcn.005e54e0` and `fcn.005e55e0`, called from the mesh fixup `fcn.005e9ab0` with stage names such as `L0DIFFUSET0`. Both take a **small stage-type enum (1/2/3 or 0x63)** selecting one of three arrays at object offsets `0x110`/`0x21c`/`0x328`, plus a name string; neither takes or derives from the per-vertex f0 marker. Corpus check: f0 spans **4,364 distinct values** in 20,005 vertices, with only 3.1% equal to one of the four enum values — so f0 is not a shader/material registry index of this kind. Full-tier regression test added.

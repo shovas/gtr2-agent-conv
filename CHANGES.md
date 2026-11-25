@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 05:45:00 -0500 - f0 archive scope negative
+- Archive stem + material name set explains f0 in only 16.2% of groups (vs 28.7% for name set alone); f0 is not archive-scoped. Full-tier regression test added.
+
 ## 2026-11-28 05:15:00 -0500 - f0 shader-index hypothesis negated
 - Disassembled GTR2.exe shader lookup helpers (fcn.005e54e0/005e55e0): they use a 1/2/3/99 stage-type enum, not f0; f0 has 4,364 distinct values in 20,005 samples. Full-tier regression test added.
 

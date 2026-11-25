@@ -1300,6 +1300,70 @@ class CorpusDeep2Test(unittest.TestCase):
                            for half in (lo, hi) if half == values[name])
             self.assertLess(observed, 10)  # chance level for 2 x 12k halfwords
 
+    def test_f0_not_archive_scoped(self):
+        """Adding archive identity to material names does not explain f0."""
+        import collections
+        import glob
+        import random
+        import re
+        import statistics
+        import gmt_format as gf
+        import mas_tool
+
+        def norm(value):
+            return re.sub(r"[^a-z0-9]", "", value.lower())
+
+        groups = collections.defaultdict(list)
+        for root, ext in (("GTR2Steam", ".gtr"), ("GTLSteam", ".gtl"),
+                          ("BMWM3Challenge", ".bmw")):
+            for archive in glob.glob(str(ROOT.parent / root / "**" / f"*{ext}"),
+                                     recursive=True):
+                try:
+                    _, entries = mas_tool.read_archive(archive)
+                except Exception:
+                    continue
+                stem = archive.rsplit("/", 1)[-1].lower()
+                for entry in entries:
+                    if not entry.name.lower().endswith(".gmt") or not entry.data:
+                        continue
+                    try:
+                        parsed = gf.parse_gmt("x.gmt", entry.data)
+                    except Exception:
+                        continue
+                    for mesh in parsed.meshes:
+                        marker = gf.mesh_marker(mesh)
+                        index = mesh.record.material_index
+                        material = (parsed.materials[index]
+                                    if index < len(parsed.materials) else None)
+                        if not marker or material is None:
+                            continue
+                        names = tuple(sorted(set(
+                            norm(value) for value in
+                            [material.name] + [s.name for s in material.stages]
+                            if value)))
+                        groups[(stem, names)].append(marker)
+                if sum(len(v) for v in groups.values()) >= 30000:
+                    break
+            if sum(len(v) for v in groups.values()) >= 30000:
+                break
+        multi = {k: v for k, v in groups.items() if len(v) > 1}
+        self.assertGreater(len(multi), 3000)
+        observed = sum(1 for v in multi.values() if len(set(v)) == 1) / len(multi)
+        random.seed(0)
+        marks = [m for v in multi.values() for m in v]
+
+        def baseline():
+            permutation = random.sample(marks, len(marks))
+            offset = 0
+            same = 0
+            for values in multi.values():
+                sample = permutation[offset:offset + len(values)]
+                offset += len(values)
+                same += int(len(set(sample)) == 1)
+            return same / len(multi)
+        self.assertGreater(observed, 10 * statistics.mean(baseline() for _ in range(5)))
+        self.assertLess(observed, 0.25)
+
     def test_f0_not_shader_enum(self):
         """f0 is not the 1/2/3/99 stage-type enum used by shader lookups."""
         import glob
