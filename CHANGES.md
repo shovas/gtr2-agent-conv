@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 10:30:00 -0500 - VRL UV transfer implemented
+- VRL conversions now transfer per-corner UVs by expanding shared vertices at seams and rebasing triangle indices. 25/25 sampled conversions round-trip UVs exactly (shuffled UVs fail >90%); verification and docs updated.
+
 ## 2026-11-29 10:00:00 -0500 - VRL UV transfer gap documented
 - Recorded why VRL UVs are still not transferred: coordinates are per-corner (only 36/300 files even match vertex count, none with identity indices), so correct transfer needs vertex splitting and index rebasing. No speculative decoder shipped.
 

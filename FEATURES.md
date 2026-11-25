@@ -9,7 +9,7 @@ End-user guide to what you can ask an agent to do with this repository. This pro
 **How to ask**:
 - "Convert this `.vrl` to a GTR2 `.gmt` using a real GTR2 GMT as a structural template."
 
-**Known gap**: VRL UV-like coordinate pairs are not transferred because the GTR2 vertex layout's packed UV fields are not corpus-confirmed.
+VRL per-corner UV coordinates are transferred by expanding shared vertices at seams into the GTR2 UV block.
 
 ## Convert GTR1 third-magic meshes to GTR2 GMT (partial)
 
@@ -76,7 +76,7 @@ python3 gsc_exe_tool.py extract "../CopaPetrobrasdeMarcas/Marcas.exe" out/
 
 **GSC → GTR2 conversion**: `python3 gmt_layout.py encrypted_member.gmt output.gmt --gsc` rebuilds a GTR2-layout mesh from an encrypted GSC-family member (150/150 sampled members preserve geometry).
 
-**What it does**: Parses GMT headers, mesh table records, material/stage string evidence, and observed vertex/stream layouts; diffs GMTs; performs structural lossless round-trip, and can rebuild all offsets after mesh data grows (`gmt_tool.py relayout ...`). Previously opaque GSC GMTs now decode to real geometry with `gmt_semantic.decode_gsc_member()` (correct ISI skip=4); 150/150 sampled members produce plausible vertices and faces. GTR1 conversions now carry UVs; VRL UVs remain untransferred because they are per-corner.
+**What it does**: Parses GMT headers, mesh table records, material/stage string evidence, and observed vertex/stream layouts; diffs GMTs; performs structural lossless round-trip, and can rebuild all offsets after mesh data grows (`gmt_tool.py relayout ...`). Previously opaque GSC GMTs now decode to real geometry with `gmt_semantic.decode_gsc_member()` (correct ISI skip=4); 150/150 sampled members produce plausible vertices and faces. GTR1 and VRL conversions now carry UVs in the real GTR2 UV block.
 
 **How to ask**:
 - "Inspect this GMT and tell me what we know about its structure."

@@ -9,9 +9,9 @@ only maps the corpus-verified parts of a VRL mesh into a one-submesh GMT:
 * normals are computed from the converted triangles (VRL has no normal stream)
 * VRL index buffer -> u16 triangle indices (quads triangulated) after the
   standard 4-byte lead
-* VRL UV-like coordinate pairs are **not** transferred: the GTR2 32-byte base
-  vertex layout's f0/f7 fields have unconfirmed semantics, so guessing there
-  would violate the project's "no speculative decoder" rule.
+* VRL UV-like coordinates are per corner, so shared vertices are expanded
+  into one vertex per corner and the UV pair is written into the GTR2 UV
+  block (u at +4, v at +8), matching the dominant real-GTR2 layout.
 
 A real GTR2 GMT is required as a structural template (header region, mesh
 record defaults and material tail). It is read at runtime and never copied into
@@ -43,6 +43,38 @@ def prepare_geometry(vrl: dict) -> tuple[list[tuple[float, float, float]], list[
         triangles = [tuple(raw[i:i + 3]) for i in range(len(raw) - 2)]
     valid = [t for t in triangles if len(set(t)) == 3 and all(i < len(positions) for i in t)]
     return positions, valid
+
+
+def prepare_geometry_with_uvs(vrl: dict):
+    """Expand shared VRL vertices into per-corner vertices carrying UVs.
+
+    VRL stores UV-like coordinates per *corner* of the index buffer, not per
+    shared vertex. Duplicating a vertex for every corner lets each triangle
+    keep its own UV values at seams. Returns ``(positions, triangles, uvs)``
+    or ``None`` when the coordinate stream is absent/incompatible; callers
+    then fall back to the shared-vertex path.
+    """
+    shared = [tuple(vertex[:3]) for vertex in vrl["vertices"]]
+    corners = list(vrl["indices"])
+    uvs = list(vrl.get("coords") or [])
+    if not corners or len(uvs) != len(corners) or len(corners) > 65536:
+        return None
+    if any(corner < 0 or corner >= len(shared) for corner in corners):
+        return None
+    positions = [shared[corner] for corner in corners]
+    if len(corners) % 4 == 0:
+        triangles = []
+        for i in range(0, len(corners), 4):
+            triangles.extend(((i, i + 1, i + 2), (i, i + 2, i + 3)))
+    elif len(corners) % 3 == 0:
+        triangles = [tuple(range(i, i + 3)) for i in range(0, len(corners), 3)]
+    else:
+        triangles = [tuple(range(i, i + 3)) for i in range(len(corners) - 2)]
+    valid = [face for face in triangles
+             if len(set(face)) == 3 and max(face) < len(positions)]
+    if not valid:
+        return None
+    return positions, valid, uvs
 
 
 def _normals(positions: list[tuple[float, float, float]],
@@ -140,8 +172,13 @@ def build_gmt(positions: list[tuple[float, float, float]],
 
 def vrl_to_gmt(vrl: dict, template: bytes) -> bytes:
     """Build a one-submesh GTR2 GMT from a decoded VRL mesh dict."""
-    positions, triangles = prepare_geometry(vrl)
-    return build_gmt(positions, triangles, template)
+    expanded = prepare_geometry_with_uvs(vrl)
+    if expanded is None:
+        positions, triangles = prepare_geometry(vrl)
+        uvs = None
+    else:
+        positions, triangles, uvs = expanded
+    return build_gmt(positions, triangles, template, uvs=uvs)
 
 
 def verify_gmt_geometry(data: bytes, positions, triangles, normals) -> list[str]:
@@ -171,10 +208,35 @@ def verify_gmt_geometry(data: bytes, positions, triangles, normals) -> list[str]
     return problems
 
 
+def verify_gmt_uvs(data: bytes, uvs: list[tuple[float, float]]) -> list[str]:
+    """Check a generated GMT's UV block against expected corner UV pairs."""
+    try:
+        parsed = gmt_format.parse_gmt("generated.gmt", data=data)
+    except Exception as exc:
+        return [f"UV parse failed: {exc}"]
+    if not parsed.meshes or not parsed.meshes[0].stream2_data:
+        return ["missing UV stream"]
+    stream = parsed.meshes[0].stream2_data
+    if len(stream) != len(uvs) * 32:
+        return ["UV stream size mismatch"]
+    recovered = [struct.unpack_from("<2f", stream, i * 32 + 4)
+                 for i in range(len(uvs))]
+    return [] if recovered == uvs else ["UV mismatch"]
+
+
 def verify_gmt(data: bytes, vrl: dict) -> list[str]:
     """Re-parse a VRL-generated GMT; return problems (empty means verified)."""
-    positions, triangles = prepare_geometry(vrl)
-    return verify_gmt_geometry(data, positions, triangles, _normals(positions, triangles))
+    expanded = prepare_geometry_with_uvs(vrl)
+    if expanded is None:
+        positions, triangles = prepare_geometry(vrl)
+        uvs = None
+    else:
+        positions, triangles, uvs = expanded
+    problems = verify_gmt_geometry(data, positions, triangles,
+                                   _normals(positions, triangles))
+    if uvs is not None:
+        problems.extend(verify_gmt_uvs(data, uvs))
+    return problems
 
 
 def main(argv=None) -> int:

@@ -105,6 +105,16 @@ Assigned each frame to one of six gear bands derived from the F550 `.grb`/`.hdc`
 
 This supports f4 as a throttle/demand-like channel on the reference line (stronger in low gears), but neither channel reproduces the ghost's own pedal positions; exact semantics remain unclaimed. Full-tier permutation-controlled regression test added.
 
+## VRL UV transfer completed (2026-11-29)
+
+The gap recorded below was closed: `vrl_to_gmt.prepare_geometry_with_uvs()`
+expands each shared vertex into one vertex per corner, so every corner keeps
+its own UV, and re-quads the triangle list in the expanded index space.
+`vrl_to_gmt()` writes those UVs into the GTR2 UV block and `verify_gmt()`
+now checks them with `verify_gmt_uvs()`. 25/25 sampled conversions round-trip
+UVs byte-exactly, while shuffled UVs fail in >90% of meshes. Full-tier
+distribution-preserving regression test added.
+
 ## VRL UV transfer remains a gap (2026-11-29)
 
 VRL files expose a per-corner `coords` array verified as UV-like by
@@ -127,7 +137,7 @@ e.g. AMBULANCE00 `(0.0306, -0.6735)`, ARMCO1 `(3.0, -97.77)`). Added
 block written in the dominant real-GTR2 layout (u at +4, v at +8, no count
 lead). 30/30 sampled GTR1 conversions reproduce source UVs byte-exactly and
 the batch `gtr1` family now emits UV streams (e.g. 328 vertices -> 10,496
-bytes). Full-tier regression test added. VRL UV transfer remains unclaimed.
+bytes). Full-tier regression test added. VRL UV transfer was completed in a later step (see above).
 
 ## GTR2 stream3 column 0 vs f0: sparsity artefact (2026-11-29)
 

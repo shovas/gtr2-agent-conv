@@ -3102,6 +3102,63 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertGreater(meshes, 100)
         self.assertEqual(with_extra, 0)
 
+    def test_vrl_conversion_preserves_corner_uvs(self):
+        """VRL corner UVs survive vertex expansion into the GTR2 UV block."""
+        import glob
+        import random
+        import struct
+        import gmt_format
+        import mas_tool
+        import simbin_text_tool as stt
+        import vrl_to_gmt
+        template = None
+        for archive in glob.glob(str(ROOT.parent / "GTR2Steam" / "**" / "*.gtr"),
+                                 recursive=True)[:100]:
+            try:
+                _, entries = mas_tool.read_archive(archive)
+            except Exception:
+                continue
+            template = next((entry.data for entry in entries
+                             if entry.name.lower().endswith(".gmt") and entry.data), None)
+            if template:
+                break
+        if template is None:
+            self.skipTest("no GTR2 template")
+        random.seed(68)
+        checked = 0
+        shuffled_mismatches = 0
+        for archive in glob.glob(str(ROOT.parent / "SportsCarGtUsa" / "**" / "*.mas"),
+                                 recursive=True):
+            try:
+                _, entries = mas_tool.read_archive(archive)
+            except Exception:
+                continue
+            for entry in entries:
+                if not entry.name.lower().endswith(".vrl") or not entry.data:
+                    continue
+                vrl = stt.read_vrl(entry.data)
+                if not vrl:
+                    continue
+                expanded = vrl_to_gmt.prepare_geometry_with_uvs(vrl)
+                if expanded is None:
+                    continue
+                positions, triangles, uvs = expanded
+                output = vrl_to_gmt.vrl_to_gmt(vrl, template)
+                self.assertEqual(vrl_to_gmt.verify_gmt(output, vrl), [], entry.name)
+                stream = gmt_format.parse_gmt("x.gmt", output).meshes[0].stream2_data
+                recovered = [struct.unpack_from("<2f", stream, i * 32 + 4)
+                             for i in range(len(uvs))]
+                self.assertEqual(recovered, uvs)
+                shuffled = random.sample(uvs, len(uvs))
+                shuffled_mismatches += recovered != shuffled
+                checked += 1
+                if checked >= 25:
+                    break
+            if checked >= 25:
+                break
+        self.assertEqual(checked, 25)
+        self.assertGreater(shuffled_mismatches / checked, 0.9)
+
     def test_gtr1_conversion_preserves_uvs(self):
         """GTR1 vertex fields 9/10 survive into the GTR2 UV block."""
         import glob

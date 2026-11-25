@@ -40,6 +40,9 @@ regression tests or an explicitly documented negative.
   zero in 20,017 sampled vertices). `gtr1_to_gmt.uvs_from_gtr1()` extracts
   them and `gtr1_to_gmt()` writes them into the GTR2 UV block; 30/30 sampled
   conversions reproduce source UVs exactly.
+- VRL UVs are per corner, so `vrl_to_gmt.prepare_geometry_with_uvs()` expands
+  shared vertices into one vertex per corner and rebases triangle indices.
+  25/25 sampled conversions round-trip UVs exactly; shuffled UVs fail >90%.
 - `batch_convert.py` includes a `gsc` family; all written meshes are re-parsed
   and pass `validate_materials.check_gmt()`. Round-tripping 40 converted
   meshes through `gmt_format.relayout_gmt()` preserves vertex and stream bytes
