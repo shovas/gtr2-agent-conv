@@ -316,6 +316,21 @@ class CorpusDeepTest(unittest.TestCase):
         self.assertGreater(checked, 160)
         self.assertGreater(resolved / checked, 0.97)
 
+    def test_gdb_numeric_fields(self):
+        """GDB race-setting fields stay within corpus-observed bounds."""
+        import glob
+        import media_tool
+        import simbin_text_tool as stt_local
+        checked = 0
+        for root in ("GTR2Steam", "GTLSteam", "Race07Complete"):
+            for p in glob.glob(str(ROOT.parent / root / "**" / "*.gdb"), recursive=True):
+                if not Path(p).is_file():
+                    continue
+                text = media_tool.decrypt_jca_text(Path(p).read_bytes()).decode("latin-1")
+                self.assertEqual(stt_local.validate_gdb_numeric(text), [], p)
+                checked += 1
+        self.assertEqual(checked, 252)
+
     def test_trk_view_field_bounds(self):
         """TRK View-block numeric fields stay within corpus bounds."""
         import glob

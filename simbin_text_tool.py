@@ -1201,6 +1201,32 @@ TRK_VIEW_BOUNDS = {
 }
 
 
+GDB_RACE_BOUNDS = {
+    "vehicles": (1.0, 3.0),
+    "racelaps": (2.0, 999.0),
+    "racetime": (4.0, 1440.0),
+    "weather": (0.0, 4.0),
+    "racetimescaled": (25.0, 1440.0),
+    "firstplace": (0.0, 40.0),
+    "secondplace": (0.0, 30.0),
+    "thirdplace": (0.0, 20.0),
+    "fourthplace": (-20.0, 10.0),
+    "fifthplace": (-30.0, 10.0),
+    "ambienttemp": (11.0, 30.0),
+    "tracktemp": (13.0, 37.0),
+    "attrition": (10.0, 220.0),
+    "aidrygrip": (0.8, 1.6),
+    "aiwetgrip": (0.6, 1.2),
+    "latitude": (-35.0, 85.0),
+    "northdir": (0.0, 360.0),
+}
+
+
+def validate_gdb_numeric(data: bytes | str) -> list[str]:
+    """Check race-setting bounds across local GTR2/GTL/Race07 event files."""
+    return _check_numeric_bounds(data, GDB_RACE_BOUNDS)
+
+
 def validate_trk_view_fields(data: bytes | str) -> list[str]:
     """Check numeric View-block fields and Clear flags in a TRK script.
 
