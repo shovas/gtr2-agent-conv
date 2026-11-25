@@ -4483,6 +4483,66 @@ class CorpusDeep2Test(unittest.TestCase):
                 frames_checked += 1
         self.assertEqual(frames_checked, 44631)
 
+    def test_gttf_path_f4_tracks_aiw_galpha(self):
+        """Path control f4 correlates with AIW waypoint galpha."""
+        import glob
+        import random
+        import statistics
+        from pathlib import Path
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        import simbin_text_tool as stt
+
+        def correlation(a, b):
+            mean_a, mean_b = statistics.mean(a), statistics.mean(b)
+            numerator = sum((x - mean_a) * (y - mean_b) for x, y in zip(a, b))
+            denominator = (sum((x - mean_a) ** 2 for x in a)
+                           * sum((y - mean_b) ** 2 for y in b)) ** 0.5
+            return numerator / denominator if denominator else 0.0
+
+        observed = []
+        baseline = []
+        random.seed(100)
+        for path in glob.glob(str(ROOT.parent / "GTR2Steam" / "TimeTrial" / "**" / "*.GTT"),
+                              recursive=True):
+            payload = gz.decompress(path)
+            grid = st.find_frame_grid(payload)
+            if not grid:
+                continue
+            records = st.find_preframe_records(payload, grid["offset"])
+            if not records:
+                continue
+            location = ROOT.parent / "GTR2Steam" / "GameData" / "Locations" / Path(path).parent.name
+            waypoints = []
+            for aiw_path in location.glob("*.AIW"):
+                try:
+                    parsed = stt.parse_aiw(aiw_path.read_text(encoding="latin-1"))
+                except Exception:
+                    continue
+                if len(parsed.waypoints) > len(waypoints):
+                    waypoints = parsed.waypoints
+            if not waypoints:
+                continue
+            controls = []
+            galphas = []
+            for record in records[::max(1, len(records) // 100)]:
+                waypoint = min(waypoints,
+                               key=lambda wp: (wp.pos[1] - record[0]) ** 2
+                               + (wp.pos[2] - record[1]) ** 2)
+                if (waypoint.pos[1] - record[0]) ** 2 + (waypoint.pos[2] - record[1]) ** 2 > 9:
+                    continue
+                controls.append(record[4])
+                galphas.append(waypoint.galpha)
+            if len(controls) < 20:
+                continue
+            observed.append(abs(correlation(controls, galphas)))
+            baseline.append(statistics.mean(
+                abs(correlation(random.sample(controls, len(controls)), galphas))
+                for _ in range(3)))
+        self.assertGreater(len(observed), 20)
+        self.assertGreater(statistics.median(observed), 0.2)
+        self.assertGreater(statistics.median(observed), 2 * statistics.median(baseline))
+
     def test_gttf_path_controls_weaker_at_record_level(self):
         """Source path records are only loosely complementary, unlike frames."""
         import glob

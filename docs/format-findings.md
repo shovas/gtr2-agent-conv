@@ -214,7 +214,8 @@ regression tests or an explicitly documented negative.
     level the relation is much weaker (median sum 0.85, r −0.136 vs 0.009
     permuted), so the frame values are not a verbatim record copy;
   - `path_f4` also tracks curvature (median |r| 0.072 vs 0.020, positive in
-    23/29 ghosts) — an association, not a simple throttle interpretation;
+    23/29 ghosts) and AIW `galpha` (median |r| 0.276 vs 0.085 shuffled across
+    27 ghosts) — associations, not simple pedal semantics;
   - `+48` low i16 tracks steering/path f3; high i16 tracks engine +32;
   - `+36` is an exact quantized float lattice (`±34·4^k`) whose exponent
     **tracks path f4** (median r 0.274 vs 0.016 permuted, positive in all 29

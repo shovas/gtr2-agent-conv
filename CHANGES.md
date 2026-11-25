@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-30 03:00:00 -0500 - GTTF path f4 vs AIW galpha
+- Found path control f4 correlates with AIW waypoint galpha (median |r| 0.276 vs 0.085 shuffled, 27 ghosts). Full-tier permutation-controlled test added; findings docs updated.
+
 ## 2026-11-30 02:30:00 -0500 - GTTF tail final-state fields decoded
 - Decoded the remaining GTTF tail floats: float 3 ≈ final heading (0.0004 rad), float 4 ≈ final +16, float 2 tracks final slot48_low (|r| 0.993 vs 0.24 shuffled). Full-tier permutation-controlled test added.
 

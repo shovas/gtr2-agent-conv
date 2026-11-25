@@ -278,6 +278,18 @@ frame's `slot48_low` (|r| 0.993 vs 0.24 shuffled). These are near-copies, not
 bit-exact, so the tail is a summary of final car state. Full-tier
 permutation-controlled test added.
 
+## GTTF path f4 tracks AIW galpha (2026-11-30)
+
+Mapped pre-frame path records to the nearest AIW waypoint of the same track
+(within 3 world units) and correlated record field f4 with waypoint attributes.
+Across 27 ghosts, |correlation| with `galpha` has median **0.276** versus
+**0.085** for distribution-preserving shuffles, with 16/27 files above 3×
+baseline. f3 showed only weak path0/path1 associations and other attributes
+(width/dwidth/perp) were at chance. This is a genuine AIW↔ghost link —
+distinct from the earlier negative about frame slot +36 not being an AIW
+surface attribute — but no pedal/surface semantics are claimed. Full-tier
+permutation-controlled regression test added.
+
 ## GTTF frame time field definitively validated (2026-11-30)
 
 The 29 ghost filenames encode lap times such as `1_23_404` (83.404 s). Frame
