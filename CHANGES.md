@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 11:30:00 -0500 - Cross-game UV layout confirmation
+- Confirmed the GTR2 UV block layout in JCA-decrypted Volvo and Race07 GMTs (300/300 each with UV blocks; 86%/88% matching dominant signatures vs 0% shuffled). Full-tier test added.
+
 ## 2026-11-29 11:00:00 -0500 - Batch UV coverage verified
 - Stress-tested 300 conversions (100 per family) with 100% success: VRL and GSC outputs all carry UV blocks; GTR1 UVs appear on all 213 descriptor-based meshes and none of the 187 descriptor-less ones. Full-tier invariant test added.
 

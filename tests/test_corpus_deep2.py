@@ -1995,6 +1995,58 @@ class CorpusDeep2Test(unittest.TestCase):
                 break
         self.assertEqual(checked, 50)
 
+    def test_uv_layout_shared_with_volvo_race07(self):
+        """JCA-decrypted sibling games use the same GTR2 UV signatures."""
+        import glob
+        import random
+        import struct
+        import gmt_format as gf
+        import jca_crypt
+        known = {(1, 2, 0, 0, 0, 0, 0), (1, 2, 1, 2, 1, 2, 1)}
+        random.seed(69)
+        counts = {}
+        for game in ("VolvoTheGame", "Race07Vanilla"):
+            checked = matching = baseline = 0
+            for path in glob.glob(str(ROOT.parent / game / "**" / "*.gmt"),
+                                  recursive=True):
+                data = Path(path).read_bytes()
+                parsed = None
+                for key in (None, jca_crypt.CUSTOM_KEYS.get("volvo")):
+                    try:
+                        candidate = jca_crypt.decrypt_bytes(data, key)
+                    except Exception:
+                        continue
+                    if not candidate or len(candidate) < 0x174:
+                        continue
+                    try:
+                        candidate_parsed = gf.parse_gmt("x.gmt", candidate)
+                    except Exception:
+                        continue
+                    if candidate_parsed.meshes:
+                        parsed = candidate_parsed
+                        break
+                if parsed is None:
+                    continue
+                mesh = parsed.meshes[0]
+                vertex_count = mesh.record.vertex_count
+                stream = mesh.stream2_data
+                if not stream or len(stream) != vertex_count * 32:
+                    continue
+                checked += 1
+                matching += gf.stream_column_signature(stream, vertex_count) in known
+                records = [list(struct.unpack_from("<8f", stream, i * 32))
+                           for i in range(vertex_count)]
+                scrambled = b"".join(struct.pack("<8f", *random.sample(record, 8))
+                                     for record in records)
+                baseline += gf.stream_column_signature(scrambled, vertex_count) in known
+                if checked >= 60:
+                    break
+            counts[game] = (checked, matching, baseline)
+        for checked, matching, baseline in counts.values():
+            self.assertGreater(checked, 40)
+            self.assertGreater(matching / checked, 0.7)
+            self.assertLess(baseline / checked, 0.1)
+
     def test_gmt_rec6_only_uv_block_exposed(self):
         """Single-block layouts expose their vc*32 UV candidate to decoders."""
         import glob

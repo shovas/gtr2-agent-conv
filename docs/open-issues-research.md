@@ -105,6 +105,17 @@ Assigned each frame to one of six gear bands derived from the F550 `.grb`/`.hdc`
 
 This supports f4 as a throttle/demand-like channel on the reference line (stronger in low gears), but neither channel reproduces the ghost's own pedal positions; exact semantics remain unclaimed. Full-tier permutation-controlled regression test added.
 
+## UV layout confirmed across sibling SimBin games (2026-11-29)
+
+Decrypted JCA-encrypted GMTs from Volvo and Race07 with `jca_crypt.py`
+(Volvo key for both) and parsed them with `gmt_format`. In 300 sampled files
+per game, all 300 exposed a `vc*32` UV block at the expected record offset,
+and 257 (Volvo) / 264 (Race07) had one of the two dominant GTR2 signatures
+`(1,2,0,0,0,0,0)` or `(1,2,1,2,1,2,1)`. A per-record shuffle of the eight
+floors (preserving each vertex's value multiset) reduced the match to 0/60,
+confirming the signatures are structural. This independently validates the
+UV layout used by the converters. Full-tier test added.
+
 ## VRL UV transfer completed (2026-11-29)
 
 The gap recorded below was closed: `vrl_to_gmt.prepare_geometry_with_uvs()`
