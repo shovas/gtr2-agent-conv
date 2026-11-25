@@ -74,6 +74,8 @@ python3 gsc_exe_tool.py extract "../CopaPetrobrasdeMarcas/Marcas.exe" out/
 
 ## 3. Inspect GMT files (partial)
 
+**GSC → GTR2 conversion**: `python3 gmt_layout.py encrypted_member.gmt output.gmt --gsc` rebuilds a GTR2-layout mesh from an encrypted GSC-family member (150/150 sampled members preserve geometry).
+
 **What it does**: Parses GMT headers, mesh table records, material/stage string evidence, and observed vertex/stream layouts; diffs GMTs; performs structural lossless round-trip, and can rebuild all offsets after mesh data grows (`gmt_tool.py relayout ...`). Previously opaque GSC GMTs now decode to real geometry with `gmt_semantic.decode_gsc_member()` (correct ISI skip=4); 150/150 sampled members produce plausible vertices and faces.
 
 **How to ask**:

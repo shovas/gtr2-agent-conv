@@ -102,6 +102,21 @@ def old_to_new(data: bytes) -> bytes:
     return bytes(out)
 
 
+def gsc_member_to_gtr2(encrypted: bytes) -> bytes | None:
+    """Convert an ISI-encrypted GSC-family GMT member to a GTR2-layout GMT.
+
+    Uses ``gmt_semantic.decode_gsc_member()`` (ISI skip=4) to recover verified
+    positions/UVs/faces, then rebuilds the new layout via
+    :func:`old_to_new_semantic`.  Returns ``None`` when the member fails any
+    geometry quality gate.  No game data is embedded in this module.
+    """
+    import gmt_semantic
+    decoded = gmt_semantic.decode_gsc_member(encrypted)
+    if not decoded:
+        return None
+    return old_to_new_semantic(decoded["data"])
+
+
 def old_to_new_semantic(data: bytes) -> bytes:
     """Convert an old-layout GMT to new layout with decoded geometry.
 
@@ -176,9 +191,18 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("input")
     ap.add_argument("output")
+    ap.add_argument("--gsc", action="store_true",
+                    help="input is an ISI-encrypted GSC-family GMT member")
     args = ap.parse_args(argv)
     data = Path(args.input).read_bytes()
-    Path(args.output).write_bytes(old_to_new(data))
+    if args.gsc:
+        converted = gsc_member_to_gtr2(data)
+        if converted is None:
+            print("error: member failed geometry validation")
+            return 1
+    else:
+        converted = old_to_new(data)
+    Path(args.output).write_bytes(converted)
     return 0
 
 

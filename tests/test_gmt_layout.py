@@ -130,5 +130,38 @@ class GmtLayoutTest(unittest.TestCase):
             gmt_layout.old_to_new(sample[1].data)
 
 
+    def test_gsc_member_to_gtr2_geometry(self):
+        """Encrypted GSC members convert to GTR2 layout with geometry intact."""
+        cases = (("Automobilista", "ADVERTISEMENT001.GMT"),
+                 ("Automobilista", "AMBULANCE001.GMT"),
+                 ("CopaPetrobrasdeMarcas", "PURCHASED.GMT"),
+                 ("StockCarExtreme", "ARMCO01.GMT"))
+        for root, name in cases:
+            base = ROOT.parent / root
+            if not base.is_dir():
+                continue
+            raw = None
+            for archive in base.glob("**/*.mas"):
+                try:
+                    _, entries = mas_tool.read_archive(str(archive))
+                except Exception:
+                    continue
+                raw = next((e.data for e in entries
+                            if e.name.lower().endswith(name.lower())), None)
+                if raw is not None:
+                    break
+            if raw is None:
+                continue
+            decoded = gmt_semantic.decode_gsc_member(raw)
+            self.assertIsNotNone(decoded, name)
+            out = gmt_layout.gsc_member_to_gtr2(raw)
+            self.assertIsNotNone(out, name)
+            parsed = gmt_format.parse_gmt("out.gmt", out)
+            self.assertEqual(sum(len(m.base_vertices) for m in parsed.meshes),
+                             sum(len(s["positions"]) for s in decoded["submeshes"]))
+            self.assertEqual(sum(len(m.index_data) // 6 for m in parsed.meshes),
+                             decoded["quality"]["face_count"])
+
+
 if __name__ == "__main__":
     unittest.main()
