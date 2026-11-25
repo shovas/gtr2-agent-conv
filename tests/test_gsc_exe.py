@@ -54,6 +54,36 @@ class GscExeTest(unittest.TestCase):
         self.assertEqual(adpack, {"adpackstockcar.mas"})
         self.assertIn("adpackstockcar.mas", embedded)
 
+    def test_marcas_embedded_vehicle_configs(self):
+        """Embedded vehicle physics configs decode to rF1-era key vocabularies."""
+        import re
+        exe = ROOT.parent / "CopaPetrobrasdeMarcas" / "Marcas.exe"
+        if not exe.is_file():
+            self.skipTest("Marcas.exe not present")
+        container = gsc.read_container(exe)
+        keys = container.key_list()
+        key_index = 0
+        by_ext: dict[str, list[set[str]]] = {}
+        for res in container.resources:
+            key = None
+            if gsc.resource_encrypted(res):
+                key = keys[min(key_index, len(keys) - 1)]
+                key_index += 1
+            ext = res.name.lower().rsplit(".", 1)[-1]
+            if ext not in ("hdv", "gen", "tbc", "pm", "sfx"):
+                continue
+            data, ok = gsc.decode_resource(res, key)
+            self.assertTrue(ok, res.name)
+            by_ext.setdefault(ext, []).append({
+                match.group(1).lower() for match in re.finditer(
+                    r"(?m)^\s*([A-Za-z_]\w*)\s*=", data.decode("latin-1"))})
+        self.assertEqual({ext: len(items) for ext, items in by_ext.items()},
+                         {"gen": 6, "hdv": 5, "pm": 2, "tbc": 2, "sfx": 2})
+        for ext, expected in (("hdv", 288), ("gen", 6), ("tbc", 38),
+                              ("pm", 3), ("sfx", 116)):
+            universal = set.intersection(*by_ext[ext])
+            self.assertEqual(len(universal), expected, ext)
+
     def test_unsupported_family_is_raw(self):
         exe = ROOT.parent / "StockCarExtreme" / "GSC.exe"
         if not exe.is_file():
