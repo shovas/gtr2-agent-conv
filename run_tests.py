@@ -29,7 +29,6 @@ QUICK = (
     "test_simbin_text_tool", "test_gtr1_vanilla", "test_scgt", "test_gmt_variants",
     "test_fxm_crosscorpus", "test_simbin_tools", "test_run_tests_modes",
     "test_gtl_to_gtr2", "test_anm_format", "test_bc6h_format", "test_bc7_format",
-    "test_gsc_exe", "test_gsc_gmt_xor",
 )
 
 # Medium-cost tests (corpora read but bounded); target total ≤5 min.
@@ -40,6 +39,7 @@ NORMAL_EXTRA = (
     "test_mas_tool", "test_rf1_pipeline", "test_gmt_layout",
     "test_ams", "test_rf1_vanilla",
     "test_gtr1_coverage", "test_gmt_relayout",
+    "test_gsc_exe", "test_gsc_gmt_xor",
 )
 
 
