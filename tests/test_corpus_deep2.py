@@ -2983,6 +2983,28 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertLess(statistics.median(observed), -0.1)
         self.assertLess(statistics.median(observed), 2 * statistics.median(baseline))
 
+    def test_dedicated_exe_no_frame_serializer_pattern(self):
+        """GTR2Dedicated.exe retains GTTF strings but no 63-byte read site."""
+        exe = ROOT.parent / "GTR2Steam" / "GTR2Dedicated.exe"
+        if not exe.is_file():
+            self.skipTest("GTR2Dedicated.exe not present")
+        data = exe.read_bytes()
+        self.assertIn(b"GTTF", data)
+        lo = 0x520000 - 0x400C00
+        hi = 0x534000 - 0x400C00
+        patterns = (b"\xff\x50\x1c", b"\xff\x52\x1c",
+                    b"\xff\x51\x1c", b"\xff\x53\x1c")
+        pos = lo
+        hits = 0
+        while True:
+            index = data.find(b"\x6a\x3f", pos, hi)
+            if index < 0:
+                break
+            if any(pattern in data[index:index + 20] for pattern in patterns):
+                hits += 1
+            pos = index + 1
+        self.assertEqual(hits, 0)
+
     def test_gttf_frame_marker_prefix_constant(self):
         """Bytes +24..+30 are a fixed marker; only byte +31 varies."""
         import glob

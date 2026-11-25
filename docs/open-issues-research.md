@@ -105,6 +105,14 @@ Assigned each frame to one of six gear bands derived from the F550 `.grb`/`.hdc`
 
 This supports f4 as a throttle/demand-like channel on the reference line (stronger in low gears), but neither channel reproduces the ghost's own pedal positions; exact semantics remain unclaimed. Full-tier permutation-controlled regression test added.
 
+## GTR2Dedicated.exe ghost serializer search (2026-11-29)
+
+`GTR2Dedicated.exe` contains `GTTF` at RVA `0x6996f8` with a pointer table at
+`0x6e8d90` and the same validator/fixup functions as `GTR2.exe` (`0x526dc0` /
+`0x52a300`). A scan of the ghost-code range for `push 0x3f` near a vtable read
+call found **zero** sites, matching the `GTR2.exe` result. No frame serializer
+is recoverable statically from either build. Full-tier regression test added.
+
 ## GTTF path controls are complementary (2026-11-29)
 
 Across all 29 ghosts, path `f3` and `f4` are strongly anti-correlated: median Pearson **−0.59** vs **−0.001** for distribution-preserving shuffles. `f3 == 0` in a median 77.4% of frames, and the median of `f3 + f4` is exactly **1.0**. This strongly suggests two complementary normalized shares (e.g. brake/throttle), but the earlier acceleration negatives prevent claiming literal pedal positions. Full-tier regression test added.

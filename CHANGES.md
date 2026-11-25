@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 01:30:00 -0500 - Dedicated EXE serializer negative
+- Searched GTR2Dedicated.exe for GTTF frame serialization: same pointer-table structure as GTR2.exe, no 63-byte read sites. Full-tier negative test added; findings docs updated.
+
 ## 2026-11-29 01:00:00 -0500 - GSC decode CLI
 - Added `gmt_tool.py decode-gsc` to decrypt and convert an encrypted GSC GMT member to GTR2 layout with validation; regression test added.
 

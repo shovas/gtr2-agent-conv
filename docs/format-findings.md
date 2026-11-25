@@ -53,6 +53,9 @@ regression tests or an explicitly documented negative.
 - **Static-analysis blockers:** `Marcas.exe`, SCE `GSC.exe`, `AMS.exe` are packer
   stubs; `GameStockCar/GSC.exe` is YMY-packed with loader strings but no code
   xrefs. No static derivation of the ISI skip is possible without unpacking.
+- `GTR2Dedicated.exe` also carries the GTTF string and the same pointer-table
+  structure (validator `0x526dc0`, fixup `0x52a300`) but no 63-byte frame read
+  site either — no serializer recovered from that build.
 - `GTR2.exe` (unpacked PE32) code map: GTTF validator `0x527000`, reader
   `0x52be30`, writer `0x52a540`, GMT loader `0x5d68d0`, mesh/shader fixup
   `0x5e9ab0`, shader helpers `0x5e54e0`/`0x5e55e0`, material-library lookup
