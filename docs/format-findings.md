@@ -144,8 +144,11 @@ regression tests or an explicitly documented negative.
   GTR2 tracks with matched `.cam`/`.AIW` pairs, track-mean camera x has the
   opposite sign to track-mean waypoint x in 90% of tracks (vs 53.5% shuffled;
   Pearson r −0.84); y and z show the same tendency (r −0.99 / −0.75). This
-  confirms the guitarmaen CAM/AIW note empirically. The relation is a strong
-  frame inversion, not an exact per-coordinate negation.
+  confirms the guitarmaen CAM/AIW note empirically. At point level, negating
+  each camera's `ActivationLocation` moves it 4.4× closer to the track's AIW
+  waypoints (median 25.2 vs 110.2 world units; 80% of 422 cameras), so the
+  inversion applies to individual coordinates, not just track means. Camera
+  **orientation** fields do not show the same simple inversion.
 - All nine shipped `.Vcr` replay files parse with the same reader: gzip +
   gMb wrapper + `IRSR` v1.05, with driver/car/team names and session values
   from the same 36000/43200/46800 set. The GTTF-specific frame-grid detector

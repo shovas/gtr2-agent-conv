@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 19:30:00 -0500 - CAM activation points confirm inversion
+- Confirmed the CAM/AIW coordinate inversion at point level: negating ActivationLocation puts cameras 4.4x nearer to AIW waypoints (25.2 vs 110.2 units; 80% of 422 cameras). Full-tier test added.
+
 ## 2026-11-29 19:00:00 -0500 - CAM/AIW coordinate inversion verified
 - Confirmed empirically that GTR2 camera positions are inverted relative to AIW waypoints (x opposite-sign in 90% of 30 matched tracks vs 53.5% shuffled, r -0.842). Full-tier permutation-controlled test added.
 

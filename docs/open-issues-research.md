@@ -143,6 +143,17 @@ column-7/column-1 stream invariant was also re-scoped to the two-stream layout
 (it does not hold for single-block UVs, which end in zeros). All 35 module
 tests and the five affected full-tier tests pass after the fix.
 
+## CAM activation points confirm the inversion at point level (2026-11-29)
+
+Follow-up on the track-mean result: for 422 cameras across matched GTR2
+`.cam`/`.AIW` pairs, the nearest AIW waypoint to the camera's
+`ActivationLocation` is a median **25.2** world units away after negating the
+camera coordinate, versus **110.2** without negation — a 4.4× improvement.
+Negation wins for **336/422 (80%)** cameras, against a ~50% random sign-flip
+baseline (20 seeded trials). So the GTR2 CAM/AIW inversion holds per point,
+not merely in aggregate. Orientations were not found to invert as simply.
+Full-tier regression test added.
+
 ## CAM positions invert AIW world coordinates (2026-11-29)
 
 Verified the guitarmaen CAM/AIW note empirically on 30 GTR2 tracks with

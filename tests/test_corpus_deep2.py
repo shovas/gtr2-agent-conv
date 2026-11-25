@@ -3948,6 +3948,52 @@ class CorpusDeep2Test(unittest.TestCase):
             self.assertTrue(event.driver, path.name)
             self.assertTrue(event.car.lower().endswith(".car"), path.name)
 
+    def test_cam_activation_locations_match_negated_waypoints(self):
+        """Camera activation points map onto waypoints after negation."""
+        import math
+        import random
+        import statistics
+        import simbin_text_tool as stt
+        direct_distances = []
+        negated_distances = []
+        location_root = ROOT.parent / "GTR2Steam" / "GameData" / "Locations"
+        for directory in location_root.iterdir():
+            if not directory.is_dir():
+                continue
+            for cam_path in directory.glob("*.cam"):
+                aiw_path = directory / (cam_path.stem + ".AIW")
+                if not aiw_path.is_file():
+                    continue
+                try:
+                    cameras = stt.parse_cam(cam_path.read_text(encoding="latin-1"))
+                    waypoints = stt.parse_aiw(aiw_path.read_text(encoding="latin-1"))
+                except Exception:
+                    continue
+                if not cameras.cameras or not waypoints.waypoints:
+                    continue
+                points = [tuple(wp.pos) for wp in waypoints.waypoints]
+                for camera in cameras.cameras:
+                    if camera.activation_location is None:
+                        continue
+                    position = tuple(camera.activation_location)
+                    if position == (0.0, 0.0, 0.0):
+                        continue
+                    negated = tuple(-value for value in position)
+                    direct_distances.append(min(math.dist(position, p) for p in points))
+                    negated_distances.append(min(math.dist(negated, p) for p in points))
+        self.assertGreater(len(direct_distances), 300)
+        self.assertLess(statistics.median(negated_distances),
+                        0.5 * statistics.median(direct_distances))
+        observed = sum(negated < direct for negated, direct
+                       in zip(negated_distances, direct_distances)) / len(direct_distances)
+        self.assertGreater(observed, 0.7)
+        random.seed(86)
+        flips = []
+        for _ in range(20):
+            signs = [random.choice((-1, 1)) for _ in direct_distances]
+            flips.append(sum(sign < 0 for sign in signs) / len(signs))
+        self.assertGreater(observed, max(flips) + 0.2)
+
     def test_cam_positions_invert_aiw_world_coordinates(self):
         """GTR2 camera positions are negatively correlated with AIW waypoints."""
         import random
