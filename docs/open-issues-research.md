@@ -151,7 +151,7 @@ Follow-up on the track-mean result: for 422 cameras across matched GTR2
 camera coordinate, versus **110.2** without negation — a 4.4× improvement.
 Negation wins for **336/422 (80%)** cameras, against a ~50% random sign-flip
 baseline (20 seeded trials). So the GTR2 CAM/AIW inversion holds per point,
-not merely in aggregate. Orientations were not found to invert as simply.
+not merely in aggregate. Orientation-field semantics were not tested here.
 Full-tier regression test added.
 
 ## CAM positions invert AIW world coordinates (2026-11-29)
