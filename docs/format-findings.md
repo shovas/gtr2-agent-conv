@@ -104,7 +104,8 @@ regression tests or an explicitly documented negative.
     material/mesh slot 0;
   - half-delta and half-sum inversely track mesh ordinal (r −0.21 / −0.26);
   - **mesh 0 is structurally distinct**: median halves 542/678, delta 314 vs
-    later meshes 63/63, delta 1.
+    later meshes 63/63, delta 1; its half-sum also tracks GMT mesh count
+    (r≈0.13) and member size (r≈0.16) vs ~0.009 permuted.
 - **Terminology correction:** `material_index` equals the mesh ordinal in
   99.97% of meshes; all "material index" findings are really mesh position.
 - f0 is strongly associated with material identity (raw-material-equal groups

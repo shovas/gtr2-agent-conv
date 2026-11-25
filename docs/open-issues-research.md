@@ -166,6 +166,10 @@ Across all 42 local event files (29 GTTF + 13 IRSR) the float takes only **36000
 
 Sampled GTR2 meshes (n>100) expose **no** 16-byte extra vertex block (`has_extra_vertex_block` false for all); UV-like data in old-layout GSC meshes therefore cannot be validated against a parsed GTR2 UV representation. The GSC→GTR2 converter preserves the old UV region verbatim but no correctness claim is made. Full-tier regression test added.
 
+## GTR2 mesh-0 f0 vs member size (2026-11-28)
+
+Mesh-0 f0 half-sum also grows weakly with the GMT member's byte length: Pearson r **0.159** vs **0.009** for distribution-preserving permuted sizes (n=8,000). Like the mesh-count relation, this suggests a file-level/scene-level component in mesh 0's identifier. Full-tier regression test added.
+
 ## GTR2 mesh-0 f0 vs mesh count (2026-11-28)
 
 Mesh-0's f0 half-sum grows weakly but significantly with the number of meshes in the GMT: Pearson r ≈ **0.13–0.14** vs **0.009** for distribution-preserving permuted counts (n≈6,000). This is consistent with mesh 0 carrying a file-level/scene-level identifier related to mesh population. Full-tier regression test added.
