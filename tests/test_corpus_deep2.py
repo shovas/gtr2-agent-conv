@@ -1006,6 +1006,49 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertEqual(checked, 204)
 
+    def test_f0_halfwords_not_stage_types(self):
+        """f0 halfwords matching stage types is a small-integer artifact."""
+        import glob
+        import random
+        import statistics
+        import gmt_format as gf
+        import mas_tool
+        pairs = []
+        for root in ("GTR2Steam", "GTLSteam"):
+            for archive in glob.glob(str(ROOT.parent / root / "**" / "*.gtr"),
+                                     recursive=True):
+                try:
+                    _, entries = mas_tool.read_archive(archive)
+                except Exception:
+                    continue
+                for entry in entries:
+                    if not entry.name.lower().endswith(".gmt") or not entry.data:
+                        continue
+                    try:
+                        parsed = gf.parse_gmt("x.gmt", entry.data)
+                    except Exception:
+                        continue
+                    types = {v[0] & 0xFFFF for v in
+                             gf.build_stage_type_map(parsed.materials).values()}
+                    for mesh in parsed.meshes:
+                        marker = gf.mesh_marker(mesh)
+                        if marker:
+                            pairs.append((marker & 0xFFFF, marker >> 16, types))
+                if len(pairs) >= 2000:
+                    break
+            if len(pairs) >= 2000:
+                break
+        self.assertGreater(len(pairs), 1000)
+        observed = sum(1 for a, b, types in pairs if a in types or b in types)
+
+        def permuted():
+            shuffled = random.sample([p[2] for p in pairs], len(pairs))
+            return sum(1 for (a, b, _), types in zip(pairs, shuffled)
+                       if a in types or b in types)
+        random.seed(0)
+        baseline = statistics.mean(permuted() for _ in range(10))
+        self.assertLess(abs(observed - baseline) / max(baseline, 1), 0.1)
+
     def test_gttf_steering_sign_vs_heading_trend(self):
         """Sign of the +8/+16 relation tracks the ghost's heading trend."""
         import glob

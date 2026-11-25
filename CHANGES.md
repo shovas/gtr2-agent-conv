@@ -5,6 +5,9 @@ Newest-first change log. Timestamps use repository commit dates (ISO 8601, local
 ## 2026-11-26 16:30:00 -0500 - AIW Features capacity negative
 - Documented that AIW `[Features]` numbers are capacity defaults rather than section counts (startinggrid 104 vs GRID 36 typical); full-tier corpus-fact regression test added.
 
+## 2026-11-27 06:00:00 -0500 - f0 stage-type matches refuted
+- Showed that f0 halfwords matching stage types (478/3006) is a small-integer artifact: permutation baseline 434 vs 440 observed. No stage-derived f0 semantics; full-tier regression test added.
+
 ## 2026-11-27 05:00:00 -0500 - GTTF steering-sign vs heading trend
 - Found the ± sign of the +8/+16 relation tracks net ghost heading trend (median 7.9 rad positive vs 4.74 rad negative; per-file r=0.583), while AIW waypoint order does not explain it. Full-tier regression test added; exact sign convention unresolved.
 
