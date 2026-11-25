@@ -1006,6 +1006,33 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertEqual(checked, 204)
 
+    def test_gttf_frame8_not_elevation_or_progress(self):
+        """Ghost frame +8 is a bounded smooth field, not elevation/progress."""
+        import glob
+        import gzip
+        import statistics
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        spans = []
+        monotonic = []
+        autocorr = []
+        for path in glob.glob(str(ROOT.parent / "GTR2Steam" / "TimeTrial" / "**" / "*.GTT"),
+                              recursive=True):
+            payload = gz.decompress(path)
+            grid = st.find_frame_grid(payload)
+            if not grid:
+                continue
+            values = [f["position"][2] for f in st.read_frames(payload, grid)]
+            spans.append(max(values) - min(values))
+            monotonic.append(sum(b >= a for a, b in zip(values, values[1:]))
+                             / (len(values) - 1))
+            autocorr.append(st._corr(values[:-1], values[1:]))
+        self.assertEqual(len(spans), 29)
+        self.assertLess(statistics.median(spans), 3)
+        self.assertLess(statistics.median(monotonic), 0.6)
+        self.assertGreater(statistics.median(autocorr), 0.3)
+        self.assertLess(statistics.median(autocorr), 0.8)
+
     def test_gttf_position_axis_spans(self):
         """Ghost position triples are track-local, not AIW world XYZ."""
         import glob

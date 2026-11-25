@@ -5,6 +5,9 @@ Newest-first change log. Timestamps use repository commit dates (ISO 8601, local
 ## 2026-11-26 16:30:00 -0500 - AIW Features capacity negative
 - Documented that AIW `[Features]` numbers are capacity defaults rather than section counts (startinggrid 104 vs GRID 36 typical); full-tier corpus-fact regression test added.
 
+## 2026-11-27 01:00:00 -0500 - GTTF frame +8 bounded field
+- Verified frame +8 has a tightly bounded span (~1.66 m median) that does not match AIW elevation or lap progress, moderately smooth (lag-1 ~0.5); lateral-offset interpretation remains a hypothesis pending a coordinate transform. Full-tier regression test added.
+
 ## 2026-11-27 00:00:00 -0500 - GTL PHS reconstruction infeasible
 - Enumerated PAR2 packets in all five PHS members: only three RecvSlic bodies (384,004 bytes each, exponents 53/58/59, slice size 384,000) versus ~160 slices needed for the 61 MB updater (~1.9% coverage) with exponents 0–52 absent; reconstruction is infeasible from local data. Regression test added.
 
