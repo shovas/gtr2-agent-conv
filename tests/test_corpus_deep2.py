@@ -1006,6 +1006,56 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertEqual(checked, 204)
 
+    def test_gtr2_f0_lod_family_invariant(self):
+        """f0 marker lists repeat across LOD variants more than chance."""
+        import collections
+        import glob
+        import re
+        import gmt_format
+        import mas_tool
+        groups = collections.defaultdict(list)
+        material_matches = 0
+        markers = 0
+        files = 0
+        for root in ("GTR2Steam", "GTLSteam"):
+            for archive in glob.glob(str(ROOT.parent / root / "**" / "*.gtr"),
+                                     recursive=True):
+                try:
+                    _, entries = mas_tool.read_archive(archive)
+                except Exception:
+                    continue
+                for entry in entries:
+                    name = entry.name.lower()
+                    if not name.endswith(".gmt") or not entry.data or len(entry.data) < 0x400:
+                        continue
+                    try:
+                        parsed = gmt_format.parse_gmt("x.gmt", entry.data)
+                    except Exception:
+                        continue
+                    marks = tuple(gmt_format.mesh_marker(m) or 0 for m in parsed.meshes)
+                    if not any(marks):
+                        continue
+                    files += 1
+                    if len(parsed.meshes) < 2:
+                        continue
+                    base = re.sub(r"(lod)?\d+$", "", name.replace("\\", "/")
+                                  .rsplit("/", 1)[-1].rsplit(".", 1)[0])
+                    groups[base].append(marks)
+                    for mesh in parsed.meshes:
+                        marker = gmt_format.mesh_marker(mesh) or 0
+                        markers += 1
+                        material_matches += int((marker & 0xFFFF) == mesh.record.material_index
+                                                or (marker >> 16) == mesh.record.material_index)
+                if files >= 500:
+                    break
+            if files >= 500:
+                break
+        multi = {k: v for k, v in groups.items() if len(v) > 1}
+        self.assertGreater(len(multi), 20)
+        same = sum(1 for v in multi.values() if len(set(v)) == 1)
+        self.assertGreater(same / len(multi), 0.2)
+        self.assertLess(material_matches / markers, 0.25)
+
     def test_gttf_heading_vs_aiw_negative(self):
         """Ghost +12 heading has no consistent relation to AIW directions."""
         import glob
