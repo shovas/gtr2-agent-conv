@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """Batch-convert ancestral ISIMotor meshes into verified GTR2-layout GMTs.
 
-Walks ``../SportsCarGtUsa`` type-2 MAS archives for ``.vrl`` members and
-``../GTR1Vanilla`` archives for third-magic ``.gmt`` members, converts each with
-:mod:`vrl_to_gmt` / :mod:`gtr1_to_gmt`, verifies the result by re-parsing and by
+Walks ``../SportsCarGtUsa`` type-2 MAS archives for ``.vrl`` members,
+``../GTR1Vanilla`` archives for third-magic ``.gmt`` members and
+``../CopaPetrobrasdeMarcas`` MAS archives for ISI-encrypted GSC GMT members,
+converts each with :mod:`vrl_to_gmt` / :mod:`gtr1_to_gmt` /
+:mod:`gmt_layout.gsc_member_to_gtr2`, verifies the result by re-parsing and by
 material-tail checks, and writes only verified outputs to an explicit output
 directory. Game data is never copied into this repository.
 """
@@ -14,6 +16,8 @@ import struct
 from pathlib import Path
 
 import gmt_format
+import gmt_layout
+import gmt_semantic
 import gtr1_to_gmt
 import mas_tool
 import simbin_text_tool as stt
@@ -24,12 +28,13 @@ ROOT = Path(__file__).resolve().parent
 DEFAULT_ROOTS = {
     "vrl": ROOT.parent / "SportsCarGtUsa",
     "gtr1": ROOT.parent / "GTR1Vanilla",
+    "gsc": ROOT.parent / "CopaPetrobrasdeMarcas",
 }
 
 
-def archive_members(root: Path, extension: str):
+def archive_members(root: Path, extension: str, kind: str):
     """Yield (archive_path, entry) for members with the given extension."""
-    patterns = ("*.mas", "*.MAS") if extension == ".vrl" else ("*.gtr", "*.GTR")
+    patterns = ("*.gtr", "*.GTR") if kind == "gtr1" else ("*.mas", "*.MAS")
     paths = []
     for pattern in patterns:
         paths.extend(root.rglob(pattern))
@@ -50,7 +55,22 @@ def convert_member(kind: str, data: bytes, template: bytes, name: str,
         if reasons is not None:
             reasons[reason] = reasons.get(reason, 0) + 1
 
-    if kind == "vrl":
+    if kind == "gsc":
+        decoded = gmt_semantic.decode_gsc_member(data)
+        if decoded is None:
+            skip("no_gsc_geometry")
+            return None
+        try:
+            output = gmt_layout.gsc_member_to_gtr2(data)
+        except (ValueError, struct.error) as exc:
+            skip(f"gsc_build:{type(exc).__name__}:{exc}")
+            return None
+        problems = []
+        parsed = gmt_format.parse_gmt("out.gmt", output)
+        expected = sum(len(s["positions"]) for s in decoded["submeshes"])
+        if sum(len(m.base_vertices) for m in parsed.meshes) != expected:
+            problems.append("vertex_count_mismatch")
+    elif kind == "vrl":
         vrl = stt.read_vrl(data)
         if not vrl or vrl["vertex_count"] == 0:
             skip("no_vrl_geometry")
@@ -91,11 +111,11 @@ def batch_convert(template: bytes, out_dir: Path, limit: int = 0,
     out_dir.mkdir(parents=True, exist_ok=True)
     report: dict[str, int] = {}
     reasons = reasons if reasons is not None else {}
-    for kind, ext in (("vrl", ".vrl"), ("gtr1", ".gmt")):
+    for kind, ext in (("vrl", ".vrl"), ("gtr1", ".gmt"), ("gsc", ".gmt")):
         target = out_dir / kind
         target.mkdir(exist_ok=True)
         scanned = written = 0
-        for arc, entry in archive_members(Path(roots[kind]), ext):
+        for arc, entry in archive_members(Path(roots[kind]), ext, kind):
             data = convert_member(kind, entry.data, template, entry.name, reasons)
             scanned += 1
             if data is not None:

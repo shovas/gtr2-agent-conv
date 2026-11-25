@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-27 23:45:00 -0500 - Batch GSC conversion
+- Added a `gsc` family to `batch_convert.py`: encrypted GSC MAS members are decoded and converted to verified GTR2 GMTs (8/8 in the full-tier regression run).
+
 ## 2026-11-27 23:30:00 -0500 - GSC to GTR2 mesh conversion
 - Added `gmt_layout.gsc_member_to_gtr2()` and a `--gsc` CLI mode: encrypted GSC GMT members convert directly to GTR2-layout meshes with geometry preserved (150/150 sampled members, plus a 4-game normal-tier test).
 

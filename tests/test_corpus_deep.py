@@ -576,6 +576,8 @@ class CorpusDeepTest(unittest.TestCase):
             report = batch_convert.batch_convert(template_path.read_bytes(), out, limit=8)
             self.assertEqual(report["vrl_scanned"], 8)
             self.assertEqual(report["gtr1_scanned"], 8)
+            self.assertEqual(report["gsc_scanned"], 8)
+            self.assertEqual(report["gsc_written"], 8)
             files = list(out.rglob("*.gmt"))
             self.assertGreaterEqual(len(files), 8)
             for f in files:
