@@ -80,7 +80,8 @@ regression tests or an explicitly documented negative.
 - **Integer tiling ratios:** in the `(1,2,3,4,5,6,1)` UV signature, columns 4
   and 6 are often constant integer multiples of column 2 (e.g. ×5/×8, ×20/×24)
   while columns 1/3/5/7 are binary flags — 915/1,980 meshes; shuffling column 2
-  drops the match to 0/500. The ratios are material-associated: among 487
+  drops the match to 0/500. The rule also decodes in JCA-decrypted Race07
+  meshes, so it is not GTR2-only. The ratios are material-associated: among 487
   multi-mesh material groups, 91.6% have identical ratios vs 4.8% for a
   distribution-preserving shuffle. `gmt_format.uv_tiling_factors()` exposes it.
 - **Two-stream meshes duplicate one UV pair:** in 1,731 two-stream meshes,

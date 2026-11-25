@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 22:30:00 -0500 - UV tiling ratios in Race07
+- Confirmed the integer UV tiling-ratio rule decodes in JCA-decrypted Race07 meshes as well as GTR2; full-tier deterministic-sample test added.
+
 ## 2026-11-29 22:00:00 -0500 - GSC UV preservation at scale
 - Verified source and converted UV pairs are exactly equal on 150/150 GSC members. Full-tier regression test added; findings doc updated.
 

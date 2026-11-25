@@ -143,6 +143,16 @@ column-7/column-1 stream invariant was also re-scoped to the two-stream layout
 (it does not hold for single-block UVs, which end in zeros). All 35 module
 tests and the five affected full-tier tests pass after the fix.
 
+## UV tiling ratios confirmed in Race07 (2026-11-29)
+
+The `(1,2,3,4,5,6,1)` UV signature with integer column-4/6 ratios is not
+GTR2-specific: a deterministic scan of the first 400 sorted `Race07Vanilla`
+GMTs (JCA-decrypted) found signature meshes such as `Collisionwall.gmt`,
+`Shape01.gmt` and `TRACK_2007_01.gmt` whose ratios decode cleanly, while
+`road_crack*.gmt` have the same signature without the ratio rule. The rule is
+therefore shared across SimBin titles but not universal within a title.
+Full-tier regression test added.
+
 ## PHS cipher-header negatives (2026-11-29)
 
 Scanned all five GTL PHS members for an ISI `crypt_info` signature at byte
