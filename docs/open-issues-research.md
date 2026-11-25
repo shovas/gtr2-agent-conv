@@ -73,6 +73,12 @@ Deep field-level probe of the minimally investigated `../Automobilista`, `../Sto
 
 Generic section/key parsing of all 1,287 `.gdb` and 3,385 `.car` files found **667 / 173 distinct keys respectively but no cross-corpus universal key**. Only family-specific universals exist: `.car` GTR2-family files (165) all carry `genstring`, `pitgroup`, `number`, `driver1`, `team` (the GTR2-only key set already used by `gtl_to_gtr2`); rF1 `.gdb` (81) all carry `racelaps`. Seven zero-length `.gdb` fixtures in `../rfactortools/tests/data` are legitimately empty. `parse_gdb()`/`parse_car()`/`validate_config()` therefore perform structural validation only — no universal key rule can be promoted beyond the existing family-specific validators.
 
+## GSC opaque GMT: XOR-masked headers found (2026-11-26)
+
+**Refinement of the 2026-11-25 negatives** (not a decoder): 188/200 ISI-decrypted opaque GSC GMTs sampled from four corpora have the 16 bytes at `0x1D4` equal to the old-layout magic `c8cfd2d8…bba8bf90` XORed with a **single constant byte**; 12/200 have the plain magic. `gmt_semantic.gsc_xor_magic_key()` detects this deterministically. In `showroom.mas/PURCHASED.GMT` (Copa) the masks are **region-specific**: `0x0C` over `0x000–0x193`, `0x0B` over `0x194+` (name and magic), and `0xFB` at the submesh header at offset 740. The relaxed magic scan `gsc_masked_submeshes()` (which requires the full `0x200040xx` byte relation under an arbitrary one-byte mask) finds exactly one header there: `(740, 0xFB, 0x20004011)` — previously reported as "zero occurrences of any submesh magic" because only the unmasked magic was tested. After applying the two header masks, the table at `0x174` reads `(1, 736, 576, 868, 576, 19300, 0, 28516)` and the name field reads `purchased`.
+
+**Still blocked:** no single whole-file XOR key restores `read_gmt()` submeshes (all 256 keys tested), and applying the three known region masks still yields zero submeshes — the mask schedule beyond those regions is unknown. No speculative decoder is added; the detectors and a quick-tier regression test document the verified structure. Unblock conditions: identify the mask derivation (per-section/per-mesh key schedule) from a tool or spec, or find a file pair that shares a schedule.
+
 ## Embedded Marcas physics vs GTR2 target fields (2026-11-26)
 
 `validate_embedded_marcas_config()` encodes inclusive numeric envelopes for all 174 numeric keys in the 17 EXE-embedded vehicle configs. Cross-checking against the GTR2 target validators gives a **negative result for direct field copying**:

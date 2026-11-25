@@ -242,6 +242,43 @@ def opaque_gsc_flags(data: bytes) -> int | None:
     return struct.unpack_from("<I", data, 4)[0]
 
 
+OLD_GMT_MAGIC = bytes.fromhex("c8cfd2d8ced8e6c3d6ded8bebba8bf90")
+SUBMESH_MAGICS = (0x20004011, 0x20004015, 0x20004031, 0x20004035)
+
+
+def gsc_xor_magic_key(data: bytes) -> int | None:
+    """Return the one-byte XOR mask applied to the file-level GMT magic.
+
+    For 188/200 opaque GSC GMTs sampled from four corpora, all 16 bytes at
+    0x1D4 equal ``OLD_GMT_MAGIC ^ K`` for a single constant K. Detection is
+    deterministic; it does **not** imply that the rest of the file uses K.
+    """
+    if len(data) < 0x1E4:
+        return None
+    key = data[0x1D4] ^ OLD_GMT_MAGIC[0]
+    if all(data[0x1D4 + i] ^ key == OLD_GMT_MAGIC[i] for i in range(16)):
+        return key
+    return None
+
+
+def gsc_masked_submeshes(data: bytes) -> list[tuple[int, int, int]]:
+    """Find submesh headers hidden behind a one-byte XOR mask.
+
+    Returns ``(offset, mask, magic)`` triples. The 4-byte magic relation is
+    strong enough to avoid false positives: with mask K, bytes must satisfy
+    ``d[i+1]^K == 0x40``, ``d[i+2]^K == 0`` and ``d[i+3]^K == 0x20``.
+    """
+    hits = []
+    for pos in range(len(data) - 4):
+        mask = data[pos + 2]
+        if data[pos + 1] ^ mask != 0x40 or data[pos + 3] ^ mask != 0x20:
+            continue
+        magic = int.from_bytes(bytes(b ^ mask for b in data[pos:pos + 4]), "little")
+        if magic in SUBMESH_MAGICS:
+            hits.append((pos, mask, magic))
+    return hits
+
+
 def read_gsc_geometry(data: bytes) -> dict | None:
     """Decode geometry from an ISI-decrypted, decodable GSC old-layout GMT.
 
