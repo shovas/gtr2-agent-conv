@@ -2809,6 +2809,42 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertGreater(meshes, 100)
         self.assertEqual(with_extra, 0)
 
+    def test_gsc_conversion_index_integrity(self):
+        """Converted faces stay within vertex bounds and are non-degenerate."""
+        import glob
+        import struct
+        import gmt_format
+        import gmt_layout
+        import gmt_semantic
+        import mas_tool
+        checked = 0
+        for archive in glob.glob(str(ROOT.parent / "CopaPetrobrasdeMarcas" / "**" / "*.mas"),
+                                 recursive=True):
+            try:
+                _, entries = mas_tool.read_archive(archive)
+            except Exception:
+                continue
+            for entry in entries:
+                if not entry.name.lower().endswith(".gmt") or len(entry.data) < 0x400:
+                    continue
+                if not gmt_semantic.decode_gsc_member(entry.data):
+                    continue
+                parsed = gmt_format.parse_gmt("out.gmt",
+                                              gmt_layout.gsc_member_to_gtr2(entry.data))
+                for mesh in parsed.meshes:
+                    ids = struct.unpack("<%dH" % ((len(mesh.index_data) - 4) // 2),
+                                        mesh.index_data[4:])
+                    count = len(mesh.base_vertices)
+                    self.assertEqual(sum(1 for index in ids if index >= count), 0)
+                    self.assertEqual(sum(1 for k in range(0, len(ids) - 2, 3)
+                                         if len(set(ids[k:k + 3])) < 3), 0)
+                    checked += 1
+                if checked >= 40:
+                    break
+            if checked >= 40:
+                break
+        self.assertEqual(checked, 40)
+
     def test_gsc_conversion_preserves_material_names(self):
         """Converted GSC meshes keep a parseable material library."""
         import glob

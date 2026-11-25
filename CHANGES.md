@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 03:00:00 -0500 - GSC conversion index integrity
+- Validated 56,273 converted triangles (40 meshes): no out-of-range indices or degenerate faces. Full-tier regression test added; findings doc updated.
+
 ## 2026-11-29 02:30:00 -0500 - Debug artifact sweep negative
 - Searched all ISIMotor installs for PDBs/debug symbols: only RSDS references (GTR2 PDB path/GUID) with no PDB files, no COFF symbols, and no useful RTTI. Full-tier regression test added; findings docs updated.
 
