@@ -320,6 +320,16 @@ Full-tier permutation-controlled regression test added.
 call found **zero** sites, matching the `GTR2.exe` result. No frame serializer
 is recoverable statically from either build. Full-tier regression test added.
 
+## GTTF path control complementarity is frame-level only (2026-11-29)
+
+Re-tested f3/f4 on the 24-byte source path records rather than the mapped
+frames: median `f3+f4` is **0.847** (not 1.0), median correlation **−0.136**
+vs **0.009** permuted, and `f3 == 0` in 68% of records. So the near-perfect
+frame-level complementarity is introduced by the frame/record mapping (or by
+frame-side interpolation), not present verbatim in the path stream. This
+qualifies the earlier brake/throttle-share interpretation; no pedal semantics
+are claimed. Full-tier regression test added.
+
 ## GTTF path controls are complementary (2026-11-29)
 
 Across all 29 ghosts, path `f3` and `f4` are strongly anti-correlated: median Pearson **−0.59** vs **−0.001** for distribution-preserving shuffles. `f3 == 0` in a median 77.4% of frames, and the median of `f3 + f4` is exactly **1.0**. This strongly suggests two complementary normalized shares (e.g. brake/throttle), but the earlier acceleration negatives prevent claiming literal pedal positions. Full-tier regression test added.

@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 16:00:00 -0500 - GTTF control complementarity caveat
+- Found path-record f3/f4 only loosely complementary (sum 0.85, r -0.136 vs 0.009 shuffled) versus near-exact at frame level; documented as a caveat with a full-tier test.
+
 ## 2026-11-29 15:30:00 -0500 - UV layout flag rule
 - Found a perfect structural rule: mesh flag bit 0x20 selects the two-stream UV layout (40,327/40,327 meshes agree). Verified all converter outputs are consistent. Full-tier test added; findings docs updated.
 

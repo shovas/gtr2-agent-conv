@@ -148,9 +148,12 @@ regression tests or an explicitly documented negative.
   - `path_f4` decreases with gear index (r −0.200 vs −0.005) — throttle-like;
   - `path_f3` rises mildly with racing-line curvature (median |r| 0.060 vs
     0.019 permuted), consistent with a brake-like channel;
-  - `path_f3`/`path_f4` are complementary normalized channels: median correlation
-    **−0.59** (vs −0.001 permuted), median `f3+f4 = 1.0`, and `f3 == 0` in 77% of
-    frames — consistent with brake/throttle shares but not proven as pedals;
+  - `path_f3`/`path_f4` are complementary normalized channels **at the frame
+    level**: median correlation **−0.59** (vs −0.001 permuted), median
+    `f3+f4 = 1.0`, and `f3 == 0` in 77% of frames — consistent with
+    brake/throttle shares but not proven as pedals. At the *source path-record*
+    level the relation is much weaker (median sum 0.85, r −0.136 vs 0.009
+    permuted), so the frame values are not a verbatim record copy;
   - `path_f4` also tracks curvature (median |r| 0.072 vs 0.020, positive in
     23/29 ghosts) — an association, not a simple throttle interpretation;
   - `+48` low i16 tracks steering/path f3; high i16 tracks engine +32;

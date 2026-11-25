@@ -3779,6 +3779,39 @@ class CorpusDeep2Test(unittest.TestCase):
                 frames_checked += 1
         self.assertEqual(frames_checked, 44631)
 
+    def test_gttf_path_controls_weaker_at_record_level(self):
+        """Source path records are only loosely complementary, unlike frames."""
+        import glob
+        import random
+        import statistics
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        sums = []
+        correlations = []
+        baselines = []
+        random.seed(76)
+        for path in glob.glob(str(ROOT.parent / "GTR2Steam" / "TimeTrial" / "**" / "*.GTT"),
+                              recursive=True):
+            payload = gz.decompress(path)
+            grid = st.find_frame_grid(payload)
+            if not grid:
+                continue
+            records = st.find_preframe_records(payload, grid["offset"])
+            if len(records) < 50:
+                continue
+            first = [record[3] for record in records]
+            second = [record[4] for record in records]
+            sums.append(statistics.median(x + y for x, y in zip(first, second)))
+            correlations.append(st._corr(first, second))
+            baselines.append(statistics.mean(
+                st._corr(first, random.sample(second, len(second))) for _ in range(3)))
+        self.assertEqual(len(sums), 29)
+        self.assertLess(statistics.median(sums), 0.95)
+        self.assertGreater(statistics.median(sums), 0.7)
+        self.assertLess(statistics.median(correlations), -0.05)
+        self.assertLess(statistics.median(correlations),
+                        5 * statistics.median(baselines))
+
     def test_gttf_path_controls_complementary(self):
         """Path f3/f4 are complementary normalized channels (median sum 1)."""
         import glob
