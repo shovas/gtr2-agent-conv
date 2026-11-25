@@ -92,6 +92,10 @@ Assigned each frame to one of six gear bands derived from the F550 `.grb`/`.hdc`
 
 This supports f4 as a throttle/demand-like channel on the reference line (stronger in low gears), but neither channel reproduces the ghost's own pedal positions; exact semantics remain unclaimed. Full-tier permutation-controlled regression test added.
 
+## GTTF path records: heading validates the x field (2026-11-28)
+
+The 24-byte racing-line record's third float is a heading following the same convention as ghost `+12`: **`heading = atan2(dx, dz)`** using its own x (field 5) and z (field 1). Median circular coherence across 15 ghosts is **0.973** vs **0.086** permuted; 13/15 files prefer this sign/axis convention outright. This independently confirms that field 5 is world x and removes the earlier ambiguity about the missing coordinate. Full-tier regression test added.
+
 ## GTTF path records f3/f4: control-like channels (2026-11-28)
 
 The 24-byte racing-line records' 4th and 5th floats are normalized [0,1] channels with many exact 0.0/1.0 values. `read_frames()` now exposes them as `path_f3` / `path_f4` using the same monotone path mapping as x. Across all 29 ghosts (permutation baselines in parentheses):

@@ -2460,6 +2460,51 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertLess(statistics.median(observed), -0.1)
         self.assertLess(statistics.median(observed), 2 * statistics.median(baseline))
 
+    def test_gttf_path_heading_is_xz_tangent(self):
+        """The 24-byte path heading is the world x/z tangent of its own points."""
+        import glob
+        import gzip
+        import math
+        import random
+        import statistics
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        observed = []
+        baselines = []
+        random.seed(20)
+        for path in glob.glob(str(ROOT.parent / "GTR2Steam" / "TimeTrial" / "**" / "*.GTT"),
+                              recursive=True)[:15]:
+            payload = gz.decompress(path)
+            grid = st.find_frame_grid(payload)
+            if not grid:
+                continue
+            records = st.find_preframe_records(payload, grid["offset"])
+            if len(records) < 50:
+                continue
+            angles = []
+            headings = [record[2] for record in records]
+            for first, second in zip(records, records[1:]):
+                dx = second[5] - first[5]
+                dz = second[1] - first[1]
+                if math.hypot(dx, dz) > 1e-6:
+                    angles.append(math.atan2(dx, dz))
+            if len(angles) < 50:
+                continue
+
+            def coherence(values, directions):
+                diffs = [(value - angle + math.pi) % (2 * math.pi) - math.pi
+                         for value, angle in zip(values, directions)]
+                c = sum(math.cos(x) for x in diffs) / len(diffs)
+                s = sum(math.sin(x) for x in diffs) / len(diffs)
+                return math.hypot(c, s)
+            observed.append(coherence(headings, angles))
+            baselines.append(statistics.mean(
+                coherence(headings, random.sample(angles, len(angles)))
+                for _ in range(5)))
+        self.assertGreater(len(observed), 10)
+        self.assertGreater(statistics.median(observed), 0.9)
+        self.assertGreater(statistics.median(observed), 3 * statistics.median(baselines))
+
     def test_gttf_path_control_fields(self):
         """Pre-frame path fields f3/f4 track steering and engine speed."""
         import glob

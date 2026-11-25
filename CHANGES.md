@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 11:45:00 -0500 - GTTF path heading validation
+- Path-record heading follows atan2(dx,dz) using its own x/z fields (median coherence 0.973 vs 0.086 permuted), independently confirming reconstructed world x. Full-tier regression test added.
+
 ## 2026-11-28 11:15:00 -0500 - f0 split accessors
 - Added `gmt_format.split_f0()` and `gmt_tool.py info --meshes` f0 reporting; regression test added.
 
