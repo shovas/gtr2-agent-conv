@@ -355,6 +355,8 @@ GTR1 coverage is now complete: a full `../GTR1Vanilla` scan (33,477 GMTs with th
 
 - **GDB TerrainDataFile references**: `parse_gdb_terrain_refs()` extracts `.tdf` overrides from rF1-era event files. RF1Vanilla has 26 references, all resolving to loose or archived `.tdf` files; F1C/F12002/NT2003 event files contain no `TerrainDataFile` keys. Full-tier regression test; no exceptions.
 
+- **ANM bone-name negative**: across 904 archived `.anm` files in F1C/F12002/NT2003 (SCGT and RF1Vanilla ship none), 13,005 decoded bone names were compared with all `.gmt`/`.vrl`/`.mts` member basenames in the same corpora: only 2 matches (chance level). Bone names are internal node labels (`_END`, `MAIN`, `FCHAIN`, ...), not mesh references; no cross-reference validator applies. Full-tier corpus-fact regression test.
+
 - **TDF numeric bounds**: `TDF_NUMERIC_BOUNDS` covers 17 surface grip/bump fields from all 203 local `.tdf` files across ten corpora (roads 0.7–1.04 dry / 0.7–0.8 wet, rumble 0.64–0.99 dry, bump amplitudes 0–0.1, lengths 0–54). Full-tier regression test.
 
 - **CAM numeric bounds**: `CAM_NUMERIC_BOUNDS` covers 14 scalar/vector fields from 258 GTR2/GTL/Race07 `.cam` files: FOV 1–102, clip planes 0.05–9700, color 0–249, size/center fixed at 1/0.5, mipmap bias -1..2, LOD multiplier 0.75–65536, rates 0..999 and shake magnitude 0..48. Full-tier regression test.

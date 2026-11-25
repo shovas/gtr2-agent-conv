@@ -203,6 +203,40 @@ class CorpusDeepTest(unittest.TestCase):
         self.assertGreater(tokens, 100)
         self.assertLess(resolved / tokens, 0.01)  # documented negative
 
+    def test_anm_bone_names_not_mesh_names(self):
+        """ANM bone names are internal nodes, not mesh member names."""
+        import glob
+        import anm_format
+        import mas_tool
+        bones = resolved = anms = 0
+        for root in ("SportsCarGtUsa", "RF1Vanilla", "F1C", "F12002", "NT2003"):
+            meshes: set[str] = set()
+            for p in glob.glob(str(ROOT.parent / root / "**" / "*"), recursive=True):
+                if not p.lower().endswith((".mas", ".gtr", ".gtl")):
+                    continue
+                try:
+                    _, entries = mas_tool.read_archive(p)
+                except Exception:
+                    continue
+                for e in entries:
+                    stem = Path(e.name).stem.lower()
+                    if e.name.lower().endswith((".gmt", ".vrl", ".mts")):
+                        meshes.add(stem)
+                    if e.name.lower().endswith(".anm") and e.data:
+                        anms += 1
+                        try:
+                            anim = anm_format.read_anm(e.data)
+                        except Exception:
+                            continue
+                        for bone in anim.bones:
+                            if not bone.name:
+                                continue
+                            bones += 1
+                            resolved += bone.name.lower() in meshes
+        self.assertGreater(anms, 800)
+        self.assertGreater(bones, 12000)
+        self.assertLess(resolved, 10)
+
     def test_gdb_special_class_resolution(self):
         """GDB SpecialClasses keys resolve against local .car class tags."""
         import glob
