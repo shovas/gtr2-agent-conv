@@ -5,6 +5,9 @@ Newest-first change log. Timestamps use repository commit dates (ISO 8601, local
 ## 2026-11-26 16:30:00 -0500 - AIW Features capacity negative
 - Documented that AIW `[Features]` numbers are capacity defaults rather than section counts (startinggrid 104 vs GRID 36 typical); full-tier corpus-fact regression test added.
 
+## 2026-11-26 07:00:00 -0500 - Partial decoder for XOR-masked GSC GMTs
+- Added `gmt_semantic.decode_gsc_xor_gmt()`: a magic-derived whole-file XOR mask now decodes 32/60 (Copa), 32/60 (GSC), 35/60 (SCE) and 39/60 (AMS) masked GMTs to real submesh geometry; region-specific-mask files remain blocked. Quick-tier regression test across four corpora.
+
 ## 2026-11-26 06:00:00 -0500 - Opaque GSC GMT headers are XOR-masked
 - Refined the long-standing GMT blocker: 188/200 sampled opaque GSC GMTs carry the old-layout magic XORed with a constant byte; region-specific masks also reveal a `0x20004011` submesh header and a readable name/table in `PURCHASED.GMT`. Added deterministic detectors and a quick-tier regression test. No decoder is promoted — the mask schedule is still unknown.
 

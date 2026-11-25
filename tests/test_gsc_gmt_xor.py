@@ -35,5 +35,38 @@ class GscGmtXorTest(unittest.TestCase):
         self.assertEqual(head[0x1D4:0x1E4], gmt_semantic.OLD_GMT_MAGIC)
 
 
+    def test_whole_file_xor_decodes_subset(self):
+        """Magic-derived masks fully decode a verified GMT subset in 4 corpora."""
+        cases = (
+            ("CopaPetrobrasdeMarcas", "TRACKWORKERRIGHT.GMT"),
+            ("GameStockCar", "TR_LF_LVL1.GMT"),
+            ("StockCarExtreme", "STARTBOX.GMT"),
+            ("Automobilista", "AMBULANCE_LOD001.GMT"),
+        )
+        for root, name in cases:
+            base = ROOT.parent / root
+            if not base.is_dir():
+                continue
+            found = False
+            for archive in base.glob("**/*.mas"):
+                try:
+                    _, entries = mas_tool.read_archive(str(archive))
+                except Exception:
+                    continue
+                entry = next((e for e in entries
+                              if e.name.lower().endswith(name.lower())), None)
+                if entry is None:
+                    continue
+                data = isi_crypt.decrypt_bytes(entry.data, 1)
+                result = gmt_semantic.decode_gsc_xor_gmt(data)
+                self.assertIsNotNone(result, f"{root}/{name}")
+                decoded, mask = result
+                self.assertNotEqual(mask, 0)
+                self.assertTrue(gmt_semantic.read_gmt(decoded).get("submeshes"))
+                found = True
+                break
+            self.assertTrue(found, f"{root}/{name} not found")
+
+
 if __name__ == "__main__":
     unittest.main()

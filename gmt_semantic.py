@@ -279,6 +279,28 @@ def gsc_masked_submeshes(data: bytes) -> list[tuple[int, int, int]]:
     return hits
 
 
+def decode_gsc_xor_gmt(data: bytes) -> tuple[bytes, int] | None:
+    """Decode a whole-file XOR-masked, ISI-decrypted GSC GMT.
+
+    Returns ``(decoded_data, mask)`` only when the file-level magic at 0x1D4
+    is a constant-byte XOR of the old-layout magic **and** the fully unmasked
+    file parses to at least one submesh.  Corpus-verified on 104/160 masked
+    Copa members; the remaining files use multiple region masks and are not
+    decoded (see ``docs/open-issues-research.md``).
+    """
+    mask = gsc_xor_magic_key(data)
+    if mask is None:
+        return None
+    decoded = bytes(b ^ mask for b in data)
+    try:
+        info = read_gmt(decoded)
+    except Exception:
+        return None
+    if not info.get("submeshes"):
+        return None
+    return decoded, mask
+
+
 def read_gsc_geometry(data: bytes) -> dict | None:
     """Decode geometry from an ISI-decrypted, decodable GSC old-layout GMT.
 
