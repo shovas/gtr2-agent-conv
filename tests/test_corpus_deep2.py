@@ -1300,6 +1300,38 @@ class CorpusDeep2Test(unittest.TestCase):
                            for half in (lo, hi) if half == values[name])
             self.assertLess(observed, 10)  # chance level for 2 x 12k halfwords
 
+    def test_f0_not_shader_enum(self):
+        """f0 is not the 1/2/3/99 stage-type enum used by shader lookups."""
+        import glob
+        import gmt_format as gf
+        import mas_tool
+        values = []
+        for root, ext in (("GTR2Steam", ".gtr"), ("GTLSteam", ".gtl")):
+            for archive in glob.glob(str(ROOT.parent / root / "**" / f"*{ext}"),
+                                     recursive=True):
+                try:
+                    _, entries = mas_tool.read_archive(archive)
+                except Exception:
+                    continue
+                for entry in entries:
+                    if not entry.name.lower().endswith(".gmt") or not entry.data:
+                        continue
+                    try:
+                        parsed = gf.parse_gmt("x.gmt", entry.data)
+                    except Exception:
+                        continue
+                    for mesh in parsed.meshes:
+                        marker = gf.mesh_marker(mesh)
+                        if marker:
+                            values.append(marker)
+                if len(values) >= 20000:
+                    break
+            if len(values) >= 20000:
+                break
+        self.assertGreater(len(values), 10000)
+        self.assertGreater(len(set(values)), 1000)
+        self.assertLess(sum(v in (1, 2, 3, 99) for v in values) / len(values), 0.05)
+
     def test_f0_material_record_association(self):
         """Same f0 is ~10x more likely when the raw material record is identical."""
         import collections

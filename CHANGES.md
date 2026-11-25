@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 05:15:00 -0500 - f0 shader-index hypothesis negated
+- Disassembled GTR2.exe shader lookup helpers (fcn.005e54e0/005e55e0): they use a 1/2/3/99 stage-type enum, not f0; f0 has 4,364 distinct values in 20,005 samples. Full-tier regression test added.
+
 ## 2026-11-28 04:45:00 -0500 - GTTF +48 signed half
 - Decoded slot +48 as two signed 16-bit fields: the low half tracks steering +8 at median |r| 0.503 vs 0.021 permuted (~24x). Units/sign remain unknown; full-tier permutation-controlled test added.
 
