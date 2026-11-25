@@ -74,7 +74,7 @@ python3 gsc_exe_tool.py extract "../CopaPetrobrasdeMarcas/Marcas.exe" out/
 
 ## 3. Inspect GMT files (partial)
 
-**What it does**: Parses GMT headers, mesh table records, material/stage string evidence, and observed vertex/stream layouts; diffs GMTs; performs structural lossless round-trip, and can rebuild all offsets after mesh data grows (`gmt_tool.py relayout ...`). A subset of previously opaque GSC GMTs has its file/submesh structure recovered with `gmt_semantic.decode_gsc_xor_gmt()` (single-byte XOR mask derived from the file magic); decoded bulk vertices are usually still masked and need `read_gsc_geometry()` quality gating.
+**What it does**: Parses GMT headers, mesh table records, material/stage string evidence, and observed vertex/stream layouts; diffs GMTs; performs structural lossless round-trip, and can rebuild all offsets after mesh data grows (`gmt_tool.py relayout ...`). Previously opaque GSC GMTs now decode to real geometry with `gmt_semantic.decode_gsc_member()` (correct ISI skip=4); 150/150 sampled members produce plausible vertices and faces.
 
 **How to ask**:
 - "Inspect this GMT and tell me what we know about its structure."
@@ -90,7 +90,7 @@ python3 gmt_tool.py diff <a.gmt> <b.gmt>
 python3 gmt_tool.py relayout <input.gmt> <output.gmt>   # rebuild offsets after mesh data grows
 ```
 
-**Limitations**: Stage type (+256) and texture channel (+260) are decoded, but UV/LOD/shader/flag meanings and in-game geometry correctness remain unresolved. GSC GMTs with region-specific XOR masks (~45% of the opaque subset) still have no decoder.
+**Limitations**: Stage type (+256) and texture channel (+260) are decoded, but UV/LOD/shader/flag meanings and in-game geometry correctness remain unresolved. GSC GMT conversion correctness in-game remains unvalidated; the earlier region-mask blocker was an ISI-parameter artifact.
 
 ## 4. Inspect/round-trip DSI/HAT/GTT/VCR gzip containers
 

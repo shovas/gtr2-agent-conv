@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-27 23:00:00 -0500 - GSC GMT geometry solved (ISI skip=4)
+- **Major fix:** the long-standing "region-specific mask" blocker was caused by decrypting ISI-encrypted GSC GMT members with `skip=1`. With the correct `skip=4`, `gmt_semantic.decode_gsc_member()` yields full geometry (positions, indices, faces) on **150/150** sampled members across Automobilista, StockCarExtreme, GameStockCar and Copa Petrobras de Marcas. Added full-tier regression test and corrected the documentation; `decode_gsc_xor_gmt()` is retained only as a historical artifact path.
+
 ## 2026-11-26 16:30:00 -0500 - AIW Features capacity negative
 - Documented that AIW `[Features]` numbers are capacity defaults rather than section counts (startinggrid 104 vs GRID 36 typical); full-tier corpus-fact regression test added.
 

@@ -280,18 +280,12 @@ def gsc_masked_submeshes(data: bytes) -> list[tuple[int, int, int]]:
 
 
 def decode_gsc_xor_gmt(data: bytes) -> tuple[bytes, int] | None:
-    """Decode a whole-file XOR-masked, ISI-decrypted GSC GMT.
+    """Historical artifact path: undo a whole-file XOR on a skip=1 decryption.
 
-    Returns ``(decoded_data, mask)`` only when the file-level magic at 0x1D4
-    is a constant-byte XOR of the old-layout magic **and** the fully unmasked
-    file parses to at least one submesh.  This restores the file/submesh
-    *structure*; the bulk vertex data is often still region-masked, so
-    ``read_gsc_geometry()`` reports implausible positions for most results
-    (0/150 sampled decodes had both plausible positions and faces). Callers
-    must check geometry quality before using decoded vertices. Corpus-verified
-    structurally on 104/160 masked Copa members; the remaining files use
-    multiple region masks and are not decoded (see
-    ``docs/open-issues-research.md``).
+    Retained only for analysing the earlier incorrect ISI skip assumption.
+    It restores file/submesh *structure* but not geometry.  Use
+    :func:`decode_gsc_member` on the original encrypted member for real
+    vertex positions, indices and faces.
     """
     mask = gsc_xor_magic_key(data)
     if mask is None:
@@ -304,6 +298,32 @@ def decode_gsc_xor_gmt(data: bytes) -> tuple[bytes, int] | None:
     if not info.get("submeshes"):
         return None
     return decoded, mask
+
+
+def decode_gsc_member(encrypted: bytes) -> dict | None:
+    """Decode an ISI-encrypted GSC-family GMT member to real geometry.
+
+    The correct ISI decryption skip for these members is **4**.  Using skip=1
+    (the historical assumption) leaves a spurious per-file XOR layer that
+    corrupts the bulk vertex/index regions; the earlier "region mask"
+    investigation was an artifact of that wrong parameter.
+
+    Verified on 150/150 sampled members across Automobilista, StockCarExtreme,
+    GameStockCar and Copa Petrobras de Marcas: all have submeshes, plausible
+    positions and faces.  Returns ``None`` if any quality gate fails.
+    """
+    from isi_crypt import decrypt_bytes  # local import avoids module cycles
+    data = decrypt_bytes(encrypted, 4)
+    try:
+        info = read_gmt(data)
+        quality = read_gsc_geometry(data)
+    except Exception:
+        return None
+    q = quality.get("quality") if quality else None
+    if not info.get("submeshes") or not q or not q.get("plausible_positions") \
+            or not q.get("face_count"):
+        return None
+    return {**info, "quality": q, "data": data}
 
 
 def read_gsc_geometry(data: bytes) -> dict | None:

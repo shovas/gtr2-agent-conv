@@ -51,8 +51,8 @@ class GscGmtXorTest(unittest.TestCase):
                          [(740, 0xFB, 0x20004011)])
         self.assertIsNone(gmt_semantic.decode_gsc_xor_gmt(data))
 
-    def test_xor_decode_does_not_restore_geometry(self):
-        """A structurally decoded GMT usually still has masked bulk vertices."""
+    def test_correct_isl_skip_restores_geometry(self):
+        """The region-mask mystery was a wrong ISI skip; skip=4 yields real geometry."""
         import mas_tool
         for root, name in (("CopaPetrobrasdeMarcas", "TRACKWORKERRIGHT.GMT"),
                            ("Automobilista", "AMBULANCE_LOD001.GMT")):
@@ -69,11 +69,10 @@ class GscGmtXorTest(unittest.TestCase):
                               if e.name.lower().endswith(name.lower())), None)
                 if entry is None:
                     continue
-                data = isi_crypt.decrypt_bytes(entry.data, 1)
-                result = gmt_semantic.decode_gsc_xor_gmt(data)
-                self.assertIsNotNone(result)
-                quality = gmt_semantic.read_gsc_geometry(result[0])
-                self.assertFalse(quality.get("plausible_positions"), name)
+                result = gmt_semantic.decode_gsc_member(entry.data)
+                self.assertIsNotNone(result, name)
+                self.assertTrue(result["quality"]["plausible_positions"])
+                self.assertGreater(result["quality"]["face_count"], 0)
                 found = True
                 break
             self.assertTrue(found, f"{root}/{name} not found")

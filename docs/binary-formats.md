@@ -135,7 +135,7 @@ These are usually text but may contain null-padded SimBin headers: `.aiw`, `.svm
 ### Automobilista (Reiza, 2016) cross-corpus observations (evidence only, `../Automobilista`)
 - 470 `.mas` archives all use the standard MAS type-1 signature (header-only scan).
 - 470 archives hold 111,943 members, of which 91,974 are GMTs. Encrypted members use the Game Stock Car signature `0x4b1dca9f960524e8` (enctype 1), decryptable with `isi_crypt.py` skip=4. A real member (`AdelaideMesh.MAS::ADVERTISEMENT001.GMT`) matches `rfactordec` byte-for-byte.
-- All 91,974 GMTs use the **old-style magic** `...bba8bf90` at 0x1D4 (91,962 GSC-encrypted + 12 plain). Despite being the newest source game here, Automobilista keeps the old rF1-era GMT layout — same structural gap for GTR2 conversion as rF1/Copa.
+- All 91,974 GMTs use the **old-style magic** `...bba8bf90` at 0x1D4 (91,962 GSC-encrypted + 12 plain). Despite being the newest source game here, Automobilista keeps the old rF1-era GMT layout. Geometry is decoded by `gmt_semantic.decode_gsc_member()` using ISI `skip=4` (150/150 sampled members yield plausible positions and faces).
 - Verification: `tests/test_ams.py`.
 
 ### Sports Car GT (1999) cross-corpus observations (evidence only, `../SportsCarGtUsa`)

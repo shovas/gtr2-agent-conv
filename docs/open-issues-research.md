@@ -1,5 +1,18 @@
 # Open issues — offline research record (2026-11-23)
 
+## GSC GMT geometry SOLVED: wrong ISI skip, not region masks (2026-11-27)
+
+**Breakthrough.** All earlier "region-specific mask" work was an artifact of decrypting ISI-encrypted GSC GMT members with `skip=1`. The correct parameter is **`skip=4`**: `isi_crypt.decrypt_bytes(raw_member, 4)` yields the native GSC magic (`...bba8bf90`) directly with **no residual XOR**, and the bulk vertex/index data is intact.
+
+Evidence:
+- **150/150** sampled members across Automobilista, StockCarExtreme, GameStockCar and Copa Petrobras de Marcas decode via `gmt_semantic.decode_gsc_member()` with submeshes, **plausible positions and faces** (e.g. `AMBULANCE001.GMT` 2,433 faces, `PURCHASED.GMT` 5 submeshes / 8,786 faces, `ARMCO01.GMT` 96 faces).
+- Five unmasked GMT images embedded in `GameStockCar/GSC.exe` (file offsets `0x3a3980`, `0x3a3ed0`, `0x3a44f0`, `0x3a5080`, `0x3a5cb0`) were found with the same native magic and fully plausible geometry — direct confirmation that the magic byte `0xa8` is a real GSC-era format revision, not a masked GTR2 magic.
+- With `skip=1` those same members show the apparent per-file `magic ^ K` masks and implausible vertices; sweeping `skip` showed `skip=4` collapses every magic key to `K=0` and restores geometry.
+
+`decode_gsc_xor_gmt()` is retained only as a historical artifact path (structure without geometry); the old "mask schedule", "per-vertex run", "name/metadata derivation", "no alignment counterpart" and "geometry caveat" sections below are **superseded** and kept for provenance. Use `decode_gsc_member()` for conversion work. Full-tier regression test added.
+
+
+
 All work here is **offline**: no game was launched. "Runtime-dependent" means
 conclusively establishing it requires actual game execution.
 

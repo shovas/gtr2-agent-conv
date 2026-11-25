@@ -1641,6 +1641,36 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertGreaterEqual(clamped, 25)
         self.assertEqual(statistics.median(maxima), 1.0)
 
+    def test_gsc_member_geometry_corpus(self):
+        """150 ISI-encrypted GSC GMT members decode to valid geometry with skip=4."""
+        import glob
+        import gmt_semantic
+        import mas_tool
+        decoded = 0
+        members = 0
+        for root in ("Automobilista", "StockCarExtreme", "GameStockCar",
+                     "CopaPetrobrasdeMarcas"):
+            for archive in glob.glob(str(ROOT.parent / root / "**" / "*.mas"),
+                                     recursive=True):
+                try:
+                    _, entries = mas_tool.read_archive(archive)
+                except Exception:
+                    continue
+                for entry in entries:
+                    if not entry.name.lower().endswith(".gmt") or len(entry.data) < 0x400:
+                        continue
+                    result = gmt_semantic.decode_gsc_member(entry.data)
+                    members += 1
+                    decoded += int(result is not None)
+                    if members >= 150:
+                        break
+                if members >= 150:
+                    break
+            if members >= 150:
+                break
+        self.assertEqual(members, 150)
+        self.assertEqual(decoded, 150)
+
     def test_gsc_gmt_no_alignment_counterpart(self):
         """No GSC GMT has a same-name/same-size plain GTR2/GTL counterpart."""
         import glob
