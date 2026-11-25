@@ -19,6 +19,10 @@ Across all 31 GTT files, the varying byte +31 of the `00 20 00 XX` u32 at +28 ha
 
 Across all 31 GTT files the raw u32 at +40 is neither a monotonic counter nor a stable two-state flag: monotonic fraction median 0.555 (range 0.503–0.586), |correlation with frame time| median 0.025 (max 0.119), and the two exponent clusters (raw >2³⁰ vs lower) flip in a median 26.6% of consecutive frames (range 0.4–29.6%). The hi fraction varies by file (0.475–0.997), so it is not a car-invariant state either. The earlier quantized-float kinematics negatives for this slot stand; `simbin_events_tool.frame_s40_word()` and a regression test lock in these bounds. No semantic promoted.
 
+## GTR2 vertex f0: raw-record hashes negative (2026-11-27)
+
+Tested CRC32 / CRC32-high / Adler32 / FNV-1a / MD5-first-2 over the **raw** material record and all stage record bytes (20,005 meshes). Halfword matches were 0 / 0 / 6 / 0 / 3 versus permutation baselines 0.6 / 1 / 7.8 / 0.6 / 1.6 — all at chance. With the name-hash, count, offset and stage-type negatives, f0 is not derivable from any GMT-local field tested; it remains an external identifier. Full-tier regression test added.
+
 ## GTR2 vertex f0: set-hash encodings negative (2026-11-27)
 
 Tested order-independent hash constructions from normalized material/stage name sets on 20,000 meshes: CRC32 / Adler32 / MD5-first-2 of the sorted, `'|'`-joined set plus XOR and sum of per-name CRC16 halves. Matches to f0 halfwords were 3 / 2 / 0 / 3 / 4 respectively — chance level (permutation baselines 2.4 / 0 / 0.2 / 2 / 2). So the material-name grouping found above is not produced by a simple set hash; f0 likely encodes an external ID unrelated to a derivable string hash. Full-tier regression test added.

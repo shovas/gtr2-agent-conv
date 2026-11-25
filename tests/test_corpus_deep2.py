@@ -1006,6 +1006,64 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertEqual(checked, 204)
 
+    def test_f0_not_raw_record_hash(self):
+        """f0 halfwords are not hashes/CRCs of raw material/stage records."""
+        import glob
+        import hashlib
+        import zlib
+        import gmt_format as gf
+        import mas_tool
+
+        def fnv(data):
+            value = 2166136261
+            for byte in data:
+                value = ((value ^ byte) * 16777619) & 0xFFFFFFFF
+            return value
+
+        hashes = {
+            "crc": lambda b: zlib.crc32(b) & 0xFFFF,
+            "crc_hi": lambda b: (zlib.crc32(b) >> 16) & 0xFFFF,
+            "adler": lambda b: zlib.adler32(b) & 0xFFFF,
+            "fnv": lambda b: fnv(b) & 0xFFFF,
+            "md5": lambda b: int.from_bytes(hashlib.md5(b).digest()[:2], "little"),
+        }
+        rows = []
+        for root, ext in (("GTR2Steam", ".gtr"), ("GTLSteam", ".gtl"),
+                          ("BMWM3Challenge", ".bmw")):
+            for archive in glob.glob(str(ROOT.parent / root / "**" / f"*{ext}"),
+                                     recursive=True):
+                try:
+                    _, entries = mas_tool.read_archive(archive)
+                except Exception:
+                    continue
+                for entry in entries:
+                    if not entry.name.lower().endswith(".gmt") or not entry.data:
+                        continue
+                    try:
+                        parsed = gf.parse_gmt("x.gmt", entry.data)
+                    except Exception:
+                        continue
+                    for mesh in parsed.meshes:
+                        marker = gf.mesh_marker(mesh)
+                        index = mesh.record.material_index
+                        material = (parsed.materials[index]
+                                    if index < len(parsed.materials) else None)
+                        if not marker or material is None:
+                            continue
+                        blobs = [material.raw] + [s.raw for s in material.stages]
+                        rows.append((marker & 0xFFFF, marker >> 16,
+                                     {name: {fn(blob) for blob in blobs if blob}
+                                      for name, fn in hashes.items()}))
+                if len(rows) >= 12000:
+                    break
+            if len(rows) >= 12000:
+                break
+        self.assertGreater(len(rows), 8000)
+        for name in hashes:
+            matches = sum(1 for lo, hi, values in rows
+                          for half in (lo, hi) if half in values[name])
+            self.assertLess(matches, 20)  # chance level for 2 x 12k halfwords
+
     def test_f0_not_order_independent_name_hash(self):
         """f0 halfwords are not set hashes of normalized material/stage names."""
         import functools
