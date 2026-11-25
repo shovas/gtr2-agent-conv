@@ -2,11 +2,14 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
-## 2026-11-26 01:00:00 -0500 - Decrypted config invariants
-- Surveyed all 26 distinct decrypted gM configs and added `validate_decrypted_gm_config()`: 8 rFactor setups share 15 universal keys with tight gear/aero bounds; 18 GTR-family configs have per-family vocabularies and 24 bounded chassis/brake fields. Full-tier regression test, targeted run 1 s.
-
 ## 2026-11-26 16:30:00 -0500 - AIW Features capacity negative
 - Documented that AIW `[Features]` numbers are capacity defaults rather than section counts (startinggrid 104 vs GRID 36 typical); full-tier corpus-fact regression test added.
+
+## 2026-11-26 02:00:00 -0500 - GSC EXE embedded resources decoded
+- Added `gsc_exe_tool.py` to list/extract resources embedded in GSC-family EXEs (`AXS.GS.0`): `.keyMan` GUID keys, Blowfish-CBC decryption, LZMA/LZ4 decompression. Verified against QuickBMS: 34/35 Marcas files and 626/627 AMS files byte-identical; StockCarExtreme's variant remains unsupported by both tools. New quick-tier and full-tier tests; mirror script documented in `docs/tools-reference.md`.
+
+## 2026-11-26 01:00:00 -0500 - Decrypted config invariants
+- Surveyed all 26 distinct decrypted gM configs and added `validate_decrypted_gm_config()`: 8 rFactor setups share 15 universal keys with tight gear/aero bounds; 18 GTR-family configs have per-family vocabularies and 24 bounded chassis/brake fields. Full-tier regression test, targeted run 1 s.
 
 ## 2026-11-26 00:30:00 -0500 - Full tool-mirror accounting; JCA cross-check
 - Completed a full accounting of `../aluigi-mirror-261124/`: 4,405 files / 189.7 MiB indexed in `docs/aluigi-mirror-manifest.tsv` and 461 ZIPs in `docs/aluigi-mirror-archives.tsv`; HTML tool descriptions and techniques documented in `docs/tools-reference.md`. Cross-checked `jca_crypt.py`/`jca_tables.py` against wtcced 0.3.5 (magic, XOR byte, keys, version mapping, 3,090 identical Blowfish constants) with a regression test.

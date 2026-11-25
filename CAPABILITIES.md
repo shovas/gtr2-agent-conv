@@ -133,6 +133,8 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 
 - **TRK/CAM namespace boundary**: 288 `View=` and 135,196 `Instance=` references across 152 track scripts share no names with parsed `.cam` cameras; the namespaces are distinct. Full-tier corpus-fact test.
 
+- **GSC-family EXE embedded resources**: `gsc_exe_tool.py list|extract` reads the `AXS.GS.0` container in GSC2012/Marcas/SCE/AMS EXEs (up to 637 resources: `.scn`, `.AIW`, `.MAS`, DLLs), decrypts Blowfish-CBC chunks using `.keyMan` GUID keys and decompresses `lzma86head`/LZ4. Verified byte-identical to QuickBMS for 34/35 Marcas and 626/627 AMS files. StockCarExtreme's cipher remains unsupported (QuickBMS also fails). Quick-tier regression test.
+
 - **Decrypted config invariants**: `validate_decrypted_gm_config()` checks corpus-observed vocabularies and numeric bounds on all 26 distinct decrypted configs: the 8 rFactor setups share 15 universal keys with gear1–5 bounds 1–3/10–18/16–26/20–33/22–39 and fixed downforce/balance/ride/gearing 0.5; the 18 GTR-family configs have per-family key vocabularies and 24 bounded chassis/brake fields (e.g. bumptravel −0.04..−0.005, braketorque 1700–3650). Full-tier regression test (targeted run 1 s).
 
 - **Encrypted `//[[gM` config decoder**: `isi_gm_crypt.py` (independent reimplementation of Luigi Auriemma's GPLv2 `rfactorgmdec` algorithm) decrypts all **10** encrypted `.svm` files with keynum 0 and all **18** `gMb1.002f` configs with Top Race 2009 (`0x000dfc2a`) / Superleague (`0x0001be0b`) keynums — 100% printable text. Full-tier regression test across every encrypted file. Tool provenance in `docs/tools-reference.md`.

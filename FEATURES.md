@@ -66,6 +66,8 @@ python3 mas_tool.py delete <archive> <name...>
 python3 isi_crypt.py <input> <output>             # decrypt
 python3 isi_crypt.py -e -s 4b1dca9f960524e8 <in> <out>  # encrypt
 python3 -c "import isi_gm_crypt as g; d=open('setup.svm','rb').read(); print(g.decrypt_gm_file(d, g.GM_KEYNUMS['rf1']).decode('latin-1'))"
+python3 gsc_exe_tool.py list "../CopaPetrobrasdeMarcas/Marcas.exe"
+python3 gsc_exe_tool.py extract "../CopaPetrobrasdeMarcas/Marcas.exe" out/
 ```
 
 **Limitations**: Only known ISI sign/key 16-byte-header variants. Unknown-signature files (e.g. DETOMASO_PANTERA_RAINSCREEN.GMT) remain unresolved.

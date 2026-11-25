@@ -76,6 +76,16 @@ By extension: `.bms` 2,758 · `.txt` 925 · `.zip` 461 · `.png` 69 · `.h` 62 �
 - **papers/quickbms*.zip** (11–16 MB each) → Windows/Linux/macOS binaries and 0.12.0 source
 - Other crypto-related ZIPs: `papers/EncryptX VB.net Conversion.zip`, `dwbdcrypto.zip`, `dwcryptonet.zip`, `pbmsdown.zip`, `pbmsgs.zip` — not racing-specific.
 
+### `bms/gamestockcar_exe.bms` — embedded EXE resources (new decoder 2026-11-26)
+
+Documents the `AXS.GS.0` container in GSC-family EXEs. Local corpora confirm it in 6 EXEs (GSC2012, Marcas, SCE, AMS; up to 637 resources each, including `.scn`, `.AIW`, `.MAS`). Implemented independently as `gsc_exe_tool.py`:
+
+- `.keyMan` records hold SHA-1 key strings; one key is consumed per encrypted resource.
+- Blowfish-CBC with big-endian blocks, IV = BF-ECB of eight zero bytes, plus the script's unaligned-tail XOR fix.
+- `lzma86head` (13-byte header + raw LZMA) and LZ4 block decompression (pure Python).
+- **Verified against QuickBMS 0.12.0 output** for `Marcas.exe`: 34 of 35 decoded files byte-identical; the 15.8 MB `.MAS` differs only in 7 final bytes plus 497 trailing padding bytes from QuickBMS's LZMA decoder. For `AMS.exe`: 626 of 627 decrypted files identical (one `.gen` differs in 19 bytes).
+- **Verified negatives:** QuickBMS itself fails to decode `StockCarExtreme/GSC.exe` resources (same key candidate set yields no valid LZMA header across 890 strings); `AMS.EXE` encrypted chunks are decrypted but **not** compressed by design, so `gsc_exe_tool.py` mirrors that limitation.
+
 ### Cross-check: `jca_crypt.py` vs wtcced 0.3.5 (verified 2026-11-26)
 
 - Magic `0xFFFFB10F` (bytes `0f b1 ff ff`), XOR byte `0xEB`, all eight version→(key,keytable,compression) mappings and all custom keys (volvo, raceroom, raceroom_plr, old_raceroom) match wtcced source exactly.

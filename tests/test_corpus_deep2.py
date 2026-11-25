@@ -979,6 +979,19 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertEqual(jca_crypt.MAGIC, 0xFFFFB10F)
         self.assertEqual(jca_crypt.XOR_BYTE, 0xEB)
 
+    def test_gsc_exe_large_mas(self):
+        """Full-tier: decode the 15 MB MAS embedded in Marcas.exe."""
+        import gsc_exe_tool as gsc
+        exe = ROOT.parent / "CopaPetrobrasdeMarcas" / "Marcas.exe"
+        if not exe.is_file():
+            self.skipTest("Marcas.exe not present")
+        container = gsc.read_container(exe)
+        res = container.get("Gamedata\\Locations\\ReizaCommon\\AdPackStockcar.MAS")
+        data, ok = gsc.decode_resource(res, container.key_list()[5])
+        self.assertTrue(ok)
+        self.assertTrue(data.startswith(b"\xce\xc3\xd5\xc7\xc0\xd9\xe6\xc9"))
+        self.assertGreater(len(data), 15_000_000)
+
     def test_decrypted_gm_config_vocabularies(self):
         """Decrypted SVM/GMB configs match corpus key and numeric invariants."""
         import glob
