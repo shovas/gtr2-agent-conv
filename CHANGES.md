@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 06:15:00 -0500 - GTTF +36 AIW negative
+- Slot +36 shows no relation to AIW waypoint galpha/width/index (median |r| ~0.01); session-time values remain an inference. Full-tier regression test added.
+
 ## 2026-11-28 05:45:00 -0500 - f0 archive scope negative
 - Archive stem + material name set explains f0 in only 16.2% of groups (vs 28.7% for name set alone); f0 is not archive-scoped. Full-tier regression test added.
 

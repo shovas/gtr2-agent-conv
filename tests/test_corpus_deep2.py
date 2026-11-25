@@ -1893,6 +1893,55 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertEqual(len(correlations), 10)
         self.assertLess(statistics.median(abs(v) for v in correlations), 0.05)
 
+    def test_gttf_slot36_not_aiw_surface(self):
+        """+36 does not encode nearest-waypoint surface/path attributes."""
+        import glob
+        import gzip
+        import random
+        import statistics
+        import struct
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        import simbin_text_tool as stt
+        base = ROOT.parent / "GTR2Steam"
+        aiws = {}
+        for path in glob.glob(str(base / "**" / "*.AIW"), recursive=True):
+            aiws.setdefault(path.lower().rsplit("/", 1)[-1], path)
+        fields = ("galpha", "width", "wpindex")
+        observed = {name: [] for name in fields}
+        baselines = {name: [] for name in fields}
+        random.seed(8)
+        for path in glob.glob(str(base / "TimeTrial" / "**" / "*.GTT"), recursive=True)[:12]:
+            payload = gz.decompress(path)
+            event = st.parse_payload(payload)
+            frames = st.read_frames(payload, st.find_frame_grid(payload))
+            aiw = aiws.get((event.aiw or "").lower())
+            if not aiw:
+                continue
+            waypoints = stt.parse_aiw(stt.read_text(aiw)).waypoints
+            values = [struct.unpack_from("<f", payload, frame["offset"] + 36)[0]
+                      for frame in frames]
+            references = {name: [] for name in fields}
+            for frame in frames:
+                y, z = frame["position"][0], frame["position"][1]
+                index = min(range(len(waypoints)),
+                            key=lambda k: (waypoints[k].pos[1] - y) ** 2
+                            + (waypoints[k].pos[2] - z) ** 2)
+                references["galpha"].append(waypoints[index].galpha or 0)
+                references["width"].append(waypoints[index].width[0]
+                                           if waypoints[index].width else 0)
+                references["wpindex"].append(index)
+            for name in fields:
+                observed[name].append(abs(st._corr(values, references[name])))
+                baselines[name].append(statistics.mean(
+                    abs(st._corr(random.sample(values, len(values)),
+                                 references[name])) for _ in range(3)))
+        self.assertGreater(len(observed["galpha"]), 5)
+        for name in fields:
+            self.assertLess(statistics.median(observed[name]), 0.05)
+            self.assertLess(statistics.median(observed[name]),
+                            2 * statistics.median(baselines[name]) + 0.02)
+
     def test_gttf_slot48_low_half_signed(self):
         """The low signed 16-bit half of +48 tracks steering +8 above chance."""
         import glob

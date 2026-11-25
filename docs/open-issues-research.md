@@ -50,6 +50,12 @@ Permutation-controlled study across all 29 ghosts using reconstructed world spee
 
 For +48, the permuted baseline for the +8 coupling is 0.018 (≈10× lower) and 19/29 files exceed twice their own baseline; the sign varies by track. This is a weak but real association, not a decoded semantic — exact units remain unknown. Full-tier permutation-controlled regression test added.
 
+## GTTF +36 is not an AIW surface attribute (2026-11-28)
+
+Tested slot +36 against nearest-AIW-waypoint `galpha`, `width` and waypoint index across 12 ghosts: median |correlation| 0.009 / 0.012 / 0.012, all at or below permutation baselines. Combined with the curvature negative (|r|<0.01), +36 remains structurally characterized (quantized lattice) but semantically unresolved. Full-tier regression test added.
+
+Session-time inference attempt: searched `GTR2Steam/GameData` and `Config.ini` for 36000/43200/46800 outside event files; only `LAUNCHTIME=600` exists and the other matches are coordinate substrings in `.ds` files. The 10h/12h/13h interpretation remains an inference from the exact header values, not corpus-confirmed.
+
 ## GTTF +32 gear-ratio bands and +36 curvature negative (2026-11-28)
 
 With reconstructed world positions and 5-frame smoothing, `+32 / speed` clusters near the F550's gear-ratio-derived bands. Bands were computed **from the actual setup files**: `HewlandLS200.grb` ratios, `BMS550.hdc` gear settings (0/3/7/11/17/22), final drive 3.10 and `Michelin_GT.tyr` rear radius 0.355 m, scaled by the observed `1024` engine-speed factor → ~85.5k/97.5k/111k/138k/177k/250k raw per m/s. Across 7,047 samples from 8 ghosts the median relative distance to a band is **0.0496**, versus **0.1247** for six random log-uniform bands (permutation p≈0.01). This strongly supports an engine-speed interpretation but the exact scale remains unconfirmed; full-tier regression test added.
