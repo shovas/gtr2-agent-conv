@@ -119,5 +119,39 @@ class GmtToolTest(unittest.TestCase):
         self.assertIn("near_equal<=1=", result.stdout)
 
 
+    def test_f0_command_warns_on_mesh0(self):
+        """The f0 command flags an unexpected near-equal mesh-0 marker."""
+        import struct
+        import subprocess
+        import sys
+        sample = None
+        for path in Path(__file__).resolve().parents[1].parent.glob("GTR2Steam/**/*.gtr"):
+            try:
+                _, entries = mas_tool.read_archive(str(path))
+            except Exception:
+                continue
+            sample = next((e.data for e in entries
+                           if e.name.lower().endswith(".gmt") and e.data), None)
+            if sample:
+                break
+        if sample is None:
+            self.skipTest("no GTR2 GMT sample")
+        import tempfile
+        data = bytearray(sample)
+        # Locate mesh records via gmt_format, then patch the first vertex f0.
+        parsed = gmt_format.parse_gmt("sample.gmt", bytes(data))
+        self.assertTrue(parsed.meshes)
+        first_vertex = parsed.meshes[0].record.vertex_offset
+        struct.pack_into("<I", data, first_vertex, 0x00AA00A9)
+        with tempfile.TemporaryDirectory() as td:
+            target = Path(td) / "patched.gmt"
+            target.write_bytes(data)
+            result = subprocess.run(
+                [sys.executable, str(Path(__file__).resolve().parents[1] / "gmt_tool.py"),
+                 "f0", str(target)], capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("mesh0_normally_has_large_delta", result.stdout)
+
+
 if __name__ == "__main__":
     unittest.main()

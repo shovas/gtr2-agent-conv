@@ -247,8 +247,13 @@ def cmd_f0(args: argparse.Namespace) -> int:
         low, high, delta = gmt_format.split_f0(marker)
         near_equal += int(delta <= 1)
         reported += 1
+        note = ""
+        if ordinal == 0 and delta <= 1:
+            note = " note=mesh0_normally_has_large_delta"
+        elif ordinal > 0 and delta > 8:
+            note = " note=later_mesh_delta_unusually_large"
         print(f"mesh[{ordinal}]: f0=0x{marker:08x} halves=({low},{high}) "
-              f"delta={delta} first={ordinal == 0}")
+              f"delta={delta} first={ordinal == 0}{note}")
     print(f"meshes={len(parsed.meshes)} markers={reported} near_equal<=1={near_equal}")
     return 0
 

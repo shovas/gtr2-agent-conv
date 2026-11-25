@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 19:30:00 -0500 - f0 invariant warnings
+- `gmt_tool.py f0` now warns on unexpected mesh-0 near-equal markers and large later-mesh half-deltas; regression test added.
+
 ## 2026-11-28 19:00:00 -0500 - GTTF +16 engine coupling
 - Found frame +16's unclamped values couple weakly to engine +32 (median |r| 0.152 vs 0.020 permuted), unlike the +8/+16 clamp artifact. Full-tier permutation-controlled test added.
 
