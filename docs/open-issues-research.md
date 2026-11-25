@@ -16,6 +16,10 @@ Evidence:
 All work here is **offline**: no game was launched. "Runtime-dependent" means
 conclusively establishing it requires actual game execution.
 
+## GTTF heading semantics resolved: atan2(dx,dz) (2026-11-28)
+
+With reconstructed world x, ghost `+12` heading aligns with AIW pointer-chain tangents in the **world x/z plane** as **`heading = atan2(dx, dz)`**: median circular coherence **0.858** across 15 matched ghosts (dominant convention in 10/15 files; equivalent `-atan2(dz,dx)` in the rest). The earlier y/z-only test gave 0.404 and the DSI-line test 0.318 — both were degraded by the missing x. Full-tier regression test added (median >0.7 across 29 ghosts).
+
 ## GTTF missing x RECONSTRUCTED from pre-frame path records (2026-11-28)
 
 **Breakthrough.** The 63-byte frame records store only y/z (and steering), but the **24-byte records immediately preceding the frame grid** contain a path with six f32 fields: `(y, z, heading, f3, f4, x)`. The 6th float is the missing world x. `find_preframe_records()` and `reconstruct_frame_x()` map frames onto this path in chronological order (monotone index search, small look-back window) and add `frame["x"]` / `frame["world_position"]`.

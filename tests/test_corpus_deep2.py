@@ -1681,6 +1681,50 @@ class CorpusDeep2Test(unittest.TestCase):
                 break
         self.assertEqual(converted, 150)
 
+    def test_gttf_heading_is_aiw_xz_tangent(self):
+        """Ghost +12 is atan2(dx,dz) of the AIW path in world x/z."""
+        import glob
+        import math
+        import statistics
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        import simbin_text_tool as stt
+        base = ROOT.parent / "GTR2Steam"
+        aiws = {}
+        for path in glob.glob(str(base / "**" / "*.AIW"), recursive=True):
+            aiws.setdefault(path.lower().rsplit("/", 1)[-1], path)
+        coherences = []
+        for path in glob.glob(str(base / "TimeTrial" / "**" / "*.GTT"), recursive=True):
+            payload = gz.decompress(path)
+            event = st.parse_payload(payload)
+            frames = st.read_frames(payload, st.find_frame_grid(payload))
+            aiw = aiws.get((event.aiw or "").lower())
+            if not aiw:
+                continue
+            waypoints = [w for w in stt.parse_aiw(stt.read_text(aiw)).waypoints
+                         if w.pos and w.wp_class() in (0, 1)]
+            diffs = []
+            for frame in frames:
+                y, z = frame["position"][0], frame["position"][1]
+                i = min(range(len(waypoints)),
+                        key=lambda k: (waypoints[k].pos[1] - y) ** 2
+                        + (waypoints[k].pos[2] - z) ** 2)
+                j = waypoints[i].ptrs[1]
+                if not (0 <= j < len(waypoints)):
+                    continue
+                dx = waypoints[j].pos[0] - waypoints[i].pos[0]
+                dz = waypoints[j].pos[2] - waypoints[i].pos[2]
+                angle = math.atan2(dx, dz)
+                diffs.append((frame["heading"] - angle + math.pi)
+                             % (2 * math.pi) - math.pi)
+            if len(diffs) < 50:
+                continue
+            c = sum(math.cos(x) for x in diffs) / len(diffs)
+            s = sum(math.sin(x) for x in diffs) / len(diffs)
+            coherences.append(math.hypot(c, s))
+        self.assertGreater(len(coherences), 20)
+        self.assertGreater(statistics.median(coherences), 0.7)
+
     def test_gttf_missing_x_reconstructed(self):
         """Pre-frame path records yield plausible world x and speeds."""
         import glob

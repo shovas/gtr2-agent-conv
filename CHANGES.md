@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 01:45:00 -0500 - GTTF heading convention resolved
+- With world x reconstructed, ghost heading aligns with AIW x/z tangents as `atan2(dx,dz)` (median coherence 0.858 vs 0.404 previously). Full-tier regression test added.
+
 ## 2026-11-28 01:15:00 -0500 - GTTF missing x reconstructed
 - Found the missing world x in the 24-byte pre-frame racing-line records (6th f32). `read_frames()` now exposes `x`/`world_position`; reconstructed speeds are plausible in all 29 ghosts (median 30 m/s vs 0.1 m/s before). Full-tier regression test added.
 
