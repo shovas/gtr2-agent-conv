@@ -278,6 +278,18 @@ frame's `slot48_low` (|r| 0.993 vs 0.24 shuffled). These are near-copies, not
 bit-exact, so the tail is a summary of final car state. Full-tier
 permutation-controlled test added.
 
+## GTTF path f3 vs AIW attributes and curvature (2026-11-30)
+
+A systematic scan of path f3 against all decoded AIW waypoint attributes
+(galpha, widths, dwidths, path fields, perp components, groove_lat,
+score_distance) found only chance-level associations (max |r| 0.046).
+Curvature computed from consecutive AIW waypoints is a better match: across
+27 ghosts median |r| is **0.142** versus **0.068** for shuffled controls,
+with 14/27 files above 2× baseline. This complements the earlier path-record
+curvature result (0.060 vs 0.019). f3 is curvature-related, but no
+brake/throttle semantics are claimed. Full-tier permutation-controlled test
+added.
+
 ## GTTF path f4 tracks AIW galpha (2026-11-30)
 
 Mapped pre-frame path records to the nearest AIW waypoint of the same track
