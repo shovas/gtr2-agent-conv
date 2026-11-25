@@ -5,6 +5,9 @@ Newest-first change log. Timestamps use repository commit dates (ISO 8601, local
 ## 2026-11-26 16:30:00 -0500 - AIW Features capacity negative
 - Documented that AIW `[Features]` numbers are capacity defaults rather than section counts (startinggrid 104 vs GRID 36 typical); full-tier corpus-fact regression test added.
 
+## 2026-11-26 15:00:00 -0500 - StockCarExtreme EXE cipher solved
+- Found the SCE `.keyMan` key schedule (type-1 resource *i* uses key `i + 11`; 204/204 valid LZMA headers) and added it to `gsc_exe_tool.py`; 207/218 SCE EXE resources now extract (`bolognahistoric.scn` → 212,880-byte `CUBEASF`). The prior "blocked" conclusion came from rejecting the valid LZMA props byte `0x5D`. Quick/full-tier regression tests.
+
 ## 2026-11-26 14:00:00 -0500 - GSC GMT decoder geometry caveat
 - Corrected an overstatement: the XOR-masked GMT decoder restores file/submesh *structure* only — 0/150 sampled decodes had both plausible positions and faces. Added geometry-quality regression negative and updated decoder docs; no geometry should be used from these files without `read_gsc_geometry()` gating.
 

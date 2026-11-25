@@ -122,6 +122,20 @@ class GscExeTest(unittest.TestCase):
         self.assertFalse(ok)
         self.assertEqual(data, res.data)
 
+    def test_sce_resources_decode(self):
+        """StockCarExtreme resources use the SCE key schedule (+11)."""
+        exe = ROOT.parent / "StockCarExtreme" / "GSC.exe"
+        if not exe.is_file():
+            self.skipTest("StockCarExtreme GSC.exe not present")
+        container = gsc.read_container(exe)
+        keys = container.key_list()
+        scn = container.get("GameData\\Locations\\BolognaHistoric\\"
+                            "BolognaHistoric\\bolognahistoric.scn")
+        data, ok = gsc.decode_resource(scn, keys[11])
+        self.assertTrue(ok)
+        self.assertTrue(data.startswith(b"CUBEASF\r\n"))
+        self.assertGreater(len(data), 100_000)
+
     def test_ams_decrypts_without_decompression(self):
         exe = ROOT.parent / "Automobilista" / "AMS.exe"
         if not exe.is_file():

@@ -84,7 +84,7 @@ Documents the `AXS.GS.0` container in GSC-family EXEs. Local corpora confirm it 
 - Blowfish-CBC with big-endian blocks, IV = BF-ECB of eight zero bytes, plus the script's unaligned-tail XOR fix.
 - `lzma86head` (13-byte header + raw LZMA) and LZ4 block decompression (pure Python).
 - **Verified against QuickBMS 0.12.0 output** for `Marcas.exe`: 34 of 35 decoded files byte-identical; the 15.8 MB `.MAS` differs only in 7 final bytes plus 497 trailing padding bytes from QuickBMS's LZMA decoder. For `AMS.exe`: 626 of 627 decrypted files identical (one `.gen` differs in 19 bytes).
-- **Verified negatives:** QuickBMS itself fails to decode `StockCarExtreme/GSC.exe` resources (same key candidate set yields no valid LZMA header across 890 strings); `AMS.EXE` encrypted chunks are decrypted but **not** compressed by design, so `gsc_exe_tool.py` mirrors that limitation.
+- **StockCarExtreme solved separately (2026-11-26):** SCE type-1 resources use `.keyMan` key at index `i + 11`; 204/204 validate and 207/218 resources extract (e.g. `bolognahistoric.scn` → 212,880-byte `CUBEASF`). The earlier negative came from an LZMA-props filter that excluded the valid `0x5D` properties byte. QuickBMS's own script still fails on SCE. `AMS.EXE` encrypted chunks are decrypted but **not** compressed by design, so `gsc_exe_tool.py` mirrors that limitation.
 
 ### Cross-check: `jca_crypt.py` vs wtcced 0.3.5 (verified 2026-11-26)
 

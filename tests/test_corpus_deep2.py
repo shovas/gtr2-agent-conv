@@ -979,6 +979,44 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertEqual(jca_crypt.MAGIC, 0xFFFFB10F)
         self.assertEqual(jca_crypt.XOR_BYTE, 0xEB)
 
+    def test_sce_exe_key_schedule(self):
+        """SCE AXS.GS.0 type-1 resources use .keyMan key at index +11."""
+        import struct
+        import gsc_exe_tool as gsc
+        exe = ROOT.parent / "StockCarExtreme" / "GSC.exe"
+        if not exe.is_file():
+            self.skipTest("StockCarExtreme GSC.exe not present")
+        container = gsc.read_container(exe)
+        keys = container.key_list()
+        index = 0
+        checked = 0
+        for res in container.resources:
+            if res.kind != 1 or not gsc.resource_encrypted(res):
+                continue
+            key = keys[index + 11]
+            zsize = struct.unpack_from("<I", res.data, 10)[0]
+            raw = res.data[14:14 + min(zsize, 64)]
+            chunk = gsc._decrypt_chunk(raw, gsc._BlowfishBE(key.encode("latin-1")))
+            prop = chunk[0]
+            dict_size = struct.unpack_from("<I", chunk, 1)[0]
+            lc, lp, pb = prop % 9, (prop // 9) % 5, prop // 45
+            self.assertTrue(lc <= 8 and lp <= 4 and pb <= 4 and dict_size >= 65536
+                            and dict_size & (dict_size - 1) == 0, res.name)
+            index += 1
+            checked += 1
+        self.assertEqual(checked, 204)
+
+    def test_sce_exe_full_extract(self):
+        """Full-tier: extract all decodable StockCarExtreme EXE resources."""
+        import gsc_exe_tool as gsc
+        exe = ROOT.parent / "StockCarExtreme" / "GSC.exe"
+        if not exe.is_file():
+            self.skipTest("StockCarExtreme GSC.exe not present")
+        container = gsc.read_container(exe)
+        results = gsc.extract_all(container, "/tmp/opencode/sce_full_extract")
+        self.assertEqual(sum(1 for _, flag in results if flag), 207)
+        self.assertEqual(len(results), 218)
+
     def test_gsc_exe_large_mas(self):
         """Full-tier: decode the 15 MB MAS embedded in Marcas.exe."""
         import gsc_exe_tool as gsc

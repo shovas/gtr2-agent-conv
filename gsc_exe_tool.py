@@ -50,6 +50,7 @@ class Container:
     version: int
     resources: list[Resource]
     exe_name: str = ""
+    source: str = ""
 
     def key_list(self) -> list[str]:
         """Return the ``.keyMan`` decryption keys in QuickBMS order."""
@@ -92,7 +93,28 @@ def read_container(path: str | Path) -> Container:
             raise ValueError(f"truncated resource {name}")
         resources.append(Resource(name, section, off, data[off:off + size]))
         off += size
-    return Container(version, resources, Path(path).name)
+    return Container(version, resources, Path(path).name, str(path))
+
+
+def keyman_name_pairs(data: bytes) -> list[tuple[str, str]]:
+    """Return all ``(name1, name2)`` string pairs from a ``.keyMan`` table."""
+    pairs = []
+    off = 0
+    while off + 12 <= len(data):
+        len1 = struct.unpack_from("<I", data, off + 4)[0]
+        if not 0 < len1 <= 256 or off + 8 + len1 + 4 > len(data):
+            break
+        off += 8
+        name1 = data[off:off + len1].decode("latin-1")
+        off += len1
+        len2 = struct.unpack_from("<I", data, off)[0]
+        off += 4
+        if not 0 < len2 <= 256 or off + len2 > len(data):
+            break
+        name2 = data[off:off + len2].decode("latin-1")
+        off += len2
+        pairs.append((name1, name2))
+    return pairs
 
 
 def parse_keyman(data: bytes, version: int, exe_name: str = "") -> list[str]:
@@ -334,13 +356,23 @@ def extract_all(container: Container, output_dir: str | Path) -> list[tuple[str,
     out_dir.mkdir(parents=True, exist_ok=True)
     keys = container.key_list()
     key_index = 0
+    sce_type1_index = 0
+    sce = "stockcarextreme" in container.source.lower() and container.version == 2
     results = []
     for res in container.resources:
         key = None
         if resource_encrypted(res):
-            if keys:
-                key = keys[min(key_index, len(keys) - 1)]
-            key_index += 1
+            if sce and res.kind == 1:
+                # Validated on 204/204 SCE type-1 resources: key at +11 in the
+                # .keyMan list, in encrypted-resource order.
+                pos = sce_type1_index + 11
+                if pos < len(keys):
+                    key = keys[pos]
+                sce_type1_index += 1
+            else:
+                if keys:
+                    key = keys[min(key_index, len(keys) - 1)]
+                key_index += 1
         data, ok = decode_resource(res, key, container.exe_name)
         name = res.name.replace("\\", "/")
         target = out_dir / name
