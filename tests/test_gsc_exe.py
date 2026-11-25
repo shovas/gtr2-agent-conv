@@ -84,6 +84,34 @@ class GscExeTest(unittest.TestCase):
             universal = set.intersection(*by_ext[ext])
             self.assertEqual(len(universal), expected, ext)
 
+    def test_marcas_embedded_config_validators(self):
+        """Embedded vehicle configs satisfy their own corpus-derived bounds."""
+        import simbin_text_tool as stt
+        exe = ROOT.parent / "CopaPetrobrasdeMarcas" / "Marcas.exe"
+        if not exe.is_file():
+            self.skipTest("Marcas.exe not present")
+        container = gsc.read_container(exe)
+        keys = container.key_list()
+        key_index = 0
+        checked = 0
+        for res in container.resources:
+            key = None
+            if gsc.resource_encrypted(res):
+                key = keys[min(key_index, len(keys) - 1)]
+                key_index += 1
+            ext = res.name.lower().rsplit(".", 1)[-1]
+            if ext not in stt.EMBEDDED_MARCAS_NUMERIC_BOUNDS:
+                continue
+            data, ok = gsc.decode_resource(res, key)
+            self.assertTrue(ok, res.name)
+            self.assertEqual(stt.validate_embedded_marcas_config(data, ext), [], res.name)
+            checked += 1
+        self.assertEqual(checked, 17)
+        self.assertTrue(stt.validate_embedded_marcas_config(b"bumptravel=1", "hdv")[0].startswith(
+            "hdv: bumptravel=1.0 outside"))
+        self.assertEqual(stt.validate_embedded_marcas_config(b"x=1", "car"),
+                         ["unsupported embedded config extension car"])
+
     def test_unsupported_family_is_raw(self):
         exe = ROOT.parent / "StockCarExtreme" / "GSC.exe"
         if not exe.is_file():

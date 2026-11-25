@@ -1468,6 +1468,231 @@ def validate_gen_numeric(data: bytes | str) -> list[str]:
     return problems
 
 
+EMBEDDED_MARCAS_NUMERIC_BOUNDS = {
+    "hdv": {
+        "abs4wheel": (1.0, 1.0),
+        "adjustsusprates": (0.0, 0.0),
+        "aicornerreductionbase": (150.0, 150.0),
+        "aidamperfast": (0.3, 0.9),
+        "aidamperslow": (0.7, 0.9),
+        "aidownforcebias": (0.0, 0.0),
+        "aidownforcezarm": (0.15, 0.3),
+        "aievensuspension": (0.0, 0.0),
+        "aifuelmult": (-1.0, 0.9),
+        "aiminpassespertick": (10.0, 15.0),
+        "airotationthreshold": (0.25, 0.25),
+        "aispringrate": (1.0, 1.0),
+        "alignwheels": (1.0, 1.0),
+        "allowfinaldrivechanges": (0.0, 1.0),
+        "allowgearingchanges": (0.0, 1.0),
+        "allowmanualoverride": (0.0, 0.0),
+        "allownoantisway": (0.0, 0.0),
+        "alltires": (0.0, 0.0),
+        "applyslowtofastdampers": (1.0, 1.0),
+        "autodownshiftgripthresh": (0.2, 0.4),
+        "autoupshiftgripthresh": (0.2, 0.4),
+        "baulktorque": (689.75, 712.5),
+        "brakediscinertia": (0.0, 0.0),
+        "brakediscsetting": (0.0, 0.0),
+        "brakeductcooling": (2.64e-05, 0.0001),
+        "brakeductsetting": (0.0, 2.0),
+        "brakefailure": (0.0, 0.0),
+        "brakeheating": (0.0005, 0.00208333333333333),
+        "brakepressuresetting": (15.0, 25.0),
+        "braketorque": (2000.0, 3550.0),
+        "braketorqueai": (2000.0, 3550.0),
+        "brakewearrate": (0.0, 0.0),
+        "bumpstage2": (0.08, 0.25),
+        "bumpstopdamper": (0.0, 0.0),
+        "bumpstoprisingdamper": (200000.0, 750000.0),
+        "bumpstoprisingspring": (10000000.0, 15000000.0),
+        "bumpstopspring": (0.0, 0.0),
+        "bumptravel": (-0.06, 0.0),
+        "cambersetting": (0.0, 10.0),
+        "centerwheelsonbodyx": (0.0, 0.0),
+        "cgheight": (0.368, 0.372),
+        "cgrearsetting": (0.0, 1.0),
+        "cgrightsetting": (0.0, 0.0),
+        "clutchengagerate": (3.0, 3.0),
+        "clutchfriction": (2.0, 3.0),
+        "clutchinertia": (0.03, 0.05),
+        "clutchtorque": (366.947, 946.2),
+        "compoundrestrictions": (0.0, 0.0),
+        "correctedinnersuspheight": (0.0, 0.0),
+        "damage": (2.0, 2.0),
+        "damagedtiresonly": (0.0, 0.0),
+        "dampermult": (0.750143667296787, 1.0),
+        "diffcoastsetting": (0.0, 18.0),
+        "diffpowersetting": (0.0, 38.0),
+        "diffpreloadsetting": (0.0, 124.0),
+        "diffuserdraftliftmult": (1.4, 1.4),
+        "downshiftblipthrottle": (0.6, 0.7),
+        "downshiftclutchtime": (0.01, 0.04),
+        "downshiftdelay": (0.08, 0.1),
+        "driver": (1.0, 1.0),
+        "fastbumpsetting": (4.0, 6.0),
+        "fastreboundsetting": (0.0, 6.0),
+        "feelerflags": (0.0, 0.0),
+        "feelersatcgheight": (1.0, 1.0),
+        "fenderflaretime": (4.5, 4.5),
+        "finaldrivesetting": (0.0, 0.0),
+        "forwardgears": (6.0, 6.0),
+        "frictiontorque": (0.5, 3.0),
+        "frontantiswaysetting": (1.0, 2.0),
+        "fronttirecompoundsetting": (0.0, 13.0),
+        "fronttoeinsetting": (3.0, 12.0),
+        "frontwheeltrack": (0.0, 1.618),
+        "frontwing": (0.0, 0.0),
+        "fuel": (0.0, 1.0),
+        "fuelsetting": (19.0, 19.0),
+        "fwdraftliftmult": (1.0, 1.0),
+        "fwsetting": (0.0, 1.0),
+        "garagedisplayflags": (175.0, 175.0),
+        "gear1setting": (0.0, 0.0),
+        "gear2setting": (1.0, 1.0),
+        "gear3setting": (2.0, 2.0),
+        "gear4setting": (3.0, 3.0),
+        "gear5setting": (4.0, 4.0),
+        "gear6setting": (5.0, 5.0),
+        "generalpowermult": (0.88, 0.88),
+        "generaltorquemult": (0.88, 0.88),
+        "handbrakepresssetting": (0.0, 0.0),
+        "leftcastersetting": (0.0, 1.0),
+        "leftwheelbase": (0.0, 2.852),
+        "limitfastdampers": (1.0, 1.0),
+        "mass": (1160.0, 1850.0),
+        "numpitstopssetting": (0.0, 2.0),
+        "onboardbrakebias": (0.0, 1.0),
+        "packersetting": (0.0, 35.0),
+        "pitstop1setting": (19.0, 70.0),
+        "pitstop2setting": (70.0, 70.0),
+        "pressureonthefly": (1.0, 1.0),
+        "pressuresetting": (8.0, 15.0),
+        "pressuretime": (4.0, 6.0),
+        "radiator": (0.0, 0.0),
+        "radiatorsetting": (0.0, 5.0),
+        "radiatortime": (8.0, 8.0),
+        "rearantiswaysetting": (1.0, 2.0),
+        "rearbrakesetting": (2.0, 16.0),
+        "reartirecompoundsetting": (0.0, 13.0),
+        "reartoeinsetting": (1.0, 2.0),
+        "rearwheeltrack": (0.0, 1.618),
+        "rearwing": (0.0, 0.0),
+        "reboundstage2": (-0.25, -0.1),
+        "reboundtravel": (-0.155, -0.075),
+        "reversesetting": (0.0, 0.0),
+        "rideheightsetting": (0.0, 10.0),
+        "rightcastersetting": (0.0, 1.0),
+        "rightwheelbase": (0.0, 2.852),
+        "rules": (0.0, 0.0),
+        "rwdraftliftmult": (1.0, 1.0),
+        "rwsetting": (1.0, 1.0),
+        "semiautomatic": (1.0, 1.0),
+        "slowbumpsetting": (1.0, 7.0),
+        "slowreboundsetting": (1.0, 7.0),
+        "spininertia": (1.2090625, 2.531275),
+        "spininertiaai": (0.9, 1.2),
+        "springbasedantisway": (1.0, 1.0),
+        "springmult": (0.400625, 1.0),
+        "springrubbertime": (3.0, 3.0),
+        "springsetting": (0.0, 0.0),
+        "steeringffbmult": (2.0, 2.0),
+        "steerlocksetting": (4.0, 4.0),
+        "stopgo": (1.0, 1.0),
+        "stopgosimultaneous": (0.0, 0.0),
+        "symmetric": (1.0, 1.0),
+        "trackbar": (0.0, 0.0),
+        "trackbartime": (3.5, 3.5),
+        "upshiftclutchtime": (0.0, 0.01),
+        "upshiftdelay": (0.05, 0.1),
+        "upshiftliftthrottle": (0.0, 1.0),
+        "wedge": (0.0, 0.0),
+        "wedgepushrod": (0.0, 0.0),
+        "wedgesetting": (0.0, 0.0),
+        "wedgetime": (3.5, 3.5),
+    },
+    "gen": {
+    },
+    "tbc": {
+        "aigripmult": (1.02, 1.145),
+        "aipeakslip": (0.09, 0.092),
+        "airtreadrate": (0.00212490357886158, 0.00344571756845224),
+        "aitiremodel": (1.0, 1.0),
+        "aiwear": (2.69755e-07, 3.59755e-07),
+        "damper": (750.0, 1100.0),
+        "dropofffunction": (0.0, 0.0),
+        "minspeed": (13.0, 13.0),
+        "pneumatictrail": (0.0, 1e-06),
+        "radius": (0.325, 0.365),
+        "radiusrpm": (2.5e-06, 3e-06),
+        "rollingresistance": (1150.0, 1600.0),
+        "softness": (0.6, 1.0),
+        "springbase": (20000.0, 25000.0),
+        "springkpa": (1075.0, 1250.0),
+        "step": (0.0125, 0.024),
+        "wearrate": (6.3424136724043e-08, 2.63688663110832e-07),
+        "width": (0.245, 0.275),
+    },
+    "pm": {
+    },
+    "sfx": {
+        "backfireamount": (4.0, 4.0),
+        "brakepressure": (1.0, 1.0),
+        "brakerampspeed": (12.0, 12.0),
+        "engineambient": (0.5, 2.0),
+        "enginerange": (70.0, 80.0),
+        "engineshape": (0.9, 0.9),
+        "otherambient": (0.5, 0.7),
+        "otherrange": (40.0, 60.0),
+        "othershape": (0.7, 1.0),
+        "playerenginevolumeminimum": (0.3, 0.4),
+        "playerenginevolumerevfraction": (0.3, 0.3),
+        "playerenginevolumethrottlefraction": (0.3, 0.4),
+        "shiftambient": (0.5, 2.0),
+        "shiftrange": (40.0, 60.0),
+        "shiftshape": (0.9, 0.9),
+        "trannyinitialramprpm": (1050.0, 1050.0),
+    },
+}
+
+EMBEDDED_MARCAS_SENTINELS = {
+    "hdv": ("bumptravel", "reboundtravel", "frictiontorque", "braketorque"),
+    "gen": ("actor", "instance", "masfile", "meshfile", "moveable", "searchpath"),
+    "tbc": ("radius", "width", "aigripmult", "dropofffunction"),
+    "pm": ("name", "pos", "posbody"),
+    "sfx": ("engineambient", "brakepressure", "brakerampspeed"),
+}
+
+
+def validate_embedded_marcas_config(data: bytes | str, ext: str) -> list[str]:
+    """Validate the 17 vehicle configs embedded in ``Marcas.exe``.
+
+    ``ext`` is one of ``hdv``, ``gen``, ``tbc``, ``pm`` or ``sfx``.  Bounds are
+    the inclusive corpus envelopes of those 17 files, not of the loose game
+    data.  Many key names overlap GTR2's .hdc/.tyr fields but the numeric
+    ranges differ; see ``docs/open-issues-research.md``.
+    """
+    ext = ext.lower().lstrip(".")
+    if ext not in EMBEDDED_MARCAS_NUMERIC_BOUNDS:
+        return [f"unsupported embedded config extension {ext}"]
+    text = data if isinstance(data, str) else data.decode("latin-1")
+    keys = set()
+    for match in re.finditer(r"(?mi)^\s*([A-Za-z_]\w*)\s*=\s*([^\r\n]+)", text):
+        key = match.group(1).lower()
+        keys.add(key)
+        bounds = EMBEDDED_MARCAS_NUMERIC_BOUNDS[ext].get(key)
+        if bounds is None:
+            continue
+        try:
+            value = float(match.group(2).split("//", 1)[0].strip())
+        except ValueError:
+            continue
+        if not (bounds[0] <= value <= bounds[1]):
+            return [f"{ext}: {key}={value} outside [{bounds[0]}, {bounds[1]}]"]
+    missing = [key for key in EMBEDDED_MARCAS_SENTINELS[ext] if key not in keys]
+    return [f"{ext}: missing key {key}" for key in missing]
+
+
 VEH_UNIVERSAL_KEYS = ("hdvehicle", "graphics", "sounds", "classes",
                       "driver", "number", "team")
 

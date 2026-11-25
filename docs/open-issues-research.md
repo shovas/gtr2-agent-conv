@@ -73,6 +73,17 @@ Deep field-level probe of the minimally investigated `../Automobilista`, `../Sto
 
 Generic section/key parsing of all 1,287 `.gdb` and 3,385 `.car` files found **667 / 173 distinct keys respectively but no cross-corpus universal key**. Only family-specific universals exist: `.car` GTR2-family files (165) all carry `genstring`, `pitgroup`, `number`, `driver1`, `team` (the GTR2-only key set already used by `gtl_to_gtr2`); rF1 `.gdb` (81) all carry `racelaps`. Seven zero-length `.gdb` fixtures in `../rfactortools/tests/data` are legitimately empty. `parse_gdb()`/`parse_car()`/`validate_config()` therefore perform structural validation only — no universal key rule can be promoted beyond the existing family-specific validators.
 
+## Embedded Marcas physics vs GTR2 target fields (2026-11-26)
+
+`validate_embedded_marcas_config()` encodes inclusive numeric envelopes for all 174 numeric keys in the 17 EXE-embedded vehicle configs. Cross-checking against the GTR2 target validators gives a **negative result for direct field copying**:
+
+| Source → target | Shared keys | Source range inside GTR2 bounds | Incompatible |
+|---|---:|---:|---:|
+| Marcas `.hdv` → GTR2 `.hdc` (`HDC_NUMERIC_BOUNDS`) | 19 | 6 | **13**: `brakediscinertia`, `bumpstage2`, `bumpstopdamper`, `bumpstopspring`, `bumptravel`, `fastbumpsetting`, `frictiontorque`, `pressuresetting`, `reboundstage2`, `reboundtravel`, `slowbumpsetting`, `spininertia`, `springmult` |
+| Marcas `.tbc` → GTR2 `.tyr` (`TYR_NUMERIC_BOUNDS`) | 15 | 7 | **8**: `aipeakslip`, `airtreadrate`, `aiwear`, `damper`, `radius`, `rollingresistance`, `springbase`, `step` |
+
+Examples: Marcas `pressuresetting` 8–15 vs GTR2 30–65; `frictiontorque` 0.5–3 vs 5.5–12.5; `springbase` 20,000–25,000 vs 30,000–120,000; `step` 0.0125–0.024 vs the constant 0.009. These are different parameterizations/units, so any HDV/TBC → HDC/TYR adapter needs explicit rescaling or target-template defaults rather than name-based copying. The embedded configs still validate against their own derived bounds (all 17 pass).
+
 ## StockCarExtreme EXE-embedded resources (2026-11-26) — blocked
 
 `StockCarExtreme/GSC.exe` (AXS.GS.0 ver 2, 218 resources) uses key material that neither our `gsc_exe_tool.py` nor QuickBMS 0.12.0 with the original `gamestockcar_exe.bms` can decode. Evidence: QuickBMS aborts at the first embedded `GSC.exe` resource with "uncompressed data (-5) bigger than allocated buffer"; bypassing that resource, it aborts on the first `.scn` with the same error. Our decoder tried 890 candidate strings from `.keyMan` (both name fields, upper/lower variants) against BF-CBC with SHA-1 keys — **zero** candidates produced a valid `lzma86head` properties/dict header. The mirror's BMS script header explicitly claims support only for GSC2012, GSC2013 and Copa Petrobras, and marks AMS encryption unsupported; no newer script exists in `../quickbms_scripts`, `../quickbms-mirror` or `../aluigi-mirror-261124` (all copies are byte-identical, MD5 `67ab40f6...`). Unblock conditions: an updated BMS script/tool for the SCE variant, a format spec, or a known uncompressed SCE resource whose plaintext identifies the cipher. Marcas and AMS variants are solved and independently verified; this does not affect them.

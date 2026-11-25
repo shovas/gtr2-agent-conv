@@ -5,6 +5,9 @@ Newest-first change log. Timestamps use repository commit dates (ISO 8601, local
 ## 2026-11-26 16:30:00 -0500 - AIW Features capacity negative
 - Documented that AIW `[Features]` numbers are capacity defaults rather than section counts (startinggrid 104 vs GRID 36 typical); full-tier corpus-fact regression test added.
 
+## 2026-11-26 05:00:00 -0500 - Embedded physics numeric validators
+- Added `validate_embedded_marcas_config()` with 174 corpus-derived numeric bounds and sentinel keys; all 17 EXE-embedded vehicle configs pass. Cross-check with GTR2 `.hdc`/`.tyr` bounds found incompatible ranges for 13/19 and 8/15 shared fields, documenting why direct name-based field copying cannot work. Quick-tier regression test.
+
 ## 2026-11-26 04:00:00 -0500 - Embedded vehicle physics corpus
 - Decoded all 17 vehicle config resources embedded in `Marcas.exe` (`.hdv/.gen/.tbc/.pm/.sfx`), none of which have loose copies; documented their stable key vocabularies and added a quick-tier regression test.
 
