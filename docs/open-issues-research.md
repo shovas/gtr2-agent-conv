@@ -105,6 +105,15 @@ Assigned each frame to one of six gear bands derived from the F550 `.grb`/`.hdc`
 
 This supports f4 as a throttle/demand-like channel on the reference line (stronger in low gears), but neither channel reproduces the ghost's own pedal positions; exact semantics remain unclaimed. Full-tier permutation-controlled regression test added.
 
+## GTTF frame slots vs path fields matrix (2026-11-28)
+
+A permutation-controlled matrix across 15 frame slots and 6 path-record fields confirmed the direct mappings and revealed one new relation:
+- frame +0 ↔ path y (r≈1.000), +4 ↔ path z (r≈1.000), +12 ↔ path heading (r≈0.96) — all with permuted baselines ≈0.02;
+- frame +20 (timestamp) ↔ path x (field 5): median |r| **0.568** vs **0.017** permuted — x is the longitudinal progress coordinate used by playback;
+- frame +32 ↔ path f4 (engine-related) r≈0.51; no other slot/field pair stands out.
+
+Full-tier regression test added for the time/x relation.
+
 ## GTTF heading comes from the path records (2026-11-28)
 
 Directly comparing each ghost frame's `+12` heading with the heading field of its matched 24-byte path record gives median circular coherence **0.992** across all 29 ghosts vs **0.024** for permuted path headings. This is the strongest heading result so far and shows the frame's heading is copied from / derived directly from the reference path record, not independently reconstructed from frame-to-frame motion. Full-tier permutation-controlled regression test added.

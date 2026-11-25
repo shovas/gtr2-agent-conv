@@ -2935,6 +2935,47 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertLess(statistics.median(observed), -0.1)
         self.assertLess(statistics.median(observed), 2 * statistics.median(baseline))
 
+    def test_gttf_time_tracks_path_x(self):
+        """Frame time advances with the path record's world x coordinate."""
+        import glob
+        import gzip
+        import random
+        import statistics
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        observed = []
+        baseline = []
+        random.seed(45)
+        for path in glob.glob(str(ROOT.parent / "GTR2Steam" / "TimeTrial" / "**" / "*.GTT"),
+                              recursive=True):
+            payload = gz.decompress(path)
+            grid = st.find_frame_grid(payload)
+            if not grid:
+                continue
+            frames = st.read_frames(payload, grid)
+            records = st.find_preframe_records(payload, grid["offset"])
+            if not records:
+                continue
+            index = 0
+            times = []
+            path_x = []
+            for frame in frames:
+                y, z = frame["position"][0], frame["position"][1]
+                candidates = range(max(0, index - 3), min(len(records), index + 30))
+                chosen = min(candidates,
+                             key=lambda k: (records[k][0] - y) ** 2
+                             + (records[k][1] - z) ** 2)
+                index = chosen
+                times.append(frame["time"])
+                path_x.append(records[chosen][5])
+            observed.append(abs(st._corr(times, path_x)))
+            baseline.append(statistics.mean(
+                abs(st._corr(times, random.sample(path_x, len(path_x))))
+                for _ in range(3)))
+        self.assertEqual(len(observed), 29)
+        self.assertGreater(statistics.median(observed), 0.4)
+        self.assertGreater(statistics.median(observed), 10 * statistics.median(baseline))
+
     def test_gttf_heading_matches_path_record_heading(self):
         """Ghost +12 equals the nearest path record's heading field."""
         import glob

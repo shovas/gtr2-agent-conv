@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 21:00:00 -0500 - GTTF time vs path x
+- A frame/path field matrix confirmed y/z/heading mappings and found frame time tracks path x (median |r| 0.568 vs 0.017 permuted), identifying x as longitudinal progress. Full-tier test added.
+
 ## 2026-11-28 20:30:00 -0500 - GTTF heading from path records
 - Found ghost +12 heading matches the matched path record's heading with median coherence 0.992 vs 0.024 permuted across 29 ghosts. Full-tier permutation-controlled test added.
 
