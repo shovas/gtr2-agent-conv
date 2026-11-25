@@ -2935,6 +2935,37 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertLess(statistics.median(observed), -0.1)
         self.assertLess(statistics.median(observed), 2 * statistics.median(baseline))
 
+    def test_gttf_slot48_low_vs_path_f3_no_clamps(self):
+        """Slot +48's low half tracks path f3 even without clamped frames."""
+        import glob
+        import gzip
+        import random
+        import statistics
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        observed = []
+        baseline = []
+        random.seed(46)
+        for path in glob.glob(str(ROOT.parent / "GTR2Steam" / "TimeTrial" / "**" / "*.GTT"),
+                              recursive=True):
+            payload = gz.decompress(path)
+            frames = st.read_frames(payload, st.find_frame_grid(payload))
+            if frames[0]["path_f3"] is None:
+                continue
+            frames = [frame for frame in frames if abs(frame["pitch"]) < 0.99]
+            if len(frames) < 100:
+                continue
+            values = [frame["slot48_low"] for frame in frames]
+            reference = [frame["path_f3"] for frame in frames]
+            observed.append(abs(st._corr(values, reference)))
+            baseline.append(statistics.mean(
+                abs(st._corr(random.sample(values, len(values)), reference))
+                for _ in range(3)))
+        self.assertEqual(len(observed), 29)
+        self.assertGreater(statistics.median(observed), 0.08)
+        self.assertGreater(statistics.median(observed),
+                           3 * statistics.median(baseline))
+
     def test_gttf_time_tracks_path_x(self):
         """Frame time advances with the path record's world x coordinate."""
         import glob

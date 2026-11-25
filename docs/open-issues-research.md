@@ -105,6 +105,14 @@ Assigned each frame to one of six gear bands derived from the F550 `.grb`/`.hdc`
 
 This supports f4 as a throttle/demand-like channel on the reference line (stronger in low gears), but neither channel reproduces the ghost's own pedal positions; exact semantics remain unclaimed. Full-tier permutation-controlled regression test added.
 
+## GTTF slot +48 vs path f3 without clamps (2026-11-28)
+
+Re-tested slot +48's packed halves against path-control fields after removing frames where `+16` saturates (the source of the earlier spurious +8/+16 coupling):
+- low i16 half vs path f3: median |r| **0.101** vs **0.022** permuted across 29 ghosts, 17/29 files above 3× baseline;
+- high i16 half vs path f4: 0.062 vs 0.024 — weak.
+
+So +48's low half has a genuine, though modest, steering/path-f3 association independent of saturation. Full-tier regression test added.
+
 ## GTTF frame slots vs path fields matrix (2026-11-28)
 
 A permutation-controlled matrix across 15 frame slots and 6 path-record fields confirmed the direct mappings and revealed one new relation:

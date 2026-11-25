@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 21:30:00 -0500 - GTTF +48 low vs path f3
+- After removing clamped frames, slot +48's low half still tracks path f3 (median |r| 0.101 vs 0.022 permuted). Full-tier permutation-controlled test added.
+
 ## 2026-11-28 21:00:00 -0500 - GTTF time vs path x
 - A frame/path field matrix confirmed y/z/heading mappings and found frame time tracks path x (median |r| 0.568 vs 0.017 permuted), identifying x as longitudinal progress. Full-tier test added.
 
