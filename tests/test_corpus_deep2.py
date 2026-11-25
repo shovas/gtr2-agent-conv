@@ -2908,6 +2908,42 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertGreater(meshes, 100)
         self.assertEqual(with_extra, 0)
 
+    def test_gsc_conversion_roundtrip_preserves_streams(self):
+        """Repacking a converted GSC GMT preserves vertices and streams."""
+        import glob
+        import gmt_format
+        import gmt_layout
+        import gmt_semantic
+        import mas_tool
+        checked = 0
+        for archive in glob.glob(str(ROOT.parent / "CopaPetrobrasdeMarcas" / "**" / "*.mas"),
+                                 recursive=True):
+            try:
+                _, entries = mas_tool.read_archive(archive)
+            except Exception:
+                continue
+            for entry in entries:
+                if not entry.name.lower().endswith(".gmt") or len(entry.data) < 0x400:
+                    continue
+                if not gmt_semantic.decode_gsc_member(entry.data):
+                    continue
+                converted = gmt_layout.gsc_member_to_gtr2(entry.data)
+                if converted is None:
+                    continue
+                before = gmt_format.parse_gmt("a.gmt", converted)
+                after = gmt_format.parse_gmt("b.gmt", gmt_format.relayout_gmt(before))
+                self.assertEqual(len(before.meshes), len(after.meshes))
+                for first, second in zip(before.meshes, after.meshes):
+                    self.assertEqual(first.record.vertex_count, second.record.vertex_count)
+                    self.assertEqual(first.vertex_data, second.vertex_data)
+                    self.assertEqual(first.stream2_data, second.stream2_data)
+                checked += 1
+                if checked >= 40:
+                    break
+            if checked >= 40:
+                break
+        self.assertEqual(checked, 40)
+
     def test_gsc_conversion_index_integrity(self):
         """Converted faces stay within vertex bounds and are non-degenerate."""
         import glob

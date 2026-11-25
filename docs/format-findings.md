@@ -37,7 +37,9 @@ regression tests or an explicitly documented negative.
   face winding relative to stored normals (cross-product agreement ~0 forward,
   ~1 reversed). Do **not** flip indices during conversion.
 - `batch_convert.py` includes a `gsc` family; all written meshes are re-parsed
-  and pass `validate_materials.check_gmt()`.
+  and pass `validate_materials.check_gmt()`. Round-tripping 40 converted
+  meshes through `gmt_format.relayout_gmt()` preserves vertex and stream bytes
+  exactly.
 - **UV storage candidate located (not yet decoded):** meshes whose record has
   `rec[6] < rec[7] < rec[8]` carry two extra 32-byte-per-vertex streams. In
   46.7% of 1,605 sampled meshes every 8-float stream record follows

@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 05:00:00 -0500 - GSC conversion round-trip guarantee
+- Verified that repacking 40 converted GSC→GTR2 GMTs preserves vertex and stream bytes exactly; full-tier regression test added.
+
 ## 2026-11-29 04:30:00 -0500 - GTR2 extra vertex stream structure
 - Located a UV-candidate stream in GTR2 GMTs: meshes with extra 32-byte-per-vertex streams reduce to three distinct values in 46.7% of cases (vs 0% shuffled). Added `gmt_format.decode_stream_records()` and a full-tier test; semantics remain unassigned.
 
