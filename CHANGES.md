@@ -5,6 +5,9 @@ Newest-first change log. Timestamps use repository commit dates (ISO 8601, local
 ## 2026-11-26 16:30:00 -0500 - AIW Features capacity negative
 - Documented that AIW `[Features]` numbers are capacity defaults rather than section counts (startinggrid 104 vs GRID 36 typical); full-tier corpus-fact regression test added.
 
+## 2026-11-27 00:00:00 -0500 - GTL PHS reconstruction infeasible
+- Enumerated PAR2 packets in all five PHS members: only three RecvSlic bodies (384,004 bytes each, exponents 53/58/59, slice size 384,000) versus ~160 slices needed for the 61 MB updater (~1.9% coverage) with exponents 0–52 absent; reconstruction is infeasible from local data. Regression test added.
+
 ## 2026-11-26 23:30:00 -0500 - GTTF position transform negative
 - Fitted axis/scale/offset transforms of ghost positions to AIW waypoints (best median NN 10.3 m, no convincing fit) and found all 31 ghosts have one axis <2.71 m and one >307 m while AIW spans x≈685/y≈2/z≈395 m: ghost triples are track-local, not world XYZ. Full-tier regression test added.
 

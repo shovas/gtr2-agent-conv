@@ -9,6 +9,10 @@ PAR2-style recovery containers for a single file, `GTL_Update_0901.exe`; the fif
 gameplay physics content. No evidence was found that GTL reads PHS contents as
 structured physics data.
 
+## PAR2 recovery-slice coverage (2026-11-26)
+
+Enumerated every PHS packet chain: `AI.PHS`, `TRACKS.PHS` and `CARS.PHS` each contain one `Main` packet and one `RecvSlic` packet; `DRIVERS.PHS` has only `FileDesc` (naming `GTL_Update_0901.exe` with file id `2f1fc214…`); `PHYSICS.PHS` has no PAR2 packets. The Main packets agree on slice size **384,000** bytes, file count 1 and the same file id. The three recovery bodies are 384,004 bytes each with exponents **53, 58, 59** and all share the same file id — total 1,152,012 bytes = **3 slices**. The 61,334,805-byte GTL 1.1 updater implies ~160 source slices at that size, so these cover ~1.9%; moreover exponents 0–52 and 54–57 are absent. **Reconstruction is infeasible** from the local PHS data even if the exact 0.9.01 executable were available. Regression test added (`tests/test_phs_tool.py`).
+
 ## Updater acquisition attempt (2026-11-26)
 
 A direct GTL 1.1 updater was obtained from the Patches Scrolls page: the download link resolves to `download.php?g=GT+Legends&f=gtl_update_1100.zip`, then a session-cookie `GET /get.php` serves a **60,724,988-byte** ZIP. Its three members are `GTL_Update_1.1.0.0.exe` (61,334,805 B), `Readme 1.1.0.0.txt` and `Game Patches.url`; the readme's 35 changes contain no PHS/physics entries. A full `strings` scan of the executable found **zero** occurrences of `0901`, `PHYSICS.PHS` or `.phs`. Probing the same site for `gtl_update_0901.zip` / `GTL_Update_0901.exe` (and variants) returns **404**; a web search for the exact filename returns no results. The artifact was kept under `/tmp` only and is **not** committed (third-party executable, read-only reference). This closes the most promising acquisition lead: the missing `GTL_Update_0901.exe` and its PAR2 set are still unavailable, so the PHS blocker remains genuine. Unblock conditions now require a different archive/source for the 0.9.01 updater or a PAR2 spec enabling reconstruction from the four local PHS containers.
