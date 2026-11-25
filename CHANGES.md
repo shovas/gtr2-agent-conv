@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 08:15:00 -0500 - GTTF +48 high half engine
+- Found the high signed 16-bit half of slot +48 tracks engine +32 (median |r| 0.122 vs 0.021 permuted); +48 now reads as two packed signed control channels. Full-tier permutation-controlled test added.
+
 ## 2026-11-28 07:45:00 -0500 - path_f4 gear trend
 - path_f4 decreases with gear index (median r -0.200 vs -0.005 permuted), supporting a throttle/demand interpretation on the reference racing line; path_f3 is not a brake flag. Full-tier permutation-controlled test added.
 

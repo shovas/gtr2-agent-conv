@@ -1942,6 +1942,37 @@ class CorpusDeep2Test(unittest.TestCase):
             self.assertLess(statistics.median(observed[name]),
                             2 * statistics.median(baselines[name]) + 0.02)
 
+    def test_gttf_slot48_high_half_engine(self):
+        """The high signed 16-bit half of +48 tracks engine speed."""
+        import glob
+        import gzip
+        import random
+        import statistics
+        import struct
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        observed = []
+        baseline = []
+        random.seed(12)
+        for path in glob.glob(str(ROOT.parent / "GTR2Steam" / "TimeTrial" / "**" / "*.GTT"),
+                              recursive=True):
+            payload = gz.decompress(path)
+            frames = st.read_frames(payload, st.find_frame_grid(payload))
+            highs = []
+            for frame in frames:
+                value = int.from_bytes(payload[frame["offset"] + 48:
+                                              frame["offset"] + 52], "little")
+                highs.append(struct.unpack("<h", struct.pack("<H", (value >> 16) & 0xFFFF))[0])
+            rpm = [frame["engine_speed"] for frame in frames]
+            observed.append(abs(st._corr(highs, rpm)))
+            baseline.append(statistics.mean(
+                abs(st._corr(random.sample(highs, len(highs)), rpm)) for _ in range(3)))
+        self.assertEqual(len(observed), 29)
+        self.assertGreater(statistics.median(observed), 0.09)
+        self.assertGreater(statistics.median(observed),
+                           3 * statistics.median(baseline))
+        self.assertGreater(sum(o > 3 * b for o, b in zip(observed, baseline)), 15)
+
     def test_gttf_slot48_low_half_signed(self):
         """The low signed 16-bit half of +48 tracks steering +8 above chance."""
         import glob

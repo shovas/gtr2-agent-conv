@@ -34,6 +34,14 @@ Evidence:
 All work here is **offline**: no game was launched. "Runtime-dependent" means
 conclusively establishing it requires actual game execution.
 
+## GTTF +48 packs two signed channels (2026-11-28)
+
+Extending the +48 halfword study across all 29 ghosts:
+- **low i16** ↔ steering +8: median |r| **0.099** vs 0.015 permuted (already recorded);
+- **high i16** ↔ engine +32: median |r| **0.122** vs 0.021 permuted, with 21/29 files exceeding 3× their own permutation baseline.
+
+So slot +48 is best described as two packed signed 16-bit channels, one steering-related and one engine-related. Neither has a confirmed fixed scale (the empirical slope varies by file), so no unit is claimed. Full-tier permutation-controlled regression test added.
+
 ## GTTF +48 units: low signed 16-bit half (2026-11-28)
 
 Slot +48 is almost always near `0xFFFFxxxx`, i.e. two signed 16-bit fields rather than a float. Decoding the **low half as int16** produces a much stronger steering association than the raw u32:
