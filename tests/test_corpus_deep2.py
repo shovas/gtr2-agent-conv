@@ -1006,6 +1006,31 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertEqual(checked, 204)
 
+    def test_gttf_frame16_not_bounded_by_steer_lock(self):
+        """+16 extrema exceed the .hdc steer lock and often hit a 1.0 clamp."""
+        import glob
+        import gzip
+        import statistics
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        maxima = []
+        clamped = 0
+        for root in ("GTR2Steam", "BMWM3Challenge"):
+            for path in glob.glob(str(ROOT.parent / root / "**" / "*.GTT"),
+                                  recursive=True):
+                payload = gz.decompress(path)
+                grid = st.find_frame_grid(payload)
+                if not grid:
+                    continue
+                values = [f["pitch"] for f in st.read_frames(payload, grid)]
+                maxima.append(max(values))
+                clamped += int(any(v == 1.0 for v in values))
+        self.assertEqual(len(maxima), 31)
+        # SteerLockRange=(5,0.5,37), SteerLockSetting=20 in both cars => 15 deg.
+        self.assertTrue(all(v > 0.262 for v in maxima))
+        self.assertGreaterEqual(clamped, 25)
+        self.assertEqual(statistics.median(maxima), 1.0)
+
     def test_gsc_gmt_no_alignment_counterpart(self):
         """No GSC GMT has a same-name/same-size plain GTR2/GTL counterpart."""
         import glob

@@ -43,6 +43,10 @@ Matched 27 ghosts to their track's DSI lap-instructor line by y/z and compared `
 
 The ± sign of the `+8`/`+16` relation is not random across the 29 F550 ghosts: files with positive correlation have a median net unwrapped `+12` heading trend of **7.9 rad**, negative-correlation files **4.74 rad**, and the per-file correlation coefficient versus heading trend is **0.583**. AIW waypoint file order/signed area does **not** explain the split (sign agreement 12/27, correlation 0.109). So the steering sign is tied to the recorded heading evolution (likely different ghost/recording configurations), but the exact convention remains unknown. Full-tier regression test added.
 
+## GTTF +16 extrema vs .hdc steer lock (2026-11-27) — negative
+
+Both `BMS550.hdc` (F550) and `BMW_M3.hdc` declare `SteerLockRange=(5.0,0.5,37)`, `SteerLockSetting=20` → 15° (0.262 rad). If +16 were a front-wheel steer angle, per-ghost extrema should respect that bound. They do not: **31/31** files exceed 0.262 rad and **27/31** hit exactly **1.0** at least once (median per-file maximum = 1.0). Globally the field is near zero (median 0.005 rad, 99th percentile 0.131) with sparse 1.0 spikes, so it is not a raw steer angle bounded by setup lock — likely a rate/clamped control signal. Full-tier regression test added; exact semantics unresolved.
+
 ## GTTF +8 vs steering +16 (2026-11-27)
 
 After detrending both fields on ghost z (+1) and a z-increment speed proxy, frame `+8` and the decoded steering-like field `+16` have a **median |correlation| of 0.585** across 29 GTR2 ghosts (24/29 above 0.3). The sign is not universal (17 positive, 12 negative), likely reflecting track/record orientation or a sign convention. So `+8` is a steering/lateral-control-related quantity rather than random padding or a world coordinate. Exact units and sign convention remain unresolved; full-tier regression test added.
