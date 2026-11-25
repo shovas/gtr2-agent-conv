@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 06:45:00 -0500 - GMT winding convention verified
+- Verified that GSC, rF1 and GTR2 meshes all share inverted face winding vs stored normals (reversed agreement 1.0); conversion correctly preserves index order. Full-tier regression test added.
+
 ## 2026-11-28 06:15:00 -0500 - GTTF +36 AIW negative
 - Slot +36 shows no relation to AIW waypoint galpha/width/index (median |r| ~0.01); session-time values remain an inference. Full-tier regression test added.
 

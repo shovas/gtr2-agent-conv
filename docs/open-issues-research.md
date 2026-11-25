@@ -9,6 +9,15 @@ Tried to trace the GSC-family mesh loader statically to derive the ISI decryptio
 
 So the code-first route to the GSC loader is blocked without unpacking/runtime tooling. The correct `skip=4` remains empirically validated on 150/150 sampled members. Full-tier regression test records the packing state.
 
+## Face winding convention verified across old/new layouts (2026-11-28)
+
+Compared triangle cross products against the stored vertex normals:
+- decoded GSC members: forward agreement 0.0, reversed **1.0** (14 samples);
+- rF1 old-layout meshes: forward 0.0, reversed **1.0** (12 samples);
+- GTR2 target meshes: forward 0.0, reversed **1.0** (17 samples).
+
+All three generations use the same inverted winding-vs-normal convention, so `gmt_layout.old_to_new_semantic()` correctly preserves index order — no winding flip should be introduced. Full-tier regression test added.
+
 ## GSC GMT geometry SOLVED: wrong ISI skip, not region masks (2026-11-27)
 
 **Breakthrough.** All earlier "region-specific mask" work was an artifact of decrypting ISI-encrypted GSC GMT members with `skip=1`. The correct parameter is **`skip=4`**: `isi_crypt.decrypt_bytes(raw_member, 4)` yields the native GSC magic (`...bba8bf90`) directly with **no residual XOR**, and the bulk vertex/index data is intact.

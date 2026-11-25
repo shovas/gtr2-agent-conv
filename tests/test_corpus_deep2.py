@@ -2165,6 +2165,69 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertTrue(all(value in (36000.0, 43200.0, 46800.0)
                             for value in sessions))
 
+    def test_gsc_converted_winding_matches_gtr2(self):
+        """Converted meshes keep GTR2's inverted winding-vs-normal convention."""
+        import glob
+        import math
+        import statistics
+        import struct
+        import gmt_format
+        import gmt_layout
+        import gmt_semantic
+        import mas_tool
+
+        def agreement(positions, normals, triangles):
+            forward = reversed_count = total = 0
+            for i, j, k in triangles:
+                if max(i, j, k) >= len(positions):
+                    continue
+                u = [positions[j][x] - positions[i][x] for x in range(3)]
+                v = [positions[k][x] - positions[i][x] for x in range(3)]
+                cross = (u[1] * v[2] - u[2] * v[1],
+                         u[2] * v[0] - u[0] * v[2],
+                         u[0] * v[1] - u[1] * v[0])
+                dot = sum(cross[x] * normals[i][x] for x in range(3))
+                total += 1
+                forward += int(dot > 0)
+                reversed_count += int(dot < 0)
+            return forward / total, reversed_count / total if total else (0, 0)
+
+        raw_values = []
+        for archive in glob.glob(str(ROOT.parent / "CopaPetrobrasdeMarcas" / "**" / "*.mas"),
+                                 recursive=True):
+            try:
+                _, entries = mas_tool.read_archive(archive)
+            except Exception:
+                continue
+            for entry in entries:
+                if not entry.name.lower().endswith(".gmt") or len(entry.data) < 0x400:
+                    continue
+                decoded = gmt_semantic.decode_gsc_member(entry.data)
+                if not decoded:
+                    continue
+                raw_values.append(entry.data)
+                if len(raw_values) >= 10:
+                    break
+            if len(raw_values) >= 10:
+                break
+        self.assertEqual(len(raw_values), 10)
+        forward, reverse = [], []
+        for raw in raw_values:
+            out = gmt_layout.gsc_member_to_gtr2(raw)
+            parsed = gmt_format.parse_gmt("out.gmt", out)
+            for mesh in parsed.meshes:
+                positions = [(v.x, v.y, v.z) for v in mesh.base_vertices]
+                normals = [(v.nx, v.ny, v.nz) for v in mesh.base_vertices]
+                ids = struct.unpack("<%dH" % ((len(mesh.index_data) - 4) // 2),
+                                    mesh.index_data[4:])
+                triangles = [tuple(ids[k:k + 3]) for k in range(0, len(ids) - 2, 3)]
+                f, r = agreement(positions, normals, triangles)
+                forward.append(f)
+                reverse.append(r)
+        self.assertGreater(len(forward), 5)
+        self.assertLess(statistics.median(forward), 0.1)
+        self.assertGreater(statistics.median(reverse), 0.9)
+
     def test_gsc_member_geometry_corpus(self):
         """150 ISI-encrypted GSC GMT members decode to valid geometry with skip=4."""
         import glob
