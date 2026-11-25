@@ -147,7 +147,10 @@ regression tests or an explicitly documented negative.
   confirms the guitarmaen CAM/AIW note empirically. At point level, negating
   each camera's `ActivationLocation` moves it 4.4× closer to the track's AIW
   waypoints (median 25.2 vs 110.2 world units; 80% of 422 cameras), so the
-  inversion applies to individual coordinates, not just track means.
+  inversion applies to individual coordinates, not just track means. The same
+  convention holds in rF1 (594/684 cameras, median 15.3 vs 304.6) and GTL
+  (246/274, 10.1 vs 113.9), so it is a gMotor-wide storage convention, **not**
+  a GTR2-specific conversion step.
 - All nine shipped `.Vcr` replay files parse with the same reader: gzip +
   gMb wrapper + `IRSR` v1.05, with driver/car/team names and session values
   from the same 36000/43200/46800 set. The GTTF-specific frame-grid detector

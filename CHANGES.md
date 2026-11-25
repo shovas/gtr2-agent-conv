@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 20:00:00 -0500 - CAM inversion is cross-generation
+- Corrected the earlier implication that CAM negation is GTR2-specific: rF1 (594/684) and GTL (246/274) show the same inverted CAM-vs-AIW convention. No negation should be added by an rF1→GTR2 converter. Full-tier test added.
+
 ## 2026-11-29 19:30:00 -0500 - CAM activation points confirm inversion
 - Confirmed the CAM/AIW coordinate inversion at point level: negating ActivationLocation puts cameras 4.4x nearer to AIW waypoints (25.2 vs 110.2 units; 80% of 422 cameras). Full-tier test added.
 

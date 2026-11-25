@@ -3994,6 +3994,43 @@ class CorpusDeep2Test(unittest.TestCase):
             flips.append(sum(sign < 0 for sign in signs) / len(signs))
         self.assertGreater(observed, max(flips) + 0.2)
 
+    def test_cam_inversion_is_shared_across_generations(self):
+        """rF1, GTL and GTR2 all store CAM positions inverted vs AIW."""
+        import math
+        import statistics
+        import simbin_text_tool as stt
+        for game in ("RF1Vanilla", "GTLSteam", "GTR2Steam"):
+            direct = []
+            negated = []
+            root = ROOT.parent / game
+            for cam_path in root.rglob("*.cam"):
+                aiw_path = cam_path.with_suffix(".AIW")
+                if not aiw_path.is_file():
+                    continue
+                try:
+                    cameras = stt.parse_cam(cam_path.read_text(encoding="latin-1"))
+                    waypoints = stt.parse_aiw(aiw_path.read_text(encoding="latin-1"))
+                except Exception:
+                    continue
+                if not cameras.cameras or not waypoints.waypoints:
+                    continue
+                points = [tuple(wp.pos) for wp in waypoints.waypoints]
+                for camera in cameras.cameras:
+                    if camera.activation_location is None:
+                        continue
+                    position = tuple(camera.activation_location)
+                    if position == (0.0, 0.0, 0.0):
+                        continue
+                    flipped = tuple(-value for value in position)
+                    direct.append(min(math.dist(position, point) for point in points))
+                    negated.append(min(math.dist(flipped, point) for point in points))
+            self.assertGreater(len(direct), 200, game)
+            self.assertLess(statistics.median(negated),
+                            0.5 * statistics.median(direct), game)
+            share = sum(negated_value < direct_value
+                        for negated_value, direct_value in zip(negated, direct)) / len(direct)
+            self.assertGreater(share, 0.75, game)
+
     def test_cam_positions_invert_aiw_world_coordinates(self):
         """GTR2 camera positions are negatively correlated with AIW waypoints."""
         import random

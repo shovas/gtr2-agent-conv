@@ -143,6 +143,16 @@ column-7/column-1 stream invariant was also re-scoped to the two-stream layout
 (it does not hold for single-block UVs, which end in zeros). All 35 module
 tests and the five affected full-tier tests pass after the fix.
 
+## CAM inversion is shared across rF1/GTL/GTR2 (2026-11-29) — correction
+
+The earlier note that CAM inversion "matters for rF1→GTR2 conversion" implied
+a GTR2-specific difference. Repeating the activation-point test on rF1 and GTL
+showed the **same** inversion everywhere: rF1 594/684 cameras favour negation
+(median nearest waypoint 15.3 vs 304.6 without), GTL 246/274 (10.1 vs 113.9),
+GTR2 336/422 (25.2 vs 110.2). So CAM positions are stored inverted relative to
+AIW across the whole local gMotor corpus, and no negation should be introduced
+by an rF1→GTR2 converter. Full-tier cross-generation test added.
+
 ## CAM activation points confirm the inversion at point level (2026-11-29)
 
 Follow-up on the track-mean result: for 422 cameras across matched GTR2
