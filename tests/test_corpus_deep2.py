@@ -1006,6 +1006,68 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertEqual(checked, 204)
 
+    def test_gttf_slot28_not_waypoint_index(self):
+        """Slot +28 does not track AIW waypoint index or lap distance."""
+        import glob
+        import gzip
+        import math
+        import statistics
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        import simbin_text_tool as stt
+        base = ROOT.parent / "GTR2Steam"
+        aiws = {}
+        for path in glob.glob(str(base / "**" / "*.AIW"), recursive=True):
+            aiws.setdefault(path.lower().rsplit("/", 1)[-1], path)
+        rank_r = []
+        distance_r = []
+        for path in glob.glob(str(base / "TimeTrial" / "**" / "*.GTT"),
+                              recursive=True):
+            payload = gz.decompress(path)
+            event = st.parse_payload(payload)
+            frames = st.read_frames(payload, st.find_frame_grid(payload))
+            aiw = aiws.get((event.aiw or "").lower())
+            if not aiw:
+                continue
+            waypoints = [w for w in stt.parse_aiw(stt.read_text(aiw)).waypoints
+                         if w.pos and w.wp_class() in (0, 1)]
+            order = []
+            current = 0
+            seen = set()
+            while current not in seen and len(order) < len(waypoints):
+                seen.add(current)
+                order.append(current)
+                nxt = waypoints[current].ptrs[1]
+                if nxt is None or not (0 <= nxt < len(waypoints)):
+                    break
+                current = nxt
+            rank = {wp: i for i, wp in enumerate(order)}
+            distance = {}
+            travelled = 0.0
+            for i, wp in enumerate(order):
+                distance[wp] = travelled
+                if i + 1 < len(order):
+                    travelled += math.dist(waypoints[wp].pos,
+                                           waypoints[order[i + 1]].pos)
+            values, ranks, distances = [], [], []
+            for frame in frames:
+                y, z = frame["position"][0], frame["position"][1]
+                nearest = min(range(len(waypoints)),
+                              key=lambda k: (waypoints[k].pos[1] - y) ** 2
+                              + (waypoints[k].pos[2] - z) ** 2)
+                value = int.from_bytes(payload[frame["offset"] + 28:
+                                               frame["offset"] + 32], "little")
+                values.append(value)
+                ranks.append(rank.get(nearest, 0))
+                distances.append(distance.get(nearest, 0.0))
+            if len(values) < 100:
+                continue
+            rank_r.append(st._corr(values, ranks))
+            distance_r.append(st._corr(values, distances))
+        self.assertGreater(len(rank_r), 10)
+        self.assertLess(statistics.median(abs(v) for v in rank_r), 0.15)
+        self.assertLess(statistics.median(abs(v) for v in distance_r), 0.15)
+
     def test_gttf_frame32_not_peak_power_rpm(self):
         """Ghost +32 ceilings do not match .eng peak-power RPM consistently."""
         import re

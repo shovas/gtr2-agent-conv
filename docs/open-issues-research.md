@@ -95,6 +95,10 @@ Attempted to test slot +32 against wheel angular velocity from `.grb`/`.hdc` gea
 
 Cross-checked the recorded `+12` heading against the nearest AIW waypoint's next-pointer direction in all 29 GTR2 ghost files (3,606 samples, every 10th frame). Under the tested horizontal conventions (`atan2(dx,dz)` and its sign/swapped variants) there is **no coherent relation**: circular concentration R=0.026 (uniform ≈0), median absolute angular error 1.606 rad (chance ≈1.571), and no consistent constant offset. A direct comparison with frame-to-frame position deltas is likewise poor (best median ~1.24 rad). This **corrects** the earlier single-sample "cross-validated" claim: it was a coincidence, not a general rule. Full-tier regression test added; `+12` remains a heading-like angle but its frame/axis convention is not resolved.
 
+## GTTF slot +28 vs AIW progress (2026-11-27) — negative
+
+Using the mapped y/z frame, matched each ghost frame to its nearest AIW waypoint and compared the u32 at +28 (`00 20 00 XX`) with both waypoint file order and pointer-chain rank/lap distance. Median |correlation| is 0.035 (file order), 0.08 (chain rank) and 0.08 (cumulative lap distance) across 15 F550 ghosts; no file exceeds 0.2. The field's constant `0x2000` low bits and slowly varying high byte are a packing artifact, not lap progress or waypoint identity. Full-tier regression test added.
+
 ## GTTF +32 vs peak-power RPM (2026-11-27) — negative
 
 Tested whether the car-specific +32 ceilings mark `.eng` peak-power RPM instead of rev limits. From the torque tables, peak power is at **6500 rpm** (F550 `550_Std_V12.eng`) and **8250 rpm** (BMW `BMW_M3.eng`); peak torque at 5000 / 3750 rpm. Raw ceilings divided by peak-power RPM are **903.7** vs **768.1** — a 15% car-dependent discrepancy (and peak-torque ratios differ far more). So no common engine-table RPM band explains the ceiling under any single scale; the +32 signal remains engine-speed-like with unknown car-dependent normalization. Full-tier regression test added.
