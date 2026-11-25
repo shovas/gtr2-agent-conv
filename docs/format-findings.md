@@ -62,6 +62,11 @@ regression tests or an explicitly documented negative.
   `0x5e85c0`. No 63-byte file serializer was found; those 63-byte objects are
   runtime replay state.
 - All 29 shipped GTL/GTR2 EXEs/DLLs contain **no** `PHS`/`PHYSICS` strings.
+- Debug-artifact sweep: no `.pdb`/linker `.map`/COFF symbol tables in any game
+  install. `GTR2.exe` embeds an RSDS reference
+  (`D:\work\gtr2\workspace\Projects\copperhead\…\GTR2.pdb`, GUID
+  `a2746770…`, age 16), but the PDB itself is absent. Exports are only five
+  UI/Game entrypoints and RTTI names are UI classes — no format semantics.
 
 ## 4. GTTF / IRSR (time trial / replay payloads)
 

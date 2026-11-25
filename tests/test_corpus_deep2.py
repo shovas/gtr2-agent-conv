@@ -2983,6 +2983,22 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertLess(statistics.median(observed), -0.1)
         self.assertLess(statistics.median(observed), 2 * statistics.median(baseline))
 
+    def test_no_debug_symbols_in_game_binaries(self):
+        """Game EXEs reference PDBs but ship no usable debug symbols."""
+        root = ROOT.parent
+        pdbs = list(root.glob("*/**/*.pdb"))
+        self.assertEqual(pdbs, [])
+        exe = root / "GTR2Steam" / "GTR2.exe"
+        if not exe.is_file():
+            self.skipTest("GTR2.exe not present")
+        data = exe.read_bytes()
+        self.assertIn(b"RSDS", data)
+        self.assertIn(b"GTR2.pdb", data)
+        import struct
+        pe = struct.unpack_from("<I", data, 0x3C)[0]
+        self.assertEqual(data[pe:pe + 4], b"PE\0\0")
+        self.assertEqual(struct.unpack_from("<I", data, pe + 12)[0], 0)
+
     def test_dedicated_exe_no_frame_serializer_pattern(self):
         """GTR2Dedicated.exe retains GTTF strings but no 63-byte read site."""
         exe = ROOT.parent / "GTR2Steam" / "GTR2Dedicated.exe"

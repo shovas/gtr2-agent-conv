@@ -105,6 +105,19 @@ Assigned each frame to one of six gear bands derived from the F550 `.grb`/`.hdc`
 
 This supports f4 as a throttle/demand-like channel on the reference line (stronger in low gears), but neither channel reproduces the ghost's own pedal positions; exact semantics remain unclaimed. Full-tier permutation-controlled regression test added.
 
+## Debug-artifact sweep across ISIMotor installs (2026-11-29)
+
+Checked all `../` game installs for leftover development/debug material:
+- no `.pdb`, linker `.map`, `.idb`, `.ilk` or COFF symbol tables in game EXEs;
+- `GTR2.exe`, `GTR2Dedicated.exe`, `Race_Steam.exe` and `Volvo.exe` embed RSDS
+  CodeView references with build paths (GTR2: `…\copperhead\…\GTR2.pdb`,
+  GUID `a274677040fef54fbbdf2a81da5bcd3d`, age 16) but the PDBs are not shipped;
+- `GTR2.exe` exports only five C++ symbols (`Game::Init`, `PlayerFile::Create`,
+  etc.) and its RTTI names are UI classes; no ghost/telemetry data structures;
+- the numerous `.map` files in F1 2000/F1CS 2000 are **audio** maps, not linker maps.
+
+So no usable debug symbol source was found locally. Full-tier regression test added.
+
 ## GTTF +36 exponent tracks path demand (2026-11-29)
 
 Slot +36's value is a heavily quantized lattice (base ±34 with `4^k` steps).

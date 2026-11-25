@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 02:30:00 -0500 - Debug artifact sweep negative
+- Searched all ISIMotor installs for PDBs/debug symbols: only RSDS references (GTR2 PDB path/GUID) with no PDB files, no COFF symbols, and no useful RTTI. Full-tier regression test added; findings docs updated.
+
 ## 2026-11-29 02:00:00 -0500 - GTTF +36 exponent link
 - Found slot +36's quantization exponent tracks path f4 (median r 0.274 vs 0.016 permuted, positive in all 29 ghosts); exact units unresolved. Full-tier test added; findings docs updated.
 
