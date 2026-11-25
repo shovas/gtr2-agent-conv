@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 10:15:00 -0500 - f0 halves family-stable
+- Both f0 halves repeat across cross-corpus material families (16.3% / 17.3% vs 0.2% / 0.5% permuted), supporting paired authoring IDs. Full-tier permutation-controlled test added.
+
 ## 2026-11-28 09:45:00 -0500 - f0 shader registry negative
 - Showed f0 halves cannot index the 94 shipped .psh/.vsh shaders (f0 spans >1,000 values) and stage-name hashes match at chance. Full-tier regression test added.
 

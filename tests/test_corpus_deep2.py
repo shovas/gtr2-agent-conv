@@ -1364,6 +1364,74 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertGreater(observed, 10 * statistics.mean(baseline() for _ in range(5)))
         self.assertLess(observed, 0.25)
 
+    def test_f0_halves_family_stable(self):
+        """Both f0 halves repeat across cross-corpus material families."""
+        import collections
+        import glob
+        import random
+        import re
+        import statistics
+        import gmt_format as gf
+        import mas_tool
+
+        def norm(value):
+            return re.sub(r"[^a-z0-9]", "", value.lower())
+
+        groups = collections.defaultdict(list)
+        for root, ext in (("GTR2Steam", ".gtr"), ("GTLSteam", ".gtl"),
+                          ("BMWM3Challenge", ".bmw")):
+            for archive in glob.glob(str(ROOT.parent / root / "**" / f"*{ext}"),
+                                     recursive=True):
+                try:
+                    _, entries = mas_tool.read_archive(archive)
+                except Exception:
+                    continue
+                for entry in entries:
+                    if not entry.name.lower().endswith(".gmt") or not entry.data:
+                        continue
+                    try:
+                        parsed = gf.parse_gmt("x.gmt", entry.data)
+                    except Exception:
+                        continue
+                    for mesh in parsed.meshes:
+                        marker = gf.mesh_marker(mesh)
+                        index = mesh.record.material_index
+                        material = (parsed.materials[index]
+                                    if index < len(parsed.materials) else None)
+                        if not marker or material is None:
+                            continue
+                        names = tuple(sorted(set(
+                            norm(value) for value in
+                            [material.name] + [s.name for s in material.stages]
+                            if value)))
+                        groups[names].append((marker & 0xFFFF, marker >> 16))
+                if sum(len(v) for v in groups.values()) >= 25000:
+                    break
+            if sum(len(v) for v in groups.values()) >= 25000:
+                break
+        multi = {key: values for key, values in groups.items() if len(values) > 1}
+        self.assertGreater(len(multi), 2000)
+        flat = [pair for values in multi.values() for pair in values]
+
+        def agreement(pairs, half):
+            return statistics.mean(
+                len(set(pair[half] for pair in values)) == 1
+                for values in pairs)
+
+        random.seed(17)
+        for half in (0, 1):
+            observed = agreement(multi.values(), half)
+            shuffled = random.sample(flat, len(flat))
+            offset = 0
+            same = 0
+            for values in multi.values():
+                sample = shuffled[offset:offset + len(values)]
+                offset += len(values)
+                same += int(len(set(pair[half] for pair in sample)) == 1)
+            baseline = same / len(multi)
+            self.assertGreater(observed, 10 * max(baseline, 0.001))
+            self.assertGreater(observed, 0.1)
+
     def test_f0_not_shader_registry_index(self):
         """Shader members are too few to explain f0's 16-bit half range."""
         import glob

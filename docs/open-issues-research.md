@@ -161,6 +161,15 @@ Code-first check around `fcn.005e9ab0` and the shipped shader members:
 
 So the paired near-equal halves are not indices or simple hashes of shipped shaders; they most plausibly originate from an external authoring/material identifier. Full-tier regression test added.
 
+## GTR2 f0 halves are individually family-stable (2026-11-28)
+
+Across 3,153 cross-corpus groups sharing an identical normalized material/stage name set (37,814 records):
+- low half identical within a family: **16.3%** (permuted 0.2%);
+- high half identical within a family: **17.3%** (permuted 0.5%);
+- both halves identical: 16.2%.
+
+So the two near-equal 16-bit components are separately stable per material family — consistent with a *pair of related authoring IDs* (e.g. paired shader/material slots) rather than one value being derived from the other at load time. Full-tier permutation-controlled regression test added.
+
 ## GTR2 f0 packs two nearly-equal 16-bit identifiers (2026-11-28)
 
 Across 30,000 mesh markers, the low and high u16 halves of f0 are nearly equal:
