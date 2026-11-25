@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-30 01:00:00 -0500 - GTTF vs IRSR header flags
+- Documented that GTTF ghosts have a fixed header flag tuple (0,0,1,0) across all 29 files while IRSR replays vary; no flag semantics claimed. Full-tier test added.
+
 ## 2026-11-30 00:30:00 -0500 - VCR frame-field negatives
 - Recorded that the 20-byte bulk stride has no smooth f32 field, no constant byte offsets, and only mild delta smoothing; replay frame decoding remains blocked. Findings log updated.
 

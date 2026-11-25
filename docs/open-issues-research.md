@@ -158,6 +158,16 @@ multiple of 4. A short 12-record run in the header has an increasing f32 at
 across the file. Frame semantics remain undecoded. Full-tier test scoped to
 the header region.
 
+## GTTF vs IRSR header flags (2026-11-30)
+
+Parsed the post-filename header fields on all 29 GTTF ghosts and nine IRSR
+replays. Every GTTF file has the identical flag tuple `(a=0, b=0, c=1, u=0)`;
+session variation is carried solely by `session_seconds`
+(36000/43200/46800). IRSR replays use several tuples (`a` 0/1, `b` 0/1/6,
+`c` 5/8, `u` 0/1); `b=6` appears in two of the three "HOT LAP" files and
+`c=8` only in Magny-Cours, but with nine samples no semantics are claimed.
+Full-tier regression test added.
+
 ## VCR 20-byte stride: no frame fields found (2026-11-30)
 
 Followed the 20-byte lag excess: at stride 20, every 4-byte-aligned f32 field

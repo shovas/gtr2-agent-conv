@@ -4162,6 +4162,24 @@ class CorpusDeep2Test(unittest.TestCase):
         random.shuffle(shuffled)
         self.assertLess(match_at(bytes(shuffled), 86), 0.2)
 
+    def test_gttf_flags_constant_irsr_flags_vary(self):
+        """GTTF header flags are fixed; IRSR replay flags carry variation."""
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        ghosts = list((ROOT.parent / "GTR2Steam" / "TimeTrial").rglob("*.GTT"))
+        ghost_flags = set()
+        for path in ghosts:
+            event = st.parse_payload(gz.decompress(str(path)))
+            ghost_flags.add((event.flags_a, event.flags_b, event.flags_c, event.flags_u))
+        self.assertEqual(len(ghosts), 29)
+        self.assertEqual(ghost_flags, {(0, 0, 1, 0)})
+
+        replay_flags = set()
+        for path in (ROOT.parent / "GTR2Steam" / "ReplayData").glob("*.Vcr"):
+            event = st.parse_payload(gz.decompress(str(path)))
+            replay_flags.add((event.flags_a, event.flags_b, event.flags_c, event.flags_u))
+        self.assertGreater(len(replay_flags), 3)
+
     def test_vcr_replay_headers_parse(self):
         """All shipped .Vcr replays parse as IRSR with known session values."""
         import gzip
