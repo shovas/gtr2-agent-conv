@@ -2717,37 +2717,31 @@ class CorpusDeep2Test(unittest.TestCase):
         negative = [t for r, t in zip(correlations, trends) if r < 0]
         self.assertGreater(statistics.median(positive) - statistics.median(negative), 2)
 
-    def test_gttf_frame8_tracks_steering(self):
-        """+8 and the decoded steering field +16 are strongly related."""
+    def test_gttf_frame8_steering_coupling_is_clamp_artifact(self):
+        """The +8/+16 correlation disappears when +16's clamped frames are removed."""
         import glob
         import gzip
         import statistics
         import gzip_simbin_tool as gz
         import simbin_events_tool as st
-
-        def resid(xs, ys):
-            mx, my = statistics.mean(xs), statistics.mean(ys)
-            den = sum((x - mx) ** 2 for x in xs)
-            if den == 0:
-                return [y - my for y in ys]
-            slope = sum((x - mx) * (y - my) for x, y in zip(xs, ys)) / den
-            return [y - my - slope * (x - mx) for x, y in zip(xs, ys)]
-
-        correlations = []
+        all_correlations = []
+        unclamped = []
         for path in glob.glob(str(ROOT.parent / "GTR2Steam" / "TimeTrial" / "**" / "*.GTT"),
                               recursive=True):
             payload = gz.decompress(path)
             frames = st.read_frames(payload, st.find_frame_grid(payload))
             offset = [f["position"][2] for f in frames]
             steering = [f["pitch"] for f in frames]
-            z = [f["position"][1] for f in frames]
-            speed = [0] + [abs(z[i] - z[i - 1]) for i in range(1, len(z))]
-            detrended_offset = resid(z, resid(speed, offset))
-            detrended_steering = resid(z, resid(speed, steering))
-            correlations.append(st._corr(detrended_offset, detrended_steering))
-        self.assertEqual(len(correlations), 29)
-        self.assertGreater(statistics.median(abs(v) for v in correlations), 0.5)
-        self.assertGreaterEqual(sum(1 for v in correlations if abs(v) > 0.3), 20)
+            all_correlations.append(abs(st._corr(offset, steering)))
+            pairs = [(x, y) for x, y in zip(offset, steering) if abs(y) < 0.99]
+            if len(pairs) > 100:
+                unclamped.append(abs(st._corr([x for x, _ in pairs],
+                                              [y for _, y in pairs])))
+        self.assertEqual(len(all_correlations), 29)
+        self.assertGreater(statistics.median(all_correlations), 0.5)
+        self.assertLess(statistics.median(unclamped), 0.25)
+        self.assertLess(statistics.median(unclamped),
+                        0.5 * statistics.median(all_correlations))
 
     def test_gttf_frame8_not_missing_x(self):
         """+8 does not encode the AIW x coordinate via a DSI centerline."""

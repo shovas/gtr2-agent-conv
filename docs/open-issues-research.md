@@ -124,6 +124,14 @@ Static analysis of the unpacked `GTR2.exe` (`.text` at RVA `0x401000`) located t
 
 Across all 42 local event files (29 GTTF + 13 IRSR) the float takes only **36000 / 43200 / 46800**, exactly 10/12/13 hours in seconds — consistent with a session time limit (strong inference, not runtime-confirmed). The GTTF `+8` steering relationship and the rest of the frame field work remain separate. Full-tier regression test added.
 
+## Correction: GTTF +8/+16 "steering coupling" is a clamp artifact (2026-11-28)
+
+The earlier reported median |correlation| 0.585 between frame `+8` and `+16` was **driven by frames where +16 saturates at ±1.0**. Recomputing per file:
+- all frames: median |r| **0.675**;
+- excluding `|+16| > 0.99`: median |r| **0.146** (≈4.6× lower).
+
+Spearman rank correlation is also low (median 0.145), confirming there is no strong monotone relationship. The earlier sign-vs-heading-trend observation is likewise driven by the saturation pattern. The new regression test asserts the drop after removing clamped frames. The `+48`-low ↔ `+8` and path-control ↔ `+8` associations (which use `+8` directly, not clamped `+16`) are unaffected.
+
 ## GTTF slots +48/+52/+56/+60: car-independence negative (2026-11-26)
 
 Across all 31 GTT files, every one of these slots reaches sentinel-like u32 maxima (>4.0e9 in **31/31** files for each slot; medians 4.295e9 / 4.295e9 / 4.295e8 / 4.291e9). Ferrari F550 and BMW M3 show no distinguishing ceiling or range. Slot +52 has small clusters near `0x00000000` and `0x00800000` (sign-bit artifact) in both cars, together covering a median 16.7% of frames (range 5.3–30.6%) — far too little to be a bounded physical signal. The earlier per-byte smoothness and throttle/brake/acceleration negatives for these slots stand; no car-calibrated semantics promoted. Regression test added (`test_gttf_slots48_52_56_60_no_car_ceiling`).
@@ -251,7 +259,7 @@ Both `BMS550.hdc` (F550) and `BMW_M3.hdc` declare `SteerLockRange=(5.0,0.5,37)`,
 
 ## GTTF +8 vs steering +16 (2026-11-27)
 
-After detrending both fields on ghost z (+1) and a z-increment speed proxy, frame `+8` and the decoded steering-like field `+16` have a **median |correlation| of 0.585** across 29 GTR2 ghosts (24/29 above 0.3). The sign is not universal (17 positive, 12 negative), likely reflecting track/record orientation or a sign convention. So `+8` is a steering/lateral-control-related quantity rather than random padding or a world coordinate. Exact units and sign convention remain unresolved; full-tier regression test added.
+**Superseded (see clamp-artifact correction above).** After detrending both fields on ghost z (+1) and a z-increment speed proxy, frame `+8` and the decoded steering-like field `+16` had a **median |correlation| of 0.585** across 29 GTR2 ghosts (24/29 above 0.3). The sign is not universal (17 positive, 12 negative), likely reflecting track/record orientation or a sign convention. So `+8` is a steering/lateral-control-related quantity rather than random padding or a world coordinate. Exact units and sign convention remain unresolved; full-tier regression test added.
 
 ## GTTF missing x: DSI-centerline reconstruction negative (2026-11-27)
 
