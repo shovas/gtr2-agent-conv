@@ -103,6 +103,10 @@ Deep field-level probe of the minimally investigated `../Automobilista`, `../Sto
 
 Generic section/key parsing of all 1,287 `.gdb` and 3,385 `.car` files found **667 / 173 distinct keys respectively but no cross-corpus universal key**. Only family-specific universals exist: `.car` GTR2-family files (165) all carry `genstring`, `pitgroup`, `number`, `driver1`, `team` (the GTR2-only key set already used by `gtl_to_gtr2`); rF1 `.gdb` (81) all carry `racelaps`. Seven zero-length `.gdb` fixtures in `../rfactortools/tests/data` are legitimately empty. `parse_gdb()`/`parse_car()`/`validate_config()` therefore perform structural validation only — no universal key rule can be promoted beyond the existing family-specific validators.
 
+## GSC opaque GMT: per-vertex-run key negative (2026-11-26)
+
+A fresh hypothesis tested whether the bulk mask is a per-32-byte-vertex byte, derivable from the repeated-byte runs found at 32-byte stride in `PURCHASED.GMT` (618 aligned runs). Using each run byte as the vertex mask yields 469/618 finite, bounded float triples — but their median maximum magnitude is **<0.01** (values like 0.001–0.003), i.e. near-zero padding, not mesh positions. The runs therefore identify padded records, not a vertex keystream; no bulk decode is obtained. Full-tier regression test added; the region-mask schedule remains blocked.
+
 ## GSC opaque GMT: region-mask schedule negative (2026-11-26)
 
 Targeted search for a derivable schedule on the remaining files (no decoder promoted):

@@ -1006,6 +1006,33 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertEqual(checked, 204)
 
+    def test_gsc_region_mask_per_vertex_run_negative(self):
+        """Repeated-byte runs at 32-byte stride decode to near-zero padding."""
+        import math
+        import struct
+        import isi_crypt
+        import mas_tool
+        archive = ROOT.parent / "CopaPetrobrasdeMarcas" / "Gamedata" / \
+            "Vehicles" / "showroom.mas"
+        if not archive.is_file():
+            self.skipTest("showroom.mas not present")
+        _, entries = mas_tool.read_archive(str(archive))
+        entry = next((e for e in entries if e.name.lower() == "purchased.gmt"), None)
+        if entry is None:
+            self.skipTest("PURCHASED.GMT not present")
+        data = isi_crypt.decrypt_bytes(entry.data, 1)
+        magnitudes = []
+        for off in range(0x330, len(data) - 16, 32):
+            run = data[off:off + 4]
+            if len(run) != 4 or len(set(run)) != 1:
+                continue
+            mask = run[0]
+            triple = struct.unpack("<3f", bytes(b ^ mask for b in data[off + 4:off + 16]))
+            if all(math.isfinite(v) and abs(v) < 1000 for v in triple):
+                magnitudes.append(max(abs(v) for v in triple))
+        self.assertGreater(len(magnitudes), 100)
+        self.assertLess(sorted(magnitudes)[len(magnitudes) // 2], 0.01)
+
     def test_gttf_engine_scale_vs_eng_revlimit(self):
         """GTTF +32 /1024 ceilings do not match .eng rev limits per car."""
         import re
