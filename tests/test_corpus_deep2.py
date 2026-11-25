@@ -1681,6 +1681,95 @@ class CorpusDeep2Test(unittest.TestCase):
                 break
         self.assertEqual(converted, 150)
 
+    def test_gttf_slot36_not_curvature(self):
+        """Slot +36 is not a path-curvature measurement."""
+        import glob
+        import gzip
+        import math
+        import statistics
+        import struct
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        correlations = []
+        for path in glob.glob(str(ROOT.parent / "GTR2Steam" / "TimeTrial" / "**" / "*.GTT"),
+                              recursive=True)[:10]:
+            payload = gz.decompress(path)
+            frames = st.read_frames(payload, st.find_frame_grid(payload))
+            world = [frame["world_position"] for frame in frames]
+            smooth = [tuple(statistics.mean(p[k] for p in
+                                            world[max(0, i - 2):i + 3])
+                            for k in range(3)) for i in range(len(world))]
+            values, curvature = [], []
+            for i in range(1, len(smooth) - 1):
+                a, b, c = smooth[i - 1], smooth[i], smooth[i + 1]
+                u = [b[k] - a[k] for k in range(3)]
+                v = [c[k] - b[k] for k in range(3)]
+                cross = (u[1] * v[2] - u[2] * v[1],
+                         u[2] * v[0] - u[0] * v[2],
+                         u[0] * v[1] - u[1] * v[0])
+                la = math.sqrt(sum(x * x for x in u))
+                lb = math.sqrt(sum(x * x for x in v))
+                if la * lb > 1e-9:
+                    curvature.append(math.sqrt(sum(x * x for x in cross)) / (la * lb))
+                    values.append(struct.unpack_from("<f", payload,
+                                                     frames[i]["offset"] + 36)[0])
+            if len(values) > 50:
+                correlations.append(st._corr(values, curvature))
+        self.assertEqual(len(correlations), 10)
+        self.assertLess(statistics.median(abs(v) for v in correlations), 0.05)
+
+    def test_gttf_engine_speed_gear_bands(self):
+        """+32/speed clusters around F550 gear-ratio-derived bands."""
+        import glob
+        import math
+        import random
+        import re
+        import statistics
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        base = ROOT.parent / "GTR2Steam" / "GameData"
+        teams = base / "Teams" / "GT" / "Ferrari 550 Teams"
+        hdc = (teams / "BMS550.hdc").read_text(errors="replace")
+        grb = (teams / "HewlandLS200.grb").read_text(errors="replace")
+        tyr = (base / "Teams" / "Michelin_GT.tyr").read_text(errors="replace")
+        ratios = [int(b) / int(a) for a, b in re.findall(
+            r"(?m)^Ratio=\((\d+),\s*(\d+)\)", grb)]
+        settings = [int(re.search(rf"(?m)^Gear{i}Setting=(\d+)", hdc).group(1))
+                    for i in range(1, 7)]
+        final = 31 / 10  # .grb [FINAL_DRIVE] ratio=(10,31)
+        radii = [float(x) for x in re.findall(r"(?m)^Radius=([\d.]+)", tyr)]
+        radius = radii[1] if len(radii) > 1 else radii[0]
+        bands = [ratios[i] * final * 60 * 1024 / (2 * math.pi * radius)
+                 for i in settings]
+
+        def score(values, proposed):
+            return statistics.median(min(abs(v - p) / v for p in proposed)
+                                     for v in values)
+
+        observations = []
+        for path in glob.glob(str(ROOT.parent / "GTR2Steam" / "TimeTrial" / "**" / "*.GTT"),
+                              recursive=True)[:8]:
+            payload = gz.decompress(path)
+            frames = st.read_frames(payload, st.find_frame_grid(payload))
+            world = [frame["world_position"] for frame in frames]
+            smooth = [tuple(statistics.mean(p[k] for p in
+                                            world[max(0, i - 2):i + 3])
+                            for k in range(3)) for i in range(len(world))]
+            speed = [math.dist(smooth[i], smooth[i + 1])
+                     / max(frames[i + 1]["time"] - frames[i]["time"], 1e-6)
+                     for i in range(len(smooth) - 1)]
+            observations += [frames[i + 1]["engine_speed"] / s
+                             for i, s in enumerate(speed) if 8 < s < 60]
+        self.assertGreater(len(observations), 3000)
+        observed = score(observations, bands)
+        random.seed(2)
+        baseline = [score(observations,
+                          [math.exp(random.uniform(math.log(60000),
+                                                   math.log(350000)))
+                           for _ in bands]) for _ in range(50)]
+        self.assertLess(observed, statistics.median(baseline))
+        self.assertLess(observed, 0.07)
+
     def test_gttf_heading_is_aiw_xz_tangent(self):
         """Ghost +12 is atan2(dx,dz) of the AIW path in world x/z."""
         import glob

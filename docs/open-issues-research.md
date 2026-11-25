@@ -16,6 +16,12 @@ Evidence:
 All work here is **offline**: no game was launched. "Runtime-dependent" means
 conclusively establishing it requires actual game execution.
 
+## GTTF +32 gear-ratio bands and +36 curvature negative (2026-11-28)
+
+With reconstructed world positions and 5-frame smoothing, `+32 / speed` clusters near the F550's gear-ratio-derived bands. Bands were computed **from the actual setup files**: `HewlandLS200.grb` ratios, `BMS550.hdc` gear settings (0/3/7/11/17/22), final drive 3.10 and `Michelin_GT.tyr` rear radius 0.355 m, scaled by the observed `1024` engine-speed factor → ~85.5k/97.5k/111k/138k/177k/250k raw per m/s. Across 7,047 samples from 8 ghosts the median relative distance to a band is **0.0496**, versus **0.1247** for six random log-uniform bands (permutation p≈0.01). This strongly supports an engine-speed interpretation but the exact scale remains unconfirmed; full-tier regression test added.
+
+Slot `+36` is **not** path curvature: median |correlation| with 3D path curvature is **0.007** across 10 ghosts (full-tier regression test). Its quantized-lattice structure remains the only verified fact.
+
 ## GTTF heading semantics resolved: atan2(dx,dz) (2026-11-28)
 
 With reconstructed world x, ghost `+12` heading aligns with AIW pointer-chain tangents in the **world x/z plane** as **`heading = atan2(dx, dz)`**: median circular coherence **0.858** across 15 matched ghosts (dominant convention in 10/15 files; equivalent `-atan2(dz,dx)` in the rest). The earlier y/z-only test gave 0.404 and the DSI-line test 0.318 — both were degraded by the missing x. Full-tier regression test added (median >0.7 across 29 ghosts).

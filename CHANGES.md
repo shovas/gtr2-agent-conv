@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 02:15:00 -0500 - GTTF gear bands and +36 negative
+- Using reconstructed world speeds, +32/speed clusters near F550 gear-ratio bands derived from .grb/.hdc/.tyr (p≈0.01 vs random bands); +36 is not path curvature (|r|<0.01). Two full-tier tests added.
+
 ## 2026-11-28 01:45:00 -0500 - GTTF heading convention resolved
 - With world x reconstructed, ghost heading aligns with AIW x/z tangents as `atan2(dx,dz)` (median coherence 0.858 vs 0.404 previously). Full-tier regression test added.
 
