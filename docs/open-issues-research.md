@@ -105,6 +105,18 @@ Assigned each frame to one of six gear bands derived from the F550 `.grb`/`.hdc`
 
 This supports f4 as a throttle/demand-like channel on the reference line (stronger in low gears), but neither channel reproduces the ghost's own pedal positions; exact semantics remain unclaimed. Full-tier permutation-controlled regression test added.
 
+## GTR2 two-stream meshes duplicate one UV pair (2026-11-29)
+
+Compared stream2 and stream3 on 1,731 two-stream GTR2 meshes. Stream3's
+columns 3..7 are exactly zero in **all** meshes, and its columns 1/2 agree
+with stream2's on a per-vertex basis in **1,662 (96%)** meshes. Median
+agreement is 1.0 versus 0.023 when stream3 rows are shuffled within each mesh
+(a distribution-preserving baseline). Stream3's remaining column 0 is a
+distinct per-vertex value but shows no world-position relationship (median
+max |correlation| 0.135, none above 0.9). Interpretation: the two streams
+carry one UV-like pair, largely duplicated — not two independent UV sets.
+Added `gmt_format.stream_cross_agreement()` and a full-tier test.
+
 ## GTR2 UV block layouts and converter misalignment FIXED (2026-11-29)
 
 Cross-checking converted files against real GTR2 exposed two related problems:

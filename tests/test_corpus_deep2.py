@@ -1873,6 +1873,55 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertGreater(max(halves), 10 * len(shaders))
         self.assertGreater(len(set(halves)), 5 * len(shaders))
 
+    def test_gmt_two_streams_share_uv_pair(self):
+        """Two-stream meshes duplicate their UV-like pair across streams."""
+        import glob
+        import random
+        import statistics
+        import gmt_format as gf
+        import mas_tool
+        observed = []
+        baseline = []
+        random.seed(64)
+        for archive in glob.glob(str(ROOT.parent / "GTR2Steam" / "**" / "*.gtr"),
+                                 recursive=True):
+            try:
+                _, entries = mas_tool.read_archive(archive)
+            except Exception:
+                continue
+            for entry in entries:
+                if not entry.name.lower().endswith(".gmt") or not entry.data:
+                    continue
+                try:
+                    parsed = gf.parse_gmt("x.gmt", entry.data)
+                except Exception:
+                    continue
+                for mesh in parsed.meshes:
+                    vertex_count = mesh.record.vertex_count
+                    if vertex_count < 8 or not mesh.stream2_data or not mesh.stream3_data:
+                        continue
+                    if len(mesh.stream2_data) != vertex_count * 32:
+                        continue
+                    if len(mesh.stream3_data) != vertex_count * 32:
+                        continue
+                    agreement = gf.stream_cross_agreement(
+                        mesh.stream2_data, mesh.stream3_data, vertex_count)
+                    if agreement is None:
+                        continue
+                    observed.append(agreement)
+                    rows = [mesh.stream3_data[i * 32:(i + 1) * 32]
+                            for i in range(vertex_count)]
+                    shuffled = random.sample(rows, len(rows))
+                    baseline.append(gf.stream_cross_agreement(
+                        mesh.stream2_data, b"".join(shuffled), vertex_count))
+                if len(observed) >= 1700:
+                    break
+            if len(observed) >= 1700:
+                break
+        self.assertGreater(len(observed), 1500)
+        self.assertGreater(statistics.median(observed), 0.95)
+        self.assertLess(statistics.median(baseline), 0.1)
+
     def test_gmt_rec6_only_uv_block_exposed(self):
         """Single-block layouts expose their vc*32 UV candidate to decoders."""
         import glob
