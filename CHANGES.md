@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 11:00:00 -0500 - GEN mesh-config validator
+- Added `simbin_text_tool.validate_gen_numeric()` for LOD distance ranges and ReflectPlane unit/zero-fourth invariants across 272 rF1-era `.gen` files; documented that SimBin installs ship none. Full-tier regression test added.
+
 ## 2026-11-26 10:30:00 -0500 - VEH key/eyepoint validator
 - Added `simbin_text_tool.validate_veh_numeric()` covering seven universal keys and Eyepoint vector bounds across 371 rF1-era `.veh` files. Full-tier regression test added.
 

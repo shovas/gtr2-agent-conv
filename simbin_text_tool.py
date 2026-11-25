@@ -1144,6 +1144,41 @@ HED_NUMERIC_BOUNDS = {
 }
 
 
+def validate_gen_numeric(data: bytes | str) -> list[str]:
+    """Check numeric vector bounds in rF1-era `.gen` mesh configs.
+
+    Verified on 272 files: LODIn components lie in [0, 350], LODOut in
+    [0, 3000], and ReflectPlane holds a unit 3-vector with a zero fourth
+    component (167 planes, all unit).
+    """
+    text = data if isinstance(data, str) else data.decode("latin-1")
+    problems: list[str] = []
+    for key, low, high in (("LODIn", 0.0, 350.0), ("LODOut", 0.0, 3000.0)):
+        for match in re.finditer(r"(?mi)" + key + r"\s*=\s*\(([^)]*)\)", text):
+            try:
+                values = [float(x) for x in match.group(1).split(",")]
+            except ValueError:
+                continue
+            for value in values:
+                if not (low <= value <= high):
+                    problems.append(f"{key}={value} outside [{low}, {high}]")
+                    return problems
+    for match in re.finditer(r"(?mi)ReflectPlane\s*=\s*\(([^)]*)\)", text):
+        try:
+            plane = [float(x) for x in match.group(1).split(",")]
+        except ValueError:
+            continue
+        if len(plane) >= 3:
+            norm = math.sqrt(sum(x * x for x in plane[:3]))
+            if abs(norm - 1.0) > 0.01:
+                problems.append(f"ReflectPlane norm {norm:.4f} != 1")
+                return problems
+        if len(plane) == 4 and plane[3] != 0.0:
+            problems.append(f"ReflectPlane fourth component {plane[3]} != 0")
+            return problems
+    return problems
+
+
 VEH_UNIVERSAL_KEYS = ("hdvehicle", "graphics", "sounds", "classes",
                       "driver", "number", "team")
 

@@ -781,6 +781,21 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertEqual(engines, 66)
         self.assertEqual(boxes, 60)
 
+    def test_gen_numeric_fields(self):
+        """GEN mesh configs obey LOD/reflect-plane bounds."""
+        import glob
+        import os
+        checked = 0
+        for root in ("Automobilista", "RF1Vanilla", "StockCarExtreme", "TC2000",
+                     "NascarSimRacing", "SimuladorTopRace2009", "NT2003",
+                     "CopaPetrobrasdeMarcas", "GameStockCar", "F12002"):
+            for p in glob.glob(str(ROOT.parent / root / "**" / "*"), recursive=True):
+                if not os.path.isfile(p) or not p.lower().endswith(".gen"):
+                    continue
+                self.assertEqual(stt.validate_gen_numeric(stt.read_text(p)), [], p)
+                checked += 1
+        self.assertEqual(checked, 272)
+
     def test_veh_numeric_fields(self):
         """VEH files carry universal keys and bounded Eyepoint vectors."""
         import glob
