@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 13:00:00 -0500 - VCR replay header coverage
+- Verified all nine shipped .Vcr replays parse as IRSR with the existing reader (driver/car/session fields); frame grid remains undetected and is documented as a distinct format. Full-tier test added.
+
 ## 2026-11-29 12:30:00 -0500 - f0 scope boundary recorded
 - Recorded that GTR2/GTL f0 marker semantics do not apply to JCA-decrypted Volvo/Race07 GMTs (their rec[4] holds float-shaped data). No code change; findings docs updated.
 

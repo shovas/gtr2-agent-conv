@@ -120,6 +120,11 @@ regression tests or an explicitly documented negative.
 - Header fields after filenames: `u8, u8, f32, u8, u32`; the f32 is one of
   **36000/43200/46800** (10/12/13 h in seconds — strong inference) across 42
   files. Exposed as `EventFile.session_seconds` etc.
+- All nine shipped `.Vcr` replay files parse with the same reader: gzip +
+  gMb wrapper + `IRSR` v1.05, with driver/car/team names and session values
+  from the same 36000/43200/46800 set. The GTTF-specific frame-grid detector
+  does **not** find their frames (no `01 00 00 34 00 20 00` marker), so their
+  frame layout remains a separate, undecoded format.
 - **24-byte pre-frame records** immediately precede the frame grid: six f32
   fields `(y, z, heading, f3, f4, x)`. They form the reference racing line.
   `find_preframe_records()` / `reconstruct_frame_x()` expose x; frames get

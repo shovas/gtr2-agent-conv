@@ -3646,6 +3646,23 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertGreater(statistics.median(observed),
                            5 * statistics.median(baseline))
 
+    def test_vcr_replay_headers_parse(self):
+        """All shipped .Vcr replays parse as IRSR with known session values."""
+        import gzip
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        replays = sorted((ROOT.parent / "GTR2Steam" / "ReplayData").glob("*.Vcr"))
+        self.assertGreaterEqual(len(replays), 9)
+        for path in replays:
+            event = st.parse_payload(gz.decompress(str(path)))
+            self.assertEqual(event.kind, "IRSR", path.name)
+            self.assertAlmostEqual(event.version, 1.05, places=2)
+            self.assertTrue(event.trk.lower().endswith(".trk"), path.name)
+            self.assertTrue(event.aiw.lower().endswith(".aiw"), path.name)
+            self.assertIn(event.session_seconds, (36000.0, 43200.0, 46800.0))
+            self.assertTrue(event.driver, path.name)
+            self.assertTrue(event.car.lower().endswith(".car"), path.name)
+
     def test_gttf_frame_marker_prefix_constant(self):
         """Bytes +24..+30 are a fixed marker; only byte +31 varies."""
         import glob

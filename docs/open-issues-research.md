@@ -105,6 +105,19 @@ Assigned each frame to one of six gear bands derived from the F550 `.grb`/`.hdc`
 
 This supports f4 as a throttle/demand-like channel on the reference line (stronger in low gears), but neither channel reproduces the ghost's own pedal positions; exact semantics remain unclaimed. Full-tier permutation-controlled regression test added.
 
+## .Vcr replay files share the IRSR container (2026-11-29)
+
+The nine shipped `GTR2Steam/ReplayData/*.Vcr` files are gzip-compressed with
+the same `//[[gMb1.000f…]]` wrapper and `IRSR` v1.05 magic as time-trial
+ghosts. `simbin_events_tool.parse_payload()` already reads all nine: TRK/AIW
+names, driver, co-driver, team, car and `session_seconds` (always one of
+36000/43200/46800) parse cleanly, and the CLI handles them without changes.
+However, `find_frame_grid()` returns None for every replay: the GTTF 7-byte
+marker `01 00 00 34 00 20 00` is absent and a stride autocorrelation shows
+a 20-byte repeating pattern instead. Replay frame layout is therefore a
+distinct, undecoded format — recorded as a new avenue, not claimed as solved.
+Full-tier header regression test added.
+
 ## f0 marker semantics do not transfer to Volvo/Race07 (2026-11-29)
 
 Attempted to cross-validate the f0 byte-pair rule on JCA-decrypted Volvo and
