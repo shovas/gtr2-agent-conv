@@ -2983,6 +2983,26 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertLess(statistics.median(observed), -0.1)
         self.assertLess(statistics.median(observed), 2 * statistics.median(baseline))
 
+    def test_gttf_frame_marker_prefix_constant(self):
+        """Bytes +24..+30 are a fixed marker; only byte +31 varies."""
+        import glob
+        import gzip
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        expected = bytes((1, 0, 0, 52, 0, 32, 0))
+        frames_checked = 0
+        for path in glob.glob(str(ROOT.parent / "GTR2Steam" / "TimeTrial" / "**" / "*.GTT"),
+                              recursive=True):
+            payload = gz.decompress(path)
+            grid = st.find_frame_grid(payload)
+            if not grid:
+                continue
+            for index in range(grid["count"]):
+                offset = grid["offset"] + index * grid["stride"]
+                self.assertEqual(payload[offset + 24:offset + 31], expected)
+                frames_checked += 1
+        self.assertEqual(frames_checked, 44631)
+
     def test_gttf_byte31_tracks_path_y(self):
         """The varying byte at +31 tracks the path's world y coordinate."""
         import glob

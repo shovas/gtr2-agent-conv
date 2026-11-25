@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 00:00:00 -0500 - GTTF marker prefix validator
+- Verified bytes +24..+30 are the fixed marker 01 00 00 34 00 20 00 across all 44,631 frames; full-tier validator added and findings docs updated.
+
 ## 2026-11-28 23:30:00 -0500 - GTTF byte 31 path elevation
 - Found the varying byte at GTTF frame +31 tracks path y (median |r| 0.164 vs 0.020 permuted), replacing the earlier "exponent artifact" interpretation. Full-tier test added; findings docs updated.
 

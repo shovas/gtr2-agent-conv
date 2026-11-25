@@ -105,6 +105,14 @@ Assigned each frame to one of six gear bands derived from the F550 `.grb`/`.hdc`
 
 This supports f4 as a throttle/demand-like channel on the reference line (stronger in low gears), but neither channel reproduces the ghost's own pedal positions; exact semantics remain unclaimed. Full-tier permutation-controlled regression test added.
 
+## GTTF frame marker prefix constant (2026-11-28)
+
+Across all 29 ghosts and 44,631 frames, bytes `+24..+30` are exactly
+`01 00 00 34 00 20 00` (one distinct value per position). Only byte `+31`
+varies. This makes the 7-byte prefix a reliable frame-grid validator, and
+explains why earlier byte-statistics work treated `+31` separately. Full-tier
+regression test added.
+
 ## GTTF byte +31 tracks path elevation (2026-11-28)
 
 The `+28` u32 has constant low bits `0x00200000`; its high byte (frame offset `+31`) was previously called a "car-independent exponent artifact". A matrix against path-record fields shows it tracks the path's world y coordinate: median |correlation| **0.164** vs **0.020** permuted across 29 ghosts, 23/29 above 3× baseline; it also tracks path f4 (0.123 vs 0.017). So byte +31 carries real track-state information, not just a packing exponent. Full-tier regression test added.
