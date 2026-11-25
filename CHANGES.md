@@ -5,6 +5,9 @@ Newest-first change log. Timestamps use repository commit dates (ISO 8601, local
 ## 2026-11-26 16:30:00 -0500 - AIW Features capacity negative
 - Documented that AIW `[Features]` numbers are capacity defaults rather than section counts (startinggrid 104 vs GRID 36 typical); full-tier corpus-fact regression test added.
 
+## 2026-11-27 15:00:00 -0500 - GTTF +32 peak-power RPM negative
+- Tested +32 ceilings against .eng peak-power RPM (6500 F550 / 8250 BMW): raw ratios 903.7 vs 768.1 differ by 15%, so no common engine-table RPM band explains the ceiling. Full-tier regression test added.
+
 ## 2026-11-27 14:00:00 -0500 - f0 counts/bbox negative
 - Across 8,003 markers, f0 halfwords matching material/stage counts or bounding-box-derived values (1019) equal permutation chance (1057); no GMT-internal field explains the family-invariant marker. Full-tier regression test added.
 

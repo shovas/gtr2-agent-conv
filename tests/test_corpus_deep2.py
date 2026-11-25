@@ -1006,6 +1006,25 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertEqual(checked, 204)
 
+    def test_gttf_frame32_not_peak_power_rpm(self):
+        """Ghost +32 ceilings do not match .eng peak-power RPM consistently."""
+        import re
+        def peak_power_rpm(path: Path) -> float:
+            rows = []
+            for match in re.finditer(
+                    r"(?mi)^RPMTorque\s*=\s*\(\s*([\d.]+)\s*,\s*([-\d.e]+)\s*,\s*([-\d.e]+)",
+                    path.read_bytes().decode("latin-1")):
+                rows.append((float(match.group(1)), float(match.group(3))))
+            return max(rows, key=lambda row: row[0] * row[1])[0]
+        f550 = peak_power_rpm(ROOT.parent / "GTR2Steam" / "GameData" / "Teams" / "GT" /
+                              "Ferrari 550 Teams" / "550_Std_V12.eng")
+        bmw = peak_power_rpm(ROOT.parent / "BMWM3Challenge" / "GameData" / "Teams" /
+                             "BMW" / "BMW M3" / "BMW_M3.eng")
+        self.assertEqual((f550, bmw), (6500.0, 8250.0))
+        ratio_f = 5_873_841 / f550
+        ratio_b = 6_336_964 / bmw
+        self.assertGreater(abs(ratio_f - ratio_b) / ratio_f, 0.14)
+
     def test_f0_not_count_or_bbox_derived(self):
         """f0 halfword matches to counts/bbox values equal permutation chance."""
         import glob
