@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 09:00:00 -0500 - Single-block UV round-trip guarantee
+- Verified repacking preserves vertex and UV bytes on 563 real GTR2 single-block meshes; full-tier regression test added.
+
 ## 2026-11-29 08:30:00 -0500 - GTR2 stream3/f0 sparsity artefact
 - Recorded a negative: stream3 column 0 and f0 both appear only at vertex 0, so their apparent per-vertex correlation of 1.0 is a sparsity artefact. Full-tier test added; methodology note in findings docs.
 

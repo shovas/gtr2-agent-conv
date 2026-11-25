@@ -1961,6 +1961,40 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertGreater(statistics.median(observed), 0.95)
         self.assertLess(statistics.median(baseline), 0.1)
 
+    def test_gmt_single_block_roundtrip_preserves_uv(self):
+        """Repacking a real single-block GTR2 mesh keeps UV bytes intact."""
+        import glob
+        import gmt_format as gf
+        import mas_tool
+        checked = 0
+        for archive in glob.glob(str(ROOT.parent / "GTR2Steam" / "**" / "*.gtr"),
+                                 recursive=True):
+            try:
+                _, entries = mas_tool.read_archive(archive)
+            except Exception:
+                continue
+            for entry in entries:
+                if not entry.name.lower().endswith(".gmt") or not entry.data:
+                    continue
+                try:
+                    before = gf.parse_gmt("x.gmt", entry.data)
+                except Exception:
+                    continue
+                candidates = [m for m in before.meshes
+                              if m.stream2_data and m.record.raw[7] == 0]
+                if not candidates:
+                    continue
+                after = gf.parse_gmt("y.gmt", gf.relayout_gmt(before))
+                for first, second in zip(before.meshes, after.meshes):
+                    self.assertEqual(first.vertex_data, second.vertex_data)
+                    self.assertEqual(first.stream2_data, second.stream2_data)
+                checked += 1
+                if checked >= 50:
+                    break
+            if checked >= 50:
+                break
+        self.assertEqual(checked, 50)
+
     def test_gmt_rec6_only_uv_block_exposed(self):
         """Single-block layouts expose their vc*32 UV candidate to decoders."""
         import glob

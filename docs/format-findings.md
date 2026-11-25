@@ -61,7 +61,8 @@ regression tests or an explicitly documented negative.
 - **Two UV block layouts, both now parsed:** GTR2 uses either explicit stream
   end markers (`rec[6] < rec[7] < rec[8]`, ~18%) or a single `vc*32` block at
   `rec[6]` running up to the index array (~86%). `parse_gmt()` now exposes
-  both as `stream2_data`. In the single-block layout the UV pair sits at
+  both as `stream2_data`, and repacking preserves vertex and UV bytes on
+  563/563 sampled single-block meshes. In the single-block layout the UV pair sits at
   `rec[6]+4/+8` (dominant signature `(1,2,0,0,0,0,0)`).
 - **Converter UV layout corrected:** `old_to_new_semantic()` previously wrote
   a 4-byte count lead before the UV block and placed UVs at `+8/+12`, so
