@@ -316,6 +316,27 @@ class CorpusDeepTest(unittest.TestCase):
         self.assertGreater(checked, 160)
         self.assertGreater(resolved / checked, 0.97)
 
+    def test_gdb_has_no_texture_references(self):
+        """GDB event files carry no SkyName/texture references."""
+        import glob
+        import media_tool
+        checked = weather = 0
+        for root in ("GTR2Steam", "GTLSteam", "Race07Complete"):
+            for p in glob.glob(str(ROOT.parent / root / "**" / "*.gdb"), recursive=True):
+                if not Path(p).is_file():
+                    continue
+                text = media_tool.decrypt_jca_text(Path(p).read_bytes()).decode("latin-1")
+                for key, value in re.findall(r"(?mi)^\s*([A-Za-z_]\w*)\s*=\s*([^\r\n]+)", text):
+                    low = key.lower()
+                    for token in ("sky", "tex", "dds", "tga", "image"):
+                        self.assertNotIn(token, low, (p, key))
+                    if low == "weather":
+                        self.assertIn(value.split("//")[0].strip(), ("0", "1", "2", "3", "4"), p)
+                        weather += 1
+                checked += 1
+        self.assertEqual(checked, 252)
+        self.assertGreater(weather, 200)
+
     def test_gdb_numeric_fields(self):
         """GDB race-setting fields stay within corpus-observed bounds."""
         import glob

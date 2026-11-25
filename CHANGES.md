@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 15:00:00 -0500 - GDB texture-reference negative
+- Documented that 252 GTR2/GTL/Race07 event GDB files contain no sky/texture/image references (Weather is a numeric 0–4 index). Full-tier corpus-fact regression test added.
+
 ## 2026-11-26 14:30:00 -0500 - GDB race-setting bounds
 - Added `simbin_text_tool.validate_gdb_numeric()` with 17 corpus-observed race-setting bounds across 252 GTR2/GTL/Race07 event files. Full-tier regression test added.
 

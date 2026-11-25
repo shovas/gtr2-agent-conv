@@ -355,6 +355,8 @@ GTR1 coverage is now complete: a full `../GTR1Vanilla` scan (33,477 GMTs with th
 
 - **GDB TerrainDataFile references**: `parse_gdb_terrain_refs()` extracts `.tdf` overrides from rF1-era event files. RF1Vanilla has 26 references, all resolving to loose or archived `.tdf` files; F1C/F12002/NT2003 event files contain no `TerrainDataFile` keys. Full-tier regression test; no exceptions.
 
+- **GDB texture-reference negative**: none of the 252 GTR2/GTL/Race07 `.gdb` files contains any key mentioning sky, texture, DDS, TGA or image. `Weather` is a numeric index (0–4, 237 occurrences), not a texture filename. Sky/environment maps are selected by `.trk`/`.cam` files, not event GDBs. Full-tier corpus-fact regression test.
+
 - **GDB race-setting bounds**: `GDB_RACE_BOUNDS` covers 17 fields from 252 GTR2/GTL/Race07 event files: laps 2–999, race time 4–1440 min, weather 0–4, AI grip 0.8–1.6 dry / 0.6–1.2 wet, point allocations −30..40, ambient 11–30 °C, track 13–37 °C, attrition 10–220, latitude −35..85. Full-tier regression test.
 
 - **TRK View-block fields**: `validate_trk_view_fields()` enforces corpus bounds from 152 GTR2/GTL/Race07 track scripts: FOV 62.5–77.75, clip planes 0.5–10000, colors 0–254, view sizes 0.5–512, and `Clear` strictly TRUE/FALSE (302 TRUE / 4 FALSE). Full-tier regression test.
