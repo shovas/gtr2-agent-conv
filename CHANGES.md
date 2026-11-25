@@ -5,6 +5,9 @@ Newest-first change log. Timestamps use repository commit dates (ISO 8601, local
 ## 2026-11-26 16:30:00 -0500 - AIW Features capacity negative
 - Documented that AIW `[Features]` numbers are capacity defaults rather than section counts (startinggrid 104 vs GRID 36 typical); full-tier corpus-fact regression test added.
 
+## 2026-11-26 03:00:00 -0500 - Embedded SCN reference invariant
+- Verified that all 6 `.scn` scripts embedded in `Marcas.exe` parse with the existing parser and contain 45 MAS references; the only references missing from loose game files point to `AdPackStockCar.MAS`, which exists solely as an EXE-embedded resource. Quick-tier regression test added.
+
 ## 2026-11-26 02:00:00 -0500 - GSC EXE embedded resources decoded
 - Added `gsc_exe_tool.py` to list/extract resources embedded in GSC-family EXEs (`AXS.GS.0`): `.keyMan` GUID keys, Blowfish-CBC decryption, LZMA/LZ4 decompression. Verified against QuickBMS: 34/35 Marcas files and 626/627 AMS files byte-identical; StockCarExtreme's variant remains unsupported by both tools. New quick-tier and full-tier tests; mirror script documented in `docs/tools-reference.md`.
 
