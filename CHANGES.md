@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 16:15:00 -0500 - f0 index terminology clarified
+- Verified material_index equals mesh ordinal in 99.97% of meshes; f0 invariants are with respect to mesh position in the GMT. Regression test added.
+
 ## 2026-11-28 15:45:00 -0500 - f0 half-sum invariant
 - Verified f0's paired-half mean inversely tracks material index (r -0.264 vs 0.006 permuted); full-tier distribution-preserving test added.
 

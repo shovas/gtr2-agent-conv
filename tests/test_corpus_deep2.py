@@ -1492,6 +1492,37 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertLess(observed, -0.3)
         self.assertLess(observed, -10 * max(baseline, 0.001))
 
+    def test_f0_material_index_is_mesh_ordinal(self):
+        """The material index used in f0 studies is the mesh's ordinal."""
+        import glob
+        import gmt_format as gf
+        import mas_tool
+        total = equal = 0
+        for root, ext in (("GTR2Steam", ".gtr"), ("GTLSteam", ".gtl"),
+                          ("BMWM3Challenge", ".bmw")):
+            for archive in glob.glob(str(ROOT.parent / root / "**" / f"*{ext}"),
+                                     recursive=True):
+                try:
+                    _, entries = mas_tool.read_archive(archive)
+                except Exception:
+                    continue
+                for entry in entries:
+                    if not entry.name.lower().endswith(".gmt") or not entry.data:
+                        continue
+                    try:
+                        parsed = gf.parse_gmt("x.gmt", entry.data)
+                    except Exception:
+                        continue
+                    for ordinal, mesh in enumerate(parsed.meshes):
+                        total += 1
+                        equal += int(mesh.record.material_index == ordinal)
+                if total >= 12000:
+                    break
+            if total >= 12000:
+                break
+        self.assertGreater(total, 5000)
+        self.assertGreater(equal / total, 0.99)
+
     def test_f0_half_sum_vs_material_index(self):
         """f0's paired-half mean decreases with local material index."""
         import glob
