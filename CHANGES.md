@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 10:00:00 -0500 - VRL UV transfer gap documented
+- Recorded why VRL UVs are still not transferred: coordinates are per-corner (only 36/300 files even match vertex count, none with identity indices), so correct transfer needs vertex splitting and index rebasing. No speculative decoder shipped.
+
 ## 2026-11-29 09:30:00 -0500 - GTR1 UV transfer enabled
 - Identified GTR1 vertex fields 9/10 as UVs (fields 8/11 always zero in 20,017 samples) and enabled their transfer into GTR2 UV blocks; 30/30 sampled conversions reproduce UVs exactly. Full-tier test added.
 

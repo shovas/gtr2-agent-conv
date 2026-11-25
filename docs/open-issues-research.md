@@ -105,6 +105,17 @@ Assigned each frame to one of six gear bands derived from the F550 `.grb`/`.hdc`
 
 This supports f4 as a throttle/demand-like channel on the reference line (stronger in low gears), but neither channel reproduces the ghost's own pedal positions; exact semantics remain unclaimed. Full-tier permutation-controlled regression test added.
 
+## VRL UV transfer remains a gap (2026-11-29)
+
+VRL files expose a per-corner `coords` array verified as UV-like by
+`vrl_uv_quad_score()` (1,046 files, mean 0.753 vs 0.271 shuffled). However
+those coordinates are indexed per corner, not per vertex: in 300 sampled
+VRL files only 36 have `len(coords) == vertex_count`, and **none** has an
+identity index buffer. Transferring them therefore requires splitting shared
+vertices at UV seams and rebasing every triangle index, which would also
+invalidate the current `verify_gmt_geometry()` checks. Left as an explicit
+gap rather than shipping a speculative mapping.
+
 ## GTR1 UV fields identified and transferred (2026-11-29)
 
 Previously `gtr1_to_gmt` deliberately dropped GTR1 UVs as unconfirmed.
