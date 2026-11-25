@@ -55,6 +55,10 @@ New invariant from a 500-file GTR2/GTL mesh sweep: among LOD/number-variant grou
 
 Cross-checked `SCE_EMBEDDED_NUMERIC_BOUNDS` against the GTR2 target validators: SCE `.hdv` shares 19 keys with `HDC_NUMERIC_BOUNDS` but only **3** have source ranges inside the target (16 incompatible: e.g. `bumptravel` −0.085..0.026 vs −0.12..−0.02, `pressuresetting` 1..50 vs 30..65, `braketorque` 0..4800 vs 1017..4000). SCE `.tbc` shares 15 keys with `TYR_NUMERIC_BOUNDS` with only **4** compatible (11 incompatible: `radius` 0.125..0.365 vs 0.249..0.355, `damper` 360..1100 vs 1000..3850, `step` 0.0033..0.05 vs constant 0.009). This extends the earlier Marcas negative: a GSC-era → GTR2 adapter needs explicit rescaling or target templates for both families. Full-tier regression test added.
 
+## GTTF heading vs AIW pointer-chain tangents (2026-11-27)
+
+Using pointer-chain `ptrs[1]` tangents in the mapped (y,z) plane across 27 GTR2 ghosts, the best-of-four-convention circular coherence with `+12` heading has median **0.404** versus **~0.05** under permutation of tangents — an 8× above-chance alignment. Unlike the DSI-line test (median best coherence 0.318), this shows the ghost heading does follow the AIW racing-line direction, but the convention (`±`, axis order) varies per track, so no universal sign/axis rule is promoted. Full-tier permutation-controlled regression test added.
+
 ## GTTF heading vs DSI tangents in y/z plane (2026-11-27) — negative
 
 After establishing that ghost `+0` = AIW y and `+1` = AIW z, recomputed DSI instructor-line tangents in the same (y,z) plane and compared them with ghost `+12` heading across 27 matched tracks. Even allowing four orientation conventions (`±atan2(dy,dz)`, `±atan2(dz,dy)`), the **best per-file circular coherence is only 0.318 median**, with no single convention dominant. So `+12` does not encode the DSI tangent direction despite sharing two coordinate axes; its earlier AIW-direction negative is confirmed in the correct frame. Full-tier regression test added.

@@ -1006,6 +1006,73 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertEqual(checked, 204)
 
+    def test_gttf_heading_vs_aiw_chain_tangents(self):
+        """AIW pointer-chain tangents align with ghost heading above chance."""
+        import glob
+        import gzip
+        import math
+        import random
+        import statistics
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        import simbin_text_tool as stt
+        base = ROOT.parent / "GTR2Steam"
+        aiws = {}
+        for path in glob.glob(str(base / "**" / "*.AIW"), recursive=True):
+            aiws.setdefault(path.lower().rsplit("/", 1)[-1], path)
+
+        def coherence(headings, angles):
+            best = 0.0
+            for sign in (1, -1):
+                for swap in (False, True):
+                    diffs = []
+                    for heading, dy, dz in zip(headings, *angles):
+                        angle = sign * (math.atan2(dz, dy) if swap
+                                        else math.atan2(dy, dz))
+                        diffs.append((heading - angle + math.pi)
+                                     % (2 * math.pi) - math.pi)
+                    c = sum(math.cos(v) for v in diffs) / len(diffs)
+                    s = sum(math.sin(v) for v in diffs) / len(diffs)
+                    best = max(best, math.hypot(c, s))
+            return best
+
+        observed = []
+        baselines = []
+        for path in glob.glob(str(base / "TimeTrial" / "**" / "*.GTT"),
+                              recursive=True):
+            payload = gz.decompress(path)
+            event = st.parse_payload(payload)
+            frames = st.read_frames(payload, st.find_frame_grid(payload))
+            aiw = aiws.get((event.aiw or "").lower())
+            if not aiw:
+                continue
+            waypoints = [w for w in stt.parse_aiw(stt.read_text(aiw)).waypoints
+                         if w.pos and w.wp_class() in (0, 1)]
+            headings, deltas = [], []
+            for frame in frames:
+                y, z = frame["position"][0], frame["position"][1]
+                nearest = min(range(len(waypoints)),
+                              key=lambda k: (waypoints[k].pos[1] - y) ** 2
+                              + (waypoints[k].pos[2] - z) ** 2)
+                nxt = waypoints[nearest].ptrs[1]
+                if nxt is None or not (0 <= nxt < len(waypoints)):
+                    continue
+                dy = waypoints[nxt].pos[1] - waypoints[nearest].pos[1]
+                dz = waypoints[nxt].pos[2] - waypoints[nearest].pos[2]
+                if math.hypot(dy, dz) < 1e-6:
+                    continue
+                headings.append(frame["heading"])
+                deltas.append((dy, dz))
+            if len(headings) < 50:
+                continue
+            observed.append(coherence(headings, tuple(zip(*deltas))))
+            random.seed(0)
+            shuffled = random.sample(deltas, len(deltas))
+            baselines.append(coherence(headings, tuple(zip(*shuffled))))
+        self.assertGreater(len(observed), 20)
+        self.assertGreater(statistics.median(observed),
+                           statistics.median(baselines) * 2)
+
     def test_gsc_mask_not_derived_from_member_metadata(self):
         """GSC GMT XOR masks do not match archive member metadata hashes."""
         import glob

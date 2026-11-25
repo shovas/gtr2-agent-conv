@@ -5,6 +5,9 @@ Newest-first change log. Timestamps use repository commit dates (ISO 8601, local
 ## 2026-11-26 16:30:00 -0500 - AIW Features capacity negative
 - Documented that AIW `[Features]` numbers are capacity defaults rather than section counts (startinggrid 104 vs GRID 36 typical); full-tier corpus-fact regression test added.
 
+## 2026-11-27 22:00:00 -0500 - GTTF heading vs AIW chain tangents
+- Found above-chance alignment of ghost +12 with AIW pointer-chain tangents in the mapped y/z plane (median best coherence 0.404 vs ~0.05 permuted) across 27 ghosts; convention varies by track. Permutation-controlled full-tier test added.
+
 ## 2026-11-27 21:00:00 -0500 - GSC mask not metadata-derived
 - Tested 120 masked GSC GMTs against member size/zsize/flags and compressed-byte CRCs/Adler/sums: all matches at permutation baseline. Full-tier regression test added.
 
