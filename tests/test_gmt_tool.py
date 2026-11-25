@@ -91,5 +91,33 @@ class GmtToolTest(unittest.TestCase):
         self.assertIn("halves=", result.stdout)
 
 
+    def test_f0_command(self):
+        """The f0 subcommand reports marker halves and summary counts."""
+        import subprocess
+        import sys
+        sample = None
+        for path in Path(__file__).resolve().parents[1].parent.glob("GTR2Steam/**/*.gtr"):
+            try:
+                _, entries = mas_tool.read_archive(str(path))
+            except Exception:
+                continue
+            sample = next((e.data for e in entries
+                           if e.name.lower().endswith(".gmt") and e.data), None)
+            if sample:
+                break
+        if sample is None:
+            self.skipTest("no GTR2 GMT sample")
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            target = Path(td) / "sample.gmt"
+            target.write_bytes(sample)
+            result = subprocess.run(
+                [sys.executable, str(Path(__file__).resolve().parents[1] / "gmt_tool.py"),
+                 "f0", str(target)], capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("halves=", result.stdout)
+        self.assertIn("near_equal<=1=", result.stdout)
+
+
 if __name__ == "__main__":
     unittest.main()

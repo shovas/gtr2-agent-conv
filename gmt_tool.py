@@ -233,6 +233,26 @@ def cmd_relayout(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_f0(args: argparse.Namespace) -> int:
+    """Report per-mesh f0 markers and their verified structure."""
+    data = Path(args.file).read_bytes()
+    parsed = gmt_format.parse_gmt(args.file, data)
+    near_equal = 0
+    reported = 0
+    for ordinal, mesh in enumerate(parsed.meshes):
+        marker = gmt_format.mesh_marker(mesh)
+        if marker is None:
+            print(f"mesh[{ordinal}]: f0=none")
+            continue
+        low, high, delta = gmt_format.split_f0(marker)
+        near_equal += int(delta <= 1)
+        reported += 1
+        print(f"mesh[{ordinal}]: f0=0x{marker:08x} halves=({low},{high}) "
+              f"delta={delta} first={ordinal == 0}")
+    print(f"meshes={len(parsed.meshes)} markers={reported} near_equal<=1={near_equal}")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -252,6 +272,10 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("right")
     p.add_argument("-v", "--verbose", action="store_true")
     p.set_defaults(func=cmd_diff)
+
+    p = sub.add_parser("f0", help="report per-mesh f0 marker structure")
+    p.add_argument("file")
+    p.set_defaults(func=cmd_f0)
 
     p = sub.add_parser("relayout", help="rebuild all offsets and pack a GMT to a new file")
     p.add_argument("file")

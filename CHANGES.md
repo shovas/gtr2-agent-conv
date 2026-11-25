@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 17:15:00 -0500 - f0 CLI report
+- Added `gmt_tool.py f0 FILE` to report per-mesh marker halves, deltas and near-equal counts; regression test added.
+
 ## 2026-11-28 16:45:00 -0500 - f0 mesh-0 distinctness
 - Found mesh 0's f0 halves/delta structurally distinct (median delta 314 vs 1 for later meshes; permutation baseline 0.1). Full-tier regression test added.
 
