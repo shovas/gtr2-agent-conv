@@ -133,6 +133,10 @@ Static analysis of the unpacked `GTR2.exe` (`.text` at RVA `0x401000`) located t
 
 Across all 42 local event files (29 GTTF + 13 IRSR) the float takes only **36000 / 43200 / 46800**, exactly 10/12/13 hours in seconds — consistent with a session time limit (strong inference, not runtime-confirmed). The GTTF `+8` steering relationship and the rest of the frame field work remain separate. Full-tier regression test added.
 
+## GTR2 mesh-0 f0 vs mesh count (2026-11-28)
+
+Mesh-0's f0 half-sum grows weakly but significantly with the number of meshes in the GMT: Pearson r ≈ **0.13–0.14** vs **0.009** for distribution-preserving permuted counts (n≈6,000). This is consistent with mesh 0 carrying a file-level/scene-level identifier related to mesh population. Full-tier regression test added.
+
 ## GTR2 f0: mesh 0 is structurally distinct (2026-11-28)
 
 For the first mesh in each GMT, f0's halves are much larger and further apart:

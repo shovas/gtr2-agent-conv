@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 17:45:00 -0500 - mesh-0 f0 vs mesh count
+- Verified mesh-0 f0 half-sum tracks GMT mesh count (r≈0.13 vs 0.009 permuted); full-tier distribution-preserving test added.
+
 ## 2026-11-28 17:15:00 -0500 - f0 CLI report
 - Added `gmt_tool.py f0 FILE` to report per-mesh marker halves, deltas and near-equal counts; regression test added.
 
