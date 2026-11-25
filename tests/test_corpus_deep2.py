@@ -4072,6 +4072,23 @@ class CorpusDeep2Test(unittest.TestCase):
                         for negated_value, direct_value in zip(negated, direct)) / len(direct)
             self.assertGreater(share, 0.75, game)
 
+    def test_rf1_pipeline_leaves_cam_files_intact(self):
+        """CAM files pass through the rF1 -> GTR2 byte conversion unchanged."""
+        import glob
+        import rf1_to_gtr2
+        checked = 0
+        for path in glob.glob(str(ROOT.parent / "RF1Vanilla" / "**" / "*.cam"),
+                              recursive=True):
+            name = Path(path).name
+            data = Path(path).read_bytes()
+            output, action = rf1_to_gtr2.convert_bytes(name, data)
+            self.assertEqual(output, data, name)
+            self.assertEqual(action, "copy")
+            checked += 1
+            if checked >= 50:
+                break
+        self.assertEqual(checked, 50)
+
     def test_cam_positions_invert_aiw_world_coordinates(self):
         """GTR2 camera positions are negatively correlated with AIW waypoints."""
         import random
