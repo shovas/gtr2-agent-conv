@@ -160,6 +160,7 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 - **Stream column signature**: `gmt_format.stream_column_signature()` reports which of the 8 f32 columns of a GTR2 extra stream repeat earlier columns, capturing the verified 99.73% column-7/column-1 invariant and the dominant three-value layout. Full-tier test.
 - **GTR1 UV transfer**: `gtr1_to_gmt.uvs_from_gtr1()` decodes GTR1 vertex fields 9/10 as UV pairs; conversions write them into the GTR2 UV block and reproduce source UVs exactly (30/30 sampled). Full-tier test.
 - **Two-stream cross-check**: `gmt_format.stream_cross_agreement()` measures per-vertex UV-pair agreement between GTR2 stream2 and stream3 (96% of meshes at 1.0 vs 0.023 shuffled). Full-tier test.
+- **GTTF frame-time editor**: `simbin_events_tool.shift_frame_times()` shifts every frame's +20 time word in place, preserving positions/controls/tail (full-tier test).
 - **GTTF session-field editor**: `simbin_events_tool.set_session_seconds()` mutates the header f32 in place (≤4 bytes change) with a verified full-tier test on 29 ghosts.
 - **SimBin gzip writer**: `gzip_simbin_tool.compress_simbin()` reproduces GTT/VCR containers byte-for-byte (29 + 9 sampled files) by patching the XFL/OS header bytes. Full-tier test.
 - **UV inspection CLI**: `gmt_tool.py uv FILE` prints per-mesh UV block size, column signature, decoded-triple status and the first UV pairs. Regression test.

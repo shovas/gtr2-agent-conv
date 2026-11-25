@@ -278,6 +278,15 @@ frame's `slot48_low` (|r| 0.993 vs 0.24 shuffled). These are near-copies, not
 bit-exact, so the tail is a summary of final car state. Full-tier
 permutation-controlled test added.
 
+## Frame-time editor and f32 precision (2026-11-30)
+
+Added `shift_frame_times()` to modify every grid frame's +20 time word while
+preserving positions, controls and tail. On sampled ghosts, a +64 s shift
+produced per-frame differences accurate to 7.6e-6 s — the expected f32
+rounding at session-time magnitudes (values up to ~650 s), not a decoder
+error. This confirms the time words are independent f32 fields and can be
+edited without disturbing other frame data. Full-tier test added.
+
 ## GTTF session-field editor (2026-11-30)
 
 With containers reproducible, added `session_field_offset()` and

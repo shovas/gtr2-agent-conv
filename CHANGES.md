@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-30 05:00:00 -0500 - GTTF frame-time editor
+- Added `simbin_events_tool.shift_frame_times()`; verified a +64 s shift preserves all other frame fields with only f32 rounding error (≤7.6e-6 s). Full-tier test added.
+
 ## 2026-11-30 04:30:00 -0500 - GTTF session-field editor
 - Added `simbin_events_tool.set_session_seconds()` to edit the header session f32 in place; verified on 29 ghosts that at most four bytes change and the container rewraps correctly. Full-tier test added.
 

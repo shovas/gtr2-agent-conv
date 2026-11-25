@@ -198,6 +198,24 @@ def set_session_seconds(data: bytes, seconds: float) -> bytes:
     return bytes(output)
 
 
+def shift_frame_times(data: bytes, delta: float) -> bytes:
+    """Return a copy with every grid frame's +20 time offset shifted by delta.
+
+    Only the f32 time words are modified; frame positions, controls and the
+    20-byte tail are preserved verbatim. Useful for constructing shifted
+    ghosts without rebuilding the payload from scratch.
+    """
+    grid = find_frame_grid(data)
+    if grid is None:
+        raise ValueError("no frame grid found")
+    output = bytearray(data)
+    for index in range(grid["count"]):
+        offset = grid["offset"] + index * grid["stride"] + FRAME_TIME_OFF
+        current = struct.unpack_from("<f", output, offset)[0]
+        struct.pack_into("<f", output, offset, current + delta)
+    return bytes(output)
+
+
 def parse_payload(data: bytes) -> EventFile:
     kind = next((m.decode() for m in MAGICS if m in data[:64]), None)
     if kind is None:

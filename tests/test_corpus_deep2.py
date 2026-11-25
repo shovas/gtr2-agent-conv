@@ -4180,6 +4180,32 @@ class CorpusDeep2Test(unittest.TestCase):
             replay_flags.add((event.flags_a, event.flags_b, event.flags_c, event.flags_u))
         self.assertGreater(len(replay_flags), 3)
 
+    def test_gttf_frame_time_editor_preserves_other_fields(self):
+        """Frame-time shifting changes only frame time words."""
+        import glob
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        checked = 0
+        for path in glob.glob(str(ROOT.parent / "GTR2Steam" / "TimeTrial" / "**" / "*.GTT"),
+                              recursive=True)[:10]:
+            payload = gz.decompress(path)
+            grid = st.find_frame_grid(payload)
+            if not grid:
+                continue
+            shifted = st.shift_frame_times(payload, 64.0)
+            before = st.read_frames(payload, grid)
+            grid2 = st.find_frame_grid(shifted)
+            after = st.read_frames(shifted, grid2)
+            self.assertEqual(len(before), len(after))
+            for old, new in zip(before, after):
+                self.assertLess(abs((new["time"] - old["time"]) - 64.0), 1e-4)
+                self.assertEqual(old["position"], new["position"])
+                self.assertEqual(old["heading"], new["heading"])
+            self.assertEqual(gz.compress_simbin(shifted)[:10],
+                             Path(path).read_bytes()[:10])
+            checked += 1
+        self.assertEqual(checked, 10)
+
     def test_gttf_session_field_editor(self):
         """Session seconds can be changed without touching other payload bytes."""
         import glob
