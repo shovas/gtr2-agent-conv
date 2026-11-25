@@ -1364,6 +1364,86 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertGreater(observed, 10 * statistics.mean(baseline() for _ in range(5)))
         self.assertLess(observed, 0.25)
 
+    def test_f0_half_sign_family_stable(self):
+        """f0's paired-ID sign is family-stable and skewed by material slot."""
+        import collections
+        import glob
+        import random
+        import re
+        import statistics
+        import gmt_format as gf
+        import mas_tool
+
+        def norm(value):
+            return re.sub(r"[^a-z0-9]", "", value.lower())
+
+        groups = collections.defaultdict(list)
+        for root, ext in (("GTR2Steam", ".gtr"), ("GTLSteam", ".gtl"),
+                          ("BMWM3Challenge", ".bmw")):
+            for archive in glob.glob(str(ROOT.parent / root / "**" / f"*{ext}"),
+                                     recursive=True):
+                try:
+                    _, entries = mas_tool.read_archive(archive)
+                except Exception:
+                    continue
+                for entry in entries:
+                    if not entry.name.lower().endswith(".gmt") or not entry.data:
+                        continue
+                    try:
+                        parsed = gf.parse_gmt("x.gmt", entry.data)
+                    except Exception:
+                        continue
+                    for mesh in parsed.meshes:
+                        marker = gf.mesh_marker(mesh)
+                        index = mesh.record.material_index
+                        if not marker or index >= len(parsed.materials):
+                            continue
+                        high, low = marker >> 16, marker & 0xFFFF
+                        sign = 1 if high > low else (-1 if high < low else 0)
+                        names = tuple(sorted(set(
+                            norm(value) for value in
+                            [parsed.materials[index].name] +
+                            [stage.name for stage in parsed.materials[index].stages]
+                            if value)))
+                        groups[names].append((sign, index == 0))
+                if sum(len(v) for v in groups.values()) >= 25000:
+                    break
+            if sum(len(v) for v in groups.values()) >= 25000:
+                break
+        multi = {key: values for key, values in groups.items() if len(values) > 1}
+        self.assertGreater(len(multi), 1500)
+        random.seed(33)
+        flat = [pair for values in multi.values() for pair in values]
+        signs = [pair[0] for pair in flat]
+        zeros = [pair[1] for pair in flat]
+
+        def stability(values):
+            offset = 0
+            same = total = 0
+            for values_in_group in multi.values():
+                sample = values[offset:offset + len(values_in_group)]
+                offset += len(values_in_group)
+                nonzero = [value for value in sample if value != 0]
+                if nonzero:
+                    total += 1
+                    same += int(len(set(nonzero)) == 1)
+            return same / total
+        observed = stability(signs)
+        baseline = statistics.mean(stability(random.sample(signs, len(signs)))
+                                   for _ in range(10))
+        self.assertGreater(observed, 2 * baseline)
+
+        def positivity(values):
+            first = [value for value, zero in zip(values, zeros) if zero and value]
+            second = [value for value, zero in zip(values, zeros) if not zero and value]
+            return (statistics.mean(value > 0 for value in first)
+                    - statistics.mean(value > 0 for value in second))
+        observed_bias = positivity(signs)
+        permuted = statistics.mean(abs(positivity(random.sample(signs, len(signs))))
+                                   for _ in range(10))
+        self.assertLess(observed_bias, -0.2)
+        self.assertLess(observed_bias, -10 * max(permuted, 0.001))
+
     def test_f0_half_delta_index_zero_threshold(self):
         """Material index 0 meshes have much larger f0 half-deltas."""
         import glob

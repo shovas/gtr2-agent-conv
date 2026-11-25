@@ -186,6 +186,14 @@ Code-first check around `fcn.005e9ab0` and the shipped shader members:
 
 So the paired near-equal halves are not indices or simple hashes of shipped shaders; they most plausibly originate from an external authoring/material identifier. Full-tier regression test added.
 
+## GTR2 f0 paired-ID sign invariant (2026-11-28)
+
+The sign of `high - low` is also structured:
+- within cross-corpus material families, the sign is identical in **53.4%** of 2,376 multi-member groups vs **18.4%** under a distribution-preserving permutation baseline;
+- material-index-0 meshes skew **negative** (26.2% positive) while index>0 meshes skew positive (58.6%), difference **−0.325** vs 0.007 permuted.
+
+Together with the near-equality and delta-threshold results, f0's two halves behave like a pair of related authoring IDs whose ordering depends on the material slot. Exact source remains unknown. Full-tier permutation-controlled regression test added.
+
 ## GTR2 f0 half-delta: material-index-0 threshold (2026-11-28)
 
 The correlation above is dominated by a sharp threshold: in multi-material meshes, `|high-low| <= 1` occurs in only **13.8%** of material-index-0 meshes but **61.5%** of index>0 meshes (difference −0.477 vs 0.009 under distribution-preserving permutation). Median delta is 747 for index 0 versus 1 for higher indices. So f0's paired IDs are much closer together when the mesh uses a later material slot. Full-tier regression test added.
