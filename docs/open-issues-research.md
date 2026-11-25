@@ -124,6 +124,10 @@ Static analysis of the unpacked `GTR2.exe` (`.text` at RVA `0x401000`) located t
 
 Across all 42 local event files (29 GTTF + 13 IRSR) the float takes only **36000 / 43200 / 46800**, exactly 10/12/13 hours in seconds — consistent with a session time limit (strong inference, not runtime-confirmed). The GTTF `+8` steering relationship and the rest of the frame field work remain separate. Full-tier regression test added.
 
+## Correction: f0 half vs material index was a baseline artifact (2026-11-28)
+
+A probe appeared to show a half of f0 equal to the local material index far above chance (2.4% vs 0.01%). That baseline shuffled **uniform** indices, while real indices are heavily skewed toward 0 and small values. Re-running with a distribution-preserving shuffle gives **278 observed vs 239 expected** matches — at chance. No relationship; no test was retained.
+
 ## Correction: GTTF +8/+16 "steering coupling" is a clamp artifact (2026-11-28)
 
 The earlier reported median |correlation| 0.585 between frame `+8` and `+16` was **driven by frames where +16 saturates at ±1.0**. Recomputing per file:

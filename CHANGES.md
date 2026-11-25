@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 12:45:00 -0500 - f0 material index baseline corrected
+- A f0/material-index association was traced to a flawed permutation baseline (uniform instead of index-distribution-preserving); corrected baseline shows no signal. Probe discarded.
+
 ## 2026-11-28 12:15:00 -0500 - GTTF +8/+16 correlation corrected
 - Re-examined the +8/+16 steering correlation: median |r| 0.675 across all frames collapses to 0.146 when +16's clamped frames are removed. Earlier "steering coupling" and sign-vs-heading claims are marked superseded; regression test now asserts the artifact.
 
