@@ -5,6 +5,9 @@ Newest-first change log. Timestamps use repository commit dates (ISO 8601, local
 ## 2026-11-26 16:30:00 -0500 - AIW Features capacity negative
 - Documented that AIW `[Features]` numbers are capacity defaults rather than section counts (startinggrid 104 vs GRID 36 typical); full-tier corpus-fact regression test added.
 
+## 2026-11-27 17:00:00 -0500 - f0 material-name group signal
+- Permutation-controlled test over 74,547 meshes found same-f0 meshes share rare normalized material/stage name hashes 60× above baseline (8.06% vs 0.13%), though no simple hash reproduces the halfwords. f0 groups by material identity; encoding still unknown. Full-tier regression test added.
+
 ## 2026-11-27 16:00:00 -0500 - GTTF +28 progress negative
 - Matched ghost frames to AIW waypoints in the mapped y/z frame: slot +28 shows median |r| 0.035–0.08 with waypoint index/chain rank/lap distance. It is not lap progress. Full-tier regression test added.
 

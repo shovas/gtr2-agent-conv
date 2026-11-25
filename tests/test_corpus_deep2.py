@@ -1006,6 +1006,80 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertEqual(checked, 204)
 
+    def test_f0_groups_material_name_hashes(self):
+        """Same-f0 meshes share rare normalized material/stage name hashes."""
+        import collections
+        import glob
+        import random
+        import re
+        import statistics
+        import zlib
+        import gmt_format as gf
+        import mas_tool
+        rows = []
+        for root, ext in (("GTR2Steam", ".gtr"), ("GTLSteam", ".gtl"),
+                          ("BMWM3Challenge", ".bmw")):
+            for archive in glob.glob(str(ROOT.parent / root / "**" / f"*{ext}"),
+                                     recursive=True):
+                try:
+                    _, entries = mas_tool.read_archive(archive)
+                except Exception:
+                    continue
+                for entry in entries:
+                    if not entry.name.lower().endswith(".gmt") or not entry.data:
+                        continue
+                    try:
+                        parsed = gf.parse_gmt("x.gmt", entry.data)
+                    except Exception:
+                        continue
+                    family = re.sub(r"(lod)?\d+$", "", entry.name.lower()
+                                    .replace("\\", "/").rsplit("/", 1)[-1]
+                                    .rsplit(".", 1)[0])
+                    for mesh in parsed.meshes:
+                        marker = gf.mesh_marker(mesh)
+                        index = mesh.record.material_index
+                        material = (parsed.materials[index]
+                                    if index < len(parsed.materials) else None)
+                        if not marker or material is None:
+                            continue
+                        names = [material.name] + [s.name for s in material.stages]
+                        hashes = frozenset(
+                            zlib.crc32(re.sub(r"[^a-z0-9]", "", name.lower())
+                                       .encode()) & 0xFFFF
+                            for name in names if name)
+                        rows.append((family, marker, hashes))
+                if len(rows) >= 20000:
+                    break
+            if len(rows) >= 20000:
+                break
+        self.assertGreater(len(rows), 10000)
+        frequency = collections.Counter(h for _, _, hashes in rows for h in hashes)
+        rare = {h for h, count in frequency.items()
+                if count / len(rows) < 0.01}
+
+        def score(assignment):
+            groups = collections.defaultdict(list)
+            for (family, _, hashes), marker in zip(rows, assignment):
+                groups[marker].append((family, hashes))
+            hits = pairs = 0
+            random.seed(1)
+            for group in groups.values():
+                if len(group) < 2:
+                    continue
+                sample = random.sample(group, min(len(group), 20))
+                for i in range(len(sample)):
+                    for j in range(i + 1, len(sample)):
+                        if sample[i][0] == sample[j][0]:
+                            continue
+                        pairs += 1
+                        hits += int(bool((sample[i][1] & sample[j][1]) & rare))
+            return hits / max(pairs, 1)
+        observed = score([marker for _, marker, _ in rows])
+        markers = [marker for _, marker, _ in rows]
+        baseline = statistics.mean(
+            score(random.sample(markers, len(markers))) for _ in range(5))
+        self.assertGreater(observed, baseline * 2)
+
     def test_gttf_slot28_not_waypoint_index(self):
         """Slot +28 does not track AIW waypoint index or lap distance."""
         import glob
