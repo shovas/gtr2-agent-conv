@@ -3003,6 +3003,40 @@ class CorpusDeep2Test(unittest.TestCase):
                 frames_checked += 1
         self.assertEqual(frames_checked, 44631)
 
+    def test_gttf_path_controls_complementary(self):
+        """Path f3/f4 are complementary normalized channels (median sum 1)."""
+        import glob
+        import gzip
+        import random
+        import statistics
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        correlations = []
+        baselines = []
+        zero_fractions = []
+        sums = []
+        random.seed(53)
+        for path in glob.glob(str(ROOT.parent / "GTR2Steam" / "TimeTrial" / "**" / "*.GTT"),
+                              recursive=True):
+            payload = gz.decompress(path)
+            frames = st.read_frames(payload, st.find_frame_grid(payload))
+            if frames[0]["path_f3"] is None:
+                continue
+            first = [frame["path_f3"] for frame in frames]
+            second = [frame["path_f4"] for frame in frames]
+            correlations.append(st._corr(first, second))
+            baselines.append(statistics.mean(
+                st._corr(first, random.sample(second, len(second)))
+                for _ in range(3)))
+            zero_fractions.append(sum(value == 0 for value in first) / len(first))
+            sums.append(statistics.median(x + y for x, y in zip(first, second)))
+        self.assertEqual(len(correlations), 29)
+        self.assertLess(statistics.median(correlations), -0.4)
+        self.assertLess(statistics.median(correlations),
+                        5 * statistics.median(baselines))
+        self.assertGreater(statistics.median(zero_fractions), 0.5)
+        self.assertTrue(0.9 <= statistics.median(sums) <= 1.1)
+
     def test_gttf_byte31_tracks_path_y(self):
         """The varying byte at +31 tracks the path's world y coordinate."""
         import glob
