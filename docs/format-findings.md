@@ -206,7 +206,9 @@ regression tests or an explicitly documented negative.
   - `+32/speed` clusters near `.grb`-derived gear bands (p≈0.01);
   - `path_f4` decreases with gear index (r −0.200 vs −0.005) — throttle-like;
   - `path_f3` rises mildly with racing-line curvature (median |r| 0.060 vs
-    0.019 permuted), consistent with a brake-like channel;
+    0.019 permuted) and with AIW-derived waypoint curvature (0.142 vs 0.068;
+    14/27 files >2× baseline), consistent with a brake-like channel. Its
+    associations with raw AIW attributes are all chance-level (|r| ≤ 0.046);
   - `path_f3`/`path_f4` are complementary normalized channels **at the frame
     level**: median correlation **−0.59** (vs −0.001 permuted), median
     `f3+f4 = 1.0`, and `f3 == 0` in 77% of frames — consistent with

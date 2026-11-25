@@ -4483,6 +4483,77 @@ class CorpusDeep2Test(unittest.TestCase):
                 frames_checked += 1
         self.assertEqual(frames_checked, 44631)
 
+    def test_gttf_path_f3_tracks_aiw_curvature(self):
+        """Path control f3 correlates with AIW-derived waypoint curvature."""
+        import glob
+        import math
+        import random
+        import statistics
+        from pathlib import Path
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        import simbin_text_tool as stt
+
+        def correlation(a, b):
+            mean_a, mean_b = statistics.mean(a), statistics.mean(b)
+            numerator = sum((x - mean_a) * (y - mean_b) for x, y in zip(a, b))
+            denominator = (sum((x - mean_a) ** 2 for x in a)
+                           * sum((y - mean_b) ** 2 for y in b)) ** 0.5
+            return numerator / denominator if denominator else 0.0
+
+        observed = []
+        baseline = []
+        random.seed(102)
+        for path in glob.glob(str(ROOT.parent / "GTR2Steam" / "TimeTrial" / "**" / "*.GTT"),
+                              recursive=True):
+            payload = gz.decompress(path)
+            grid = st.find_frame_grid(payload)
+            if not grid:
+                continue
+            records = st.find_preframe_records(payload, grid["offset"])
+            if not records:
+                continue
+            location = ROOT.parent / "GTR2Steam" / "GameData" / "Locations" / Path(path).parent.name
+            waypoints = []
+            for aiw_path in location.glob("*.AIW"):
+                try:
+                    parsed = stt.parse_aiw(aiw_path.read_text(encoding="latin-1"))
+                except Exception:
+                    continue
+                if len(parsed.waypoints) > len(waypoints):
+                    waypoints = parsed.waypoints
+            if len(waypoints) < 10:
+                continue
+            curvature = {}
+            for index in range(1, len(waypoints) - 1):
+                first, middle, last = (waypoints[index - 1].pos,
+                                       waypoints[index].pos,
+                                       waypoints[index + 1].pos)
+                u = (middle[0] - first[0], middle[2] - first[2])
+                v = (last[0] - middle[0], last[2] - middle[2])
+                cross = u[0] * v[1] - u[1] * v[0]
+                length = math.hypot(*u) * math.hypot(*v)
+                curvature[index] = abs(cross) / length if length > 1e-9 else 0.0
+            controls = []
+            bends = []
+            for record in records[::max(1, len(records) // 100)]:
+                index = min(range(len(waypoints)),
+                            key=lambda k: (waypoints[k].pos[1] - record[0]) ** 2
+                            + (waypoints[k].pos[2] - record[1]) ** 2)
+                if index not in curvature:
+                    continue
+                controls.append(record[3])
+                bends.append(curvature[index])
+            if len(controls) < 20:
+                continue
+            observed.append(abs(correlation(controls, bends)))
+            baseline.append(statistics.mean(
+                abs(correlation(random.sample(controls, len(controls)), bends))
+                for _ in range(3)))
+        self.assertGreater(len(observed), 20)
+        self.assertGreater(statistics.median(observed), 0.1)
+        self.assertGreater(statistics.median(observed), 1.8 * statistics.median(baseline))
+
     def test_gttf_path_f4_tracks_aiw_galpha(self):
         """Path control f4 correlates with AIW waypoint galpha."""
         import glob
