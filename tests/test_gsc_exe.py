@@ -136,6 +136,42 @@ class GscExeTest(unittest.TestCase):
         self.assertTrue(data.startswith(b"CUBEASF\r\n"))
         self.assertGreater(len(data), 100_000)
 
+    def test_sce_scn_references(self):
+        """All MASFile refs in 70 SCE embedded .scn resolve in-locale."""
+        import os
+        import simbin_text_tool as stt
+        exe = ROOT.parent / "StockCarExtreme" / "GSC.exe"
+        if not exe.is_file():
+            self.skipTest("StockCarExtreme GSC.exe not present")
+        container = gsc.read_container(exe)
+        keys = container.key_list()
+        index = 0
+        refs = []
+        parsed = 0
+        for res in container.resources:
+            key = None
+            if gsc.resource_encrypted(res):
+                if res.kind == 1:
+                    key = keys[index + 11]
+                    index += 1
+            if not res.name.lower().endswith(".scn"):
+                continue
+            data, ok = gsc.decode_resource(res, key)
+            self.assertTrue(ok, res.name)
+            refs.extend(stt.parse_scn(data.decode("latin-1")).mas_files)
+            parsed += 1
+        self.assertEqual(parsed, 70)
+        self.assertEqual(len(refs), 543)
+        loose = {os.path.basename(p).lower() for p in
+                 (ROOT.parent / "StockCarExtreme").glob("**/*") if p.is_file()}
+        embedded = {res.name.replace("\\", "/").rsplit("/", 1)[-1].lower()
+                    for res in container.resources}
+        basenames = {os.path.basename(v.replace("\\", "/")).lower() for v in refs}
+        self.assertEqual(basenames, basenames & (loose | embedded))
+        self.assertEqual(len({v for v in refs if
+                              os.path.basename(v.replace("\\", "/")).lower()
+                              not in loose}), 2)
+
     def test_ams_decrypts_without_decompression(self):
         exe = ROOT.parent / "Automobilista" / "AMS.exe"
         if not exe.is_file():

@@ -1006,6 +1006,39 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertEqual(checked, 204)
 
+    def test_sce_vehicle_vocabularies(self):
+        """SCE embedded vehicle configs have their own universal key sets."""
+        import re
+        import gsc_exe_tool as gsc
+        exe = ROOT.parent / "StockCarExtreme" / "GSC.exe"
+        if not exe.is_file():
+            self.skipTest("StockCarExtreme GSC.exe not present")
+        container = gsc.read_container(exe)
+        keys = container.key_list()
+        index = 0
+        by_ext = {}
+        for res in container.resources:
+            key = None
+            if gsc.resource_encrypted(res):
+                if res.kind == 1:
+                    key = keys[index + 11]
+                    index += 1
+                else:
+                    continue
+            ext = res.name.lower().rsplit(".", 1)[-1]
+            if ext not in ("hdv", "gen", "tbc", "pm", "sfx"):
+                continue
+            data, ok = gsc.decode_resource(res, key)
+            self.assertTrue(ok, res.name)
+            by_ext.setdefault(ext, []).append({
+                match.group(1).lower() for match in re.finditer(
+                    r"(?m)^\s*([A-Za-z_]\w*)\s*=", data.decode("latin-1"))})
+        self.assertEqual({ext: len(v) for ext, v in by_ext.items()},
+                         {"hdv": 28, "gen": 33, "tbc": 24, "pm": 23, "sfx": 23})
+        for ext, expected in (("hdv", 237), ("gen", 6), ("tbc", 38),
+                              ("pm", 3), ("sfx", 89)):
+            self.assertEqual(len(set.intersection(*by_ext[ext])), expected, ext)
+
     def test_sce_exe_full_extract(self):
         """Full-tier: extract all decodable StockCarExtreme EXE resources."""
         import gsc_exe_tool as gsc

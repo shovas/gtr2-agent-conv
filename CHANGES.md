@@ -5,6 +5,9 @@ Newest-first change log. Timestamps use repository commit dates (ISO 8601, local
 ## 2026-11-26 16:30:00 -0500 - AIW Features capacity negative
 - Documented that AIW `[Features]` numbers are capacity defaults rather than section counts (startinggrid 104 vs GRID 36 typical); full-tier corpus-fact regression test added.
 
+## 2026-11-26 16:00:00 -0500 - SCE embedded reference/vocabulary checks
+- Parsed all 70 `.scn` files decoded from `StockCarExtreme/GSC.exe`: 543 MAS references all resolve (65 only via the EXE-embedded `AdPackStockcar.MAS`, with two capitalisations). Documented 131 embedded vehicle configs with family-specific vocabularies; added quick/full-tier regression tests.
+
 ## 2026-11-26 15:00:00 -0500 - StockCarExtreme EXE cipher solved
 - Found the SCE `.keyMan` key schedule (type-1 resource *i* uses key `i + 11`; 204/204 valid LZMA headers) and added it to `gsc_exe_tool.py`; 207/218 SCE EXE resources now extract (`bolognahistoric.scn` → 212,880-byte `CUBEASF`). The prior "blocked" conclusion came from rejecting the valid LZMA props byte `0x5D`. Quick/full-tier regression tests.
 
