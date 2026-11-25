@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 20:30:00 -0500 - GTTF heading from path records
+- Found ghost +12 heading matches the matched path record's heading with median coherence 0.992 vs 0.024 permuted across 29 ghosts. Full-tier permutation-controlled test added.
+
 ## 2026-11-28 20:00:00 -0500 - GTTF path count ratio
 - Verified frame/path-record count ratio is bounded (median 2.44, range 1.93–3.49) across 29 ghosts; full-tier validator added.
 

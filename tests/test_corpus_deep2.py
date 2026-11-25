@@ -2935,6 +2935,55 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertLess(statistics.median(observed), -0.1)
         self.assertLess(statistics.median(observed), 2 * statistics.median(baseline))
 
+    def test_gttf_heading_matches_path_record_heading(self):
+        """Ghost +12 equals the nearest path record's heading field."""
+        import glob
+        import gzip
+        import math
+        import random
+        import statistics
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        observed = []
+        baseline = []
+        random.seed(44)
+        for path in glob.glob(str(ROOT.parent / "GTR2Steam" / "TimeTrial" / "**" / "*.GTT"),
+                              recursive=True):
+            payload = gz.decompress(path)
+            grid = st.find_frame_grid(payload)
+            if not grid:
+                continue
+            frames = st.read_frames(payload, grid)
+            records = st.find_preframe_records(payload, grid["offset"])
+            if not records:
+                continue
+            index = 0
+            ghost = []
+            path_heading = []
+            for frame in frames:
+                y, z = frame["position"][0], frame["position"][1]
+                candidates = range(max(0, index - 3), min(len(records), index + 30))
+                chosen = min(candidates,
+                             key=lambda k: (records[k][0] - y) ** 2
+                             + (records[k][1] - z) ** 2)
+                index = chosen
+                ghost.append(frame["heading"])
+                path_heading.append(records[chosen][2])
+
+            def coherence(left, right):
+                diffs = [(a - b + math.pi) % (2 * math.pi) - math.pi
+                         for a, b in zip(left, right)]
+                c = sum(math.cos(x) for x in diffs) / len(diffs)
+                s = sum(math.sin(x) for x in diffs) / len(diffs)
+                return math.hypot(c, s)
+            observed.append(coherence(ghost, path_heading))
+            baseline.append(statistics.mean(
+                coherence(ghost, random.sample(path_heading, len(path_heading)))
+                for _ in range(3)))
+        self.assertEqual(len(observed), 29)
+        self.assertGreater(statistics.median(observed), 0.9)
+        self.assertGreater(statistics.median(observed), 10 * statistics.median(baseline))
+
     def test_gttf_path_record_count_ratio(self):
         """Frame count is a bounded multiple of pre-frame path record count."""
         import glob

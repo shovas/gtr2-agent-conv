@@ -105,6 +105,10 @@ Assigned each frame to one of six gear bands derived from the F550 `.grb`/`.hdc`
 
 This supports f4 as a throttle/demand-like channel on the reference line (stronger in low gears), but neither channel reproduces the ghost's own pedal positions; exact semantics remain unclaimed. Full-tier permutation-controlled regression test added.
 
+## GTTF heading comes from the path records (2026-11-28)
+
+Directly comparing each ghost frame's `+12` heading with the heading field of its matched 24-byte path record gives median circular coherence **0.992** across all 29 ghosts vs **0.024** for permuted path headings. This is the strongest heading result so far and shows the frame's heading is copied from / derived directly from the reference path record, not independently reconstructed from frame-to-frame motion. Full-tier permutation-controlled regression test added.
+
 ## GTTF path record count ratio (2026-11-28)
 
 Across all 29 ghosts, the number of 63-byte frames divided by the number of 24-byte pre-frame path records is bounded: median **2.44**, range **1.93–3.49** (10th–90th percentile 2.08–3.05). This is a useful structural validator for path-grid detection, not a semantic decoding. Full-tier regression test added.
