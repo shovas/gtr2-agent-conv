@@ -39,7 +39,9 @@ regression tests or an explicitly documented negative.
 - GTR1 48-byte vertices carry UV pairs in fields 9/10 (fields 8/11 are always
   zero in 20,017 sampled vertices). `gtr1_to_gmt.uvs_from_gtr1()` extracts
   them and `gtr1_to_gmt()` writes them into the GTR2 UV block; 30/30 sampled
-  conversions reproduce source UVs exactly.
+  conversions reproduce source UVs exactly. UVs are available only for
+  descriptor-based GTR1 meshes (213/213 sampled); descriptor-less fallback
+  meshes have no UV source (187/187 correctly yield none).
 - VRL UVs are per corner, so `vrl_to_gmt.prepare_geometry_with_uvs()` expands
   shared vertices into one vertex per corner and rebases triangle indices.
   25/25 sampled conversions round-trip UVs exactly; shuffled UVs fail >90%.

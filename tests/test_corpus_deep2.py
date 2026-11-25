@@ -3102,6 +3102,34 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertGreater(meshes, 100)
         self.assertEqual(with_extra, 0)
 
+    def test_gtr1_uv_availability_matches_descriptors(self):
+        """Only descriptor-based GTR1 meshes expose UVs for conversion."""
+        import glob
+        import gmt_semantic
+        import gtr1_to_gmt
+        import mas_tool
+        counts = {"descriptor_uv": 0, "descriptor_no_uv": 0,
+                  "fallback_uv": 0, "fallback_no_uv": 0}
+        for archive in glob.glob(str(ROOT.parent / "GTR1Vanilla" / "**" / "*.gtr"),
+                                 recursive=True):
+            try:
+                _, entries = mas_tool.read_archive(archive)
+            except Exception:
+                continue
+            for entry in entries:
+                if not entry.name.lower().endswith(".gmt") or not entry.data:
+                    continue
+                descriptor = bool(gmt_semantic.read_gtr1_geometry(entry.data))
+                uv = bool(gtr1_to_gmt.uvs_from_gtr1(entry.data))
+                key = ("descriptor" if descriptor else "fallback") + (
+                    "_uv" if uv else "_no_uv")
+                counts[key] += 1
+            if counts["descriptor_uv"] + counts["fallback_no_uv"] >= 400:
+                break
+        self.assertGreater(counts["descriptor_uv"], 100)
+        self.assertEqual(counts["descriptor_no_uv"], 0)
+        self.assertEqual(counts["fallback_uv"], 0)
+
     def test_vrl_conversion_preserves_corner_uvs(self):
         """VRL corner UVs survive vertex expansion into the GTR2 UV block."""
         import glob

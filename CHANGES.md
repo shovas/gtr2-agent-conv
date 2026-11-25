@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 11:00:00 -0500 - Batch UV coverage verified
+- Stress-tested 300 conversions (100 per family) with 100% success: VRL and GSC outputs all carry UV blocks; GTR1 UVs appear on all 213 descriptor-based meshes and none of the 187 descriptor-less ones. Full-tier invariant test added.
+
 ## 2026-11-29 10:30:00 -0500 - VRL UV transfer implemented
 - VRL conversions now transfer per-corner UVs by expanding shared vertices at seams and rebasing triangle indices. 25/25 sampled conversions round-trip UVs exactly (shuffled UVs fail >90%); verification and docs updated.
 
