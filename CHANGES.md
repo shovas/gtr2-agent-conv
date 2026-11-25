@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 02:00:00 -0500 - GTTF +36 exponent link
+- Found slot +36's quantization exponent tracks path f4 (median r 0.274 vs 0.016 permuted, positive in all 29 ghosts); exact units unresolved. Full-tier test added; findings docs updated.
+
 ## 2026-11-29 01:30:00 -0500 - Dedicated EXE serializer negative
 - Searched GTR2Dedicated.exe for GTTF frame serialization: same pointer-table structure as GTR2.exe, no 63-byte read sites. Full-tier negative test added; findings docs updated.
 

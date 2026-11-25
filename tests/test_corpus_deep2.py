@@ -3005,6 +3005,41 @@ class CorpusDeep2Test(unittest.TestCase):
             pos = index + 1
         self.assertEqual(hits, 0)
 
+    def test_gttf_slot36_exponent_tracks_path_f4(self):
+        """Slot +36's quantization exponent rises with path f4 demand."""
+        import glob
+        import gzip
+        import math
+        import random
+        import statistics
+        import struct
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        observed = []
+        baseline = []
+        random.seed(55)
+        for path in glob.glob(str(ROOT.parent / "GTR2Steam" / "TimeTrial" / "**" / "*.GTT"),
+                              recursive=True):
+            payload = gz.decompress(path)
+            frames = st.read_frames(payload, st.find_frame_grid(payload))
+            if not frames or frames[0]["path_f4"] is None:
+                continue
+            levels = []
+            for frame in frames:
+                value = abs(struct.unpack_from("<f", payload,
+                                               frame["offset"] + 36)[0])
+                levels.append(math.log2(value / 34.0) / 2.0 if value > 0 else 0.0)
+            demand = [frame["path_f4"] for frame in frames]
+            observed.append(st._corr(levels, demand))
+            baseline.append(statistics.mean(
+                abs(st._corr(random.sample(levels, len(levels)), demand))
+                for _ in range(3)))
+        self.assertEqual(len(observed), 29)
+        self.assertGreater(statistics.median(observed), 0.2)
+        self.assertTrue(all(value > 0 for value in observed))
+        self.assertGreater(statistics.median(observed),
+                           5 * statistics.median(baseline))
+
     def test_gttf_frame_marker_prefix_constant(self):
         """Bytes +24..+30 are a fixed marker; only byte +31 varies."""
         import glob

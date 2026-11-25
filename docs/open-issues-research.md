@@ -105,6 +105,16 @@ Assigned each frame to one of six gear bands derived from the F550 `.grb`/`.hdc`
 
 This supports f4 as a throttle/demand-like channel on the reference line (stronger in low gears), but neither channel reproduces the ghost's own pedal positions; exact semantics remain unclaimed. Full-tier permutation-controlled regression test added.
 
+## GTTF +36 exponent tracks path demand (2026-11-29)
+
+Slot +36's value is a heavily quantized lattice (base ±34 with `4^k` steps).
+Taking `k = log2(|value|/34)/2` reveals a strong relationship to path `f4`:
+median correlation **0.274** across 29 ghosts vs **0.016** for shuffled levels,
+and the sign is positive in **all 29** files. The *raw* +36 value had shown no
+correlation with speed/steering/curvature; the information is in its exponent,
+which likely encodes a magnitude/demand scale. Exact units remain unknown.
+Full-tier permutation-controlled regression test added.
+
 ## GTR2Dedicated.exe ghost serializer search (2026-11-29)
 
 `GTR2Dedicated.exe` contains `GTTF` at RVA `0x6996f8` with a pointer table at

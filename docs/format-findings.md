@@ -93,7 +93,9 @@ regression tests or an explicitly documented negative.
   - `path_f4` also tracks curvature (median |r| 0.072 vs 0.020, positive in
     23/29 ghosts) — an association, not a simple throttle interpretation;
   - `+48` low i16 tracks steering/path f3; high i16 tracks engine +32;
-  - `+36` is an exact quantized float lattice but its semantics are unresolved;
+  - `+36` is an exact quantized float lattice (`±34·4^k`) whose exponent
+    **tracks path f4** (median r 0.274 vs 0.016 permuted, positive in all 29
+    ghosts) — a magnitude/demand relationship, not yet a decoded unit;
   - bytes `+24..+30` are a fixed marker `01 00 00 34 00 20 00` in all 44,631
     sampled frames; only byte `+31` varies and it tracks path y (median |r|
     0.164 vs 0.020 permuted) — not merely a random exponent;
