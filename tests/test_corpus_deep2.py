@@ -1006,6 +1006,24 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertEqual(checked, 204)
 
+    def test_gttf_engine_scale_vs_eng_revlimit(self):
+        """GTTF +32 /1024 ceilings do not match .eng rev limits per car."""
+        import re
+        def rev_limit(path: Path) -> float:
+            text = path.read_bytes().decode("latin-1")
+            rng = re.search(r"(?mi)^RevLimitRange\s*=\s*\(\s*([\d.]+)\s*,\s*([\d.]+)", text)
+            setting = re.search(r"(?mi)^RevLimitSetting\s*=\s*(\d+)", text)
+            return float(rng.group(1)) + float(rng.group(2)) * int(setting.group(1))
+        f550 = rev_limit(ROOT.parent / "GTR2Steam" / "GameData" / "Teams" / "GT" /
+                         "Ferrari 550 Teams" / "550_Std_V12.eng")
+        bmw = rev_limit(ROOT.parent / "BMWM3Challenge" / "GameData" / "Teams" / "BMW" /
+                        "BMW M3" / "BMW_M3.eng")
+        self.assertEqual(f550, 7400.0)
+        self.assertEqual(bmw, 8500.0)
+        ratio_f = 5_873_841 / f550
+        ratio_b = 6_336_964 / bmw
+        self.assertGreater(abs(ratio_f - ratio_b) / ratio_f, 0.05)
+
     def test_sce_embedded_config_bounds(self):
         """All 131 SCE embedded vehicle configs satisfy their own bounds."""
         import gsc_exe_tool as gsc

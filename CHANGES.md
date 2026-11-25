@@ -5,6 +5,9 @@ Newest-first change log. Timestamps use repository commit dates (ISO 8601, local
 ## 2026-11-26 16:30:00 -0500 - AIW Features capacity negative
 - Documented that AIW `[Features]` numbers are capacity defaults rather than section counts (startinggrid 104 vs GRID 36 typical); full-tier corpus-fact regression test added.
 
+## 2026-11-26 18:00:00 -0500 - GTTF /1024 scale negated
+- Cross-checked the GTTF +32 ceilings with `.eng` rev limits: F550 7400 rpm vs BMW M3 8500 rpm give inconsistent raw/rev-limit factors (793.8 vs 745.5). The naive /1024 = RPM scale is negated; the signal stays engine-speed-like with unknown car-dependent normalization. Full-tier regression test and doc corrections.
+
 ## 2026-11-26 17:00:00 -0500 - SCE embedded numeric validators
 - Derived 245 numeric bounds from the 131 embedded StockCarExtreme vehicle configs and added `validate_sce_embedded_config()` with family-specific sentinel keys; all 131 files pass. Full-tier regression test.
 
