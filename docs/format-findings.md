@@ -126,8 +126,9 @@ regression tests or an explicitly documented negative.
     **tracks path f4** (median r 0.274 vs 0.016 permuted, positive in all 29
     ghosts) — a magnitude/demand relationship, not yet a decoded unit;
   - bytes `+24..+30` are a fixed marker `01 00 00 34 00 20 00` in all 44,631
-    sampled frames; only byte `+31` varies and it tracks path y (median |r|
-    0.164 vs 0.020 permuted) — not merely a random exponent;
+    sampled frames; only byte `+31` varies. It tracks engine speed (median
+    |r| 0.263 vs 0.021 permuted; 0.198 after removing ±2% clamps, 22/29 files
+    above 3× baseline) and path y (0.164) — not merely a random exponent;
   - frame `+16` has a weak, non-clamp-driven engine coupling (|r| 0.152).
 - **Corrected artefacts — never repeat these interpretations:**
   - `+8` ↔ `+16` correlation (0.675) collapses to 0.146 when `+16`'s ±1.0

@@ -3391,6 +3391,38 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertGreater(statistics.median(zero_fractions), 0.5)
         self.assertTrue(0.9 <= statistics.median(sums) <= 1.1)
 
+    def test_gttf_byte31_tracks_engine_speed_no_clamps(self):
+        """GTTF byte +31 tracks engine speed after removing saturation."""
+        import glob
+        import random
+        import statistics
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        observed = []
+        baseline = []
+        random.seed(62)
+        for path in glob.glob(str(ROOT.parent / "GTR2Steam" / "TimeTrial" / "**" / "*.GTT"),
+                              recursive=True):
+            payload = gz.decompress(path)
+            frames = st.read_frames(payload, st.find_frame_grid(payload))
+            if len(frames) < 100:
+                continue
+            values = [payload[frame["offset"] + 31] for frame in frames]
+            engines = [frame["engine_speed"] for frame in frames]
+            ordered = sorted(engines)
+            low, high = ordered[len(ordered) // 50], ordered[-len(ordered) // 50]
+            keep = [i for i, value in enumerate(engines) if low < value < high]
+            x = [values[i] for i in keep]
+            y = [engines[i] for i in keep]
+            observed.append(abs(st._corr(x, y)))
+            baseline.append(statistics.mean(
+                abs(st._corr(random.sample(x, len(x)), y)) for _ in range(3)))
+        self.assertEqual(len(observed), 29)
+        self.assertGreater(statistics.median(observed), 0.15)
+        self.assertGreater(statistics.median(observed),
+                           3 * statistics.median(baseline))
+        self.assertGreaterEqual(sum(o > 3 * b for o, b in zip(observed, baseline)), 18)
+
     def test_gttf_byte31_tracks_path_y(self):
         """The varying byte at +31 tracks the path's world y coordinate."""
         import glob

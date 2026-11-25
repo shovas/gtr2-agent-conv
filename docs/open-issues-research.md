@@ -199,6 +199,18 @@ is recoverable statically from either build. Full-tier regression test added.
 
 Across all 29 ghosts, path `f3` and `f4` are strongly anti-correlated: median Pearson **−0.59** vs **−0.001** for distribution-preserving shuffles. `f3 == 0` in a median 77.4% of frames, and the median of `f3 + f4` is exactly **1.0**. This strongly suggests two complementary normalized shares (e.g. brake/throttle), but the earlier acceleration negatives prevent claiming literal pedal positions. Full-tier regression test added.
 
+## GTTF byte +31 tracks engine speed (2026-11-29)
+
+A multi-field permutation-controlled matrix showed the varying byte at +31
+has its strongest association with `engine_speed` (frame +32): median |r|
+**0.263** vs **0.021** for shuffles across 29 ghosts, with a mostly negative
+sign (20/29). Because +32 has known gear-band clamps, the test was repeated
+after dropping the outer 2% of engine values; the signal survives at **0.198**
+vs **0.022** (22/29 files above 3× baseline), so it is not a saturation
+artefact. Path y (0.164) and f4 (0.126) are weaker companions. The byte's
+low-24-bit partner `0x002000` stays constant, so the field is a structured
+bitfield, but its encoding is still unexplained. Full-tier test added.
+
 ## GTTF frame marker prefix constant (2026-11-28)
 
 Across all 29 ghosts and 44,631 frames, bytes `+24..+30` are exactly
