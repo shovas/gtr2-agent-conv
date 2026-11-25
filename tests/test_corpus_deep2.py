@@ -1006,6 +1006,32 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertEqual(checked, 204)
 
+    def test_gttf_position_speed_scale_negative(self):
+        """Frame position deltas give implausibly low speeds in all GTT files."""
+        import glob
+        import gzip
+        import math
+        import statistics
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        medians = []
+        for root in ("GTR2Steam", "BMWM3Challenge"):
+            for path in glob.glob(str(ROOT.parent / root / "**" / "*.GTT"),
+                                  recursive=True):
+                payload = gz.decompress(path)
+                grid = st.find_frame_grid(payload)
+                if not grid:
+                    continue
+                frames = st.read_frames(payload, grid)
+                speeds = [math.hypot(b["position"][0] - a["position"][0],
+                                     b["position"][2] - a["position"][2])
+                          / max(b["time"] - a["time"], 1e-6)
+                          for a, b in zip(frames, frames[1:])]
+                medians.append(statistics.median(speeds))
+        self.assertEqual(len(medians), 31)
+        self.assertLess(statistics.median(medians), 1.5)
+        self.assertTrue(all(v < 2.0 for v in medians))
+
     def test_f0_halfwords_not_material_derived(self):
         """f0 halfwords do not equal material offsets, hashes or name words."""
         import glob

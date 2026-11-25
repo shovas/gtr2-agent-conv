@@ -5,6 +5,9 @@ Newest-first change log. Timestamps use repository commit dates (ISO 8601, local
 ## 2026-11-26 16:30:00 -0500 - AIW Features capacity negative
 - Documented that AIW `[Features]` numbers are capacity defaults rather than section counts (startinggrid 104 vs GRID 36 typical); full-tier corpus-fact regression test added.
 
+## 2026-11-26 23:00:00 -0500 - GTTF position-scale blocker
+- Found that position-derived speeds from GTTF frames are implausibly low in all 31 files (median of medians 0.53 m/s; all <2 m/s), so gear-ratio/wheel-speed cross-checks and AIW world-waypoint alignment cannot be performed from the +0/+4/+8 floats without a correct transform. Full-tier regression test added.
+
 ## 2026-11-26 22:00:00 -0500 - f0 material-derived hypotheses negated
 - Tested 3,006 f0 markers against material offsets, stage-string offsets, name CRCs/sums and first-u16 words: only 2 chance matches (0.07%). f0 is family-invariant but not a direct GMT material offset/hash; full-tier regression test added.
 
