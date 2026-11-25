@@ -55,7 +55,9 @@ regression tests or an explicitly documented negative.
   stream3's columns 3..7 are zero in 100%, and columns 1/2 agree with stream2
   per vertex in 96% of meshes (median agreement 1.0 vs 0.023 for shuffled
   stream3 rows). `gmt_format.stream_cross_agreement()` exposes the check. The
-  distinct stream3 column 0 is not world-position derived (median |r| 0.135).
+  distinct stream3 column 0 is not world-position derived (median |r| 0.135)
+  and, like f0, is nonzero only at vertex 0 — any per-vertex correlation
+  between the two is a sparsity artefact.
 - **Two UV block layouts, both now parsed:** GTR2 uses either explicit stream
   end markers (`rec[6] < rec[7] < rec[8]`, ~18%) or a single `vc*32` block at
   `rec[6]` running up to the index array (~86%). `parse_gmt()` now exposes

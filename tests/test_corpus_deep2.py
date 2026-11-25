@@ -1873,6 +1873,45 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertGreater(max(halves), 10 * len(shaders))
         self.assertGreater(len(set(halves)), 5 * len(shaders))
 
+    def test_gmt_stream3_col0_sparsity_artifact(self):
+        """Stream3 col 0 is vertex-0-only; a per-vertex r=1.0 vs f0 is spurious."""
+        import glob
+        import struct
+        import gmt_format as gf
+        import mas_tool
+        meshes = 0
+        sparse = 0
+        for archive in glob.glob(str(ROOT.parent / "GTR2Steam" / "**" / "*.gtr"),
+                                 recursive=True):
+            try:
+                _, entries = mas_tool.read_archive(archive)
+            except Exception:
+                continue
+            for entry in entries:
+                if not entry.name.lower().endswith(".gmt") or not entry.data:
+                    continue
+                try:
+                    parsed = gf.parse_gmt("x.gmt", entry.data)
+                except Exception:
+                    continue
+                for mesh in parsed.meshes:
+                    vertex_count = mesh.record.vertex_count
+                    if vertex_count < 8 or len(mesh.stream3_data) != vertex_count * 32:
+                        continue
+                    column = [struct.unpack_from("<I", mesh.stream3_data,
+                                                 i * 32)[0] for i in range(vertex_count)]
+                    meshes += 1
+                    sparse += (column[0] != 0
+                               and all(value == 0 for value in column[1:])
+                               and all(vertex.f0 == 0
+                                       for vertex in mesh.base_vertices[1:]))
+                if meshes >= 1700:
+                    break
+            if meshes >= 1700:
+                break
+        self.assertGreater(meshes, 1500)
+        self.assertGreater(sparse / meshes, 0.95)
+
     def test_gmt_two_streams_share_uv_pair(self):
         """Two-stream meshes duplicate their UV-like pair across streams."""
         import glob

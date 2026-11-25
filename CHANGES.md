@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 08:30:00 -0500 - GTR2 stream3/f0 sparsity artefact
+- Recorded a negative: stream3 column 0 and f0 both appear only at vertex 0, so their apparent per-vertex correlation of 1.0 is a sparsity artefact. Full-tier test added; methodology note in findings docs.
+
 ## 2026-11-29 08:00:00 -0500 - GTR2 two-stream UV duplication
 - Found that GTR2 two-stream meshes duplicate one UV-like pair (96% per-vertex agreement, 1.0 vs 0.023 shuffled; stream3 tail always zero). Added `gmt_format.stream_cross_agreement()`, a full-tier test, and findings docs updates.
 

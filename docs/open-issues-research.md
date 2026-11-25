@@ -105,6 +105,17 @@ Assigned each frame to one of six gear bands derived from the F550 `.grb`/`.hdc`
 
 This supports f4 as a throttle/demand-like channel on the reference line (stronger in low gears), but neither channel reproduces the ghost's own pedal positions; exact semantics remain unclaimed. Full-tier permutation-controlled regression test added.
 
+## GTR2 stream3 column 0 vs f0: sparsity artefact (2026-11-29)
+
+A per-vertex correlation between stream3's first f32 column and the base
+vertex f0 reported a suspicious median |r| = **1.000** (vs 0.008 shuffled).
+Inspection showed both fields are nonzero **only at vertex 0** in essentially
+every mesh (stream3 col 0: 1,701/1,731; f0: all sampled meshes), so the
+correlation is entirely a two-point sparsity artefact. Across meshes, the
+vertex-0 values themselves are essentially unrelated (|r| 0.047 vs 0.006
+permuted). Recorded as a negative methodology lesson: check sparsity before
+trusting a per-vertex correlation. Full-tier regression test added.
+
 ## GTR2 two-stream meshes duplicate one UV pair (2026-11-29)
 
 Compared stream2 and stream3 on 1,731 two-stream GTR2 meshes. Stream3's
