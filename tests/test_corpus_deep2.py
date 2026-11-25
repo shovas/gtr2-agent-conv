@@ -2228,6 +2228,53 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertLess(statistics.median(forward), 0.1)
         self.assertGreater(statistics.median(reverse), 0.9)
 
+    def test_gttf_path_f4_decreases_with_gear(self):
+        """Racing-line f4 falls as the engine/gear band rises."""
+        import glob
+        import gzip
+        import math
+        import random
+        import re
+        import statistics
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        base = ROOT.parent / "GTR2Steam" / "GameData" / "Teams" / "GT" / "Ferrari 550 Teams"
+        grb = (base / "HewlandLS200.grb").read_text(errors="replace")
+        hdc = (base / "BMS550.hdc").read_text(errors="replace")
+        ratios = [int(b) / int(a) for a, b in re.findall(
+            r"(?m)^Ratio=\((\d+),\s*(\d+)\)", grb)]
+        settings = [int(re.search(rf"(?m)^Gear{i}Setting=(\d+)", hdc).group(1))
+                    for i in range(1, 7)]
+        bands = [ratios[i] * 3.10 * 60 * 1024 / (2 * math.pi * 0.355)
+                 for i in settings]
+        observed = []
+        baseline = []
+        random.seed(11)
+        for path in glob.glob(str(ROOT.parent / "GTR2Steam" / "TimeTrial" / "**" / "*.GTT"),
+                              recursive=True):
+            payload = gz.decompress(path)
+            frames = st.read_frames(payload, st.find_frame_grid(payload))
+            world = [frame["world_position"] for frame in frames]
+            speed = [math.dist(world[i], world[i + 1])
+                     / max(frames[i + 1]["time"] - frames[i]["time"], 1e-6)
+                     for i in range(len(world) - 1)]
+            gears, values = [], []
+            for i in range(1, len(frames)):
+                if not (8 < speed[i - 1] < 60):
+                    continue
+                ratio = frames[i]["engine_speed"] / speed[i - 1]
+                gears.append(min(range(6),
+                                 key=lambda k: abs(ratio - bands[k]) / bands[k]))
+                values.append(frames[i]["path_f4"])
+            if len(gears) < 100:
+                continue
+            observed.append(st._corr(gears, values))
+            baseline.append(statistics.mean(
+                st._corr(random.sample(gears, len(gears)), values) for _ in range(3)))
+        self.assertEqual(len(observed), 29)
+        self.assertLess(statistics.median(observed), -0.1)
+        self.assertLess(statistics.median(observed), 2 * statistics.median(baseline))
+
     def test_gttf_path_control_fields(self):
         """Pre-frame path fields f3/f4 track steering and engine speed."""
         import glob

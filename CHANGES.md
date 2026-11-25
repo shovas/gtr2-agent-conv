@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 07:45:00 -0500 - path_f4 gear trend
+- path_f4 decreases with gear index (median r -0.200 vs -0.005 permuted), supporting a throttle/demand interpretation on the reference racing line; path_f3 is not a brake flag. Full-tier permutation-controlled test added.
+
 ## 2026-11-28 07:15:00 -0500 - GTTF path control channels
 - Exposed 24-byte racing-line record fields f3/f4 as frame attributes; f4 tracks engine +32 (|r| 0.502 vs 0.020 permuted), f3 tracks steering +8 (0.097 vs 0.015). Full-tier permutation-controlled test added.
 

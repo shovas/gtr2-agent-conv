@@ -75,6 +75,15 @@ Slot `+36` is **not** path curvature: median |correlation| with 3D path curvatur
 
 With reconstructed world x, ghost `+12` heading aligns with AIW pointer-chain tangents in the **world x/z plane** as **`heading = atan2(dx, dz)`**: median circular coherence **0.858** across 15 matched ghosts (dominant convention in 10/15 files; equivalent `-atan2(dz,dx)` in the rest). The earlier y/z-only test gave 0.404 and the DSI-line test 0.318 — both were degraded by the missing x. Full-tier regression test added (median >0.7 across 29 ghosts).
 
+## GTTF path_f4 vs gear bands (2026-11-28)
+
+Assigned each frame to one of six gear bands derived from the F550 `.grb`/`.hdc`/`.tyr` setup (as in the +32 study) and compared `path_f4`:
+- pointwise correlation with gear index: median **−0.200** across 29 ghosts, vs **−0.005** with permuted gear labels;
+- within-gear correlation with normalized engine position is modest (median r 0.142 vs 0.003 permuted);
+- `path_f3` is high (>0.9) in only 6.4% of decelerating frames — not a simple brake flag.
+
+This supports f4 as a throttle/demand-like channel on the reference line (stronger in low gears), but neither channel reproduces the ghost's own pedal positions; exact semantics remain unclaimed. Full-tier permutation-controlled regression test added.
+
 ## GTTF path records f3/f4: control-like channels (2026-11-28)
 
 The 24-byte racing-line records' 4th and 5th floats are normalized [0,1] channels with many exact 0.0/1.0 values. `read_frames()` now exposes them as `path_f3` / `path_f4` using the same monotone path mapping as x. Across all 29 ghosts (permutation baselines in parentheses):
