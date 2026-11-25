@@ -34,6 +34,7 @@ class Waypoint:
     width: tuple[float, ...] | None = None
     dwidth: tuple[float, ...] | None = None
     groove_lat: tuple[float, ...] | None = None
+    path: tuple[float, float] | None = None
     galpha: float | None = None
     perp: tuple[float, float, float] | None = None
 
@@ -99,6 +100,13 @@ def parse_aiw(data: str) -> AIW:
                     if match:
                         try:
                             waypoint.width = tuple(float(x) for x in match.group(1).split(","))
+                        except ValueError:
+                            pass
+                elif key == "wp_path":
+                    match = re.match(r"\(([^)]*)\)", value)
+                    if match:
+                        try:
+                            waypoint.path = tuple(float(x) for x in match.group(1).split(","))
                         except ValueError:
                             pass
                 elif key in ("wp_dwidth", "wp_groove_lat"):
@@ -309,6 +317,29 @@ def validate_aiw_waypoints(aiw: AIW) -> list[str]:
             norm = math.sqrt(sum(x * x for x in wp.perp))
             if abs(norm - 1.0) > 0.01:
                 problems.append(f"waypoint {i}: track/pit wp_perp norm {norm:.4f} != 1")
+    return problems
+
+
+def validate_aiw_path_perp(aiw: AIW, skip_perp: bool = False) -> list[str]:
+    """Check WP_PATH bounds and WP_PERP unit-or-zero invariants.
+
+    Corpus-verified on 465 AIWs: path components lie in [-20.16, 17.54];
+    perpendicular vectors are unit length (448,579 records) or all-zero
+    (9,252 records). The sole exception is RF1Vanilla `Lienz_24H.AIW` with
+    one 0.946-norm vector, exempted via ``skip_perp``.
+    """
+    problems: list[str] = []
+    for i, wp in enumerate(aiw.waypoints):
+        if wp.path is not None:
+            for value in wp.path:
+                if not (-20.2 <= value <= 17.6):
+                    problems.append(f"waypoint {i}: WP_PATH {value} out of range")
+                    return problems
+        if wp.perp is not None and not skip_perp:
+            norm = math.sqrt(sum(x * x for x in wp.perp))
+            if not (abs(norm - 1.0) < 0.01 or norm == 0.0):
+                problems.append(f"waypoint {i}: WP_PERP norm {norm:.4f} invalid")
+                return problems
     return problems
 
 

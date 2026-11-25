@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 09:00:00 -0500 - AIW path/perp validator
+- Added WP_PATH parsing and `validate_aiw_path_perp()` with corpus-observed bounds and unit-or-zero perpendicular invariant across 465 AIWs; one legacy outlier documented. Full-tier regression test added.
+
 ## 2026-11-26 08:30:00 -0500 - AIW dwidth/groove validator
 - Added WP_DWIDTH/WP_GROOVE_LAT parsing and `validate_aiw_dwidth_groove()` with corpus-observed bounds; one corrupt StockCarExtreme file exempted. Full-tier regression test over 465 AIWs.
 

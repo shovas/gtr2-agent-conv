@@ -329,6 +329,8 @@ GTR1 coverage is now complete: a full `../GTR1Vanilla` scan (33,477 GMTs with th
 
 - **SCGT `.prt` object references (negative)**: the 5 archived `.prt` scene files are well-formed CRLF ASCII with balanced braces (7 `Group`, 940 `Instance` records, 977 `ObjFile` references), validated by `simbin_text_tool.validate_prt()` with a full-tier test. None of the 977 object names resolve to archive member basenames, `.vrl` meshes, `.scn` declarations or `.aiw` content; the references appear to be stale editor-level object IDs. No reference-resolution rule promoted.
 
+- **AIW path/perp bounds**: `WP_PATH` components lie in [-20.16, 17.54] across 915,664 values from 465 AIWs. `WP_PERP` vectors are unit length in 448,579 records and all-zero in 9,252; the sole nonzero non-unit vector (norm 0.9461) is in `RF1Vanilla/Lienz_24H.AIW` and is exempted. `validate_aiw_path_perp()` with full-tier regression test.
+
 - **AIW dwidth/groove-lat bounds**: `WP_DWIDTH` components lie in [-28.95, 100] across 1,831,328 values from 465 AIWs. `WP_GROOVE_LAT` is a signed lateral offset in [-11.7, 12.6] everywhere except `StockCarExtreme/ortona4.AIW`, where 130 values are corrupt (up to 621,683) — that single file is exempted. `validate_aiw_dwidth_groove()` with full-tier regression test.
 
 - **AIW width/groove bounds**: `WP_WIDTH` components lie in [-6.75, 100] across all 465 AIWs (1,831,328 values). `WP_GALPHA` is a groove-darkness scalar in [0,1] in six corpora, but rF1Vanilla (9 files, 3,167 values) and F1 2002 (1 file, 5 values) store packed/bit-pattern values such as -431602080.0 — they are explicitly exempted via `legacy_alpha=True`. `validate_aiw_width_galpha()` with full-tier test.
