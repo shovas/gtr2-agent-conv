@@ -43,6 +43,10 @@ Matched 27 ghosts to their track's DSI lap-instructor line by y/z and compared `
 
 The ± sign of the `+8`/`+16` relation is not random across the 29 F550 ghosts: files with positive correlation have a median net unwrapped `+12` heading trend of **7.9 rad**, negative-correlation files **4.74 rad**, and the per-file correlation coefficient versus heading trend is **0.583**. AIW waypoint file order/signed area does **not** explain the split (sign agreement 12/27, correlation 0.109). So the steering sign is tied to the recorded heading evolution (likely different ghost/recording configurations), but the exact convention remains unknown. Full-tier regression test added.
 
+## GTTF +16 steering-rate hypothesis (2026-11-27) — negative
+
+Tested whether `+16` is a steering-rate signal: its per-frame derivative (divided by frame dt) has **median |correlation| 0.011** with the steering-related `+8` field and **0.054** with the `+12` heading rate across all 31 ghosts (max |r| 0.061 / 0.102). There is no rate-like relationship to either quantity, so `+16` is not a steering rate under these conventions. Its earlier moderate curvature correlation and +8 coupling remain structural observations; exact semantics still unresolved. Full-tier regression test added.
+
 ## GTTF +16 vs setup pedal ranges (2026-11-27) — negative
 
 The requested comparison against throttle/brake pedal ranges cannot be made: the F550 and M3 `.hdc` setups contain only `DownshiftBlipThrottle=0.50` plus mechanical brake settings (`BrakePressureRange`, `RearBrakeRange`, etc.); the `.car` files store only 3-D pedal *positions*, not 0..1 pedal envelopes. There is no setup-derived range to validate against. Independently, `+16` takes negative values in **31/31** ghosts (minimum down to −0.211 rad), so it cannot be a plain unsigned throttle/brake pedal signal despite its sparse 1.0 spikes. Full-tier regression test added; pedal semantics remain unsupported.

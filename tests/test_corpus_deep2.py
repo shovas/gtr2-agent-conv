@@ -1006,6 +1006,36 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertEqual(checked, 204)
 
+    def test_gttf_frame16_not_steering_rate(self):
+        """The +16 derivative has no relation to +8 or heading rate."""
+        import glob
+        import gzip
+        import math
+        import statistics
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        versus_offset = []
+        versus_heading = []
+        for root in ("GTR2Steam", "BMWM3Challenge"):
+            for path in glob.glob(str(ROOT.parent / root / "**" / "*.GTT"),
+                                  recursive=True):
+                payload = gz.decompress(path)
+                frames = st.read_frames(payload, st.find_frame_grid(payload))
+                values = [f["pitch"] for f in frames]
+                times = [f["time"] for f in frames]
+                derivative = [(values[i] - values[i - 1])
+                              / max(times[i] - times[i - 1], 1e-6)
+                              for i in range(1, len(values))]
+                offset = [f["position"][2] for f in frames][1:]
+                heading = [f["heading"] for f in frames][1:]
+                rate = [(b - a + math.pi) % (2 * math.pi) - math.pi
+                        for a, b in zip(heading[:-1], heading[1:])]
+                versus_offset.append(st._corr(derivative, offset))
+                versus_heading.append(st._corr(derivative[1:], rate[1:]))
+        self.assertEqual(len(versus_offset), 31)
+        self.assertLess(statistics.median(abs(v) for v in versus_offset), 0.05)
+        self.assertLess(statistics.median(abs(v) for v in versus_heading), 0.1)
+
     def test_gttf_frame16_not_unsigned_pedal(self):
         """Setups have no 0..1 pedal range, and +16 is sometimes negative."""
         import glob
