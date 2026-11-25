@@ -2110,6 +2110,64 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertGreater(single, 2000)
         self.assertEqual(exposed, single)
 
+    def test_uv_tiling_ratios_appear_in_material_records(self):
+        """Mesh tiling ratios are modestly enriched in their material record."""
+        import glob
+        import random
+        import statistics
+        import struct
+        import gmt_format as gf
+        import mas_tool
+        rows = []
+        pool = []
+        for archive in glob.glob(str(ROOT.parent / "GTR2Steam" / "**" / "*.gtr"),
+                                 recursive=True)[:80]:
+            try:
+                _, entries = mas_tool.read_archive(archive)
+            except Exception:
+                continue
+            for entry in entries:
+                if not entry.name.lower().endswith(".gmt"):
+                    continue
+                try:
+                    parsed = gf.parse_gmt("x.gmt", entry.data)
+                except Exception:
+                    continue
+                for mesh in parsed.meshes:
+                    vertex_count = mesh.record.vertex_count
+                    stream = mesh.stream2_data
+                    if vertex_count < 8 or not stream or len(stream) != vertex_count * 32:
+                        continue
+                    ratios = gf.uv_tiling_factors(stream, vertex_count)
+                    if not ratios or not all(abs(value) > 1.5 for value in ratios):
+                        continue
+                    material_index = mesh.record.material_index
+                    if material_index >= len(parsed.materials):
+                        continue
+                    raw = parsed.materials[material_index].raw
+                    if len(raw) < 200:
+                        continue
+                    rows.append((ratios, raw))
+                    pool.extend(int(value) for value in ratios)
+                if len(rows) >= 400:
+                    break
+            if len(rows) >= 400:
+                break
+        self.assertGreater(len(rows), 300)
+        observed = sum(struct.pack("<f", float(value)) in raw
+                       for ratios, raw in rows for value in ratios) / (2 * len(rows))
+        random.seed(106)
+        baselines = []
+        for _ in range(5):
+            count = 0
+            for ratios, raw in rows:
+                for _ in ratios:
+                    count += struct.pack("<f", float(random.choice(pool))) in raw
+            baselines.append(count / (2 * len(rows)))
+        baseline = statistics.mean(baselines)
+        self.assertGreater(observed, 1.5 * baseline)
+        self.assertLess(observed, 0.5)
+
     def test_uv_tiling_ratios_decode_in_race07(self):
         """The tiling-ratio rule also holds in JCA-decrypted Race07 GMTs."""
         import glob

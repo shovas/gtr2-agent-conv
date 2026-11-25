@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-30 06:00:00 -0500 - Tiling ratios in material records
+- Found a modest material-record enrichment for UV tiling ratios (0.314 vs 0.160 distribution-preserving baseline) but no fixed material field. Full-tier test added; no decoder claimed.
+
 ## 2026-11-30 05:30:00 -0500 - GTL replay coverage
 - Verified the four GTL .Vcr replays parse as IRSR v1.01 (vs GTR2 v1.05) and rewrap byte-identically. Full-tier test added.
 

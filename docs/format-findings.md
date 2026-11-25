@@ -88,7 +88,10 @@ regression tests or an explicitly documented negative.
   drops the match to 0/500. The rule also decodes in JCA-decrypted Race07
   meshes, so it is not GTR2-only. The ratios are material-associated: among 487
   multi-mesh material groups, 91.6% have identical ratios vs 4.8% for a
-  distribution-preserving shuffle. `gmt_format.uv_tiling_factors()` exposes it.
+  distribution-preserving shuffle. A mesh's own ratio also appears as an f32
+  in its material record more often than a ratio drawn from the same
+  distribution (0.314 vs 0.160), supporting material-level metadata, but no
+  fixed material offset was found. `gmt_format.uv_tiling_factors()` exposes it.
 - **Two-stream meshes duplicate one UV pair:** in 1,731 two-stream meshes,
   stream3's columns 3..7 are zero in 100%, and columns 1/2 agree with stream2
   per vertex in 96% of meshes (median agreement 1.0 vs 0.023 for shuffled

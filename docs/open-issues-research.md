@@ -287,6 +287,17 @@ rounding at session-time magnitudes (values up to ~650 s), not a decoder
 error. This confirms the time words are independent f32 fields and can be
 edited without disturbing other frame data. Full-tier test added.
 
+## Tiling ratios are weakly enriched in material records (2026-11-30)
+
+Since ratios are material-associated, tested whether each ratio is stored in
+the corresponding material record: a mesh's `(k1,k2)` f32 bytes occur in its
+material raw bytes in 31.4% of 500 sampled cases, versus 16.0% when the ratios
+are replaced by random values drawn from the *same* ratio distribution
+(10 seeded trials). This is a real but modest enrichment, not a fixed field:
+the ratios were not consistently found at any particular material offset
+(e.g. f32 at raw+140 matched only 6% of the time). Recorded as a partial lead;
+no material decoder promoted. Full-tier test added.
+
 ## GTL replays use IRSR v1.01 (2026-11-30)
 
 The four shipped `GTLSteam/ReplayData/*.Vcr` files use the same gzip/gMb +
