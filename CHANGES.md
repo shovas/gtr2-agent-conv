@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 21:00:00 -0500 - CAM pass-through and f0 CRC negative
+- Verified the rF1→GTR2 pipeline leaves CAM files byte-identical (50/50), consistent with the cross-generation CAM/AIW convention. Recorded that f0 is not a CRC of geometry bytes. Full-tier pass-through test added.
+
 ## 2026-11-29 20:30:00 -0500 - Unified GTR2 UV reader
 - Added `gmt_format.read_mesh_uvs()` returning UV pairs from both single-block and two-stream GTR2 meshes; verified identical to the semantic reader on 800/800 sampled meshes. Full-tier test added.
 

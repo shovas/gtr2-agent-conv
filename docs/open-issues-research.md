@@ -143,6 +143,13 @@ column-7/column-1 stream invariant was also re-scoped to the two-stream layout
 (it does not hold for single-block UVs, which end in zeros). All 35 module
 tests and the five affected full-tier tests pass after the fix.
 
+## f0 is not a geometry CRC (2026-11-29)
+
+Tested CRC32 of the first vertex's 32 bytes and of the first eight vertices
+against each mesh's f0 marker over 20,000+ GTR2 meshes: zero exact matches and
+zero 16-bit-half matches, identical to a shuffled baseline. f0 is not a
+checksum of geometry bytes.
+
 ## CAM inversion is shared across rF1/GTL/GTR2 (2026-11-29) — correction
 
 The earlier note that CAM inversion "matters for rF1→GTR2 conversion" implied

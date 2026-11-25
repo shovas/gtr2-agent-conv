@@ -154,7 +154,8 @@ regression tests or an explicitly documented negative.
   inversion applies to individual coordinates, not just track means. The same
   convention holds in rF1 (594/684 cameras, median 15.3 vs 304.6) and GTL
   (246/274, 10.1 vs 113.9), so it is a gMotor-wide storage convention, **not**
-  a GTR2-specific conversion step.
+  a GTR2-specific conversion step; the rF1→GTR2 pipeline leaves CAM files
+  byte-identical (50/50 sampled).
 - All nine shipped `.Vcr` replay files parse with the same reader: gzip +
   gMb wrapper + `IRSR` v1.05, with driver/car/team names and session values
   from the same 36000/43200/46800 set. The GTTF-specific frame-grid detector
