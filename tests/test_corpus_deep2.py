@@ -1006,6 +1006,33 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertEqual(checked, 204)
 
+    def test_gttf_position_axis_spans(self):
+        """Ghost position triples are track-local, not AIW world XYZ."""
+        import glob
+        import gzip
+        import statistics
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        small = []
+        large = []
+        for root in ("GTR2Steam", "BMWM3Challenge"):
+            for path in glob.glob(str(ROOT.parent / root / "**" / "*.GTT"),
+                                  recursive=True):
+                payload = gz.decompress(path)
+                grid = st.find_frame_grid(payload)
+                if not grid:
+                    continue
+                frames = st.read_frames(payload, grid)
+                spans = sorted(
+                    max(r["position"][i] for r in frames)
+                    - min(r["position"][i] for r in frames) for i in range(3))
+                small.append(spans[0])
+                large.append(spans[2])
+        self.assertEqual(len(large), 31)
+        self.assertTrue(all(v < 5 for v in small))
+        self.assertTrue(all(v > 100 for v in large))
+        self.assertLess(statistics.median(small), 3)
+
     def test_gttf_position_speed_scale_negative(self):
         """Frame position deltas give implausibly low speeds in all GTT files."""
         import glob
