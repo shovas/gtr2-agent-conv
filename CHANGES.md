@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 10:00:00 -0500 - WAV chunk validator
+- Added `media_tool.wav_chunks()` and `validate_wav_chunks()` for fmt-first, single-data, known-trailing-chunk validation across four corpora; handled odd-sized final chunks without pad byte and `cue ` chunks. Full-tier regression test added.
+
 ## 2026-11-26 09:30:00 -0500 - AIW event/checkpoint validator
 - Added WP_EVENT first-component parsing and `validate_aiw_event()` covering 198,932 SimBin event records and WP_SCORE checkpoints across 465 AIWs; documented garbage bit patterns in the other event fields. Full-tier regression test added.
 

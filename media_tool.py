@@ -456,6 +456,53 @@ def wav_header(data: bytes, key_name: str | None = None) -> WavHeader | None:
     return None
 
 
+WAV_KNOWN_CHUNKS = {"fmt ", "data", "PAD ", "LIST", "fact", "bext",
+                    "LGWV", "_PMX", "DISP", "cue "}
+
+
+def wav_chunks(data: bytes, key_name: str | None = None) -> list[tuple[str, int]] | None:
+    """Walk RIFF chunks of a (possibly JCA-wrapped) WAV file."""
+    if data[:4] == JCA_MAGIC:
+        try:
+            data = decrypt_jca_wav(data, key_name)
+        except Exception:
+            return None
+    if data[:4] != b"RIFF" or len(data) < 12 or data[8:12] != b"WAVE":
+        return None
+    chunks: list[tuple[str, int]] = []
+    pos = 12
+    while pos + 8 <= len(data):
+        chunk_id = data[pos:pos + 4]
+        if not all(32 <= c < 127 for c in chunk_id):
+            return None
+        size = struct.unpack_from("<I", data, pos + 4)[0]
+        if pos + 8 + size > len(data):
+            return None
+        chunks.append((chunk_id.decode("latin-1"), size))
+        pos += 8 + size + (size & 1)
+    # Final odd-sized chunks sometimes omit the word-alignment pad byte.
+    return chunks if pos in (len(data), len(data) + 1) else None
+
+
+def validate_wav_chunks(chunks: list[tuple[str, int]]) -> list[str]:
+    """Check corpus-verified WAV chunk structure.
+
+    Verified on 100 sampled GTR2/GTL/Race07/Volvo WAVs: fmt is always first,
+    data appears exactly once, and all chunks use a closed known-ID set.
+    """
+    problems: list[str] = []
+    if not chunks:
+        return ["no chunks"]
+    if chunks[0][0] != "fmt ":
+        problems.append("fmt is not the first chunk")
+    if sum(1 for cid, _ in chunks if cid == "data") != 1:
+        problems.append("data chunk count != 1")
+    for cid, _size in chunks:
+        if cid not in WAV_KNOWN_CHUNKS:
+            problems.append(f"unknown chunk {cid!r}")
+    return problems
+
+
 def validate_wav_header(header: WavHeader) -> list[str]:
     """Check corpus-verified PCM WAV invariants; non-PCM is left opaque."""
     if header.audio_format != 1:

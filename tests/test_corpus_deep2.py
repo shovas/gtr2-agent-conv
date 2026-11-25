@@ -676,6 +676,29 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertGreater(checked, 1200)
         self.assertGreater(resolved / checked, 0.8)
 
+    def test_wav_chunk_structure(self):
+        """WAV files have fmt-first, single-data chunk layouts."""
+        import glob
+        import os
+        import random
+        rng = random.Random(5)
+        checked = 0
+        for root in ("GTR2Steam", "GTLSteam", "Race07Complete", "VolvoTheGame"):
+            base = ROOT.parent / root
+            paths = []
+            for pattern in ("**/*.wav", "**/*.WAV"):
+                paths.extend(glob.glob(str(base / pattern), recursive=True))
+            paths = [p for p in paths if os.path.isfile(p)]
+            rng.shuffle(paths)
+            for p in paths[:25]:
+                data = Path(p).read_bytes()
+                chunks = media_tool.wav_chunks(
+                    data, "volvo" if root == "VolvoTheGame" else None)
+                self.assertIsNotNone(chunks, p)
+                self.assertEqual(media_tool.validate_wav_chunks(chunks), [], p)
+                checked += 1
+        self.assertGreater(checked, 80)
+
     def test_wav_header_invariants(self):
         """PCM WAV headers are internally consistent across four corpora."""
         import glob
