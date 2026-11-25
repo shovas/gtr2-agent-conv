@@ -83,6 +83,10 @@ Slot `+36` is **not** path curvature: median |correlation| with 3D path curvatur
 
 With reconstructed world x, ghost `+12` heading aligns with AIW pointer-chain tangents in the **world x/z plane** as **`heading = atan2(dx, dz)`**: median circular coherence **0.858** across 15 matched ghosts (dominant convention in 10/15 files; equivalent `-atan2(dz,dx)` in the rest). The earlier y/z-only test gave 0.404 and the DSI-line test 0.318 — both were degraded by the missing x. Full-tier regression test added (median >0.7 across 29 ghosts).
 
+## GTTF frame +16 vs engine speed (2026-11-28)
+
+Frame `+16`, with its clamped (`|+16| > 0.99`) frames removed, still couples weakly to engine `+32`: median |correlation| **0.152** across 29 ghosts vs **0.020** for shuffled values. Unlike the +8/+16 "steering" result, this survives removal of the saturation frames. It is consistent with a throttle/engine-related control signal but does not establish pedal semantics (the earlier acceleration negative stands). Full-tier permutation-controlled regression test added.
+
 ## GTTF slots +40/+44/+52/+56/+60 packed-half study (2026-11-28)
 
 Decoded each sentinel-like u32 slot as two signed i16 halves and tested them against engine, path controls, steering and speed with permutation baselines:

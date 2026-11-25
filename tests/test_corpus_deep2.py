@@ -2537,6 +2537,38 @@ class CorpusDeep2Test(unittest.TestCase):
                            3 * statistics.median(baseline))
         self.assertGreater(sum(o > 2 * b for o, b in zip(observed, baseline)), 15)
 
+    def test_gttf_frame16_engine_coupling(self):
+        """Frame +16 has a weak, non-clamp-driven coupling to engine speed."""
+        import glob
+        import gzip
+        import random
+        import statistics
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        observed = []
+        baseline = []
+        random.seed(40)
+        for path in glob.glob(str(ROOT.parent / "GTR2Steam" / "TimeTrial" / "**" / "*.GTT"),
+                              recursive=True):
+            payload = gz.decompress(path)
+            frames = st.read_frames(payload, st.find_frame_grid(payload))
+            values = [frame["pitch"] for frame in frames]
+            rpm = [frame["engine_speed"] for frame in frames]
+            pairs = [(value, speed) for value, speed in zip(values, rpm)
+                     if abs(value) < 0.99]
+            if len(pairs) < 100:
+                continue
+            values = [value for value, _ in pairs]
+            rpm = [speed for _, speed in pairs]
+            observed.append(abs(st._corr(values, rpm)))
+            baseline.append(statistics.mean(
+                abs(st._corr(random.sample(values, len(values)), rpm))
+                for _ in range(3)))
+        self.assertGreater(len(observed), 20)
+        self.assertGreater(statistics.median(observed), 0.1)
+        self.assertGreater(statistics.median(observed),
+                           2 * statistics.median(baseline))
+
     def test_gttf_engine_speed_gear_bands(self):
         """+32/speed clusters around F550 gear-ratio-derived bands."""
         import glob
