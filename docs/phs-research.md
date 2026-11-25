@@ -9,6 +9,10 @@ PAR2-style recovery containers for a single file, `GTL_Update_0901.exe`; the fif
 gameplay physics content. No evidence was found that GTL reads PHS contents as
 structured physics data.
 
+## Mirror reassessment (2026-11-26)
+
+Searched `../aluigi-mirror-261124/mirror.aluigi.org/` in full: `patches/` (192 files, 145 ZIPs, 41 `.lpatch`) has **zero** filenames or ZIP members matching GTL/Legend/0901/PHYSICS/PAR2; all 461 ZIPs in the mirror likewise contain zero matching member names. A wider `../` filename search for `*0901*`, `*gtl*update*`, `*gtl*patch*`, `*.par2` found nothing relevant. The new tool mirrors added format knowledge (rfactordec/rfactorgmdec/wtcced) but **no missing update executable or PAR2 set**, so the PHS blocker remains genuine.
+
 ## Archive-container negative (2026-11-25)
 
 A full-byte scan of the 13,064-byte `PHYSICS.PHS` member found **zero** ZIP local/central/EOCD/Zip64 signatures (`PK\x03\x04`, `PK\x01\x02`, `PK\x05\x06`, `PK\x06\x06`, `PK\x06\x07`), no 7z header magic (`37 7a bc af 27 1c`), and no RAR4/RAR5/MSCF signatures. The final 256 bytes contain no u32 value that points into the file (0/64 inward offsets), ruling out a trailing central-directory/index structure. Combined with the earlier PAR2, ISI-crypt, compression, XOR and entropy negatives, the blob has no identifiable container structure; no decoder is promoted.
