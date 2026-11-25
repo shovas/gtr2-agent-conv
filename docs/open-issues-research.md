@@ -152,6 +152,15 @@ Adding the source archive stem to the normalized material/stage name set lowers 
 
 Disassembled `fcn.005e54e0` and `fcn.005e55e0`, called from the mesh fixup `fcn.005e9ab0` with stage names such as `L0DIFFUSET0`. Both take a **small stage-type enum (1/2/3 or 0x63)** selecting one of three arrays at object offsets `0x110`/`0x21c`/`0x328`, plus a name string; neither takes or derives from the per-vertex f0 marker. Corpus check: f0 spans **4,364 distinct values** in 20,005 vertices, with only 3.1% equal to one of the four enum values — so f0 is not a shader/material registry index of this kind. Full-tier regression test added.
 
+## GTR2 f0 packs two nearly-equal 16-bit identifiers (2026-11-28)
+
+Across 30,000 mesh markers, the low and high u16 halves of f0 are nearly equal:
+- `|high-low| <= 0`: 1.8%; `<=1`: **50.2%**; `<=2`: 58.3%; `<=4`: 74.8%; `<=8`: 77.6%.
+- median `|high-low|` = 1; permutation baseline for `<=1` is 1.4% vs 49.2% observed (~35×).
+- Typical values are pairs like 0x8a4/0x8a5, 0x9d7/0x9d4, 0x751/0x753.
+
+This strongly suggests f0 is **two closely related 16-bit identifiers** (e.g. paired material/shader or vertex/pixel shader IDs) rather than one arbitrary number. It is consistent with the material-name and raw-record associations, but no simple hash of a single name reproduces the halves. Full-tier permutation-controlled regression test added.
+
 ## GTR2 vertex f0: code trace and material-record association (2026-11-28)
 
 Traced the GTR2.exe GMT loader (`fcn.005d68d0`, located via the "Error reading mesh from GMT file" string) and its mesh/shader fixup (`fcn.005e9ab0`, "Could not find shader %s for mesh %s"). The loader relocates mesh records and looks up stage shaders by name (`L0DIFFUSET0`, `L0NOLIGHTINGT0`, …), but no code path that assigns the per-vertex f0 marker was identified — the marker appears to be preserved from the source file rather than computed on load.

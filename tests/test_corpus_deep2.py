@@ -1364,6 +1364,49 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertGreater(observed, 10 * statistics.mean(baseline() for _ in range(5)))
         self.assertLess(observed, 0.25)
 
+    def test_f0_halves_near_equal(self):
+        """f0 packs two nearly-equal 16-bit identifiers."""
+        import glob
+        import random
+        import statistics
+        import gmt_format as gf
+        import mas_tool
+        pairs = []
+        for root, ext in (("GTR2Steam", ".gtr"), ("GTLSteam", ".gtl"),
+                          ("BMWM3Challenge", ".bmw")):
+            for archive in glob.glob(str(ROOT.parent / root / "**" / f"*{ext}"),
+                                     recursive=True):
+                try:
+                    _, entries = mas_tool.read_archive(archive)
+                except Exception:
+                    continue
+                for entry in entries:
+                    if not entry.name.lower().endswith(".gmt") or not entry.data:
+                        continue
+                    try:
+                        parsed = gf.parse_gmt("x.gmt", entry.data)
+                    except Exception:
+                        continue
+                    for mesh in parsed.meshes:
+                        marker = gf.mesh_marker(mesh)
+                        if marker:
+                            pairs.append((marker & 0xFFFF, marker >> 16))
+                if len(pairs) >= 20000:
+                    break
+            if len(pairs) >= 20000:
+                break
+        self.assertGreater(len(pairs), 10000)
+        observed = sum(abs(low - high) <= 1 for low, high in pairs) / len(pairs)
+        random.seed(15)
+        lows = [p[0] for p in pairs]
+        highs = [p[1] for p in pairs]
+        baseline = statistics.mean(
+            sum(abs(low - high) <= 1 for low, high in
+                zip(random.sample(lows, len(lows)), highs)) / len(pairs)
+            for _ in range(10))
+        self.assertGreater(observed, 0.4)
+        self.assertGreater(observed, 10 * baseline)
+
     def test_f0_not_shader_enum(self):
         """f0 is not the 1/2/3/99 stage-type enum used by shader lookups."""
         import glob
