@@ -105,6 +105,10 @@ Assigned each frame to one of six gear bands derived from the F550 `.grb`/`.hdc`
 
 This supports f4 as a throttle/demand-like channel on the reference line (stronger in low gears), but neither channel reproduces the ghost's own pedal positions; exact semantics remain unclaimed. Full-tier permutation-controlled regression test added.
 
+## GTTF path controls are complementary (2026-11-29)
+
+Across all 29 ghosts, path `f3` and `f4` are strongly anti-correlated: median Pearson **−0.59** vs **−0.001** for distribution-preserving shuffles. `f3 == 0` in a median 77.4% of frames, and the median of `f3 + f4` is exactly **1.0**. This strongly suggests two complementary normalized shares (e.g. brake/throttle), but the earlier acceleration negatives prevent claiming literal pedal positions. Full-tier regression test added.
+
 ## GTTF frame marker prefix constant (2026-11-28)
 
 Across all 29 ghosts and 44,631 frames, bytes `+24..+30` are exactly

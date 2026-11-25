@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 00:30:00 -0500 - GTTF complementary path controls
+- Verified path f3/f4 are complementary (median r -0.59 vs -0.001 permuted; median sum 1.0; f3 zero in 77% of frames). Full-tier test added; findings docs updated.
+
 ## 2026-11-29 00:00:00 -0500 - GTTF marker prefix validator
 - Verified bytes +24..+30 are the fixed marker 01 00 00 34 00 20 00 across all 44,631 frames; full-tier validator added and findings docs updated.
 
