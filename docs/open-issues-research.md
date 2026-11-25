@@ -105,6 +105,24 @@ Assigned each frame to one of six gear bands derived from the F550 `.grb`/`.hdc`
 
 This supports f4 as a throttle/demand-like channel on the reference line (stronger in low gears), but neither channel reproduces the ghost's own pedal positions; exact semantics remain unclaimed. Full-tier permutation-controlled regression test added.
 
+## GTR2 UV block layouts and converter misalignment FIXED (2026-11-29)
+
+Cross-checking converted files against real GTR2 exposed two related problems:
+1. `parse_gmt()` only exposed a stream when `rec[7] > rec[6]`, missing the
+   dominant layout (~86%): a single `vc*32` block at `rec[6]` ending at the
+   index offset. The parser now exposes both layouts.
+2. `old_to_new_semantic()` wrote a 4-byte count lead before the UV block and
+   put UVs at `+8/+12`, whereas real GTR2 single-block UVs are at `+4/+8`
+   with no lead (verified on GOALPOST: `[0, 3.998, -0.002, 0, ...]`). This
+   made converted files structurally invalid for the engine's UV reader and
+   broke offline UV equality. Removed the lead, moved UVs to `+4/+8`, and set
+   the gtr2 schema `uv_sub_off` to 0 in `gmt_semantic.py` and
+   `validate_conversion.py`.
+
+After the fix, converted UV blocks are exactly `vc*32` bytes with the dominant
+real signature `(1,2,0,0,0,0,0)`, and 5/5 validator tests plus the quick suite
+pass. Full-tier regression test added.
+
 ## GTR2 stream column signature (2026-11-29)
 
 Extending the stream-pattern study: a column-signature analysis of 2,601

@@ -147,7 +147,9 @@ def old_to_new_semantic(data: bytes) -> bytes:
         vo = cursor
         cursor += 4 + vc * VERTEX_STRIDE
         uo = cursor
-        cursor += 4 + vc * VERTEX_STRIDE
+        # Real GTR2 UV blocks are vc*32 bytes with no count lead, and rec[6]
+        # points at the first 32-byte record (u at +4, v at +8).
+        cursor += vc * VERTEX_STRIDE
         io = cursor
         cursor += 4 + ic * 2
         obj_off = cursor
@@ -167,9 +169,8 @@ def old_to_new_semantic(data: bytes) -> bytes:
         if len(raw_vertices) != vc * VERTEX_STRIDE:
             raise ValueError("truncated old vertex block")
         blocks += struct.pack("<I", vc) + raw_vertices
-        blocks += struct.pack("<I", vc)
         for uv in sub["uvs"]:
-            blocks += bytes(8) + struct.pack("<2f", *uv) + bytes(VERTEX_STRIDE - 16)
+            blocks += bytes(4) + struct.pack("<2f", *uv) + bytes(VERTEX_STRIDE - 12)
         blocks += struct.pack("<I", ic)
         blocks += struct.pack("<%dH" % ic, *indices) if ic else b""
 

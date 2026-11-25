@@ -1873,6 +1873,42 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertGreater(max(halves), 10 * len(shaders))
         self.assertGreater(len(set(halves)), 5 * len(shaders))
 
+    def test_gmt_rec6_only_uv_block_exposed(self):
+        """Single-block layouts expose their vc*32 UV candidate to decoders."""
+        import glob
+        import gmt_format as gf
+        import mas_tool
+        single = 0
+        exposed = 0
+        for archive in glob.glob(str(ROOT.parent / "GTR2Steam" / "**" / "*.gtr"),
+                                 recursive=True):
+            try:
+                _, entries = mas_tool.read_archive(archive)
+            except Exception:
+                continue
+            for entry in entries:
+                if not entry.name.lower().endswith(".gmt") or not entry.data:
+                    continue
+                try:
+                    parsed = gf.parse_gmt("x.gmt", entry.data)
+                except Exception:
+                    continue
+                for mesh in parsed.meshes:
+                    record = mesh.record.raw
+                    if record[6] <= 0 or record[7] != 0:
+                        continue
+                    vertex_count = record[3]
+                    if vertex_count < 8 or record[11] - record[6] != vertex_count * 32:
+                        continue
+                    single += 1
+                    exposed += len(mesh.stream2_data) == vertex_count * 32
+                if single >= 3000:
+                    break
+            if single >= 3000:
+                break
+        self.assertGreater(single, 2000)
+        self.assertEqual(exposed, single)
+
     def test_gmt_stream_last_column_equals_second(self):
         """Nearly every GTR2 extra stream repeats column 1 in column 7."""
         import glob
@@ -2943,6 +2979,44 @@ class CorpusDeep2Test(unittest.TestCase):
                 break
         self.assertGreater(meshes, 100)
         self.assertEqual(with_extra, 0)
+
+    def test_gsc_conversion_uv_layout_matches_gtr2(self):
+        """Converted UV blocks match the dominant real GTR2 stream layout."""
+        import glob
+        import gmt_format
+        import gmt_layout
+        import gmt_semantic
+        import mas_tool
+        checked = 0
+        for archive in glob.glob(str(ROOT.parent / "CopaPetrobrasdeMarcas" / "**" / "*.mas"),
+                                 recursive=True):
+            try:
+                _, entries = mas_tool.read_archive(archive)
+            except Exception:
+                continue
+            for entry in entries:
+                if not entry.name.lower().endswith(".gmt") or len(entry.data) < 0x400:
+                    continue
+                if not gmt_semantic.decode_gsc_member(entry.data):
+                    continue
+                converted = gmt_layout.gsc_member_to_gtr2(entry.data)
+                if converted is None:
+                    continue
+                parsed = gmt_format.parse_gmt("x.gmt", converted)
+                for mesh in parsed.meshes:
+                    vertex_count = mesh.record.vertex_count
+                    if vertex_count < 8:
+                        continue
+                    self.assertEqual(len(mesh.stream2_data), vertex_count * 32)
+                    self.assertEqual(
+                        gmt_format.stream_column_signature(mesh.stream2_data, vertex_count),
+                        (1, 2, 0, 0, 0, 0, 0))
+                    checked += 1
+                if checked >= 20:
+                    break
+            if checked >= 20:
+                break
+        self.assertEqual(checked, 20)
 
     def test_gsc_conversion_roundtrip_preserves_streams(self):
         """Repacking a converted GSC GMT preserves vertices and streams."""

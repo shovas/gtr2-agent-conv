@@ -38,7 +38,7 @@ MAGIC_LO = (0x4011, 0x4015, 0x4035)
 
 SCHEMAS = {
     "gtr2": dict(id=0x04, v_count=0x08, v_off=0x0C, uv_off=0x14,
-                 i_count=0x24, i_off=0x28, uv_sub_off=8),
+                 i_count=0x24, i_off=0x28, uv_sub_off=0),
     "rf1": dict(id=0x08, v_count=0x18, v_off=0x04, uv_off=0x0C,
                 i_count=0x20, i_off=0x24, uv_sub_off=0),
 }

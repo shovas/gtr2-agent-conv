@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 06:30:00 -0500 - GTR2 UV block layouts + converter fix
+- Fixed a conversion-fidelity bug: converted GMTs wrote UVs at +8/+12 behind a 4-byte count lead, while real GTR2 uses a lead-free vc*32 block with UVs at +4/+8. Parser now exposes both single-block and two-stream layouts; converted UV blocks match real GTR2 exactly and offline UV validation passes again. Full-tier test added.
+
 ## 2026-11-29 06:00:00 -0500 - GMT inspect CLI shows new findings
 - `gmt_tool.py info --meshes` now reports f0 byte pairs, consecutive-pair flags, and extra-stream column signatures / decoded triples. Regression test added.
 

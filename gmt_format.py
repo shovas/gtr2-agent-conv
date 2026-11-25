@@ -365,10 +365,17 @@ def parse_gmt(path: str | Path, data: bytes | None = None) -> GmtFile:
         if rec.has_extra_vertex_block:
             extra = d[rec.raw[5]:rec.raw[6]] if rec.raw[6] <= len(d) else b""
             extra_vertices = _decode_extra_vertices(extra, rec.vertex_count)
-        if rec.stream2_end > rec.raw[6] and rec.raw[6] > 0:
-            s2 = d[rec.raw[6]:rec.stream2_end] if rec.stream2_end <= len(d) else b""
-        if rec.stream3_end > rec.stream2_end and rec.stream2_end > 0:
-            s3 = d[rec.stream2_end:rec.stream3_end] if rec.stream3_end <= len(d) else b""
+        if rec.raw[6] > 0:
+            # Two layouts occur in the corpus: an explicit end marker in
+            # rec[7]/rec[8], or a single block at rec[6] that runs up to the
+            # index array (86% of sampled GTR2 meshes). Expose both so the UV
+            # candidate stream is visible to decoders.
+            end = rec.stream2_end if rec.stream2_end > rec.raw[6] else rec.index_offset
+            if end > rec.raw[6] and end <= len(d):
+                s2 = d[rec.raw[6]:end]
+            if rec.stream3_end > rec.stream2_end and rec.stream2_end > 0:
+                s3 = (d[rec.stream2_end:rec.stream3_end]
+                      if rec.stream3_end <= len(d) else b"")
         meshes.append(GmtMesh(record=rec, vertex_data=v_data, index_data=i_data, base_vertices=base_vertices, extra_vertices=extra_vertices, extra_vertex_data=extra, stream2_data=s2, stream3_data=s3))
     tail = d[obj_off:] if obj_off <= len(d) else b""
     materials = _parse_materials(tail)

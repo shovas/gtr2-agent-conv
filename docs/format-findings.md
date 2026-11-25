@@ -51,6 +51,18 @@ regression tests or an explicitly documented negative.
   A broader invariant: `gmt_format.stream_column_signature()` shows column 7
   equals column 1 in 2,594/2,601 (99.73%) stream meshes; the seven exceptions
   are all TRACKnn meshes with a distinct scheme.
+- **Two UV block layouts, both now parsed:** GTR2 uses either explicit stream
+  end markers (`rec[6] < rec[7] < rec[8]`, ~18%) or a single `vc*32` block at
+  `rec[6]` running up to the index array (~86%). `parse_gmt()` now exposes
+  both as `stream2_data`. In the single-block layout the UV pair sits at
+  `rec[6]+4/+8` (dominant signature `(1,2,0,0,0,0,0)`).
+- **Converter UV layout corrected:** `old_to_new_semantic()` previously wrote
+  a 4-byte count lead before the UV block and placed UVs at `+8/+12`, so
+  converted files did not match real GTR2. It now writes a lead-free `vc*32`
+  block with UVs at `+4/+8`, and the gtr2 schema's `uv_sub_off` is 0 in both
+  `gmt_semantic.py` and `validate_conversion.py`. Converted blocks now have
+  exactly the dominant real signature; source/converted UV equality is
+  restored in offline validation.
 
 ## 3. EXE / embedded-resource code
 
