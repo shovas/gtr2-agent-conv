@@ -82,6 +82,30 @@ class SimbinEventsToolTest(unittest.TestCase):
             self.skipTest("no GTTF frame grids detected")
         self.assertGreaterEqual(checked, 1)
 
+    def test_gttf_slot7_byte31_exponent_artifact(self):
+        """Slot +7's varying byte is car-independent and centred on 0x40."""
+        import collections
+        import gzip
+        import statistics
+        files = _files(".gtt")
+        if not files:
+            self.skipTest("GTR2 GTT files not present")
+        modes = []
+        medians = []
+        for p in files:
+            data = gzip.decompress(p.read_bytes())
+            grid = setool.find_frame_grid(data)
+            if not grid:
+                continue
+            values = [data[fr["offset"] + 31] for fr in setool.read_frames(data, grid)]
+            modes.append(collections.Counter(values).most_common(1)[0][0])
+            medians.append(statistics.median(values))
+        if not modes:
+            self.skipTest("no GTTF frame grids detected")
+        self.assertGreaterEqual(sum(m in (64, 65) for m in modes), len(modes) - 1)
+        self.assertTrue(all(60 <= m <= 70 for m in medians))
+        self.assertEqual(statistics.median(medians), 64)
+
     def test_gttf_slot40_not_counter_or_state(self):
         """Slot +40 is neither monotonic nor a stable hi/lo state across files."""
         import gzip

@@ -5,6 +5,9 @@ Newest-first change log. Timestamps use repository commit dates (ISO 8601, local
 ## 2026-11-26 16:30:00 -0500 - AIW Features capacity negative
 - Documented that AIW `[Features]` numbers are capacity defaults rather than section counts (startinggrid 104 vs GRID 36 typical); full-tier corpus-fact regression test added.
 
+## 2026-11-26 11:00:00 -0500 - GTTF slot +7 car-independence
+- Verified that slot +7's varying byte +31 has the same mode (0x40/0x41) and median (~64) for Ferrari F550 and BMW M3 files, with no car-specific invariant; regression test added. The exponent-artifact interpretation is corroborated; no semantic promoted.
+
 ## 2026-11-26 10:00:00 -0500 - GTTF slot +40 negative
 - Verified across all 31 GTT files that slot +40 is not a counter or stable state (monotonic fraction ~0.56, time correlation ~0.025, cluster flips ~27% of frames); added raw accessor and regression test. No semantic promoted.
 

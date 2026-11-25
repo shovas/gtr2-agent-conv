@@ -3,6 +3,10 @@
 All work here is **offline**: no game was launched. "Runtime-dependent" means
 conclusively establishing it requires actual game execution.
 
+## GTTF slot +7: car-independent exponent artifact (2026-11-26)
+
+Across all 31 GTT files, the varying byte +31 of the `00 20 00 XX` u32 at +28 has mode **64 in 28 files** and 65 in the other 3, per-file medians 63–66 (overall median 64), and 93 distinct values for the Ferrari F550 vs 59 for the BMW M3 — i.e. no car-specific invariant separates the two cars (both clusters centre on the same 0x40/0x41 exponent byte). This corroborates the earlier conclusion that slot +7 is a fixed-low-byte integer/float exponent artifact rather than a car-dependent physical signal; no semantic promoted. `test_gttf_slot7_byte31_exponent_artifact` locks the distribution bounds.
+
 ## GTTF slot +40: counter/state negative (2026-11-26)
 
 Across all 31 GTT files the raw u32 at +40 is neither a monotonic counter nor a stable two-state flag: monotonic fraction median 0.555 (range 0.503–0.586), |correlation with frame time| median 0.025 (max 0.119), and the two exponent clusters (raw >2³⁰ vs lower) flip in a median 26.6% of consecutive frames (range 0.4–29.6%). The hi fraction varies by file (0.475–0.997), so it is not a car-invariant state either. The earlier quantized-float kinematics negatives for this slot stand; `simbin_events_tool.frame_s40_word()` and a regression test lock in these bounds. No semantic promoted.
