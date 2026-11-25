@@ -31,6 +31,10 @@ Comparing 703 identically named mesh families present in two or three of GTR2Ste
 
 New invariant from a 500-file GTR2/GTL mesh sweep: among LOD/number-variant groups whose members each have ≥2 submeshes, **11/37 (29.7%)** share an *identical ordered f0 marker list* (e.g. `AMBULANCE00/01/N01.GMT` all carry `0, 0xa0009e, 0x8a008d, 0xae00af`), versus a 0% baseline under randomized grouping. Thus f0 encodes something tied to the mesh family/material setup rather than per-file or per-LOD state — a refinement of the earlier "per-mesh marker" finding. Exact halfword matches to `material_index` remain below 25% of markers in the same sweep, so the specific encoding is still unresolved. Full-tier regression test added.
 
+## GTTF +8 vs steering +16 (2026-11-27)
+
+After detrending both fields on ghost z (+1) and a z-increment speed proxy, frame `+8` and the decoded steering-like field `+16` have a **median |correlation| of 0.585** across 29 GTR2 ghosts (24/29 above 0.3). The sign is not universal (17 positive, 12 negative), likely reflecting track/record orientation or a sign convention. So `+8` is a steering/lateral-control-related quantity rather than random padding or a world coordinate. Exact units and sign convention remain unresolved; full-tier regression test added.
+
 ## GTTF missing x: DSI-centerline reconstruction negative (2026-11-27)
 
 Attempted to reconstruct the missing x from ghost `+8` using the Anderstorp DSI lap instructor line as a centerline: matched 773/860 ghost frames to DSI points by y/z, then correlated `+8` with the DSI x at those points (and with z). `+8` spans only −0.03..1.53 m while DSI x spans −346..339 m; correlation with x is **−0.049**, with z **0.03**, and the partial correlation after detrending on z is **−0.053**. No scale/offset model can recover x from this field. The lateral-offset hypothesis for `+8` is therefore unconfirmed (and if lateral, its scale would have to be unrelated to world x). Full-tier regression test added; x reconstruction remains blocked without a format spec or runtime capture.

@@ -5,6 +5,9 @@ Newest-first change log. Timestamps use repository commit dates (ISO 8601, local
 ## 2026-11-26 16:30:00 -0500 - AIW Features capacity negative
 - Documented that AIW `[Features]` numbers are capacity defaults rather than section counts (startinggrid 104 vs GRID 36 typical); full-tier corpus-fact regression test added.
 
+## 2026-11-27 04:00:00 -0500 - GTTF +8 tracks steering
+- Detrended +8 and +16 on z/speed across 29 ghosts: median |correlation| 0.585 (24/29 >0.3), sign variable by track. +8 is steering/lateral-control-related; exact units/sign unresolved. Full-tier regression test added.
+
 ## 2026-11-27 03:00:00 -0500 - GTTF missing-x reconstruction negative
 - Matched 773 Anderstorp ghost frames to DSI centerline points by y/z: +8 spans 1.56 m vs DSI x 685 m, with correlations −0.049 (x), 0.03 (z), −0.053 partial. No x reconstruction from +8; full-tier regression test added.
 

@@ -1006,6 +1006,38 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertEqual(checked, 204)
 
+    def test_gttf_frame8_tracks_steering(self):
+        """+8 and the decoded steering field +16 are strongly related."""
+        import glob
+        import gzip
+        import statistics
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+
+        def resid(xs, ys):
+            mx, my = statistics.mean(xs), statistics.mean(ys)
+            den = sum((x - mx) ** 2 for x in xs)
+            if den == 0:
+                return [y - my for y in ys]
+            slope = sum((x - mx) * (y - my) for x, y in zip(xs, ys)) / den
+            return [y - my - slope * (x - mx) for x, y in zip(xs, ys)]
+
+        correlations = []
+        for path in glob.glob(str(ROOT.parent / "GTR2Steam" / "TimeTrial" / "**" / "*.GTT"),
+                              recursive=True):
+            payload = gz.decompress(path)
+            frames = st.read_frames(payload, st.find_frame_grid(payload))
+            offset = [f["position"][2] for f in frames]
+            steering = [f["pitch"] for f in frames]
+            z = [f["position"][1] for f in frames]
+            speed = [0] + [abs(z[i] - z[i - 1]) for i in range(1, len(z))]
+            detrended_offset = resid(z, resid(speed, offset))
+            detrended_steering = resid(z, resid(speed, steering))
+            correlations.append(st._corr(detrended_offset, detrended_steering))
+        self.assertEqual(len(correlations), 29)
+        self.assertGreater(statistics.median(abs(v) for v in correlations), 0.5)
+        self.assertGreaterEqual(sum(1 for v in correlations if abs(v) > 0.3), 20)
+
     def test_gttf_frame8_not_missing_x(self):
         """+8 does not encode the AIW x coordinate via a DSI centerline."""
         import glob
