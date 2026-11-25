@@ -1873,6 +1873,57 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertGreater(max(halves), 10 * len(shaders))
         self.assertGreater(len(set(halves)), 5 * len(shaders))
 
+    def test_gmt_extra_stream_three_value_pattern(self):
+        """Extra 32-byte vertex streams reduce to three distinct values."""
+        import glob
+        import random
+        import struct
+        import gmt_format as gf
+        import mas_tool
+        meshes = []
+        for archive in glob.glob(str(ROOT.parent / "GTR2Steam" / "**" / "*.gtr"),
+                                 recursive=True):
+            try:
+                _, entries = mas_tool.read_archive(archive)
+            except Exception:
+                continue
+            for entry in entries:
+                if not entry.name.lower().endswith(".gmt") or not entry.data:
+                    continue
+                try:
+                    parsed = gf.parse_gmt("x.gmt", entry.data)
+                except Exception:
+                    continue
+                for mesh in parsed.meshes:
+                    vertex_count = mesh.record.vertex_count
+                    if vertex_count >= 8 and len(mesh.stream2_data) == vertex_count * 32:
+                        meshes.append((mesh.stream2_data, vertex_count))
+                if len(meshes) >= 1600:
+                    break
+            if len(meshes) >= 1600:
+                break
+        self.assertGreater(len(meshes), 1400)
+        decoded = sum(gf.decode_stream_records(data, count) is not None
+                      for data, count in meshes)
+        ratio = decoded / len(meshes)
+        self.assertGreater(ratio, 0.4)
+
+        # Distribution-preserving baseline: shuffle each column's values
+        # across vertices, which keeps every column's distribution intact.
+        random.seed(59)
+        baselines = []
+        for data, count in meshes[:200]:
+            columns = [list(struct.unpack_from("<f", data, i * 32 + 4 * j)[0]
+                            for i in range(count)) for j in range(8)]
+            shuffled = [column[:] for column in columns]
+            for column in shuffled:
+                random.shuffle(column)
+            hist = sum(1 for i in range(count)
+                       if shuffled[1][i] == shuffled[3][i] == shuffled[5][i] == shuffled[7][i]
+                       and shuffled[2][i] == shuffled[4][i] == shuffled[6][i])
+            baselines.append(hist == count)
+        self.assertLess(sum(baselines) / len(baselines), 0.05)
+
     def test_f0_byte_pair_consecutive_even(self):
         """f0's two meaningful bytes are usually consecutive (n, n+1)."""
         import glob

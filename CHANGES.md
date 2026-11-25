@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 04:30:00 -0500 - GTR2 extra vertex stream structure
+- Located a UV-candidate stream in GTR2 GMTs: meshes with extra 32-byte-per-vertex streams reduce to three distinct values in 46.7% of cases (vs 0% shuffled). Added `gmt_format.decode_stream_records()` and a full-tier test; semantics remain unassigned.
+
 ## 2026-11-29 03:30:00 -0500 - f0 byte-pair structure
 - Resolved f0's "near-equal halves" to a concrete byte-pair rule: for even low bytes, the upper byte is low+1 in 60.3% of markers vs 0.8% shuffled. Added `gmt_format.f0_byte_pair()`, a full-tier regression test, and updated findings docs.
 

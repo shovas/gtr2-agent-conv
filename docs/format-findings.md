@@ -38,9 +38,14 @@ regression tests or an explicitly documented negative.
   ~1 reversed). Do **not** flip indices during conversion.
 - `batch_convert.py` includes a `gsc` family; all written meshes are re-parsed
   and pass `validate_materials.check_gmt()`.
-- **Open gap:** sampled GTR2 meshes expose no 16-byte extra UV vertex block, so
-  transferred old-layout UVs cannot be validated with the current parser. No
-  UV correctness claim is made.
+- **UV storage candidate located (not yet decoded):** meshes whose record has
+  `rec[6] < rec[7] < rec[8]` carry two extra 32-byte-per-vertex streams. In
+  46.7% of 1,605 sampled meshes every 8-float stream record follows
+  `[U, S, V, S, V, S, V, S]` — only three distinct values per vertex. A flat
+  road mesh shows column 2 as a planar world-x projection (r=1.0) with columns
+  4/6 as ×10/×15 copies, but this is not general (only 39/447 meshes), so UV
+  *semantics* remain unassigned. `gmt_format.decode_stream_records()` exposes
+  the verified triples; no UV correctness claim is made.
 
 ## 3. EXE / embedded-resource code
 

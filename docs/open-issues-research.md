@@ -105,6 +105,25 @@ Assigned each frame to one of six gear bands derived from the F550 `.grb`/`.hdc`
 
 This supports f4 as a throttle/demand-like channel on the reference line (stronger in low gears), but neither channel reproduces the ghost's own pedal positions; exact semantics remain unclaimed. Full-tier permutation-controlled regression test added.
 
+## GTR2 extra vertex streams: located, not decoded (2026-11-29)
+
+Investigated where GTR2 GMTs keep UV-like data. Meshes whose 108-byte record
+has `rec[6] < rec[7] < rec[8]` carry two extra 32-byte-per-vertex streams in
+addition to the 32-byte base vertices (confirmed on ROADPITADDON, BRIDGE1,
+FENCE*, GRDR* etc. in Anderstorp). Each extra record is 8 f32s. A strong
+structural pattern holds in **750/1605 (46.7%)** meshes: every record is
+`[U, S, V, S, V, S, V, S]`, i.e. columns 1/3/5/7 are equal and columns 2/4/6
+are equal — only three distinct values per vertex. A column-wise shuffle that
+preserves each column's distribution drops the pattern rate to 0%.
+
+On ROADPITADDON specifically, column 2 is a planar world-x projection
+(correlation 1.0) and columns 4/6 are exactly ×10 and ×15 copies with tiling
+factors 10/15 in columns 3/5. This does **not** generalise: only 39/447 sampled
+meshes have any stream column correlating >0.9 with world position. So these
+streams are a credible UV/scale carrier, but their semantics are still
+unassigned — added `gmt_format.decode_stream_records()` plus a full-tier
+permutation-controlled test, no UV correctness claim.
+
 ## f0 is a consecutive byte pair, not a hash (2026-11-29)
 
 A byte-level decomposition of 30,000 GTR2/GTL f0 markers found that in 69.6%

@@ -127,6 +127,26 @@ def f0_byte_pair(value: int) -> tuple[int, int]:
     return value & 0xFF, (value >> 16) & 0xFF
 
 
+def decode_stream_records(data: bytes, vertex_count: int) -> Optional[List[tuple[float, float, float]]]:
+    """Decode a 32-byte-per-vertex extra stream into (u, v, scale) triples.
+
+    Corpus-verified on 1,605 GTR2 meshes whose mesh record has two extra
+    32-byte-per-vertex streams (rec[6] < rec[7] < rec[8]): each 32-byte record
+    is 8 f32s, and in 46.7% of meshes every record follows the pattern
+    ``[U, S, V, S, V, S, V, S]`` (columns 1/3/5/7 equal, columns 2/4/6 equal).
+    Such streams therefore carry only three distinct values per vertex. This
+    helper returns those triples when the pattern holds for the whole mesh,
+    and ``None`` otherwise. The values are not yet assigned UV semantics.
+    """
+    if vertex_count <= 0 or len(data) != vertex_count * 32:
+        return None
+    rows = [struct.unpack_from("<8f", data, i * 32) for i in range(vertex_count)]
+    if not all(row[1] == row[3] == row[5] == row[7]
+               and row[2] == row[4] == row[6] for row in rows):
+        return None
+    return [(row[0], row[2], row[1]) for row in rows]
+
+
 def unpack_vertex_color(value: int) -> tuple[int, int, int, int]:
     """Decode a GTR2 base-vertex f7 word into its four bytes.
 
