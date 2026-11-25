@@ -1006,6 +1006,47 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertEqual(checked, 204)
 
+    def test_gttf_heading_vs_aiw_negative(self):
+        """Ghost +12 heading has no consistent relation to AIW directions."""
+        import glob
+        import gzip
+        import math
+        import statistics
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        import simbin_text_tool as stt
+        base = ROOT.parent / "GTR2Steam"
+        aiws = {}
+        for path in glob.glob(str(base / "**" / "*.AIW"), recursive=True):
+            aiws.setdefault(path.lower().rsplit("/", 1)[-1], path)
+        diffs = []
+        for path in glob.glob(str(base / "TimeTrial" / "**" / "*.GTT"), recursive=True):
+            payload = gz.decompress(path)
+            event = st.parse_payload(payload)
+            grid = st.find_frame_grid(payload)
+            aiw = aiws.get((event.aiw or "").lower())
+            if not grid or not aiw:
+                continue
+            waypoints = stt.parse_aiw(stt.read_text(aiw)).waypoints
+            for frame in st.read_frames(payload, grid)[::10]:
+                px, pz = frame["position"][0], frame["position"][2]
+                i = min(range(len(waypoints)),
+                        key=lambda k: (waypoints[k].pos[0] - px) ** 2
+                        + (waypoints[k].pos[2] - pz) ** 2)
+                j = waypoints[i].ptrs[1]
+                if not (0 <= j < len(waypoints)) or j == i:
+                    continue
+                dx = waypoints[j].pos[0] - waypoints[i].pos[0]
+                dz = waypoints[j].pos[2] - waypoints[i].pos[2]
+                direction = math.atan2(dx, dz)
+                diffs.append((frame["heading"] - direction + math.pi)
+                             % (2 * math.pi) - math.pi)
+        self.assertGreater(len(diffs), 1000)
+        coherence = math.hypot(sum(math.cos(x) for x in diffs),
+                               sum(math.sin(x) for x in diffs)) / len(diffs)
+        self.assertLess(coherence, 0.1)
+        self.assertGreater(statistics.median(abs(x) for x in diffs), 1.4)
+
     def test_gsc_region_mask_per_vertex_run_negative(self):
         """Repeated-byte runs at 32-byte stride decode to near-zero padding."""
         import math

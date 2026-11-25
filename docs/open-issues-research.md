@@ -19,6 +19,10 @@ Across all 31 GTT files, the varying byte +31 of the `00 20 00 XX` u32 at +28 ha
 
 Across all 31 GTT files the raw u32 at +40 is neither a monotonic counter nor a stable two-state flag: monotonic fraction median 0.555 (range 0.503–0.586), |correlation with frame time| median 0.025 (max 0.119), and the two exponent clusters (raw >2³⁰ vs lower) flip in a median 26.6% of consecutive frames (range 0.4–29.6%). The hi fraction varies by file (0.475–0.997), so it is not a car-invariant state either. The earlier quantized-float kinematics negatives for this slot stand; `simbin_events_tool.frame_s40_word()` and a regression test lock in these bounds. No semantic promoted.
 
+## GTTF +12 heading vs AIW waypoint directions (2026-11-26) — negative
+
+Cross-checked the recorded `+12` heading against the nearest AIW waypoint's next-pointer direction in all 29 GTR2 ghost files (3,606 samples, every 10th frame). Under the tested horizontal conventions (`atan2(dx,dz)` and its sign/swapped variants) there is **no coherent relation**: circular concentration R=0.026 (uniform ≈0), median absolute angular error 1.606 rad (chance ≈1.571), and no consistent constant offset. A direct comparison with frame-to-frame position deltas is likewise poor (best median ~1.24 rad). This **corrects** the earlier single-sample "cross-validated" claim: it was a coincidence, not a general rule. Full-tier regression test added; `+12` remains a heading-like angle but its frame/axis convention is not resolved.
+
 ## GTTF +32 scale vs `.eng` rev limits (2026-11-26) — negative
 
 Checked the /1024 RPM interpretation against the cars' physics configs. `550_Std_V12.eng` (Ferrari F550) has `RevLimitRange=(7200,100,7)`, `RevLimitSetting=2` → **7400 rpm**; `BMW_M3.eng` (BMW M3 Challenge) has `RevLimitRange=(8500,0,0)` → **8500 rpm**. The GTTF ceilings are 5,873,841 raw for F550 and 6,336,964–6,345,107 for BMW M3, giving raw/rev-limit factors **793.8 vs 745.5** — an 6.5% systematic difference between cars. Therefore the naive `/1024 = rpm` scale is **negated** as a direct RPM reading. The car-specific ceiling and shift-like drops still support an engine-speed-like signal, but its scale/normalization is car-dependent and unknown. Full-tier regression test added.
@@ -281,9 +285,10 @@ patch), but does not identify the exact engine-side use. Further refinement: the
   `Gtr2VehicleTelemetry` struct documents GTR2 in-memory telemetry (plain-float
   throttle/steering/RPM, 3x3 orientation matrix) — no authoritative `.gtt` file layout.
   Tested the 63-byte frame for an orthonormal 3x3 orientation matrix: none found, so the
-  ghost frame is a compact subset, not a raw telemetry dump. However, the recorded slot-12
-  heading is **cross-validated**: heading derived from consecutive position deltas
-  (1.608 rad) matches the frame's heading values (1.583/1.615 rad). The local
+  ghost frame is a compact subset, not a raw telemetry dump. However, the earlier single-sample "cross-validation" of slot-12
+  heading against position deltas (1.608 rad vs 1.583/1.615 rad) was **superseded
+  in 2026-11-26**: the 31-file AIW/motion aggregate finds no coherent relation
+  (see the dedicated section above). The local
   `gtr2_driving/telemetry.py` reference documents GTR2 in-memory fields (pos@140, vel@152,
   gear@240, RPM@244) — a separate layout.
   Byte-level profiling of GTR2 GTT frames (1,512 samples) shows the field at +28 is
