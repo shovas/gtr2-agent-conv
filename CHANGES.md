@@ -5,6 +5,9 @@ Newest-first change log. Timestamps use repository commit dates (ISO 8601, local
 ## 2026-11-26 16:30:00 -0500 - AIW Features capacity negative
 - Documented that AIW `[Features]` numbers are capacity defaults rather than section counts (startinggrid 104 vs GRID 36 typical); full-tier corpus-fact regression test added.
 
+## 2026-11-27 03:00:00 -0500 - GTTF missing-x reconstruction negative
+- Matched 773 Anderstorp ghost frames to DSI centerline points by y/z: +8 spans 1.56 m vs DSI x 685 m, with correlations −0.049 (x), 0.03 (z), −0.053 partial. No x reconstruction from +8; full-tier regression test added.
+
 ## 2026-11-27 02:00:00 -0500 - GTTF axes +0/+1 map to AIW y/z
 - Matched 27 GTR2 ghosts to AIW waypoints: ghost +0 reproduces AIW y endpoints within 0.4 m median (27/27 within 10 m), +1 reproduces z within 6.6 m median (21/27 within 10 m). AIW x has no counterpart in the frame; full-tier regression test added.
 

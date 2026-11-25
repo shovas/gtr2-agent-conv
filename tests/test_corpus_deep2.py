@@ -1006,6 +1006,37 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertEqual(checked, 204)
 
+    def test_gttf_frame8_not_missing_x(self):
+        """+8 does not encode the AIW x coordinate via a DSI centerline."""
+        import glob
+        import gzip
+        import statistics
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        ghost = glob.glob(str(ROOT.parent / "GTR2Steam" / "TimeTrial" /
+                              "Anderstorp" / "*.GTT"))[0]
+        payload = gz.decompress(ghost)
+        frames = st.read_frames(payload, st.find_frame_grid(payload))
+        dsi = glob.glob(str(ROOT.parent / "GTR2Steam" / "GameData" /
+                            "DrivingSchool" / "Anderstorp" /
+                            "*Lap Challenge, Level 1.DSI"))[0]
+        from pathlib import Path
+        line = st.read_ghost_line(gzip.decompress(Path(dsi).read_bytes()))
+        offsets = []
+        xs = []
+        zs = []
+        for frame in frames:
+            y, z = frame["position"][0], frame["position"][1]
+            near = [q for q in line if abs(q[1] - y) < 3 and abs(q[2] - z) < 3]
+            if near:
+                offsets.append(frame["position"][2])
+                xs.append(statistics.mean(q[0] for q in near))
+                zs.append(z)
+        self.assertGreater(len(offsets), 500)
+        self.assertLess(max(offsets) - min(offsets), 3)
+        self.assertLess(abs(st._corr(offsets, xs)), 0.2)
+        self.assertLess(abs(st._corr(offsets, zs)), 0.2)
+
     def test_gttf_axes_match_aiw_y_z(self):
         """Ghost +0/+1 endpoint ranges match AIW elevation/z on matched tracks."""
         import glob
