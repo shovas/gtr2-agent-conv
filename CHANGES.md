@@ -5,6 +5,9 @@ Newest-first change log. Timestamps use repository commit dates (ISO 8601, local
 ## 2026-11-26 16:30:00 -0500 - AIW Features capacity negative
 - Documented that AIW `[Features]` numbers are capacity defaults rather than section counts (startinggrid 104 vs GRID 36 typical); full-tier corpus-fact regression test added.
 
+## 2026-11-27 10:00:00 -0500 - GTTF +16 pedal comparison negative
+- F550/M3 setups provide no 0..1 throttle/brake pedal ranges (only a blip value and mechanical settings), and +16 is negative in all 31 ghosts — not an unsigned pedal signal. Full-tier regression test added.
+
 ## 2026-11-27 09:00:00 -0500 - GTTF +16 steer-lock negative
 - Both F550 and M3 .hdc setups imply a 15° (0.262 rad) steer lock; all 31 ghosts exceed it and 27 hit exactly 1.0, so +16 is not a raw steer angle. Full-tier regression test added.
 

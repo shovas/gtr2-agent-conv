@@ -1006,6 +1006,36 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertEqual(checked, 204)
 
+    def test_gttf_frame16_not_unsigned_pedal(self):
+        """Setups have no 0..1 pedal range, and +16 is sometimes negative."""
+        import glob
+        import gzip
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        configs = [
+            ROOT.parent / "GTR2Steam" / "GameData" / "Teams" / "GT" /
+            "Ferrari 550 Teams" / "BMS550.hdc",
+            ROOT.parent / "BMWM3Challenge" / "GameData" / "Teams" / "BMW" /
+            "BMW M3" / "BMW_M3.hdc",
+        ]
+        for path in configs:
+            text = path.read_bytes().decode("latin-1")
+            # Only a single fixed blip value; no throttle/brake pedal range.
+            self.assertIn("DownshiftBlipThrottle", text)
+            self.assertNotRegex(text, r"(?mi)^\s*ThrottlePedalRange\s*=")
+            self.assertNotRegex(text, r"(?mi)^\s*BrakePedalRange\s*=")
+        negative_files = 0
+        for root in ("GTR2Steam", "BMWM3Challenge"):
+            for path in glob.glob(str(ROOT.parent / root / "**" / "*.GTT"),
+                                  recursive=True):
+                payload = gz.decompress(path)
+                grid = st.find_frame_grid(payload)
+                if not grid:
+                    continue
+                values = [f["pitch"] for f in st.read_frames(payload, grid)]
+                negative_files += int(any(v < 0 for v in values))
+        self.assertEqual(negative_files, 31)
+
     def test_gttf_frame16_not_bounded_by_steer_lock(self):
         """+16 extrema exceed the .hdc steer lock and often hit a 1.0 clamp."""
         import glob
