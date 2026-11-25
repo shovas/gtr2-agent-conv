@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 08:45:00 -0500 - GTTF +48 accessors
+- Added `frame_slot48()` / frame fields `slot48_low` and `slot48_high` so the two packed signed channels are available to downstream tooling; regression test added.
+
 ## 2026-11-28 08:15:00 -0500 - GTTF +48 high half engine
 - Found the high signed 16-bit half of slot +48 tracks engine +32 (median |r| 0.122 vs 0.021 permuted); +48 now reads as two packed signed control channels. Full-tier permutation-controlled test added.
 

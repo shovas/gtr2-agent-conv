@@ -455,5 +455,21 @@ class SimbinEventsToolTest(unittest.TestCase):
         self.assertGreater(sum(1 for r in corrs if abs(r) > 0.2), len(corrs)//2)
 
 
+    def test_slot48_signed_channels(self):
+        """Frame slot +48 exposes two signed channel readings."""
+        import gzip
+        files = _files(".gtt")
+        if not files:
+            self.skipTest("GTR2 GTT files not present")
+        data = gzip.decompress(files[0].read_bytes())
+        frames = setool.read_frames(data, setool.find_frame_grid(data))
+        self.assertGreater(len(frames), 100)
+        for frame in frames[:10]:
+            self.assertIsNotNone(frame["slot48_low"])
+            self.assertIsNotNone(frame["slot48_high"])
+            self.assertGreaterEqual(frame["slot48_low"], -32768)
+            self.assertLessEqual(frame["slot48_high"], 32767)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -260,6 +260,19 @@ def is_quantized_s36(word: int) -> bool:
     return (word & 0xFFFF) == 0 and ((word >> 16) & 0x7F) in (8, 12)
 
 
+def frame_slot48(data: bytes, offset: int) -> tuple[int | None, int | None]:
+    """Return the two signed 16-bit channels packed in frame slot +48.
+
+    The low half tracks steering +8 and the high half tracks engine +32
+    (permutation-controlled corpus evidence); exact units are unknown.
+    """
+    if offset + 52 > len(data):
+        return None, None
+    value = int.from_bytes(data[offset + 48:offset + 52], "little")
+    return (struct.unpack("<h", struct.pack("<H", value & 0xFFFF))[0],
+            struct.unpack("<h", struct.pack("<H", (value >> 16) & 0xFFFF))[0])
+
+
 def frame_rpm(data: bytes, offset: int) -> int | None:
     """Return the raw 24-bit engine-speed word at a GTTF frame offset."""
     if offset + 35 > len(data) or data[offset + 35] != 0:
@@ -385,6 +398,8 @@ def read_frames(data: bytes, grid: dict) -> list[dict]:
                     "engine_speed": frame_rpm(data, off),
                     "rpm": (value / RPM_SCALE if (value := frame_rpm(data, off)) is not None
                             else None)})
+        low, high = frame_slot48(data, off)
+        out[-1]["slot48_low"], out[-1]["slot48_high"] = low, high
     records = find_preframe_records(data, grid["offset"])
     positions = [frame["position"] for frame in out]
     xs = reconstruct_frame_x(records, positions)
