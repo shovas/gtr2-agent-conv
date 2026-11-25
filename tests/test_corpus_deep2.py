@@ -4337,6 +4337,40 @@ class CorpusDeep2Test(unittest.TestCase):
             margin = 0.25 if axis == 0 else 0.10
             self.assertGreater(observed, statistics.mean(baselines) + margin)
 
+    def test_gttf_frame_time_span_equals_lap_time(self):
+        """Frame time span reproduces the lap time encoded in ghost filenames."""
+        import glob
+        import random
+        import re
+        import statistics
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        targets = []
+        spans = []
+        for path in glob.glob(str(ROOT.parent / "GTR2Steam" / "TimeTrial" / "**" / "*.GTT"),
+                              recursive=True):
+            match = re.search(r"(\d+)_(\d+)_(\d+)_", Path(path).name)
+            if not match:
+                continue
+            minutes, seconds, milliseconds = (int(part) for part in match.groups())
+            target = minutes * 60 + seconds + milliseconds / 1000
+            payload = gz.decompress(path)
+            grid = st.find_frame_grid(payload)
+            frames = st.read_frames(payload, grid) if grid else []
+            if not frames:
+                continue
+            targets.append(target)
+            spans.append(frames[-1]["time"] - frames[0]["time"])
+        self.assertEqual(len(targets), 29)
+        errors = [abs(target - span) for target, span in zip(targets, spans)]
+        self.assertLess(statistics.median(errors), 0.01)
+        self.assertLess(max(errors), 0.05)
+        random.seed(91)
+        shuffled = random.sample(spans, len(spans))
+        baseline = statistics.median(abs(target - span)
+                                     for target, span in zip(targets, shuffled))
+        self.assertGreater(baseline, 10)
+
     def test_gttf_frame_marker_prefix_constant(self):
         """Bytes +24..+30 are a fixed marker; only byte +31 varies."""
         import glob

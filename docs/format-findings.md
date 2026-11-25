@@ -190,7 +190,10 @@ regression tests or an explicitly documented negative.
 - Verified mappings / invariants (all permutation-controlled, see tests):
   - frame `+0` = path y, `+4` = path z (r≈1.0);
   - frame `+12` = path heading = `atan2(dx,dz)` (coherence 0.992 vs 0.024);
-  - frame `+20` (time) tracks path x (|r| 0.568 vs 0.017) — x is longitudinal progress;
+  - frame `+20` is absolute session time with an arbitrary start offset; its
+    **span** (last − first) reproduces the lap time encoded in every ghost
+    filename to a median 0.0023 s (max 0.034 s, 29/29 within 0.05 s; 23.59 s
+    for shuffled pairings). x is longitudinal progress;
   - path-heading field follows its own x/z tangent (0.973 vs 0.086);
   - frame/path-record count ratio median 2.44, range 1.93–3.49;
   - `+32/speed` clusters near `.grb`-derived gear bands (p≈0.01);

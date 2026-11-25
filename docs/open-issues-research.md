@@ -263,6 +263,17 @@ round-trip preserves vertex and UV bytes. Added
 or textures are present, so this is a structural fallback/test fixture, not a
 render-ready replacement for a real template.
 
+## GTTF frame time field definitively validated (2026-11-30)
+
+The 29 ghost filenames encode lap times such as `1_23_404` (83.404 s). Frame
+field `+20` is an absolute session time with an arbitrary starting offset
+(first frame 18–560 s across files), but `last_time − first_time` matches the
+filename lap time with median absolute error **0.0023 s**, maximum **0.034 s**,
+and all 29 files within 0.05 s. Shuffling the lap-time pairings raises the
+median error to **23.59 s**. This settles the time field's units and scale:
+it is seconds, and the ghost's lap duration is a span, not the final value.
+Full-tier permutation-controlled regression test added.
+
 ## f0 bytes do not index material stages (2026-11-29)
 
 Tested whether f0's two bytes are small indices into the mesh's material stage

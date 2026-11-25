@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-30 01:30:00 -0500 - GTTF time field validated
+- Proved frame +20 is absolute session seconds: last-minus-first matches every ghost filename lap time (median error 0.0023 s, max 0.034 s, vs 23.59 s shuffled). Full-tier permutation-controlled test added.
+
 ## 2026-11-30 01:00:00 -0500 - GTTF vs IRSR header flags
 - Documented that GTTF ghosts have a fixed header flag tuple (0,0,1,0) across all 29 files while IRSR replays vary; no flag semantics claimed. Full-tier test added.
 
