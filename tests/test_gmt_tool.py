@@ -6,7 +6,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
+import gmt_format  # noqa: E402
 import gmt_tool  # noqa: E402
+import mas_tool  # noqa: E402
 
 
 class GmtToolTest(unittest.TestCase):
@@ -56,6 +58,37 @@ class GmtToolTest(unittest.TestCase):
         h = gmt_tool.read_header(p)
         self.assertTrue(h.known_magic)
         self.assertGreater(h.size, 24)
+
+
+    def test_split_f0_and_info_output(self):
+        """f0 halves are exposed by the helper and the info CLI."""
+        import subprocess
+        import sys
+        import gmt_format
+        low, high, delta = gmt_format.split_f0(0x0067006F)
+        self.assertEqual((low, high, delta), (0x6F, 0x67, 8))
+        sample = None
+        for path in Path(__file__).resolve().parents[1].parent.glob("GTR2Steam/**/*.gtr"):
+            try:
+                _, entries = mas_tool.read_archive(str(path))
+            except Exception:
+                continue
+            sample = next((e.data for e in entries
+                           if e.name.lower().endswith(".gmt") and e.data), None)
+            if sample:
+                break
+        if sample is None:
+            self.skipTest("no GTR2 GMT sample")
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            target = Path(td) / "sample.gmt"
+            target.write_bytes(sample)
+            result = subprocess.run(
+                [sys.executable, str(Path(__file__).resolve().parents[1] / "gmt_tool.py"),
+                 "info", "--meshes", str(target)], capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("f0=0x", result.stdout)
+        self.assertIn("halves=", result.stdout)
 
 
 if __name__ == "__main__":

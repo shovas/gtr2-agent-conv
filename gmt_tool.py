@@ -158,6 +158,12 @@ def cmd_info(args: argparse.Namespace) -> int:
                 f"mesh[{m.index}]: flags=0x{m.flags:08x} vc={m.vertex_count} vo={m.vertex_offset} "
                 f"ic={m.index_count} io={m.index_offset}"
             )
+            import gmt_format
+            raw = Path(args.file).read_bytes()
+            if m.vertex_offset + 4 <= len(raw):
+                marker = struct.unpack_from("<I", raw, m.vertex_offset)[0]
+                low, high, delta = gmt_format.split_f0(marker)
+                print(f"  f0=0x{marker:08x} halves=({low},{high}) delta={delta}")
     return 0
 
 

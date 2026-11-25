@@ -102,6 +102,17 @@ def mesh_marker(mesh: GmtMesh) -> int | None:
     return mesh.base_vertices[0].f0 or None
 
 
+def split_f0(value: int) -> tuple[int, int, int]:
+    """Split a per-mesh f0 marker into its two 16-bit components.
+
+    Corpus invariants: the halves are near-equal in ~49% of markers, and each
+    half is separately stable across cross-corpus material families.  Exact
+    encoding remains unresolved; this helper only exposes the verified layout.
+    """
+    low, high = value & 0xFFFF, value >> 16
+    return low, high, abs(high - low)
+
+
 def unpack_vertex_color(value: int) -> tuple[int, int, int, int]:
     """Decode a GTR2 base-vertex f7 word into its four bytes.
 
