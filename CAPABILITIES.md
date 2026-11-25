@@ -133,7 +133,8 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 
 - **TRK/CAM namespace boundary**: 288 `View=` and 135,196 `Instance=` references across 152 track scripts share no names with parsed `.cam` cameras; the namespaces are distinct. Full-tier corpus-fact test.
 
-- **SVM numeric validation**: `simbin_text_tool.validate_svm_numeric()` checks 11 high-frequency setup keys against inclusive corpus-observed bounds across all 21,183 plain `.svm` files; encrypted payloads are skipped. Full-tier regression test.
+- **Encrypted `//[[gM` config decoder**: `isi_gm_crypt.py` (independent reimplementation of Luigi Auriemma's GPLv2 `rfactorgmdec` algorithm) decrypts all **10** encrypted `.svm` files with keynum 0 and all **18** `gMb1.002f` configs with Top Race 2009 (`0x000dfc2a`) / Superleague (`0x0001be0b`) keynums — 100% printable text. Full-tier regression test across every encrypted file. Tool provenance in `docs/tools-reference.md`.
+- **SVM numeric validation**: `simbin_text_tool.validate_svm_numeric()` checks 11 high-frequency setup keys against inclusive corpus-observed bounds across all 21,183 plain `.svm` files; encrypted payloads are decoded first by `isi_gm_crypt.py`. Full-tier regression test.
 
 - **AUD numeric validation**: `validate_aud_map()` now checks 20 numeric event keys against corpus-observed bounds in addition to the strict path/numeric key split; verified on all 202 GTR2/GTL/Race07/Volvo maps. Full-tier regression test.
 

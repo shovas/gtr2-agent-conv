@@ -2,6 +2,10 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-25 23:30:00 -0500 - Encrypted ISI configs decrypted; tool mirrors indexed
+- **Solved the encrypted `.svm` and gMb1.002f backlog**: added `isi_gm_crypt.py` implementing the rfactorgmdec stream cipher with documented game keynums; all 10 encrypted `.svm` files and all 18 gMb1.002f configs now decode to 100% printable text. Full-tier regression test over every encrypted file.
+- Indexed `../aluigi-mirror-261124/` (202M/4,405 files), `../quickbms-mirror/` (99M/1,025 files) and `../gtl-tools/` in new `docs/tools-reference.md`, plus `DEPENDENCIES.md`/`AGENTS.md`/`docs/corpus-reference.md`. Confirmed GTL's gMb 'Encryptomatic' cipher is distinct from rfactorgmdec and does not decrypt our files (nor vice versa).
+
 ## 2026-11-26 16:30:00 -0500 - AIW Features capacity negative
 - Documented that AIW `[Features]` numbers are capacity defaults rather than section counts (startinggrid 104 vs GRID 36 typical); full-tier corpus-fact regression test added.
 

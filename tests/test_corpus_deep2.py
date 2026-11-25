@@ -957,6 +957,33 @@ class CorpusDeep2Test(unittest.TestCase):
                 checked += 1
         self.assertEqual(checked, 371)
 
+    def test_encrypted_gm_configs(self):
+        """Every encrypted .svm / gMb config decrypts to real text."""
+        import glob
+        import os
+        import isi_gm_crypt as gm
+        svm = gmb = 0
+        for p in glob.glob(str(ROOT.parent / "**" / "*"), recursive=True):
+            if not os.path.isfile(p):
+                continue
+            data = Path(p).read_bytes()
+            if data.startswith(b"//[[gM") and data[6:7] == b"b":
+                if gm.printability(data.split(b"\n", 1)[-1]) > 0.9:
+                    continue  # plain text config with a gM-style header
+                name = gm.detect_keynum(data)
+                if name is None:
+                    continue  # unrelated //[[gM file (e.g. .bch replay)
+                text = gm.decrypt_gm_file(data, gm.GM_KEYNUMS[name])
+                self.assertGreater(gm.printability(text), 0.97, p)
+                if data[7:12] == b"1.000":
+                    svm += 1
+                    self.assertIn(b"VehicleClassSetting=", text, p)
+                    self.assertIn(b"[GENERAL]", text, p)
+                else:
+                    gmb += 1
+        self.assertEqual(svm, 10)
+        self.assertGreaterEqual(gmb, 18)
+
     def test_hdc_numeric_bounds(self):
         """HDC chassis fields stay within corpus-observed bounds."""
         import glob

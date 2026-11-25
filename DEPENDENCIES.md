@@ -8,6 +8,8 @@
 ## Optional / external (not bundled)
 
 - **`../rfactortools`** - reference Python package and C sources; useful for comparison and for `rfactordec.c` / `_crypt` experiments. Not required by current project tests.
+- **`../aluigi-mirror-261124/` and `../quickbms-mirror/`** - offline mirrors of Luigi Auriemma's GPLv2 tool sources (`rfactordec`, `rfactorgmdec`, `wtcced`) and QuickBMS scripts. Used as format/algorithm references only; no code or binaries copied. Inventory in `docs/tools-reference.md`.
+- **`../gtl-tools/gtl_files.py`** - reference utility for GTL-specific `.gtl` MAS and gMb 'Encryptomatic' crypt; documents a cipher distinct from `rfactorgmdec`. Read-only reference; no code copied.
 - **Game corpora under `../`** - many local game installs used as format oracles/reference data; the full list is in `AGENTS.md`. Not required; tests skip when absent.
 - **`monodis` / .NET tooling** - used once to cross-check the JCA implementation against a third-party decryptor; not required for normal use.
 - **GCC / Python headers** - only needed if experimenting with building ISI decrypt/encrypt C code (`rfactordec.c` / `_crypt` extension). Not required for normal tool use.

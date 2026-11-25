@@ -73,7 +73,11 @@ Deep field-level probe of the minimally investigated `../Automobilista`, `../Sto
 
 Generic section/key parsing of all 1,287 `.gdb` and 3,385 `.car` files found **667 / 173 distinct keys respectively but no cross-corpus universal key**. Only family-specific universals exist: `.car` GTR2-family files (165) all carry `genstring`, `pitgroup`, `number`, `driver1`, `team` (the GTR2-only key set already used by `gtl_to_gtr2`); rF1 `.gdb` (81) all carry `racelaps`. Seven zero-length `.gdb` fixtures in `../rfactortools/tests/data` are legitimately empty. `parse_gdb()`/`parse_car()`/`validate_config()` therefore perform structural validation only — no universal key rule can be promoted beyond the existing family-specific validators.
 
-## Encrypted `.svm` setups (2026-11-24)
+## Encrypted `.svm` setups (2026-11-24) — SOLVED 2026-11-25
+
+**Correction to the negatives below:** all 10 encrypted `.svm` files and all 18 `gMb1.002f` configs are now decoded by `isi_gm_crypt.py`, an independent Python implementation of Luigi Auriemma's GPLv2 `rfactorgmdec` algorithm (obtained from `../aluigi-mirror-261124/papers/rfactorgmdec.zip`). Keynums: rFactor `0` for `.svm`, Top Race 2009 `0x000dfc2a` for TC2000/TR2009 gMb files, Superleague `0x0001be0b` for SLF09 files. Output is 100% printable setup/physics text, e.g. `VehicleClassSetting="FormulaIS"` and `[GENERAL]`. The earlier "no decoder" conclusion was wrong because our brute-force emulation had an off-by-one in the state update (`i` is incremented before the XOR). The separate GTL `Encryptomatic` cipher documented in `../gtl-tools/gtl_files.py` does **not** decrypt these files — two distinct ciphers share the `//[[gMb...]]` header. See `docs/tools-reference.md`.
+
+## Archived negative record (kept for provenance)
 
 10 shipped `.svm` files (only **2 distinct payloads**, duplicated across corpora: `Toban Long.svm` 558 B and `Orchard Lake Oval.svm` 449 B) carry `//[[gMb1.000f ...]]` headers followed by a high-entropy payload beginning `5b 79 6d 98 7f 80 a9 e0` (221 distinct byte values, ~11 short ASCII runs, implausible f32 alignments). The two payloads share a 20-byte prefix. Exhausted offline hypotheses:
 - single-byte XOR (0..255): best printability 0.45, no valid plaintext.

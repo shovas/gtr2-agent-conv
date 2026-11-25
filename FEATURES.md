@@ -54,7 +54,7 @@ python3 mas_tool.py delete <archive> <name...>
 
 ## 2. Decrypt/encrypt ISI files (partial)
 
-**What it does**: Decrypts/encrypts ISI/rFactor 16-byte-header files (GMT/MAS-style), with GMT skip=4 handling.
+**What it does**: Decrypts/encrypts ISI/rFactor 16-byte-header files (GMT/MAS-style), with GMT skip=4 handling. Encrypted `//[[gM` text configs (rFactor `.svm` and GTR-family gMb files) are decoded by `isi_gm_crypt.py` using the documented game keynums.
 
 **How to ask**:
 - "Decrypt this GMT/MAS file."
@@ -65,6 +65,7 @@ python3 mas_tool.py delete <archive> <name...>
 ```bash
 python3 isi_crypt.py <input> <output>             # decrypt
 python3 isi_crypt.py -e -s 4b1dca9f960524e8 <in> <out>  # encrypt
+python3 -c "import isi_gm_crypt as g; d=open('setup.svm','rb').read(); print(g.decrypt_gm_file(d, g.GM_KEYNUMS['rf1']).decode('latin-1'))"
 ```
 
 **Limitations**: Only known ISI sign/key 16-byte-header variants. Unknown-signature files (e.g. DETOMASO_PANTERA_RAINSCREEN.GMT) remain unresolved.
