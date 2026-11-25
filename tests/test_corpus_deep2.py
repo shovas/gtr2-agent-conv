@@ -2047,6 +2047,33 @@ class CorpusDeep2Test(unittest.TestCase):
             self.assertGreater(matching / checked, 0.7)
             self.assertLess(baseline / checked, 0.1)
 
+    def test_synthetic_gmt_container_roundtrip(self):
+        """A template-free GMT container parses and round-trips cleanly."""
+        import struct
+        import gmt_format as gf
+        import validate_materials
+        record = [0] * 27
+        record[1] = 0x20004011
+        record[3] = 3
+        record[10] = 3
+        vertices = b"".join(struct.pack("<I6fI", i + 1, float(i), 0, 0, 0, 1, 0, 0)
+                            for i in range(3))
+        stream = b"".join(bytes(4) + struct.pack("<2f", i * 0.5, 0.0) + bytes(20)
+                          for i in range(3))
+        mesh = gf.GmtMesh(record=gf.GmtMeshRecord(raw=record), vertex_data=vertices,
+                          index_data=struct.pack("<I3H", 0, 0, 1, 2),
+                          stream2_data=stream)
+        built = gf.build_synthetic_gmt([mesh])
+        first = gf.parse_gmt("a.gmt", built)
+        self.assertEqual(len(first.meshes), 1)
+        self.assertEqual(first.meshes[0].record.vertex_count, 3)
+        self.assertEqual(first.meshes[0].stream2_data, stream)
+        self.assertEqual(first.materials, [])
+        self.assertEqual(validate_materials.check_gmt(built, "a.gmt"), [])
+        second = gf.parse_gmt("b.gmt", gf.relayout_gmt(first))
+        self.assertEqual(second.meshes[0].vertex_data, vertices)
+        self.assertEqual(second.meshes[0].stream2_data, stream)
+
     def test_gmt_rec6_only_uv_block_exposed(self):
         """Single-block layouts expose their vc*32 UV candidate to decoders."""
         import glob

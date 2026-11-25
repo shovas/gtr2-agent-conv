@@ -122,6 +122,19 @@ word. Replay frame layout is therefore a distinct, undecoded format —
 recorded as a new avenue, not claimed as solved. Full-tier header regression
 test added.
 
+## Template-free GMT container verified (2026-11-29)
+
+All converters currently require a real GTR2 GMT as a structural template.
+A minimal new-layout container was synthesized from scratch: zeroed 0x18..0x16C
+header region, new magic at 0x08, mesh table at 0x16C, one mesh record with
+flag `0x20004011`, a 3-vertex block, a single-block UV block and a 3-index list,
+plus an empty material tail. `gmt_format.parse_gmt()` reads it correctly,
+`validate_materials.check_gmt()` returns no warnings, and a `relayout_gmt()`
+round-trip preserves vertex and UV bytes. Added
+`gmt_format.build_synthetic_gmt()` and a full-tier test. Caveat: no materials
+or textures are present, so this is a structural fallback/test fixture, not a
+render-ready replacement for a real template.
+
 ## f0 bytes do not index material stages (2026-11-29)
 
 Tested whether f0's two bytes are small indices into the mesh's material stage

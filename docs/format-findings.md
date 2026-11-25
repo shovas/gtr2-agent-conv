@@ -14,6 +14,11 @@ regression tests or an explicitly documented negative.
   `gmt_semantic.read_gtr1_geometry()`).
 - `gmt_layout.is_old()/is_new()` detect layouts; `old_to_new_semantic()` rebuilds
   a new-layout mesh from decoded old-layout geometry.
+- A **template-free container** can be synthesized: `gmt_format.build_synthetic_gmt()`
+  builds a valid new-layout GMT from mesh objects alone (zeroed 0x18..0x16C
+  header, empty material tail). It parses, round-trips and passes
+  `validate_materials.check_gmt()`, but carries no materials/textures, so it is
+  a test/fallback container rather than a render-ready conversion.
 - GTL archives are already new-layout: 2,529 sampled GMTs from `.gtl` archives
   all carried the new magic, so GTL→GTR2 needs no mesh relayout (only TRK/GDB/
   archive-convention fixes). Full-tier regression test.

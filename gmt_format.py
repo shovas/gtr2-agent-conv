@@ -436,6 +436,33 @@ def parse_gmt(path: str | Path, data: bytes | None = None) -> GmtFile:
     )
 
 
+def build_synthetic_gmt(meshes: List[GmtMesh], flags: int = 0x20,
+                        tail: bytes = b"", mesh_first: int = 0x174) -> bytes:
+    """Build a structurally valid new-layout GMT without a template file.
+
+    Corpus-verified: the zeroed 0x18..0x16C header region and an empty material
+    tail parse cleanly and pass `validate_materials.check_gmt()`. The result is
+    useful as a test fixture or a fallback container, but it carries **no
+    materials or textures**, so it is not a render-ready GTR2 replacement for
+    a real template. Callers must supply fully built `GmtMesh` objects.
+    """
+    if not meshes:
+        raise ValueError("at least one mesh is required")
+    container = GmtFile(
+        source_path=Path("synthetic.gmt"),
+        original=bytes(mesh_first + len(meshes) * 108 + 4),
+        obj_list_offset=0,
+        flags=flags,
+        magic=GMT_MAGIC,
+        header_18_16c=bytes(0x16C - 0x18),
+        mesh_first=mesh_first,
+        meshes=meshes,
+        tail=tail,
+        gaps=b"",
+    )
+    return relayout_gmt(container)
+
+
 def relayout_gmt(g: GmtFile, align: int = 4) -> bytes:
     """Rebuild a GMT with all mesh blobs packed contiguously after the mesh table.
 

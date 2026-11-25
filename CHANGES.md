@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 17:30:00 -0500 - Template-free GMT container
+- Added `gmt_format.build_synthetic_gmt()` to build a structurally valid GTR2 GMT without a game-data template. Parses, round-trips and passes material validation; full-tier test added. No materials/textures are included, so it is a fallback/test container only.
+
 ## 2026-11-29 17:00:00 -0500 - f0 stage-index negative
 - Recorded that f0 bytes are not material-stage indices (3,935 matches vs 3,937 shuffled); full-tier guard test added.
 
