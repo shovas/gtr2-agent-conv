@@ -143,6 +143,19 @@ column-7/column-1 stream invariant was also re-scoped to the two-stream layout
 (it does not hold for single-block UVs, which end in zeros). All 35 module
 tests and the five affected full-tier tests pass after the fix.
 
+## CAM positions invert AIW world coordinates (2026-11-29)
+
+Verified the guitarmaen CAM/AIW note empirically on 30 GTR2 tracks with
+matched `.cam`/`.AIW` file pairs. Using per-track mean positions, camera x and
+waypoint x have opposite signs in **27/30 (90%)** tracks versus **53.5%** for
+a distribution-preserving shuffle of waypoint means (Pearson r **−0.842**).
+The y and z axes show the same inversion (opposite signs 20/30 each, r −0.990
+and −0.750), though their weaker magnitude leaves larger offsets. The relation
+is therefore a coordinate-frame inversion, not an exact per-point negation —
+cameras and waypoints are sampled differently. This matters for rF1→GTR2
+track conversion, where CAM positions must be transformed consistently with
+AIW. Full-tier permutation-controlled regression test added.
+
 ## Template-free GMT container verified (2026-11-29)
 
 All converters currently require a real GTR2 GMT as a structural template.

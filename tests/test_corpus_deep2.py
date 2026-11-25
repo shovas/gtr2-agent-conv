@@ -3948,6 +3948,46 @@ class CorpusDeep2Test(unittest.TestCase):
             self.assertTrue(event.driver, path.name)
             self.assertTrue(event.car.lower().endswith(".car"), path.name)
 
+    def test_cam_positions_invert_aiw_world_coordinates(self):
+        """GTR2 camera positions are negatively correlated with AIW waypoints."""
+        import random
+        import statistics
+        import simbin_text_tool as stt
+        rows = []
+        location_root = ROOT.parent / "GTR2Steam" / "GameData" / "Locations"
+        for directory in location_root.iterdir():
+            if not directory.is_dir():
+                continue
+            for cam_path in directory.glob("*.cam"):
+                aiw_path = directory / (cam_path.stem + ".AIW")
+                if not aiw_path.is_file():
+                    continue
+                try:
+                    cameras = stt.parse_cam(cam_path.read_text(encoding="latin-1"))
+                    waypoints = stt.parse_aiw(aiw_path.read_text(encoding="latin-1"))
+                except Exception:
+                    continue
+                if not cameras.cameras or not waypoints.waypoints:
+                    continue
+                centers = [[sum(cam.position[k] for cam in cameras.cameras) / len(cameras.cameras)
+                            for k in range(3)],
+                           [sum(wp.pos[k] for wp in waypoints.waypoints) / len(waypoints.waypoints)
+                            for k in range(3)]]
+                rows.append(centers)
+        self.assertGreaterEqual(len(rows), 25)
+        random.seed(85)
+        for axis in range(3):
+            cam_values = [row[0][axis] for row in rows]
+            aiw_values = [row[1][axis] for row in rows]
+            observed = sum(x * y < 0 for x, y in zip(cam_values, aiw_values)) / len(rows)
+            baselines = []
+            for _ in range(50):
+                shuffled = random.sample(aiw_values, len(aiw_values))
+                baselines.append(sum(x * y < 0 for x, y in zip(cam_values, shuffled))
+                                 / len(rows))
+            margin = 0.25 if axis == 0 else 0.10
+            self.assertGreater(observed, statistics.mean(baselines) + margin)
+
     def test_gttf_frame_marker_prefix_constant(self):
         """Bytes +24..+30 are a fixed marker; only byte +31 varies."""
         import glob

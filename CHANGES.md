@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 19:00:00 -0500 - CAM/AIW coordinate inversion verified
+- Confirmed empirically that GTR2 camera positions are inverted relative to AIW waypoints (x opposite-sign in 90% of 30 matched tracks vs 53.5% shuffled, r -0.842). Full-tier permutation-controlled test added.
+
 ## 2026-11-29 18:30:00 -0500 - UV tiling ratios are material properties
 - Found meshes sharing a material share UV tiling ratios (91.6% of 487 groups vs 4.8% shuffled). Full-tier permutation-controlled test added; findings docs updated.
 

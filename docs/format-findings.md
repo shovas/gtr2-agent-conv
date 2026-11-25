@@ -140,6 +140,12 @@ regression tests or an explicitly documented negative.
 - Header fields after filenames: `u8, u8, f32, u8, u32`; the f32 is one of
   **36000/43200/46800** (10/12/13 h in seconds — strong inference) across 42
   files. Exposed as `EventFile.session_seconds` etc.
+- **Camera coordinates are inverted** relative to AIW waypoints: across 30
+  GTR2 tracks with matched `.cam`/`.AIW` pairs, track-mean camera x has the
+  opposite sign to track-mean waypoint x in 90% of tracks (vs 53.5% shuffled;
+  Pearson r −0.84); y and z show the same tendency (r −0.99 / −0.75). This
+  confirms the guitarmaen CAM/AIW note empirically. The relation is a strong
+  frame inversion, not an exact per-coordinate negation.
 - All nine shipped `.Vcr` replay files parse with the same reader: gzip +
   gMb wrapper + `IRSR` v1.05, with driver/car/team names and session values
   from the same 36000/43200/46800 set. The GTTF-specific frame-grid detector
