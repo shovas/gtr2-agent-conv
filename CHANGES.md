@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-30 04:30:00 -0500 - GTTF session-field editor
+- Added `simbin_events_tool.set_session_seconds()` to edit the header session f32 in place; verified on 29 ghosts that at most four bytes change and the container rewraps correctly. Full-tier test added.
+
 ## 2026-11-30 04:00:00 -0500 - Byte-identical SimBin containers
 - Added `gzip_simbin_tool.compress_simbin()` which reproduces shipped GTT/VCR gzip containers byte-for-byte (29 ghosts + 9 replays). Removes the container barrier for a future ghost writer. Full-tier test added.
 

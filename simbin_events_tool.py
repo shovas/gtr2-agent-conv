@@ -171,6 +171,33 @@ def parse_header_fields(data: bytes, off: int) -> dict | None:
     }
 
 
+def session_field_offset(data: bytes) -> int | None:
+    """Return the byte offset of the header's session_seconds f32."""
+    kind = next((magic.decode() for magic in MAGICS if magic in data[:64]), None)
+    if kind is None:
+        return None
+    offset = data.index(kind.encode()) + 4 + 4
+    first, offset = _read_u32_string(data, offset)
+    if first.lower().endswith(".rfm"):
+        return None
+    _, offset = _read_u32_string(data, offset)
+    return offset + 2
+
+
+def set_session_seconds(data: bytes, seconds: float) -> bytes:
+    """Return a copy of a GTTF/IRSR payload with session_seconds replaced.
+
+    Only the four f32 bytes change; all other payload bytes (including the
+    frame grid and tail) are preserved verbatim.
+    """
+    offset = session_field_offset(data)
+    if offset is None or offset + 6 > len(data):
+        raise ValueError("no writable session field")
+    output = bytearray(data)
+    struct.pack_into("<f", output, offset, seconds)
+    return bytes(output)
+
+
 def parse_payload(data: bytes) -> EventFile:
     kind = next((m.decode() for m in MAGICS if m in data[:64]), None)
     if kind is None:

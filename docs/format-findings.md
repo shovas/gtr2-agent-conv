@@ -151,6 +151,9 @@ regression tests or an explicitly documented negative.
   `gzip_simbin_tool.compress_simbin()` writes byte-identical containers by
   patching the XFL/OS header bytes to `00 0b` (verified on 29 GTT + 9 VCR
   files), so a payload-level ghost writer is feasible.
+  `simbin_events_tool.set_session_seconds()` already edits that field in place
+  (at most four bytes change) and the result rewraps byte-identically apart
+  from the edited value.
 - Header fields after filenames: `u8, u8, f32, u8, u32`; the f32 is one of
   **36000/43200/46800** (10/12/13 h in seconds — strong inference) across 42
   files. Exposed as `EventFile.session_seconds` etc.

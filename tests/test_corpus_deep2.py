@@ -4180,6 +4180,27 @@ class CorpusDeep2Test(unittest.TestCase):
             replay_flags.add((event.flags_a, event.flags_b, event.flags_c, event.flags_u))
         self.assertGreater(len(replay_flags), 3)
 
+    def test_gttf_session_field_editor(self):
+        """Session seconds can be changed without touching other payload bytes."""
+        import glob
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        checked = 0
+        for path in glob.glob(str(ROOT.parent / "GTR2Steam" / "TimeTrial" / "**" / "*.GTT"),
+                              recursive=True):
+            payload = gz.decompress(path)
+            offset = st.session_field_offset(payload)
+            self.assertIsNotNone(offset)
+            edited = st.set_session_seconds(payload, 12345.0)
+            self.assertEqual(len(edited), len(payload))
+            self.assertEqual(st.parse_payload(edited).session_seconds, 12345.0)
+            differences = [index for index, (old, new)
+                           in enumerate(zip(payload, edited)) if old != new]
+            self.assertTrue(set(differences).issubset(set(range(offset, offset + 4))))
+            self.assertEqual(gz.compress_simbin(gz.decompress(path)), Path(path).read_bytes())
+            checked += 1
+        self.assertEqual(checked, 29)
+
     def test_gttf_container_roundtrips_byte_identically(self):
         """SimBin gzip headers can be reproduced byte-for-byte."""
         import glob

@@ -278,6 +278,16 @@ frame's `slot48_low` (|r| 0.993 vs 0.24 shuffled). These are near-copies, not
 bit-exact, so the tail is a summary of final car state. Full-tier
 permutation-controlled test added.
 
+## GTTF session-field editor (2026-11-30)
+
+With containers reproducible, added `session_field_offset()` and
+`set_session_seconds()` to `simbin_events_tool.py`. On all 29 ghosts the
+session f32 was located at payload offset 93; editing it changed at most the
+four bytes of that float, left every other payload byte unchanged, and the
+edited payload rewrapped into a valid container. This is the first verified
+payload-level mutation, demonstrating a path toward a ghost writer without
+reconstructing frame fields from scratch. Full-tier test added.
+
 ## SimBin gzip containers are byte-identically reproducible (2026-11-30)
 
 Compared shipped `.GTT`/`.Vcr` gzip bytes against Python's deterministic
