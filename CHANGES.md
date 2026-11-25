@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 15:45:00 -0500 - f0 half-sum invariant
+- Verified f0's paired-half mean inversely tracks material index (r -0.264 vs 0.006 permuted); full-tier distribution-preserving test added.
+
 ## 2026-11-28 15:15:00 -0500 - f0 paired-ID sign invariant
 - Found f0 half-difference sign family-stable (53.4% vs 18.4% permuted) and skewed negative for material-index-0 meshes (−0.325 vs 0.007). Full-tier distribution-preserving test added.
 

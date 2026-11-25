@@ -186,6 +186,10 @@ Code-first check around `fcn.005e9ab0` and the shipped shader members:
 
 So the paired near-equal halves are not indices or simple hashes of shipped shaders; they most plausibly originate from an external authoring/material identifier. Full-tier regression test added.
 
+## GTR2 f0 half-sum invariant (2026-11-28)
+
+The mean of f0's two 16-bit halves also decreases with the local material index: Pearson r = **−0.264** (n≈12,000) vs **0.006** for distribution-preserving permuted indices. This complements the half-delta and sign invariants and confirms that both components of the pair, not just their difference, depend on the material slot. Full-tier regression test added.
+
 ## GTR2 f0 paired-ID sign invariant (2026-11-28)
 
 The sign of `high - low` is also structured:
