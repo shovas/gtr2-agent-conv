@@ -1144,6 +1144,35 @@ HED_NUMERIC_BOUNDS = {
 }
 
 
+VEH_UNIVERSAL_KEYS = ("hdvehicle", "graphics", "sounds", "classes",
+                      "driver", "number", "team")
+
+
+def validate_veh_numeric(data: bytes | str) -> list[str]:
+    """Check universal VEH keys and Eyepoint bounds.
+
+    Verified on 371 rF1-era `.veh` files: all carry the seven universal keys;
+    the 100 Eyepoint vectors have three components in [-0.1, 1.05].
+    """
+    values = parse_veh(data)
+    problems: list[str] = []
+    for key in VEH_UNIVERSAL_KEYS:
+        if key not in values:
+            problems.append(f"missing {key}")
+    eye = re.search(r"(?mi)^\s*Eyepoint\s*=\s*\(([^)]*)\)",
+                    data if isinstance(data, str) else data.decode("latin-1"))
+    if eye:
+        try:
+            components = [float(x) for x in eye.group(1).split(",")]
+        except ValueError:
+            problems.append("invalid Eyepoint components")
+            components = []
+        if components and (len(components) != 3
+                           or any(not (-0.2 <= x <= 1.1) for x in components)):
+            problems.append(f"Eyepoint {components} out of range")
+    return problems
+
+
 def validate_hed_numeric(data: bytes | str) -> list[str]:
     """Check head-physics vector fields and limit ordering.
 

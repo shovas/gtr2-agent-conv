@@ -355,6 +355,8 @@ GTR1 coverage is now complete: a full `../GTR1Vanilla` scan (33,477 GMTs with th
 
 - **GDB TerrainDataFile references**: `parse_gdb_terrain_refs()` extracts `.tdf` overrides from rF1-era event files. RF1Vanilla has 26 references, all resolving to loose or archived `.tdf` files; F1C/F12002/NT2003 event files contain no `TerrainDataFile` keys. Full-tier regression test; no exceptions.
 
+- **VEH numeric/reference scope**: the 371 rF1-era `.veh` files all carry the seven universal keys (`HDVehicle`, `Graphics`, `Sounds`, `Classes`, `Driver`, `Number`, `Team`). Only `Eyepoint` is truly numeric (100 triples, components -0.1..1.05); other "numeric" keys are text with embedded numbers (e.g. class years) and are not bounded. `validate_veh_numeric()` with full-tier test.
+
 - **WAV trailing chunks**: `wav_chunks()` walks RIFF chunks and `validate_wav_chunks()` enforces fmt-first, exactly one data chunk, and a closed chunk-ID set: `fmt `, `data`, `PAD `, `LIST`, `fact`, `bext`, `LGWV`, `_PMX`, `DISP`, `cue `. Verified on sampled GTR2/GTL/Race07/Volvo files. Two edge cases handled: final odd-sized chunks may omit the word-alignment pad byte, and `cue ` chunks occur in some GTR2 sound effects. Full-tier regression test.
 
 - **WAV header scope**: `wav_header()` / `validate_wav_header()` cover PCM (format 1) consistency: 2 channels or 1, 8/16-bit, sample rates 8k/11.025k/22k/22.05k/44.1k/48k, with block-align and byte-rate arithmetic verified on sampled GTR2/GTL/Race07/Volvo files. WAVE_FORMAT_MPEGLAYER3 (0x55) files are common in GTR2 (100/692 sampled) and GTL (1/553) — they are deliberately left opaque (no PCM arithmetic to check). Volvo's JCA WAVs require the explicit `volvo` key; the default key fails. Full-tier regression test.

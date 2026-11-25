@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 10:30:00 -0500 - VEH key/eyepoint validator
+- Added `simbin_text_tool.validate_veh_numeric()` covering seven universal keys and Eyepoint vector bounds across 371 rF1-era `.veh` files. Full-tier regression test added.
+
 ## 2026-11-26 10:00:00 -0500 - WAV chunk validator
 - Added `media_tool.wav_chunks()` and `validate_wav_chunks()` for fmt-first, single-data, known-trailing-chunk validation across four corpora; handled odd-sized final chunks without pad byte and `cue ` chunks. Full-tier regression test added.
 

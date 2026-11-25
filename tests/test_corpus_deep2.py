@@ -781,6 +781,19 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertEqual(engines, 66)
         self.assertEqual(boxes, 60)
 
+    def test_veh_numeric_fields(self):
+        """VEH files carry universal keys and bounded Eyepoint vectors."""
+        import glob
+        import os
+        checked = 0
+        for root in ("RF1Vanilla", "F1C", "F12002", "NT2003"):
+            for p in glob.glob(str(ROOT.parent / root / "**" / "*"), recursive=True):
+                if not os.path.isfile(p) or not p.lower().endswith(".veh"):
+                    continue
+                self.assertEqual(stt.validate_veh_numeric(stt.read_text(p)), [], p)
+                checked += 1
+        self.assertEqual(checked, 371)
+
     def test_hdc_numeric_bounds(self):
         """HDC chassis fields stay within corpus-observed bounds."""
         import glob
