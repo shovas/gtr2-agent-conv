@@ -1006,6 +1006,43 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertEqual(checked, 204)
 
+    def test_gttf_axes_match_aiw_y_z(self):
+        """Ghost +0/+1 endpoint ranges match AIW elevation/z on matched tracks."""
+        import glob
+        import gzip
+        import statistics
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        import simbin_text_tool as stt
+        base = ROOT.parent / "GTR2Steam"
+        aiws = {}
+        for path in glob.glob(str(base / "**" / "*.AIW"), recursive=True):
+            aiws.setdefault(path.lower().rsplit("/", 1)[-1], path)
+        y_errors = []
+        z_errors = []
+        for path in glob.glob(str(base / "TimeTrial" / "**" / "*.GTT"), recursive=True):
+            payload = gz.decompress(path)
+            event = st.parse_payload(payload)
+            grid = st.find_frame_grid(payload)
+            aiw = aiws.get((event.aiw or "").lower())
+            if not grid or not aiw:
+                continue
+            waypoints = [w.pos for w in stt.parse_aiw(stt.read_text(aiw)).waypoints
+                         if w.pos and w.wp_class() in (0, 1)]
+            frames = st.read_frames(payload, grid)
+            y_errors.append(abs(min(f["position"][0] for f in frames)
+                                - min(w[1] for w in waypoints))
+                            + abs(max(f["position"][0] for f in frames)
+                                  - max(w[1] for w in waypoints)))
+            z_errors.append(abs(min(f["position"][1] for f in frames)
+                                - min(w[2] for w in waypoints))
+                            + abs(max(f["position"][1] for f in frames)
+                                  - max(w[2] for w in waypoints)))
+        self.assertGreaterEqual(len(y_errors), 25)
+        self.assertLess(statistics.median(y_errors), 2)
+        self.assertLess(statistics.median(z_errors), 10)
+        self.assertGreaterEqual(sum(v < 10 for v in z_errors), 20)
+
     def test_gttf_frame8_not_elevation_or_progress(self):
         """Ghost frame +8 is a bounded smooth field, not elevation/progress."""
         import glob

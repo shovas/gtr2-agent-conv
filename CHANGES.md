@@ -5,6 +5,9 @@ Newest-first change log. Timestamps use repository commit dates (ISO 8601, local
 ## 2026-11-26 16:30:00 -0500 - AIW Features capacity negative
 - Documented that AIW `[Features]` numbers are capacity defaults rather than section counts (startinggrid 104 vs GRID 36 typical); full-tier corpus-fact regression test added.
 
+## 2026-11-27 02:00:00 -0500 - GTTF axes +0/+1 map to AIW y/z
+- Matched 27 GTR2 ghosts to AIW waypoints: ghost +0 reproduces AIW y endpoints within 0.4 m median (27/27 within 10 m), +1 reproduces z within 6.6 m median (21/27 within 10 m). AIW x has no counterpart in the frame; full-tier regression test added.
+
 ## 2026-11-27 01:00:00 -0500 - GTTF frame +8 bounded field
 - Verified frame +8 has a tightly bounded span (~1.66 m median) that does not match AIW elevation or lap progress, moderately smooth (lag-1 ~0.5); lateral-offset interpretation remains a hypothesis pending a coordinate transform. Full-tier regression test added.
 
