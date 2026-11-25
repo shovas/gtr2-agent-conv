@@ -16,6 +16,12 @@ Evidence:
 All work here is **offline**: no game was launched. "Runtime-dependent" means
 conclusively establishing it requires actual game execution.
 
+## GTTF header fields recovered from GTR2.exe (2026-11-27)
+
+Static analysis of the unpacked `GTR2.exe` (`.text` at RVA `0x401000`) located the `GTTF`/`IRSR` pointer table at RVA `0x6ead90`, the validator `fcn.00527000` (version constants 1.0/1.02/1.03/1.04/1.05) and the reader `fcn.0052be30` / writer `fcn.0052a540`. The reader's field order confirms that the five bytes after the TRK/AIW filenames are `u8, u8, f32, u8, u32` — now exposed as `simbin_events_tool.EventFile.flags_a/flags_b/session_seconds/flags_c/flags_u`.
+
+Across all 42 local event files (29 GTTF + 13 IRSR) the float takes only **36000 / 43200 / 46800**, exactly 10/12/13 hours in seconds — consistent with a session time limit (strong inference, not runtime-confirmed). The GTTF `+8` steering relationship and the rest of the frame field work remain separate. Full-tier regression test added.
+
 ## GTTF slots +48/+52/+56/+60: car-independence negative (2026-11-26)
 
 Across all 31 GTT files, every one of these slots reaches sentinel-like u32 maxima (>4.0e9 in **31/31** files for each slot; medians 4.295e9 / 4.295e9 / 4.295e8 / 4.291e9). Ferrari F550 and BMW M3 show no distinguishing ceiling or range. Slot +52 has small clusters near `0x00000000` and `0x00800000` (sign-bit artifact) in both cars, together covering a median 16.7% of frames (range 5.3–30.6%) — far too little to be a bounded physical signal. The earlier per-byte smoothness and throttle/brake/acceleration negatives for these slots stand; no car-calibrated semantics promoted. Regression test added (`test_gttf_slots48_52_56_60_no_car_ceiling`).

@@ -1681,6 +1681,31 @@ class CorpusDeep2Test(unittest.TestCase):
                 break
         self.assertEqual(converted, 150)
 
+    def test_event_header_fields_from_gtr2_code(self):
+        """Code-derived header fields hold across 29 ghosts and 13 replays."""
+        import glob
+        import simbin_events_tool as st
+        sessions = []
+        files = 0
+        for root, pattern in (("GTR2Steam", "**/*.GTT"), ("GTR2Steam", "ReplayData/*.Vcr"),
+                              ("GTLSteam", "ReplayData/*.Vcr")):
+            for path in glob.glob(str(ROOT.parent / root / pattern), recursive=True):
+                try:
+                    event = st.parse_file(path)
+                except Exception:
+                    continue
+                if event.session_seconds is None:
+                    continue
+                files += 1
+                sessions.append(event.session_seconds)
+                self.assertIn(event.flags_a, (0, 1))
+                self.assertLess(event.flags_b, 10)
+                self.assertLess(event.flags_c, 10)
+                self.assertIn(event.flags_u, (0, 1))
+        self.assertEqual(files, 42)
+        self.assertTrue(all(value in (36000.0, 43200.0, 46800.0)
+                            for value in sessions))
+
     def test_gsc_member_geometry_corpus(self):
         """150 ISI-encrypted GSC GMT members decode to valid geometry with skip=4."""
         import glob

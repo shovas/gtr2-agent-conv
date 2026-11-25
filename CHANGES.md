@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 00:15:00 -0500 - GTTF header fields from GTR2.exe code
+- Recovered the GTTF/IRSR header field order from the unpacked `GTR2.exe` reader (`u8,u8,f32,u8,u32`) and exposed it on `EventFile`; the f32 is 10h/12h/13h in seconds across all 42 local event files. Full-tier regression test added.
+
 ## 2026-11-27 23:45:00 -0500 - Batch GSC conversion
 - Added a `gsc` family to `batch_convert.py`: encrypted GSC MAS members are decoded and converted to verified GTR2 GMTs (8/8 in the full-tier regression run).
 

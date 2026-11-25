@@ -36,6 +36,13 @@ class EventFile:
     team: str | None = None
     car: str | None = None
     metadata_offset: int = -1
+    # Header fields recovered from GTR2.exe's reader (fcn.0052be30). They are
+    # written immediately after the TRK/AIW filenames, before the names.
+    flags_a: int | None = None
+    flags_b: int | None = None
+    session_seconds: float | None = None
+    flags_c: int | None = None
+    flags_u: int | None = None
 
 
 def _printable(data: bytes) -> bool:
@@ -146,6 +153,24 @@ def parse_rf1_metadata(data: bytes, off: int) -> dict | None:
     return {"offset": off, "driver": driver, "co_driver": None, "car": vehicle}
 
 
+def parse_header_fields(data: bytes, off: int) -> dict | None:
+    """Read the five header fields that follow the TRK/AIW filenames.
+
+    Layout recovered from the GTR2.exe reader: u8, u8, f32, u8, u32.
+    The f32 takes only 36000 / 43200 / 46800 in the local corpus — exactly
+    10 / 12 / 13 hours in seconds, consistent with a session time limit.
+    """
+    if off + 12 > len(data):
+        return None
+    return {
+        "flags_a": data[off],
+        "flags_b": data[off + 1],
+        "session_seconds": struct.unpack_from("<f", data, off + 2)[0],
+        "flags_c": data[off + 6],
+        "flags_u": struct.unpack_from("<I", data, off + 7)[0],
+    }
+
+
 def parse_payload(data: bytes) -> EventFile:
     kind = next((m.decode() for m in MAGICS if m in data[:64]), None)
     if kind is None:
@@ -181,12 +206,18 @@ def parse_payload(data: bytes) -> EventFile:
             i = j + 1
         else:
             i += 1
+    header = parse_header_fields(data, off) if not first.lower().endswith(".rfm") else None
     return EventFile(kind=kind, version=version, trk=trk, aiw=aiw, strings=strings,
                      driver=meta["driver"] if meta else None,
                      co_driver=meta["co_driver"] if meta else None,
                      team=meta.get("team") if meta else None,
                      car=meta["car"] if meta else None,
-                     metadata_offset=meta["offset"] if meta else -1)
+                     metadata_offset=meta["offset"] if meta else -1,
+                     flags_a=header["flags_a"] if header else None,
+                     flags_b=header["flags_b"] if header else None,
+                     session_seconds=header["session_seconds"] if header else None,
+                     flags_c=header["flags_c"] if header else None,
+                     flags_u=header["flags_u"] if header else None)
 
 
 def parse_file(path: str | Path) -> EventFile:
