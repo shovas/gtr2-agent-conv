@@ -72,6 +72,10 @@ regression tests or an explicitly documented negative.
   the same UV blocks and signatures: 300/300 parsed meshes per game had a
   `vc*32` block, with 257/300 (Volvo) and 264/300 (Race07) matching the two
   dominant GTR2 signatures. A per-record shuffle control scores 0%.
+- `gmt_format.read_mesh_uvs()` is a unified reader: it returns per-vertex
+  (u, v) from the 32-byte record's +4/+8 offsets for both single-block and
+  two-stream meshes, and agrees with `gmt_semantic.read_gmt()` on 800/800
+  sampled meshes spanning both layouts.
 - **Integer tiling ratios:** in the `(1,2,3,4,5,6,1)` UV signature, columns 4
   and 6 are often constant integer multiples of column 2 (e.g. ×5/×8, ×20/×24)
   while columns 1/3/5/7 are binary flags — 915/1,980 meshes; shuffling column 2

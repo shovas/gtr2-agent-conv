@@ -2167,6 +2167,47 @@ class CorpusDeep2Test(unittest.TestCase):
             baselines.append(consistent / len(multi))
         self.assertGreater(observed, 5 * max(statistics.mean(baselines), 0.01))
 
+    def test_unified_uv_reader_matches_semantic_reader(self):
+        """read_mesh_uvs works for both single- and two-stream UV layouts."""
+        import glob
+        import gmt_format as gf
+        import gmt_semantic
+        import mas_tool
+        checked = 0
+        single = 0
+        two = 0
+        for archive in glob.glob(str(ROOT.parent / "GTR2Steam" / "**" / "*.gtr"),
+                                 recursive=True):
+            try:
+                _, entries = mas_tool.read_archive(archive)
+            except Exception:
+                continue
+            for entry in entries:
+                if not entry.name.lower().endswith(".gmt") or not entry.data:
+                    continue
+                try:
+                    parsed = gf.parse_gmt("x.gmt", entry.data)
+                    semantic = gmt_semantic.read_gmt(entry.data)
+                except Exception:
+                    continue
+                for mesh, submesh in zip(parsed.meshes, semantic["submeshes"]):
+                    recovered = gf.read_mesh_uvs(mesh)
+                    expected = submesh["uvs"]
+                    if recovered is None or expected is None:
+                        continue
+                    self.assertEqual(recovered, expected)
+                    checked += 1
+                    record = mesh.record.raw
+                    single += record[7] == 0
+                    two += record[7] > record[6] and record[8] > record[7]
+                if checked >= 800:
+                    break
+            if checked >= 800:
+                break
+        self.assertEqual(checked, 800)
+        self.assertGreater(single, 100)
+        self.assertGreater(two, 50)
+
     def test_gmt_uv_tiling_ratios(self):
         """Some GTR2 UV streams encode integer tiling ratios on columns 4/6."""
         import glob

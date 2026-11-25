@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 20:30:00 -0500 - Unified GTR2 UV reader
+- Added `gmt_format.read_mesh_uvs()` returning UV pairs from both single-block and two-stream GTR2 meshes; verified identical to the semantic reader on 800/800 sampled meshes. Full-tier test added.
+
 ## 2026-11-29 20:00:00 -0500 - CAM inversion is cross-generation
 - Corrected the earlier implication that CAM negation is GTR2-specific: rF1 (594/684) and GTL (246/274) show the same inverted CAM-vs-AIW convention. No negation should be added by an rF1→GTR2 converter. Full-tier test added.
 

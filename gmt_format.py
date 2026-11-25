@@ -190,6 +190,22 @@ def stream_cross_agreement(stream2: bytes, stream3: bytes,
     return agreeing / vertex_count
 
 
+def read_mesh_uvs(mesh: GmtMesh) -> Optional[List[tuple[float, float]]]:
+    """Return per-vertex (u, v) pairs from any GTR2 UV layout variant.
+
+    All sampled new-layout meshes that expose UV data carry the base pair at
+    byte offsets +4/+8 of a 32-byte record: single-block meshes in
+    ``stream2_data``, two-stream meshes in either stream (they agree in 96%
+    of meshes). Returns ``None`` when no correctly sized stream is present.
+    """
+    vertex_count = mesh.record.vertex_count
+    for stream in (mesh.stream2_data, mesh.stream3_data):
+        if stream and len(stream) == vertex_count * 32:
+            return [struct.unpack_from("<2f", stream, i * 32 + 4)
+                    for i in range(vertex_count)]
+    return None
+
+
 def uv_tiling_factors(data: bytes, vertex_count: int) -> Optional[tuple[float, float]]:
     """Return the per-mesh integer tiling ratios of UV columns 4 and 6.
 
