@@ -130,6 +130,41 @@ class GmtLayoutTest(unittest.TestCase):
             gmt_layout.old_to_new(sample[1].data)
 
 
+    def test_gsc_conversion_preserves_vertex_attributes(self):
+        """Converted GTR2 meshes keep source f0 markers and normals."""
+        import struct
+        for root, name in (("Automobilista", "ADVERTISEMENT001.GMT"),
+                           ("CopaPetrobrasdeMarcas", "PURCHASED.GMT")):
+            base = ROOT.parent / root
+            if not base.is_dir():
+                continue
+            raw = None
+            for archive in base.glob("**/*.mas"):
+                try:
+                    _, entries = mas_tool.read_archive(str(archive))
+                except Exception:
+                    continue
+                raw = next((e.data for e in entries
+                            if e.name.lower().endswith(name.lower())), None)
+                if raw is not None:
+                    break
+            if raw is None:
+                continue
+            decoded = gmt_semantic.decode_gsc_member(raw)
+            self.assertIsNotNone(decoded)
+            out = gmt_layout.gsc_member_to_gtr2(raw)
+            parsed = gmt_format.parse_gmt("out.gmt", out)
+            for index, mesh in enumerate(parsed.meshes):
+                sub = decoded["submeshes"][index]
+                original_f0 = struct.unpack_from("<I", decoded["data"],
+                                                 sub["v_off"])[0]
+                self.assertEqual(mesh.base_vertices[0].f0, original_f0, name)
+                self.assertEqual(mesh.base_vertices[0].f7, 0xFFFFFFFF, name)
+                normal = (mesh.base_vertices[0].nx, mesh.base_vertices[0].ny,
+                          mesh.base_vertices[0].nz)
+                self.assertGreater(abs(normal[0]) + abs(normal[1]) + abs(normal[2]),
+                                   0.5, name)
+
     def test_gsc_member_to_gtr2_geometry(self):
         """Encrypted GSC members convert to GTR2 layout with geometry intact."""
         cases = (("Automobilista", "ADVERTISEMENT001.GMT"),

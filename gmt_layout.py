@@ -155,15 +155,18 @@ def old_to_new_semantic(data: bytes) -> bytes:
         rec = [0] * 27
         rec[1] = 0x20004011
         rec[3] = vc
-        rec[4] = vo
+        # The 4-byte u32 count precedes the vertex records; point the record
+        # at the first real 32-byte vertex so f0/normals/f7 survive intact.
+        rec[4] = vo + 4
         rec[6] = uo
         rec[10] = ic
         rec[11] = io
         records.append(rec)
 
-        blocks += struct.pack("<I", vc)
-        for pos in sub["positions"]:
-            blocks += struct.pack("<3f", *pos) + bytes(VERTEX_STRIDE - 12)
+        raw_vertices = data[sub["v_off"]:sub["v_off"] + vc * VERTEX_STRIDE]
+        if len(raw_vertices) != vc * VERTEX_STRIDE:
+            raise ValueError("truncated old vertex block")
+        blocks += struct.pack("<I", vc) + raw_vertices
         blocks += struct.pack("<I", vc)
         for uv in sub["uvs"]:
             blocks += bytes(8) + struct.pack("<2f", *uv) + bytes(VERTEX_STRIDE - 16)

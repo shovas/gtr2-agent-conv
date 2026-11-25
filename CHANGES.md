@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 00:45:00 -0500 - GSC conversion preserves vertex attributes
+- `gmt_layout.old_to_new_semantic()` now copies original 32-byte vertex records instead of rebuilding them, so converted GTR2 meshes keep source f0 markers, normals and f7 colours. Normal-tier regression test added.
+
 ## 2026-11-28 00:15:00 -0500 - GTTF header fields from GTR2.exe code
 - Recovered the GTTF/IRSR header field order from the unpacked `GTR2.exe` reader (`u8,u8,f32,u8,u32`) and exposed it on `EventFile`; the f32 is 10h/12h/13h in seconds across all 42 local event files. Full-tier regression test added.
 
