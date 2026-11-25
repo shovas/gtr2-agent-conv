@@ -18,7 +18,7 @@ VRL per-corner UV coordinates are transferred by expanding shared vertices at se
 **How to ask**:
 - "Convert this GTR1 `.gmt` to a GTR2 `.gmt` using a real GTR2 GMT as a structural template."
 
-**Known gap**: UV-like descriptor fields remain untransferred pending semantic confirmation.
+Vertex fields 9/10 are decoded as UV pairs and written into the GTR2 UV block; descriptor-less meshes have no UV source and are left unchanged.
 
 ## Batch-convert mesh archives
 
