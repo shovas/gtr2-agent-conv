@@ -114,9 +114,13 @@ names, driver, co-driver, team, car and `session_seconds` (always one of
 36000/43200/46800) parse cleanly, and the CLI handles them without changes.
 However, `find_frame_grid()` returns None for every replay: the GTTF 7-byte
 marker `01 00 00 34 00 20 00` is absent and a stride autocorrelation shows
-a 20-byte repeating pattern instead. Replay frame layout is therefore a
-distinct, undecoded format — recorded as a new avenue, not claimed as solved.
-Full-tier header regression test added.
+a 20-byte repeating pattern instead. A broader search over strides 20..2040
+(phases and 4-byte field offsets up to 128) found **no** monotonically
+increasing f32 or u32 field with plausible frame deltas, so the replay frames
+are not laid out as a simple fixed-stride time series with a leading time
+word. Replay frame layout is therefore a distinct, undecoded format —
+recorded as a new avenue, not claimed as solved. Full-tier header regression
+test added.
 
 ## f0 marker semantics do not transfer to Volvo/Race07 (2026-11-29)
 
