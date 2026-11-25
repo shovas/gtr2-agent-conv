@@ -4118,6 +4118,29 @@ class CorpusDeep2Test(unittest.TestCase):
             opaque += data.find(par2) < 0
         self.assertEqual(opaque, 1)
 
+    def test_vcr_payload_has_86_byte_periodicity(self):
+        """Replay payloads repeat with an 86-byte fundamental period."""
+        import gzip_simbin_tool as gz
+        path = ROOT.parent / "GTR2Steam" / "ReplayData" / "Anderstorp.Vcr"
+        if not path.is_file():
+            self.skipTest("Anderstorp.Vcr not present")
+        data = gz.decompress(str(path))
+        lo, hi = 0x400, min(len(data), 0x3000)
+
+        def match_at(buffer: bytes, lag: int) -> float:
+            indices = range(lo, hi - lag, 8)
+            return sum(buffer[i] == buffer[i + lag] for i in indices) / len(indices)
+
+        scores = [(match_at(data, lag), lag) for lag in range(1, 201)]
+        best_lag = max(scores)[1]
+        self.assertEqual(best_lag, 86)
+        self.assertGreater(match_at(data, 86), 0.5)
+        import random
+        random.seed(89)
+        shuffled = bytearray(data)
+        random.shuffle(shuffled)
+        self.assertLess(match_at(bytes(shuffled), 86), 0.2)
+
     def test_vcr_replay_headers_parse(self):
         """All shipped .Vcr replays parse as IRSR with known session values."""
         import gzip

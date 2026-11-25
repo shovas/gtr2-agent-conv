@@ -143,6 +143,17 @@ column-7/column-1 stream invariant was also re-scoped to the two-stream layout
 (it does not hold for single-block UVs, which end in zeros). All 35 module
 tests and the five affected full-tier tests pass after the fix.
 
+## VCR payload has an 86-byte fundamental period (2026-11-29)
+
+Byte-level autocorrelation (unaligned, lags 1..200) on `Anderstorp.Vcr`
+peaks at lag **86** with 0.567 matching bytes, versus 0.127 for a shuffled
+copy; harmonics appear at 172, 258 and 344. Earlier stride searches stepped
+by 4 and therefore skipped 86 entirely. Within one 12-record run starting at
+offset 1545, the f32 at record +0 increases by ~0.022 s per record and the
+f32 at +16 is constantly 10.545, but a whole-file scan finds only short runs
+(2–13 frames), so +0 is not a global replay timestamp. This is a real
+structural lead, not a decoded frame format. Full-tier periodicity test added.
+
 ## UV tiling ratios confirmed in Race07 (2026-11-29)
 
 The `(1,2,3,4,5,6,1)` UV signature with integer column-4/6 ratios is not

@@ -167,7 +167,13 @@ regression tests or an explicitly documented negative.
   gMb wrapper + `IRSR` v1.05, with driver/car/team names and session values
   from the same 36000/43200/46800 set. The GTTF-specific frame-grid detector
   does **not** find their frames (no `01 00 00 34 00 20 00` marker), so their
-  frame layout remains a separate, undecoded format.
+  frame layout remains a separate, undecoded format. The payload does have a
+  strong **86-byte fundamental period** (byte-match 0.567 at lag 86 vs 0.127
+  for shuffled bytes; harmonics at 172/258/344), found by byte-level
+  autocorrelation — earlier 4-byte-aligned stride scans missed 86 because it
+  is not a multiple of 4. A short 12-frame run has an increasing f32 at record
+  +0 (~0.022 s steps) and a constant 10.545 at +16, but these do not extend
+  monotonically across a whole replay, so frame semantics remain unknown.
 - **24-byte pre-frame records** immediately precede the frame grid: six f32
   fields `(y, z, heading, f3, f4, x)`. They form the reference racing line.
   `find_preframe_records()` / `reconstruct_frame_x()` expose x; frames get
