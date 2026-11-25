@@ -117,6 +117,7 @@ class GmtToolTest(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("uv_bytes=1600", result.stdout)
         self.assertIn("signature=", result.stdout)
+        self.assertIn("tiling=", result.stdout)
         self.assertIn("uv[0]=", result.stdout)
 
     def test_info_reports_byte_pair_and_stream(self):

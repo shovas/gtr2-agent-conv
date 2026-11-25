@@ -304,7 +304,10 @@ def cmd_uv(args: argparse.Namespace) -> int:
             continue
         signature = gmt_format.stream_column_signature(stream, vertex_count)
         triples = gmt_format.decode_stream_records(stream, vertex_count)
-        print(f"  signature={signature} decoded_triples={triples is not None}")
+        ratios = gmt_format.uv_tiling_factors(stream, vertex_count)
+        ratio_text = "None" if ratios is None else f"{ratios[0]:g},{ratios[1]:g}"
+        print(f"  signature={signature} decoded_triples={triples is not None} "
+              f"tiling={ratio_text}")
         pairs = [struct.unpack_from("<2f", stream, i * 32 + 4)
                  for i in range(min(vertex_count, args.limit))]
         for i, pair in enumerate(pairs):
