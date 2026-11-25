@@ -781,6 +781,36 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertEqual(engines, 66)
         self.assertEqual(boxes, 60)
 
+    def test_cam_control_points_not_waypoints(self):
+        """CAM ControlPoints do not reference AIW waypoint positions."""
+        import glob
+        import math
+        import os
+        points = near = 0
+        for root in ("GTR2Steam", "GTLSteam", "Race07Complete"):
+            base = ROOT.parent / root
+            for p in glob.glob(str(base / "**" / "*.cam"), recursive=True):
+                if not os.path.isfile(p):
+                    continue
+                stem = Path(p).stem.lower()
+                aiws = [q for q in glob.glob(str(Path(p).parent / "*"))
+                        if os.path.isfile(q) and q.lower().endswith(".aiw")
+                        and Path(q).stem.lower() == stem]
+                if not aiws:
+                    continue
+                text = media_tool.decrypt_jca_text(Path(p).read_bytes())
+                pts = stt.parse_cam_control_points(text)
+                if not pts:
+                    continue
+                atext = media_tool.decrypt_jca_text(
+                    Path(aiws[0]).read_bytes()).decode("latin-1")
+                wps = [w.pos for w in stt.parse_aiw(atext).waypoints if w.pos]
+                for pt in pts:
+                    points += 1
+                    near += min(math.dist(pt, w) for w in wps) < 2.0
+        self.assertGreater(points, 250)
+        self.assertEqual(near, 0)
+
     def test_gen_numeric_fields(self):
         """GEN mesh configs obey LOD/reflect-plane bounds."""
         import glob

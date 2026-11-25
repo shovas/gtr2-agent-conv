@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 11:30:00 -0500 - CAM ControlPoint negative
+- Added `parse_cam_control_points()` and documented that 290 ControlPoint coordinates in GTR2/GTL/Race07 CAM files are camera-path spline nodes, not AIW waypoint references. Full-tier corpus-fact regression test added.
+
 ## 2026-11-26 11:00:00 -0500 - GEN mesh-config validator
 - Added `simbin_text_tool.validate_gen_numeric()` for LOD distance ranges and ReflectPlane unit/zero-fourth invariants across 272 rF1-era `.gen` files; documented that SimBin installs ship none. Full-tier regression test added.
 

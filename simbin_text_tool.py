@@ -1144,6 +1144,20 @@ HED_NUMERIC_BOUNDS = {
 }
 
 
+def parse_cam_control_points(data: bytes | str) -> list[tuple[float, float, float]]:
+    """Extract XYZ ControlPoint triples from a CAM script."""
+    text = data if isinstance(data, str) else data.decode("latin-1")
+    points: list[tuple[float, float, float]] = []
+    for match in re.finditer(r"(?mi)^\s*ControlPoint\s*=\s*\(([^)]*)\)", text):
+        try:
+            values = tuple(float(x) for x in match.group(1).split(","))
+        except ValueError:
+            continue
+        if len(values) == 3:
+            points.append(values)
+    return points
+
+
 def validate_gen_numeric(data: bytes | str) -> list[str]:
     """Check numeric vector bounds in rF1-era `.gen` mesh configs.
 
