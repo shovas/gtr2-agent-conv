@@ -5,6 +5,9 @@ Newest-first change log. Timestamps use repository commit dates (ISO 8601, local
 ## 2026-11-26 16:30:00 -0500 - AIW Features capacity negative
 - Documented that AIW `[Features]` numbers are capacity defaults rather than section counts (startinggrid 104 vs GRID 36 typical); full-tier corpus-fact regression test added.
 
+## 2026-11-26 22:00:00 -0500 - f0 material-derived hypotheses negated
+- Tested 3,006 f0 markers against material offsets, stage-string offsets, name CRCs/sums and first-u16 words: only 2 chance matches (0.07%). f0 is family-invariant but not a direct GMT material offset/hash; full-tier regression test added.
+
 ## 2026-11-26 21:00:00 -0500 - f0 cross-corpus invariant
 - Compared 703 identically named mesh families across GTR2Steam/GTLSteam/BMWM3Challenge: 42.4% share byte-identical f0 marker lists (vs 1.1% random), often differing only in mesh-0's marker. Added full-tier regression test; halfword encoding still unresolved.
 

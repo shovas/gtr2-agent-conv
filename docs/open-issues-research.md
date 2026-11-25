@@ -19,6 +19,10 @@ Across all 31 GTT files, the varying byte +31 of the `00 20 00 XX` u32 at +28 ha
 
 Across all 31 GTT files the raw u32 at +40 is neither a monotonic counter nor a stable two-state flag: monotonic fraction median 0.555 (range 0.503–0.586), |correlation with frame time| median 0.025 (max 0.119), and the two exponent clusters (raw >2³⁰ vs lower) flip in a median 26.6% of consecutive frames (range 0.4–29.6%). The hi fraction varies by file (0.475–0.997), so it is not a car-invariant state either. The earlier quantized-float kinematics negatives for this slot stand; `simbin_events_tool.frame_s40_word()` and a regression test lock in these bounds. No semantic promoted.
 
+## GTR2 vertex f0: material-derived hypotheses negated (2026-11-26)
+
+Across 3,006 markers from 25 GTR2/GTL mesh archives, neither halfword matches: absolute material record offset, offset relative to the object list, stage-string offset (`+152`), CRC32 of the material name, byte-sum of the material name, or the name's first u16 — 2/3,006 chance matches total (0.07%) and 0 for the offset/stage/CRC variants. Combined with the cross-corpus/LOD-family invariance, f0 behaves like an abstract identifier of the source material/mesh setup, but not any direct offset, string hash or index derivable from the GMT itself. Full-tier regression test added; encoding unresolved.
+
 ## GTR2 vertex f0: cross-corpus invariant (2026-11-26)
 
 Comparing 703 identically named mesh families present in two or three of GTR2Steam / GTLSteam / BMWM3Challenge (23,816 mesh members scanned), **298/703 (42.4%)** have byte-identical ordered f0 marker lists across corpora, vs **1.1%** under randomized family grouping. Examples: `ads`, `fuelrigrr`, `moon`, `night` are identical in all details; `ambulance` differs only in mesh-0's marker (`0x0` vs `0xbcf4007c`) while the remaining three mesh markers match exactly. Thus f0 markers are largely determined by mesh family/material setup and survive preservation across games; mesh-0's marker can still be file-specific. Full-tier regression test added (63 s); the halfword encoding itself remains unresolved.

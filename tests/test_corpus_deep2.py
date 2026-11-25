@@ -1006,6 +1006,58 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertEqual(checked, 204)
 
+    def test_f0_halfwords_not_material_derived(self):
+        """f0 halfwords do not equal material offsets, hashes or name words."""
+        import glob
+        import struct
+        import zlib
+        import gmt_format as gf
+        import mas_tool
+        markers = 0
+        matches = 0
+        for root in ("GTR2Steam", "GTLSteam"):
+            for archive in glob.glob(str(ROOT.parent / root / "**" / "*.gtr"),
+                                     recursive=True):
+                try:
+                    _, entries = mas_tool.read_archive(archive)
+                except Exception:
+                    continue
+                for entry in entries:
+                    name = entry.name.lower()
+                    if not name.endswith(".gmt") or not entry.data or len(entry.data) < 0x400:
+                        continue
+                    try:
+                        parsed = gf.parse_gmt("x.gmt", entry.data)
+                    except Exception:
+                        continue
+                    starts = gf._find_material_starts(parsed.tail, len(parsed.materials))
+                    for i, mesh in enumerate(parsed.meshes):
+                        marker = gf.mesh_marker(mesh)
+                        if not marker:
+                            continue
+                        halves = (marker & 0xFFFF, marker >> 16)
+                        markers += 1
+                        candidates = []
+                        if i < len(starts):
+                            off = parsed.obj_list_offset + starts[i]
+                            candidates += [off & 0xFFFF, starts[i] & 0xFFFF,
+                                           (off + 152) & 0xFFFF]
+                        if i < len(parsed.materials):
+                            raw = parsed.materials[i].name.encode("latin-1")
+                            candidates += [zlib.crc32(raw) & 0xFFFF, sum(raw) & 0xFFFF]
+                            if raw:
+                                candidates.append(struct.unpack(
+                                    "<H", raw[:2].ljust(2, b"\0"))[0])
+                        matches += sum(1 for h in halves for c in candidates if h == c)
+                    if markers >= 1500:
+                        break
+                if markers >= 1500:
+                    break
+            if markers >= 1500:
+                break
+        self.assertGreater(markers, 1000)
+        self.assertLess(matches / markers, 0.01)
+
     def test_f0_marker_cross_corpus_invariant(self):
         """Identical mesh families share f0 marker lists across GTR2/GTL/BMW."""
         import collections
