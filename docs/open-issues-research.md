@@ -68,6 +68,16 @@ Tested CRC32 / CRC32-high / Adler32 / FNV-1a / MD5-first-2 over the **raw** mate
 
 Tested order-independent hash constructions from normalized material/stage name sets on 20,000 meshes: CRC32 / Adler32 / MD5-first-2 of the sorted, `'|'`-joined set plus XOR and sum of per-name CRC16 halves. Matches to f0 halfwords were 3 / 2 / 0 / 3 / 4 respectively — chance level (permutation baselines 2.4 / 0 / 0.2 / 2 / 2). So the material-name grouping found above is not produced by a simple set hash; f0 likely encodes an external ID unrelated to a derivable string hash. Full-tier regression test added.
 
+## GTR2 vertex f0: code trace and material-record association (2026-11-28)
+
+Traced the GTR2.exe GMT loader (`fcn.005d68d0`, located via the "Error reading mesh from GMT file" string) and its mesh/shader fixup (`fcn.005e9ab0`, "Could not find shader %s for mesh %s"). The loader relocates mesh records and looks up stage shaders by name (`L0DIFFUSET0`, `L0NOLIGHTINGT0`, …), but no code path that assigns the per-vertex f0 marker was identified — the marker appears to be preserved from the source file rather than computed on load.
+
+Quantified association instead:
+- meshes with **identical normalized material/stage name sets** share an f0 marker in **28.7%** of 6,036 multi-member groups, vs **0.1%** permuted;
+- conditioning on **identical raw material+stage records**, P(f0 equal) = **0.347**; when raw records differ, P(f0 equal) = **0.036** — a **~10×** association.
+
+So f0 is strongly tied to material identity but not derivable from the tested hashes; a file-specific/external component remains. Two full-tier regression tests added.
+
 ## GTR2 vertex f0: material-name group signal (2026-11-27)
 
 A permutation-controlled test on 74,547 mesh records from GTR2/GTL/BMW found that meshes sharing an f0 marker are **~60× more likely** to share a *rare* normalized material/stage-name hash (8.06% of cross-family same-marker pairs vs 0.13% permuted; exact hash-set agreement 7.58% vs 0.09%). However, no simple hash of a single name reproduces the marker halfwords (CRC32/CRC32-high/Adler/FNV/djb2/MD5/sum all at or below permutation baseline). So f0 groups meshes by material/stage identity — consistent with an external material identifier — but the exact encoding is still unknown. Full-tier regression test added (20k-row sample).

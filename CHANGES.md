@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 02:45:00 -0500 - f0 material association quantified
+- Traced GTR2.exe GMT loader/shader fixup without finding an f0 assignment path; quantified f0 association with material identity (P(f0 equal|raw material equal)=0.347 vs 0.036 otherwise). Full-tier regression test added.
+
 ## 2026-11-28 02:15:00 -0500 - GTTF gear bands and +36 negative
 - Using reconstructed world speeds, +32/speed clusters near F550 gear-ratio bands derived from .grb/.hdc/.tyr (p≈0.01 vs random bands); +36 is not path curvature (|r|<0.01). Two full-tier tests added.
 

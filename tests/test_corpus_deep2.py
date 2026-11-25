@@ -1281,6 +1281,66 @@ class CorpusDeep2Test(unittest.TestCase):
                            for half in (lo, hi) if half == values[name])
             self.assertLess(observed, 10)  # chance level for 2 x 12k halfwords
 
+    def test_f0_material_record_association(self):
+        """Same f0 is ~10x more likely when the raw material record is identical."""
+        import collections
+        import glob
+        import hashlib
+        import re
+        import gmt_format as gf
+        import mas_tool
+
+        def norm(value):
+            return re.sub(r"[^a-z0-9]", "", value.lower())
+
+        groups = collections.defaultdict(list)
+        for root, ext in (("GTR2Steam", ".gtr"), ("GTLSteam", ".gtl"),
+                          ("BMWM3Challenge", ".bmw")):
+            for archive in glob.glob(str(ROOT.parent / root / "**" / f"*{ext}"),
+                                     recursive=True):
+                try:
+                    _, entries = mas_tool.read_archive(archive)
+                except Exception:
+                    continue
+                for entry in entries:
+                    if not entry.name.lower().endswith(".gmt") or not entry.data:
+                        continue
+                    try:
+                        parsed = gf.parse_gmt("x.gmt", entry.data)
+                    except Exception:
+                        continue
+                    for mesh in parsed.meshes:
+                        marker = gf.mesh_marker(mesh)
+                        index = mesh.record.material_index
+                        material = (parsed.materials[index]
+                                    if index < len(parsed.materials) else None)
+                        if not marker or material is None:
+                            continue
+                        names = tuple(sorted(set(
+                            norm(value) for value in
+                            [material.name] + [s.name for s in material.stages]
+                            if value)))
+                        raw = hashlib.md5(material.raw +
+                                          b"|".join(s.raw for s in material.stages)).hexdigest()
+                        groups[names].append((marker, raw))
+                if sum(len(v) for v in groups.values()) >= 30000:
+                    break
+            if sum(len(v) for v in groups.values()) >= 30000:
+                break
+        counts = collections.Counter()
+        for values in groups.values():
+            if len(values) < 2:
+                continue
+            f0_same = len(set(v[0] for v in values)) == 1
+            raw_same = len(set(v[1] for v in values)) == 1
+            counts[(f0_same, raw_same)] += 1
+        same_raw = counts[(True, True)] + counts[(False, True)]
+        diff_raw = counts[(True, False)] + counts[(False, False)]
+        self.assertGreater(same_raw, 1000)
+        p_same = counts[(True, True)] / same_raw
+        p_diff = counts[(True, False)] / diff_raw
+        self.assertGreater(p_same, p_diff * 5)
+
     def test_f0_groups_material_name_hashes(self):
         """Same-f0 meshes share rare normalized material/stage name hashes."""
         import collections
