@@ -32,6 +32,8 @@ class Waypoint:
     score_checkpoint: int | None = None
     score_distance: float | None = None
     width: tuple[float, ...] | None = None
+    dwidth: tuple[float, ...] | None = None
+    groove_lat: tuple[float, ...] | None = None
     galpha: float | None = None
     perp: tuple[float, float, float] | None = None
 
@@ -97,6 +99,17 @@ def parse_aiw(data: str) -> AIW:
                     if match:
                         try:
                             waypoint.width = tuple(float(x) for x in match.group(1).split(","))
+                        except ValueError:
+                            pass
+                elif key in ("wp_dwidth", "wp_groove_lat"):
+                    match = re.match(r"\(([^)]*)\)", value)
+                    if match:
+                        try:
+                            parsed = tuple(float(x) for x in match.group(1).split(","))
+                            if key == "wp_dwidth":
+                                waypoint.dwidth = parsed
+                            else:
+                                waypoint.groove_lat = parsed
                         except ValueError:
                             pass
                 elif key == "wp_galpha":
@@ -296,6 +309,28 @@ def validate_aiw_waypoints(aiw: AIW) -> list[str]:
             norm = math.sqrt(sum(x * x for x in wp.perp))
             if abs(norm - 1.0) > 0.01:
                 problems.append(f"waypoint {i}: track/pit wp_perp norm {norm:.4f} != 1")
+    return problems
+
+
+def validate_aiw_dwidth_groove(aiw: AIW, skip_groove: bool = False) -> list[str]:
+    """Check WP_DWIDTH/WP_GROOVE_LAT component bounds.
+
+    Corpus-verified on 465 AIWs: dwidth components lie in [-28.95, 100];
+    groove_lat is a signed lateral offset in [-11.7, 12.6] except for the
+    single corrupt `StockCarExtreme/ortona4.AIW` (values up to 621,683).
+    """
+    problems: list[str] = []
+    for i, wp in enumerate(aiw.waypoints):
+        if wp.dwidth is not None:
+            for value in wp.dwidth:
+                if not (-28.95 <= value <= 100.0):
+                    problems.append(f"waypoint {i}: WP_DWIDTH {value} out of range")
+                    return problems
+        if wp.groove_lat is not None and not skip_groove:
+            for value in wp.groove_lat:
+                if not (-12.0 <= value <= 13.0):
+                    problems.append(f"waypoint {i}: WP_GROOVE_LAT {value} out of range")
+                    return problems
     return problems
 
 
