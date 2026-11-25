@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-30 00:30:00 -0500 - VCR frame-field negatives
+- Recorded that the 20-byte bulk stride has no smooth f32 field, no constant byte offsets, and only mild delta smoothing; replay frame decoding remains blocked. Findings log updated.
+
 ## 2026-11-30 00:00:00 -0500 - VCR bulk 20-byte lag excess
 - Found a 20-byte autocorrelation excess in replay bulk data (7/9 files, median +0.16 over neighbouring lags); full-tier test added. Frame semantics still undecoded.
 

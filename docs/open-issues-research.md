@@ -158,6 +158,16 @@ multiple of 4. A short 12-record run in the header has an increasing f32 at
 across the file. Frame semantics remain undecoded. Full-tier test scoped to
 the header region.
 
+## VCR 20-byte stride: no frame fields found (2026-11-30)
+
+Followed the 20-byte lag excess: at stride 20, every 4-byte-aligned f32 field
+in bulk windows is sentinel-like (|value| up to 1e38, lag-1 autocorrelation
+undefined), and no byte offset within the 20-byte cycle is constant in more
+than 50% of records. Byte deltas at lag 20 are smaller than at lags 21/86
+(median 26–40 vs 64–88) but not small enough for a simple delta encoding.
+So the periodicity reflects gradual local similarity, not a decodable fixed
+frame record with a time word. No frame serializer is claimed.
+
 ## VCR bulk data has a 20-byte lag excess (2026-11-29)
 
 Byte-autocorrelation on a bulk window of each of the nine `.Vcr` payloads
