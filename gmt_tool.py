@@ -287,6 +287,31 @@ def cmd_decode_gsc(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_uv(args: argparse.Namespace) -> int:
+    """Report each mesh's GTR2 UV block and its first UV pairs."""
+    import gmt_format
+    data = Path(args.file).read_bytes()
+    parsed = gmt_format.parse_gmt(args.file, data)
+    if not parsed.meshes:
+        print("no meshes")
+        return 1
+    for index, mesh in enumerate(parsed.meshes):
+        vertex_count = mesh.record.vertex_count
+        stream = mesh.stream2_data
+        print(f"mesh[{index}]: vc={vertex_count} uv_bytes={len(stream)} "
+              f"rec6={mesh.record.raw[6]} rec7={mesh.record.raw[7]}")
+        if not stream or vertex_count <= 0:
+            continue
+        signature = gmt_format.stream_column_signature(stream, vertex_count)
+        triples = gmt_format.decode_stream_records(stream, vertex_count)
+        print(f"  signature={signature} decoded_triples={triples is not None}")
+        pairs = [struct.unpack_from("<2f", stream, i * 32 + 4)
+                 for i in range(min(vertex_count, args.limit))]
+        for i, pair in enumerate(pairs):
+            print(f"  uv[{i}]={pair[0]:.5f},{pair[1]:.5f}")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -315,6 +340,11 @@ def main(argv: list[str] | None = None) -> int:
     p = sub.add_parser("f0", help="report per-mesh f0 marker structure")
     p.add_argument("file")
     p.set_defaults(func=cmd_f0)
+
+    p = sub.add_parser("uv", help="report GTR2 UV blocks and decoded UV pairs")
+    p.add_argument("file")
+    p.add_argument("--limit", type=int, default=5, help="max UV pairs to print per mesh")
+    p.set_defaults(func=cmd_uv)
 
     p = sub.add_parser("relayout", help="rebuild all offsets and pack a GMT to a new file")
     p.add_argument("file")

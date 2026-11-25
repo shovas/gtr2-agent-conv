@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 12:00:00 -0500 - UV inspection CLI
+- Added `gmt_tool.py uv FILE` to report UV block size, signature, decoded-triple status and sample UV pairs; regression test added.
+
 ## 2026-11-29 11:30:00 -0500 - Cross-game UV layout confirmation
 - Confirmed the GTR2 UV block layout in JCA-decrypted Volvo and Race07 GMTs (300/300 each with UV blocks; 86%/88% matching dominant signatures vs 0% shuffled). Full-tier test added.
 
