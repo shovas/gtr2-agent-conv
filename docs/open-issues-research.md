@@ -122,6 +122,16 @@ word. Replay frame layout is therefore a distinct, undecoded format —
 recorded as a new avenue, not claimed as solved. Full-tier header regression
 test added.
 
+## Mesh flag bit 0x20 selects the UV layout (2026-11-29)
+
+Tabulating `rec[1]` flags against UV block structure over 40,327 GTR2 meshes
+found a perfect structural rule: flag bit `0x20` is set if and only if the
+mesh uses the two-stream layout (`rec[6] < rec[7] < rec[8]`), with **zero**
+exceptions. `0x4011`/`0x20004011`/`0x4015` variants are single-block;
+`0x4035`/`0x20004035`/`0x20006035` are two-stream. All 308 converted outputs
+in a 100-per-family batch used the single-block form with the bit clear, so
+converter flags are consistent with their UV blocks. Full-tier test added.
+
 ## GTL meshes are already new-layout (2026-11-29)
 
 Sampled 2,529 GMT members from GTL `.gtl` archives: every one carried the new

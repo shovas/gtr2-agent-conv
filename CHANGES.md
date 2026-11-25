@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 15:30:00 -0500 - UV layout flag rule
+- Found a perfect structural rule: mesh flag bit 0x20 selects the two-stream UV layout (40,327/40,327 meshes agree). Verified all converter outputs are consistent. Full-tier test added; findings docs updated.
+
 ## 2026-11-29 15:00:00 -0500 - GTTF byte 31 further negatives
 - Recorded that gear bands explain only 2.8% of byte +31 variance and that acceleration/heading-rate/speed-change correlations are at baseline; encoding remains unresolved. Findings log updated.
 

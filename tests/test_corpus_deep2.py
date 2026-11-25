@@ -2083,6 +2083,39 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertGreater(single, 2000)
         self.assertEqual(exposed, single)
 
+    def test_gmt_flag_bit20_predicts_stream_layout(self):
+        """Mesh flag bit 0x20 exactly marks the two-stream UV layout."""
+        import glob
+        import gmt_format as gf
+        import mas_tool
+        checked = matches = 0
+        for archive in glob.glob(str(ROOT.parent / "GTR2Steam" / "**" / "*.gtr"),
+                                 recursive=True):
+            try:
+                _, entries = mas_tool.read_archive(archive)
+            except Exception:
+                continue
+            for entry in entries:
+                if not entry.name.lower().endswith(".gmt") or not entry.data:
+                    continue
+                try:
+                    parsed = gf.parse_gmt("x.gmt", entry.data)
+                except Exception:
+                    continue
+                for mesh in parsed.meshes:
+                    record = mesh.record.raw
+                    if record[3] < 8:
+                        continue
+                    two_streams = record[7] > record[6] and record[8] > record[7]
+                    checked += 1
+                    matches += bool(record[1] & 0x20) == two_streams
+                if checked >= 40000:
+                    break
+            if checked >= 40000:
+                break
+        self.assertGreater(checked, 30000)
+        self.assertEqual(matches, checked)
+
     def test_gmt_stream_last_column_equals_second(self):
         """Nearly every GTR2 extra stream repeats column 1 in column 7."""
         import glob
