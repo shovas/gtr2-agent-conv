@@ -5,6 +5,9 @@ Newest-first change log. Timestamps use repository commit dates (ISO 8601, local
 ## 2026-11-26 16:30:00 -0500 - AIW Features capacity negative
 - Documented that AIW `[Features]` numbers are capacity defaults rather than section counts (startinggrid 104 vs GRID 36 typical); full-tier corpus-fact regression test added.
 
+## 2026-11-26 09:00:00 -0500 - GTTF slot +36 quantized-float shape
+- Verified that slot +36 is an exact quantized-float lattice (low 16 bits zero; mantissa high bits 8 or 12) in 98.5% of 47,239 frames, with a car-specific exponent shift; added detector and regression test. Physical semantics remain unresolved and earlier kinematic negatives stand.
+
 ## 2026-11-26 08:00:00 -0500 - GTTF slot +32 engine-speed evidence
 - Found a car-specific ceiling in GTTF frame slot +32 (5,873,841 in 21/29 Ferrari F550 files, ~6.19M in BMW M3 files) with gear-shift-like drops; exposed as `frame_rpm()` / `read_frames()['rpm']` (≈5736/6190 at /1024). Ceiling and drops are regression-tested across all 31 GTT files; the interpretation remains labelled a hypothesis pending runtime confirmation.
 

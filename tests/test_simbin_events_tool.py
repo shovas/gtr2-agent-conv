@@ -82,6 +82,26 @@ class SimbinEventsToolTest(unittest.TestCase):
             self.skipTest("no GTTF frame grids detected")
         self.assertGreaterEqual(checked, 1)
 
+    def test_gttf_slot36_quantized_shape(self):
+        """Frame slot +36 is a quantized float with only two mantissa classes."""
+        import gzip
+        files = _files(".gtt")
+        if not files:
+            self.skipTest("GTR2 GTT files not present")
+        total = shaped = 0
+        for p in files:
+            data = gzip.decompress(p.read_bytes())
+            grid = setool.find_frame_grid(data)
+            if not grid:
+                continue
+            for fr in setool.read_frames(data, grid):
+                word = setool.frame_s36_word(data, fr["offset"])
+                total += 1
+                shaped += int(setool.is_quantized_s36(word))
+        if not total:
+            self.skipTest("no GTTF frame grids detected")
+        self.assertGreater(shaped / total, 0.98)
+
     def test_gttf_engine_speed_ceiling(self):
         """Frame slot +32 has a car-specific ceiling and shift-like drops."""
         import gzip

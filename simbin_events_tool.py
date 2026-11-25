@@ -209,6 +209,21 @@ FRAME_RPM_OFF = 32
 RPM_SCALE = 1024.0
 
 
+def frame_s36_word(data: bytes, offset: int) -> int:
+    """Return the raw u32 at frame offset +36 (a quantized-float slot)."""
+    return struct.unpack_from("<I", data, offset + 36)[0]
+
+
+def is_quantized_s36(word: int) -> bool:
+    """Whether +36 has the corpus-invariant quantized-float shape.
+
+    Across all 31 local GTT files the low 16 bits are zero (except rare
+    artifacts) and the high mantissa bits are only 8 or 12, so the float can
+    only be zero or ±(17/8 or 35/16) * 4^k.
+    """
+    return (word & 0xFFFF) == 0 and ((word >> 16) & 0x7F) in (8, 12)
+
+
 def frame_rpm(data: bytes, offset: int) -> int | None:
     """Return the raw 24-bit engine-speed word at a GTTF frame offset."""
     if offset + 35 > len(data) or data[offset + 35] != 0:

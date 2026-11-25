@@ -3,6 +3,10 @@
 All work here is **offline**: no game was launched. "Runtime-dependent" means
 conclusively establishing it requires actual game execution.
 
+## GTTF slot +36: exact quantized-float shape (2026-11-26)
+
+Across all 47,239 frames in 31 GTT files, slot +36's u32 has its low 16 bits zero in 46,529 frames (**98.5%**) and the mantissa's high 7 bits take only two values, **8 or 12** (`0x08`/`0x0C`). The float can therefore only be zero or ±(17/8 or 35/16)·4ᵏ — an exact quantization lattice, not a free measurement. By car: the Ferrari F550 files use mantissas 8/12 with exponents centred at 134; the two BMW M3 files use the same mantissas with exponents centred at 162 (a car-specific scale shift). `simbin_events_tool.is_quantized_s36()` detects this and a regression test checks ≥98% of frames. Earlier negatives still hold: no meaningful correlation with speed, acceleration, heading rate, steering or the +32 engine-speed word (|r|≤0.27 across files). No semantic promoted — this is a structural characterization of a car-scaled quantized field.
+
 ## GTTF slot +32: engine-speed hypothesis (2026-11-26)
 
 **New positive structural finding** (refines earlier "unbounded 24-bit integer" negatives): across all 31 local `.GTT` files with frame grids, the 24-bit value at `+32` (byte `+35` is always 0) has a **car-specific hard ceiling**: 21/29 Ferrari F550 files peak at exactly **5,873,841** (≈5736 when divided by 1024), while both BMW M3 files peak at 6.19–6.20M (≈6190). The remaining F550 files peak 5.66–5.81M. The signal is very smooth (median lag-1 autocorrelation 0.994) and shows abrupt downward jumps of 200k–900k (~200–900 rpm at /1024) consistent with gear shifts, including at 30–70 m/s. Correlation with speed is mildly negative (median −0.14, consistent with upshifts), and with speed-derived acceleration ≈0 (gear changes dominate).
