@@ -183,8 +183,10 @@ regression tests or an explicitly documented negative.
 - Every ghost ends with a **20-byte tail** (5 f32s). Its first two floats are
   a per-track fixed point (median distance 0.6 between ghosts of the same
   track vs 178 for random pairs) near that track's final frame position —
-  consistent with a start/finish-line coordinate. The remaining three floats
-  are not yet decoded. Full-tier test included.
+  consistent with a start/finish-line coordinate. The remaining three mirror
+  the final frame's state: float 3 ≈ final heading (median error 0.0004 rad),
+  float 4 ≈ final frame +16 (~0.0003), and float 2 tracks final `slot48_low`
+  (|r| 0.993 vs 0.24 shuffled). Full-tier test included.
 - **24-byte pre-frame records** immediately precede the frame grid: six f32
   fields `(y, z, heading, f3, f4, x)`. They form the reference racing line.
   `find_preframe_records()` / `reconstruct_frame_x()` expose x; frames get

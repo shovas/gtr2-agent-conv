@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-30 02:30:00 -0500 - GTTF tail final-state fields decoded
+- Decoded the remaining GTTF tail floats: float 3 ≈ final heading (0.0004 rad), float 4 ≈ final +16, float 2 tracks final slot48_low (|r| 0.993 vs 0.24 shuffled). Full-tier permutation-controlled test added.
+
 ## 2026-11-30 02:00:00 -0500 - GTTF tail is a track point
 - Identified a 20-byte GTTF tail whose first two floats are a per-track fixed point (median 0.6 within track vs 178 random); full-tier test added. Remaining three floats undecoded.
 

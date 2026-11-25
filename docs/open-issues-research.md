@@ -271,7 +271,11 @@ recorded on the same track (10 tracks with ≥2 ghosts, median within-track
 distance **0.594** world units) but far apart across tracks (median **178.3**
 for 1,000 random pairs). They sit close to, but are not identical to, the last
 frame's y/z (median offsets 0.007 / 0.124), consistent with a fixed
-start/finish-line coordinate. Tail floats 2/3/4 remain undecoded. Full-tier
+start/finish-line coordinate. Tail floats 2/3/4 were then decoded: float 3
+matches the last frame's heading (median |error| 0.0004 rad vs 0.0026 shuffled),
+float 4 matches the last frame's +16 (~0.0003), and float 2 tracks the last
+frame's `slot48_low` (|r| 0.993 vs 0.24 shuffled). These are near-copies, not
+bit-exact, so the tail is a summary of final car state. Full-tier
 permutation-controlled test added.
 
 ## GTTF frame time field definitively validated (2026-11-30)
