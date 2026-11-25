@@ -25,6 +25,16 @@ Evidence:
 All work here is **offline**: no game was launched. "Runtime-dependent" means
 conclusively establishing it requires actual game execution.
 
+## GTTF +48 units: low signed 16-bit half (2026-11-28)
+
+Slot +48 is almost always near `0xFFFFxxxx`, i.e. two signed 16-bit fields rather than a float. Decoding the **low half as int16** produces a much stronger steering association than the raw u32:
+
+- median |correlation| with steering `+8` = **0.503** across 12 ghosts, vs **0.021** permuted (~24×);
+- the high half gives only 0.134, and neither half tracks curvature (0.016) or yaw rate (0.06–0.07);
+- the empirical slope `low_i16 ≈ A * (+8) + B` varies by file (A ≈ 29k–42k), so no fixed unit/scale is claimed.
+
+This is a verified structural invariant: +48's low half is a steering-related signed quantity, but its units and sign convention remain unknown. Full-tier permutation-controlled regression test added.
+
 ## GTTF remaining slots vs reconstructed kinematics (2026-11-28)
 
 Permutation-controlled study across all 29 ghosts using reconstructed world speed, steering `+8`/`+16` and engine `+32`:

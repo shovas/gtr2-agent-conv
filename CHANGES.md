@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 04:45:00 -0500 - GTTF +48 signed half
+- Decoded slot +48 as two signed 16-bit fields: the low half tracks steering +8 at median |r| 0.503 vs 0.021 permuted (~24x). Units/sign remain unknown; full-tier permutation-controlled test added.
+
 ## 2026-11-28 04:15:00 -0500 - GSC EXE static trace blocked
 - Documented that GSC-family EXEs are packer stubs (or retain loader strings without code xrefs), so static mesh-loader tracing is blocked; skip=4 validation remains empirical. Full-tier regression test added.
 

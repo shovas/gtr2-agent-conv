@@ -1797,6 +1797,37 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertEqual(len(correlations), 10)
         self.assertLess(statistics.median(abs(v) for v in correlations), 0.05)
 
+    def test_gttf_slot48_low_half_signed(self):
+        """The low signed 16-bit half of +48 tracks steering +8 above chance."""
+        import glob
+        import gzip
+        import random
+        import statistics
+        import struct
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        observed = []
+        baseline = []
+        random.seed(6)
+        for path in glob.glob(str(ROOT.parent / "GTR2Steam" / "TimeTrial" / "**" / "*.GTT"),
+                              recursive=True):
+            payload = gz.decompress(path)
+            frames = st.read_frames(payload, st.find_frame_grid(payload))
+            lows = []
+            for frame in frames:
+                value = int.from_bytes(payload[frame["offset"] + 48:
+                                              frame["offset"] + 52], "little")
+                lows.append(struct.unpack("<h", struct.pack("<H", value & 0xFFFF))[0])
+            steering = [frame["position"][2] for frame in frames]
+            observed.append(abs(st._corr(lows, steering)))
+            baseline.append(statistics.mean(
+                abs(st._corr(random.sample(lows, len(lows)), steering))
+                for _ in range(3)))
+        self.assertEqual(len(observed), 29)
+        self.assertGreater(statistics.median(observed), 0.4)
+        self.assertGreater(statistics.median(observed),
+                           5 * statistics.median(baseline))
+
     def test_gttf_slot48_steering_association(self):
         """Slot +48 is modestly but significantly coupled to steering +8."""
         import glob
