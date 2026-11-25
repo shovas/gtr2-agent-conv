@@ -19,6 +19,10 @@ Across all 31 GTT files, the varying byte +31 of the `00 20 00 XX` u32 at +28 ha
 
 Across all 31 GTT files the raw u32 at +40 is neither a monotonic counter nor a stable two-state flag: monotonic fraction median 0.555 (range 0.503–0.586), |correlation with frame time| median 0.025 (max 0.119), and the two exponent clusters (raw >2³⁰ vs lower) flip in a median 26.6% of consecutive frames (range 0.4–29.6%). The hi fraction varies by file (0.475–0.997), so it is not a car-invariant state either. The earlier quantized-float kinematics negatives for this slot stand; `simbin_events_tool.frame_s40_word()` and a regression test lock in these bounds. No semantic promoted.
 
+## GTR2 vertex f0: counts/bbox identifiers negative (2026-11-27)
+
+Across 8,003 markers from GTR2/GTL meshes, neither halfword matches material count, stage count, per-axis bounding-box spans (×1/10/100) or bounding-box diagonal (×1/10/100) more than chance: **1,019** observed matches vs **1,057** mean permuted matches (range 1,020–1,110; average 12.8 candidate values per marker). With the earlier material-offset/name-hash/stage-type negatives, no GMT-internal field explains f0; its cross-corpus family invariance points to an external identifier. Full-tier regression test added.
+
 ## GTR2 vertex f0: stage-type "matches" are a small-integer artifact (2026-11-27)
 
 A naive check of 3,006 markers found 478 halfword matches against stage types / `tail_u32_64` / `tail_u32_65`, which looked significant versus a uniform-16-bit chance estimate (1.1). The correct null accounts for the fact that both f0 halves and stage types are small integers (stage type sets average 2.5 values): a permutation test that shuffles stage-type sets between meshes gives **434** matches versus **440** observed — no signal. Combined with the earlier material-offset/name-hash negatives, no stage-derived interpretation of f0 is supported. Full-tier regression test added.

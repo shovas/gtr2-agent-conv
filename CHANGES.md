@@ -5,6 +5,9 @@ Newest-first change log. Timestamps use repository commit dates (ISO 8601, local
 ## 2026-11-26 16:30:00 -0500 - AIW Features capacity negative
 - Documented that AIW `[Features]` numbers are capacity defaults rather than section counts (startinggrid 104 vs GRID 36 typical); full-tier corpus-fact regression test added.
 
+## 2026-11-27 14:00:00 -0500 - f0 counts/bbox negative
+- Across 8,003 markers, f0 halfwords matching material/stage counts or bounding-box-derived values (1019) equal permutation chance (1057); no GMT-internal field explains the family-invariant marker. Full-tier regression test added.
+
 ## 2026-11-27 13:00:00 -0500 - SCE bounds vs GTR2 targets negative
 - Cross-checked SCE embedded physics bounds with GTR2 `.hdc`/`.tyr` validators: 16/19 shared HDV keys and 11/15 shared TBC keys have incompatible ranges; adapter must rescale/use templates. Full-tier regression test added.
 

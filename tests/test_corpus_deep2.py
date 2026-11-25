@@ -1006,6 +1006,57 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertEqual(checked, 204)
 
+    def test_f0_not_count_or_bbox_derived(self):
+        """f0 halfword matches to counts/bbox values equal permutation chance."""
+        import glob
+        import math
+        import random
+        import statistics
+        import gmt_format as gf
+        import mas_tool
+        pairs = []
+        for root, ext in (("GTR2Steam", ".gtr"), ("GTLSteam", ".gtl")):
+            for archive in glob.glob(str(ROOT.parent / root / "**" / f"*{ext}"),
+                                     recursive=True):
+                try:
+                    _, entries = mas_tool.read_archive(archive)
+                except Exception:
+                    continue
+                for entry in entries:
+                    if not entry.name.lower().endswith(".gmt") or not entry.data:
+                        continue
+                    try:
+                        parsed = gf.parse_gmt("x.gmt", entry.data)
+                    except Exception:
+                        continue
+                    for mesh in parsed.meshes:
+                        marker = gf.mesh_marker(mesh)
+                        vertices = [(v.x, v.y, v.z) for v in mesh.base_vertices]
+                        if not marker or not vertices:
+                            continue
+                        spans = [max(v[i] for v in vertices)
+                                 - min(v[i] for v in vertices) for i in range(3)]
+                        candidates = {len(parsed.materials),
+                                      sum(len(m.stages) for m in parsed.materials)}
+                        for span in spans + [math.sqrt(sum(s * s for s in spans))]:
+                            for mult in (1, 10, 100):
+                                candidates.add(int(span * mult) & 0xFFFF)
+                        pairs.append(((marker & 0xFFFF, marker >> 16), candidates))
+                if len(pairs) >= 6000:
+                    break
+            if len(pairs) >= 6000:
+                break
+        self.assertGreater(len(pairs), 4000)
+        observed = sum(1 for halves, candidates in pairs
+                       for half in halves if half in candidates)
+        random.seed(0)
+        baseline = statistics.mean(
+            sum(1 for (halves, _), candidates in zip(
+                pairs, random.sample([c for _, c in pairs], len(pairs)))
+                for half in halves if half in candidates)
+            for _ in range(10))
+        self.assertLess(abs(observed - baseline) / max(baseline, 1), 0.15)
+
     def test_sce_bounds_vs_gtr2_targets(self):
         """SCE embedded physics ranges are incompatible with GTR2 targets."""
         import simbin_text_tool as stt
