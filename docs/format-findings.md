@@ -173,7 +173,9 @@ regression tests or an explicitly documented negative.
   frame data has no 86-byte structure (0.04–0.06 match), so this is a header
   table rather than the frame grid. Earlier 4-byte-aligned stride scans also
   missed 86 because it is not a multiple of 4. Frame semantics remain
-  unknown.
+  unknown. Bulk data shows a separate **20-byte lag excess** over neighbouring
+  lags in 7/9 replays (median +0.16 matching bytes), consistent with a small
+  repeating record, but no monotonic time field was found at that stride.
 - **24-byte pre-frame records** immediately precede the frame grid: six f32
   fields `(y, z, heading, f3, f4, x)`. They form the reference racing line.
   `find_preframe_records()` / `reconstruct_frame_x()` expose x; frames get

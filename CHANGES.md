@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-30 00:00:00 -0500 - VCR bulk 20-byte lag excess
+- Found a 20-byte autocorrelation excess in replay bulk data (7/9 files, median +0.16 over neighbouring lags); full-tier test added. Frame semantics still undecoded.
+
 ## 2026-11-29 23:30:00 -0500 - VCR 86-byte period scoped to header
 - Found an 86-byte period via byte-level autocorrelation (0.567 vs 0.127 shuffled), then localized it to the replay header (0.78) rather than bulk frame data (0.04). Corrected the initial too-broad interpretation; full-tier test scoped accordingly.
 

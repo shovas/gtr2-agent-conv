@@ -158,6 +158,17 @@ multiple of 4. A short 12-record run in the header has an increasing f32 at
 across the file. Frame semantics remain undecoded. Full-tier test scoped to
 the header region.
 
+## VCR bulk data has a 20-byte lag excess (2026-11-29)
+
+Byte-autocorrelation on a bulk window of each of the nine `.Vcr` payloads
+showed lag 20 exceeds the mean of neighbouring lags 18/19/21/22 in **7/9**
+files, with a median excess of **+0.16** matching bytes. Dominant bulk lags
+also cluster on multiples of 20 (20/60/80/120) in several files. Together
+with the raw 20-byte repeated pattern seen earlier, this suggests a small
+repeating record in bulk replay data — but no monotonic time field could be
+found at that stride, so the record semantics are still unknown. Full-tier
+neighbour-lag-controlled test added.
+
 ## UV tiling ratios confirmed in Race07 (2026-11-29)
 
 The `(1,2,3,4,5,6,1)` UV signature with integer column-4/6 ratios is not

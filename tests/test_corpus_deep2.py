@@ -4118,6 +4118,27 @@ class CorpusDeep2Test(unittest.TestCase):
             opaque += data.find(par2) < 0
         self.assertEqual(opaque, 1)
 
+    def test_vcr_bulk_data_has_20_byte_periodicity(self):
+        """Replay bulk data repeats at lag 20 more than at neighbouring lags."""
+        import gzip_simbin_tool as gz
+        root = ROOT.parent / "GTR2Steam" / "ReplayData"
+        checked = positive = 0
+        for path in sorted(root.glob("*.Vcr")):
+            data = gz.decompress(str(path))
+            lo = min(max(0x4000, len(data) // 4), max(0, len(data) - 1024))
+            hi = min(len(data), lo + 0x10000)
+
+            def match(lag: int) -> float:
+                indices = range(lo, max(lo + 1, min(hi, len(data) - lag)), 8)
+                count = len(indices)
+                return (sum(data[i] == data[i + lag] for i in indices) / count
+                        if count else 0.0)
+
+            checked += 1
+            positive += match(20) > (match(18) + match(19) + match(21) + match(22)) / 4
+        self.assertEqual(checked, 9)
+        self.assertGreaterEqual(positive, 7)
+
     def test_vcr_header_has_86_byte_periodicity(self):
         """The replay header region repeats with an 86-byte period."""
         import gzip_simbin_tool as gz
