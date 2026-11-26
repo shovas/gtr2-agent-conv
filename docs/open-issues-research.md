@@ -168,6 +168,20 @@ session variation is carried solely by `session_seconds`
 `c=8` only in Magny-Cours, but with nine samples no semantics are claimed.
 Full-tier regression test added.
 
+## Object-record trailing fields (2026-11-30)
+
+The EXE reader `fcn.005268e0` copies the record's u32 fields at `+0xc4` and
+`+0xc8` verbatim into the in-memory object without interpreting them, so their
+meaning must come from consumers. Across all 36 participant records in the 13
+local replays: the second u32 is the classic f32 "unset" sentinel
+`0xF49DC5AE` (-1e32) in 31 records and zero in 4 (the GTL files), i.e.
+35/36 are sentinel-or-zero. The first u32, read as f32, is finite and
+non-negative, usually constant across a replay's participants (8/13 files)
+but sometimes differs (e.g. 2355.2 vs 2348.2 in Brno.Vcr). Its units and
+consumer remain unknown — values range 0 to 2355 s but correlate with neither
+payload size nor participant count. Recorded as a characterization, not a
+semantic decoder. Full-tier test added.
+
 ## Object-record parser validated on real replays (2026-11-30)
 
 Implemented `simbin_events_tool.parse_object_records()` from the disassembled

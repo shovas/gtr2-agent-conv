@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-30 09:15:00 -0500 - Replay trailing-field characterization
+- Characterized object-record u32s: second field is the f32 unset sentinel (-1e32) or zero in 35/36 records; first is finite/non-negative but consumer and units remain unknown. Full-tier test added.
+
 ## 2026-11-30 08:45:00 -0500 - Replay participant car/skin decoded
 - Decoded the object record's 64-byte blocks as .CAR filename (36/36 records) and .BMP skin name; exposed value/trailing fields in `parse_object_records()`. Test extended.
 

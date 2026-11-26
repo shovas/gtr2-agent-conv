@@ -4335,6 +4335,26 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertEqual(checked, 4)
 
+    def test_replay_object_trailing_fields(self):
+        """The object record's trailing u32 is mostly an f32 'unset' sentinel."""
+        import math
+        import struct
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        sentinel = struct.unpack("<I", struct.pack("<f", -1e32))[0]
+        roots = (ROOT.parent / "GTR2Steam" / "ReplayData",
+                 ROOT.parent / "GTLSteam" / "ReplayData")
+        records = []
+        for root in roots:
+            for path in root.glob("*.Vcr"):
+                records.extend(st.parse_object_records(gz.decompress(str(path))))
+        self.assertGreater(len(records), 30)
+        sentinel_or_zero = sum(record["trailing_u32"] in (0, sentinel)
+                               for record in records)
+        self.assertGreater(sentinel_or_zero / len(records), 0.9)
+        self.assertTrue(all(math.isfinite(record["value"])
+                            and record["value"] >= 0 for record in records))
+
     def test_replay_object_record_chains(self):
         """The EXE-derived object layout parses real replay participants."""
         import random
