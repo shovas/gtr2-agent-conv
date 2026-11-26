@@ -68,6 +68,17 @@ for shuffled controls; Monza 0.021% versus 0.015–0.026%. At chance — the tai
 is not a flat height cache. Consolidated into
 `test_hat_trailing_stream_is_not_plain_float_records`.
 
+## HAT trailing stream is a typed node tree (2026-11-27)
+
+Traced GTL.exe's tail parser at `0x451080`: it reads two u32 words and one
+signed byte from the stream; the byte must be in -3..2 (values -1/-2 are
+special-cased). It then computes a pointer into the 92-byte-node array
+(`imul ecx, 0x5c`) and recursively calls `0x4503c0` for child nodes. The
+trailing stream is therefore a serialized tree of typed 92-byte nodes, not a
+flat float or record array — consistent with the variable length, the failed
+fixed-stride searches and the histogram-driven float plausibility. No
+field-level decoder claimed.
+
 ## HAT tail alignment negative (2026-11-27)
 
 Motivated by the writer's 32-byte structures, tested whether tail u32s are

@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-27 17:20:00 -0500 - HAT tail is a typed node tree
+- Traced GTL.exe's tail parser (0x451080): two u32 words plus a signed type tag in -3..2, then recursive 92-byte child nodes (0x4503c0). Explains the variable-length tail and all failed fixed-stride hypotheses; code-evidence test extended.
+
 ## 2026-11-27 16:50:00 -0500 - HAT u32 has no runtime decoder
 - Confirmed GTL.exe's HAT record loop copies 4+8+4 bytes at stride 16 verbatim into runtime structures without interpreting the opaque u32; neither shipped executable decodes that field. Code-evidence guard extended.
 
