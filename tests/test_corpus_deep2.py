@@ -6305,6 +6305,24 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertGreaterEqual(checked, 10)
 
+    def test_cam_header_convention_by_game_generation(self):
+        """rF1/GTL CAMs carry a gMa header; GTR2/Race07 CAMs do not."""
+        import media_tool as mt
+
+        expected = {"RF1Vanilla": True, "GTLSteam": True,
+                    "GTR2Steam": False, "Race07Vanilla": False}
+        for root, wants_header in expected.items():
+            directory = ROOT.parent / root
+            if not directory.is_dir():
+                continue
+            checked = 0
+            for path in list(directory.rglob("*.cam"))[:20]:
+                data = mt.decrypt_jca_text(path.read_bytes())
+                self.assertEqual(data.startswith(b"//[[gMa1."), wants_header,
+                                 str(path))
+                checked += 1
+            self.assertGreaterEqual(checked, 5, root)
+
     def test_gtl_tree_conversion_preserves_cam_and_trk_conventions(self):
         """GTL CAM files pass through; TRK references become GTR2-style."""
         import tempfile

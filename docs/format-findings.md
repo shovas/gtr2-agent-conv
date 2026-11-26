@@ -208,7 +208,13 @@ regression tests or an explicitly documented negative.
   convention holds in rF1 (594/684 cameras, median 15.3 vs 304.6) and GTL
   (246/274, 10.1 vs 113.9), so it is a gMotor-wide storage convention, **not**
   a GTR2-specific conversion step; the rF1→GTR2 pipeline leaves CAM files
-  byte-identical (50/50 sampled).
+  byte-identical (50/50 sampled). Separately, the `//[[gMa1.` header itself is
+  generation-specific: 34/34 sampled rF1 and 25/25 GTL CAMs carry it, while
+  34/34 sampled GTR2 and 40/40 Race07 CAMs start directly at `StaticCam=`.
+  GTR2 AIWs, unlike CAMs, still carry the header (31/31), so header stripping
+  must not be generalised from AIW to CAM without runtime evidence; our tree
+  converters preserve the source bytes. Full-tier test:
+  `test_cam_header_convention_by_game_generation`.
 - All nine shipped `.Vcr` replay files parse with the same reader: gzip +
   gMb wrapper + `IRSR` v1.05, with driver/car/team names and session values
   from the same 36000/43200/46800 set. The GTTF-specific frame-grid detector

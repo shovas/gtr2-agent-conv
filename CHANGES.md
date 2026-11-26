@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-27 12:50:00 -0500 - CAM header convention by generation
+- Documented that rF1/GTL CAMs carry a `gMa1` header while GTR2/Race07 CAMs start directly at StaticCam, whereas GTR2 AIWs retain the header; converters preserve source bytes until runtime evidence justifies stripping. Full-tier test added.
+
 ## 2026-11-27 12:20:00 -0500 - small_a scale negative
 - Found no universal elevation-to-small_a scale (regression slopes vary ~91x across replays); consolidated into the existing elevation-channel test.
 
