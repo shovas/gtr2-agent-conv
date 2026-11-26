@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 18:50:00 -0500 - Replay channel CSV export
+- Added `simbin_events_tool.py FILE --channels`, which exports per-frame driver-state positions, heading and the verified steering-like/vertical-motion channels as CSV for cross-recording comparison. Full-tier CLI test added.
+
 ## 2026-11-26 18:20:00 -0500 - Flag misplaced HAT files in conversion
 - `validate_gtr2_tree()` now flags `.hat` files outside `GameData/Locations/HAT_Dedicated`, since GTL/Race07 use different paths and cross-game HAT bodies are not compatible. Full-tier test added.
 

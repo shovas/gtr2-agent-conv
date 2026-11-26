@@ -832,6 +832,8 @@ def main(argv=None) -> int:
     ap.add_argument("--ghost-line", action="store_true", help="report a .dsi instructor polyline")
     ap.add_argument("--replay", action="store_true",
                     help="report IRSR replay participants and frame stream")
+    ap.add_argument("--channels", action="store_true",
+                    help="emit CSV of verified replay driver-state channels")
     ap.add_argument("--shift", type=float,
                     help="shift all replay timestamps by this many seconds")
     ap.add_argument("--out", help="output file for --shift (default: stdout bytes)")
@@ -852,6 +854,25 @@ def main(argv=None) -> int:
         pts = read_ghost_line(raw)
         print(f"ghost_points={len(pts)} first={pts[0] if pts else None} "
               f"last={pts[-1] if pts else None}")
+        return 0
+    if args.channels:
+        frames = parse_vcr_frames(raw)
+        if not frames:
+            ap.error("no parseable replay frame stream")
+        print("frame,time,position_x,position_y,position_z,angle,pair_diff,small_a")
+        for index, frame in enumerate(frames["frames"]):
+            for record in frame["records"]:
+                if vcr_record_tag(record["header"]) != 0:
+                    continue
+                state = vcr_driver_state(record["data"])
+                if not state:
+                    continue
+                position = state["position"]
+                values = (index, frame["time_word"], position[0], position[1],
+                          position[2], state["angle_like"],
+                          state["short_pair_difference"], state["small_a"])
+                print(",".join(f"{value:.6f}" if isinstance(value, float)
+                               else str(value) for value in values))
         return 0
     e = parse_payload(raw)
     print(f"kind={e.kind} version={e.version} trk={e.trk!r} aiw={e.aiw!r}")

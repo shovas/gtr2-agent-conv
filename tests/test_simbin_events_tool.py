@@ -553,6 +553,57 @@ class SimbinEventsToolTest(unittest.TestCase):
             checked += 1
         self.assertGreaterEqual(checked, 13)
 
+    def test_replay_channels_csv(self):
+        """--channels emits the verified channels as parseable CSV rows."""
+        import csv
+        import io
+        import subprocess
+        import sys
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        path = (ROOT.parent / "GTR2Steam" / "ReplayData"
+                / "Brno HOT LAP.Vcr")
+        if not path.is_file():
+            self.skipTest("Brno HOT LAP.Vcr not present")
+        result = subprocess.run(
+            [sys.executable, str(ROOT / "simbin_events_tool.py"), str(path),
+             "--channels"], capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        rows = list(csv.DictReader(io.StringIO(result.stdout)))
+        self.assertGreater(len(rows), 10)
+        self.assertEqual(list(rows[0]), ["frame", "time", "position_x",
+                                         "position_y", "position_z", "angle",
+                                         "pair_diff", "small_a"])
+        states = []
+        for frame in st.parse_vcr_frames(gz.decompress(str(path)))["frames"]:
+            for record in frame["records"]:
+                if st.vcr_record_tag(record["header"]) == 0:
+                    state = st.vcr_driver_state(record["data"])
+                    if state:
+                        states.append(state)
+                    break
+        self.assertEqual(len(rows), len(states))
+        for row, state in zip(rows, states):
+            self.assertAlmostEqual(float(row["pair_diff"]),
+                                   state["short_pair_difference"], places=3)
+            self.assertAlmostEqual(float(row["small_a"]),
+                                   state["small_a"], places=5)
+
+        # Every shipped replay exports parseable rows with the same schema.
+        total = 0
+        for directory in (ROOT.parent / "GTR2Steam" / "ReplayData",
+                          ROOT.parent / "GTLSteam" / "ReplayData"):
+            for candidate in sorted(directory.glob("*.Vcr")):
+                result = subprocess.run(
+                    [sys.executable, str(ROOT / "simbin_events_tool.py"),
+                     str(candidate), "--channels"],
+                    capture_output=True, text=True)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                exported = list(csv.DictReader(io.StringIO(result.stdout)))
+                self.assertEqual(list(exported[0]), list(rows[0]))
+                total += len(exported)
+        self.assertGreater(total, 10000)
+
     def test_replay_exposes_pair_difference(self):
         """The steering-like short pair difference is available in API and CLI."""
         import subprocess
