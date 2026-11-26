@@ -398,6 +398,9 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
   However no 8-byte phase yields a convincing run of plausible f32 pairs
   (~48% at every phase, same as random), so the stream is not plain packed
   floats. Full-tier test: `test_hat_trailing_stream_has_eight_byte_periodicity`.
+  The ~49% of 8-byte windows that decode as two plausible IEEE floats is fully
+  explained by the tail's byte histogram (byte-shuffled control 48.5%), so no
+  float-record layout is present.
 - The table field B has only a **weak track-scale trend**, not a decoder:
   using all 32 GTR2 layout files (including duplicate byte-identical bodies)
   gives r=0.66 against AIW waypoint count, but deduplicating to 14 independent

@@ -5287,6 +5287,52 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertGreater(observed, statistics.mean(permuted))
         self.assertGreater(observed, max(permuted))
 
+    def test_hat_trailing_stream_is_not_plain_float_records(self):
+        """Float plausibility in the tail is explained by its byte histogram."""
+        import random
+        import statistics
+        import struct
+        import gzip_simbin_tool as gz
+
+        path = (ROOT.parent / "GTR2Steam" / "GameData" / "Locations"
+                / "HAT_Dedicated" / "3Brno.hat")
+        if not path.is_file():
+            self.skipTest("GTR2 hat sample not present")
+        payload = gz.decompress(str(path))
+        marker = payload.find(b"generated\x00")
+        body = payload[marker + 10:]
+        count = 0
+        for offset in range(48, len(body) - 16, 16):
+            first, _unknown, second, third = struct.unpack_from("<fIff", body, offset)
+            if not (-1e6 < first < 1e6 and first == first
+                    and second == second and 0.01 < abs(second) < 20
+                    and -1e6 < third < 1e6 and third == third):
+                break
+            count += 1
+        start = 48 + 16 * count + 8
+        tail = body[start:start + 200000]
+        self.assertGreater(len(tail), 100000)
+
+        def plausible(data):
+            successes = 0
+            total = 0
+            for offset in range(0, len(data) - 8, 8):
+                first, second = struct.unpack_from("<2f", data, offset)
+                successes += (first == first and second == second
+                              and abs(first) < 1e6 and abs(second) < 1e6)
+                total += 1
+            return successes / total
+
+        observed = plausible(tail)
+        self.assertGreater(observed, 0.4)
+        random.seed(2026)
+        controls = []
+        for _ in range(10):
+            shuffled = bytearray(tail)
+            random.shuffle(shuffled)
+            controls.append(plausible(bytes(shuffled)))
+        self.assertLess(abs(observed - statistics.mean(controls)), 0.02)
+
     def test_hat_trailing_stream_has_eight_byte_periodicity(self):
         """The .hat stream after the record table is not byte-random."""
         import collections

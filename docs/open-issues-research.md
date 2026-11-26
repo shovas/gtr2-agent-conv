@@ -7,6 +7,16 @@ Compared each layout's median |B| against median AIW `wp_width[0]` and
 and r=0.237 (max above observed). B is not a track-width or groove-width
 parameter. Full-tier test added.
 
+## `.hat` trailing-stream float interpretation (2026-11-26) — negative
+
+Tested both IEEE byte orders and all four byte phases on the tail: ~70% of
+4-byte words and ~49% of 8-byte pairs decode as "plausible" floats, but a
+byte-shuffled control preserving the histogram gives the same ~48.5% for
+pairs, and the rate is identical at every phase and in both endiannesses.
+The apparent float-likeness comes from a byte histogram concentrated in
+float-exponent ranges (0xC0–0xE0 = 19.6%, 0x00–0x20 = 18.8%), not from float
+records. Full-tier test added.
+
 ## `.hat` u32 field negatives (2026-11-26)
 
 Tested the remaining u32 in the 16-byte record:

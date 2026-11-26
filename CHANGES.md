@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 11:50:00 -0500 - Hat tail float negative
+- Showed the trailing stream's float-likeness is entirely explained by its byte histogram (byte-shuffled control matches 48.5% vs 48.8% observed), so no float-record decoder applies. Full-tier test added.
+
 ## 2026-11-26 11:20:00 -0500 - Document decoded replay channels
 - Refined small_a: raw per-frame elevation delta fits slightly better than per-second velocity; synced FEATURES/CAPABILITIES with the decoded steering-like and vertical-motion channels.
 
