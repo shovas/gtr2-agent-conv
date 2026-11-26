@@ -4207,6 +4207,44 @@ class CorpusDeep2Test(unittest.TestCase):
                 break
         self.assertGreaterEqual(checked, 5)
 
+        # GTR1 conversions using a real GTR2 template.
+        template = None
+        for archive in glob.glob(str(ROOT.parent / "GTR2Steam" / "**" / "*.gtr"),
+                                 recursive=True)[:20]:
+            try:
+                _, entries = mas_tool.read_archive(archive)
+            except Exception:
+                continue
+            template = next((entry.data for entry in entries
+                             if entry.name.lower().endswith(".gmt") and entry.data), None)
+            if template:
+                break
+        if template:
+            import gtr1_to_gmt
+            gtr1_checked = 0
+            for archive in glob.glob(str(ROOT.parent / "GTR1Vanilla" / "**" / "*.gtr"),
+                                     recursive=True)[:20]:
+                try:
+                    _, entries = mas_tool.read_archive(archive)
+                except Exception:
+                    continue
+                for entry in entries:
+                    if not entry.name.lower().endswith(".gmt") or not entry.data:
+                        continue
+                    try:
+                        converted = gtr1_to_gmt.gtr1_to_gmt(entry.data, template)
+                    except Exception:
+                        continue
+                    ours = gmt_format.parse_gmt("x.gmt", converted)
+                    theirs = reference.parse(converted)
+                    self.assertEqual(len(ours.meshes), len(theirs))
+                    gtr1_checked += 1
+                    if gtr1_checked >= 5:
+                        break
+                if gtr1_checked >= 5:
+                    break
+            self.assertGreaterEqual(gtr1_checked, 3)
+
     def test_gmt_semantic_reader_recognizes_all_mesh_magics(self):
         """find_submeshes handles 0x60xx variants as well as 0x40xx."""
         import glob

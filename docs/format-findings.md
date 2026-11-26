@@ -345,8 +345,9 @@ regression tests or an explicitly documented negative.
 
 - Converted GSC→GTR2 GMTs were validated against the independent
   `gtr2-agent-tools` GMT reader (runtime reference only, no code copied):
-  20/20 real and converted samples agree on mesh and vertex counts. A
-  full-tier test uses that parser when the reference tree is present.
+  20/20 real and converted samples agree on mesh and vertex counts; GTR1
+  conversions validated likewise. A full-tier test uses that parser when the
+  reference tree is present.
 - Tests: `python3 run_tests.py --mode quick|normal|full`; quick tier is kept
   under its budget (currently 20 modules / ~27 s). Normal tier 252 s / 252
   tests / 0 failures, below its 300 s budget.
