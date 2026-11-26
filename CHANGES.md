@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-27 17:50:00 -0500 - HAT 34-byte node records decoded
+- Traced GTL.exe node parser 0x4503c0: 34-byte on-disk nodes with 21-bit and packed 10/11-bit fields plus three references into the 16-byte record table, explaining the measured 34-byte tail periodicity. Code-evidence test extended.
+
 ## 2026-11-27 17:20:00 -0500 - HAT tail is a typed node tree
 - Traced GTL.exe's tail parser (0x451080): two u32 words plus a signed type tag in -3..2, then recursive 92-byte child nodes (0x4503c0). Explains the variable-length tail and all failed fixed-stride hypotheses; code-evidence test extended.
 

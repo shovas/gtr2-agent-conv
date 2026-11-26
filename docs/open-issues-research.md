@@ -68,6 +68,22 @@ for shuffled controls; Monza 0.021% versus 0.015–0.026%. At chance — the tai
 is not a flat height cache. Consolidated into
 `test_hat_trailing_stream_is_not_plain_float_records`.
 
+## HAT 34-byte node records (2026-11-27)
+
+Traced `0x4503c0` in GTL.exe: each node reads **0x22 = 34 bytes** from the
+stream. The parser extracts:
+- a 21-bit field (`and ecx, 0x1fffff`);
+- a u32 whose low 10 bits (`&0x3ff`) are shifted left 11 and whose high 11
+  bits (`>>21`) are added — a packed pair;
+- three u32 values used as indices into the 16-byte record table (`shl eax,4`,
+  bounds-checked against `[esi+0x74]` with base `[esi+0x78]`);
+- a 16-bit field at node offset 28.
+
+This explains the previously measured 34-byte byte-lag periodicity as the
+actual node stride, not just exponent-byte structure. The runtime nodes are
+0x5c (92) bytes. No full field-level decoder claimed. Code-evidence test
+extended.
+
 ## HAT trailing stream is a typed node tree (2026-11-27)
 
 Traced GTL.exe's tail parser at `0x451080`: it reads two u32 words and one

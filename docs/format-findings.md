@@ -474,7 +474,11 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
   is parsed by `0x451080`, which reads two u32 fields and a signed type tag
   restricted to -3..2, then recursively walks 92-byte nodes through
   `0x4503c0` — a tree, not a flat float array, which explains the variable
-  length and the failure of all fixed-stride hypotheses. Full-tier tests: `test_hat_producer_strings_in_dedicated_exe`,
+  length and the failure of all fixed-stride hypotheses. Each node reads a
+  **34-byte (0x22) on-disk record** containing a 21-bit field (`&0x1fffff`),
+  a 10-bit field (`&0x3ff`, shifted 11) packed with an 11-bit field (`>>21`),
+  and three u32 references into the 16-byte record table (`index << 4`) —
+  matching the independently observed 34-byte tail periodicity. Full-tier tests: `test_hat_producer_strings_in_dedicated_exe`,
   `test_hat_trailing_stream_is_not_plain_float_records`. Although 18 signatures are shared
   across games, the matching bodies are **not reusable**: GTR2 Brno has 40,189
   records vs Race07's 41,530 (3/40,189 records identical at the same index),

@@ -6558,6 +6558,11 @@ class CorpusDeep2Test(unittest.TestCase):
             # 92-byte (0x5c) nodes recursively.
             self.assertIn(bytes.fromhex("663dfdff"), raw_gtl)
             self.assertIn(bytes.fromhex("6bc95c"), raw_gtl)
+            # Node parser 0x4503c0 reads 34-byte records with 21-bit and
+            # 10-bit packed fields and 3 references to the 16-byte table.
+            self.assertIn(bytes.fromhex("6a228d4c2440"), raw_gtl)
+            self.assertIn(bytes.fromhex("81e1ffff1f00"), raw_gtl)
+            self.assertIn(bytes.fromhex("81e2ff030000"), raw_gtl)
 
     def test_hat_record_tables_not_cross_game_reusable(self):
         """Matching signatures do not make HAT bodies transferable between games."""
