@@ -373,7 +373,9 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
   constrained: f0 byte semantics differ in JCA-encrypted Volvo/Race07 GMTs.
   See `docs/open-issues-research.md` for each experiment.
 - Tooling: `gmt_format.split_f0()`, `gmt_format.f0_byte_pair()`, `gmt_tool.py info --meshes` and
-  `gmt_tool.py f0 FILE` (with invariant warnings).
+  `gmt_tool.py f0 FILE` (with invariant warnings). `validate_conversion.validate()` now guards
+  byte-exact f0 preservation too (30/30 sampled old→new conversions; metamorphic test flips one
+  marker and the report fails).
 
 ## 6. `PHYSICS.PHS`
 

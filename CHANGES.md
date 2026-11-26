@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-12-01 06:35:00 -0500 - Validator guards f0 preservation
+- `validate_conversion.py` now checks exact per-mesh f0 marker preservation in addition to geometry, UVs and material tail; verified on 30 sampled conversions, with a metamorphic test proving f0 corruption is rejected.
+
 ## 2026-12-01 06:00:00 -0500 - Cross-game hat signature
 - Verified the 32-byte .hat layout signature is identical between GTL and GTR2 for the same layout (p=0.003 under name permutation); bodies still diverge, so no cross-game body conversion. Full-tier test added.
 

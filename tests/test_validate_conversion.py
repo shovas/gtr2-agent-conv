@@ -43,10 +43,31 @@ class ValidateConversionTest(unittest.TestCase):
             self.assertTrue(report["faces_equal"])
             self.assertTrue(report["independent_cross_check"])
             self.assertTrue(report["material_tail_equal"])
+            self.assertTrue(report["f0_equal"])
             checked += 1
         if not checked:
             self.skipTest("old-layout GMTs not present")
         self.assertEqual(checked, 10)
+
+    def test_f0_corruption_is_detected(self):
+        """The validator rejects a converted GMT whose f0 marker was altered."""
+        import gmt_semantic
+        import struct
+        for data in _old_gmts(10):
+            converted = gmt_layout.old_to_new_semantic(data)
+            self.assertTrue(vc.validate(data, converted)["f0_equal"])
+            subs = gmt_semantic.find_submeshes(converted)
+            if not subs:
+                continue
+            corrupted = bytearray(converted)
+            off = subs[0]["v_off"] + 4
+            value = struct.unpack_from("<I", corrupted, off)[0]
+            struct.pack_into("<I", corrupted, off, value ^ 0x01010101)
+            report = vc.validate(data, bytes(corrupted))
+            self.assertFalse(report["f0_equal"], report)
+            self.assertFalse(report["pass"], report)
+            return
+        self.skipTest("old-layout GMTs not present")
 
     def test_metamorphic_position_perturbation(self):
         import struct

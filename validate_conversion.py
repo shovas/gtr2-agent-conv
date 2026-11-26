@@ -75,6 +75,12 @@ def _float_lists_equal(a, b) -> bool:
     return True
 
 
+def _f0_markers(data: bytes) -> list[int]:
+    """Per-submesh f0 marker on vertex 0, read directly from each vertex block."""
+    return [struct.unpack_from("<I", data, sub["v_off"] + 4)[0]
+            for sub in gmt_semantic.find_submeshes(data)]
+
+
 def validate(old_data: bytes, new_data: bytes) -> dict:
     """Return a validation report for an old→new conversion."""
     old = gmt_semantic.read_gmt(old_data)
@@ -101,12 +107,18 @@ def validate(old_data: bytes, new_data: bytes) -> dict:
     new_obj = struct.unpack_from("<I", new_data, 0)[0]
     tail_equal = old_data[old_obj:] == new_data[new_obj:]
 
+    # f0 is an opaque per-mesh identifier that must survive conversion exactly.
+    old_f0 = _f0_markers(old_data)
+    new_f0 = _f0_markers(new_data)
+    f0_equal = bool(old_f0) and old_f0 == new_f0
+
     return {"submeshes": (len(old["submeshes"]), len(new["submeshes"])),
             "vertices": (len(old_pos), len(new_pos)), "faces": (len(old_faces), len(new_faces)),
             "positions_equal": positions_equal, "uvs_equal": uvs_equal,
             "faces_equal": faces_equal, "independent_cross_check": cross,
-            "material_tail_equal": tail_equal,
-            "pass": all((positions_equal, uvs_equal, faces_equal, cross, tail_equal))}
+            "material_tail_equal": tail_equal, "f0_equal": f0_equal,
+            "pass": all((positions_equal, uvs_equal, faces_equal, cross,
+                         tail_equal, f0_equal))}
 
 
 def main(argv=None) -> int:
