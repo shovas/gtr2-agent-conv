@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 10:20:00 -0500 - f0 CRC16 negative
+- Ruled out CRC16-CCITT/IBM of material and stage names as f0 bytes (hit rates ~0.6% vs 0.78% chance). Full-tier test added.
+
 ## 2026-11-26 09:50:00 -0500 - Driver small_b kinematics negative
 - Probed small_b against elevation, speed, heading rate and lateral acceleration (with lags): signs are inconsistent across replays and mean |r|<0.25, so it remains undecoded. Full-tier test added.
 

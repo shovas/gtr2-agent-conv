@@ -224,6 +224,14 @@ assets:
 
 The identifier remains opaque. Full-tier test guards the negative.
 
+## f0 vs CRC16 hashes (2026-11-26) — negative
+
+Tested CRC16-CCITT (0x1021/0xFFFF) and CRC16-IBM (0xA001/0) of material names
+and every stage string against both meaningful f0 bytes across 9,312 GTR2
+markers. Hit rates were 0.0061/0.0059 (names) and 0.0059/0.0062 (stages),
+all **below** the 0.0078 chance rate. No CRC16 variant explains f0.
+Full-tier test added.
+
 ## `.hat` body is deterministic per layout (2026-12-01)
 
 Following the header finding, all 34 bodies were compared after byte 4:

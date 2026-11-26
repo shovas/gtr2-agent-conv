@@ -1294,6 +1294,63 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertGreater(observed, max(permuted))
         self.assertLess(observed, 0.4)  # weak association, not a material ID
 
+    def test_f0_bytes_not_crc16_of_material_strings(self):
+        """CRC16 variants of material/stage names do not reproduce f0 bytes."""
+        import glob
+        import gmt_format as gf
+        import mas_tool
+
+        def crc16(data, polynomial, initial):
+            value = initial
+            for byte in data:
+                value ^= byte << 8 if polynomial == 0x1021 else byte
+                for _ in range(8):
+                    if value & 0x8000:
+                        value = ((value << 1) ^ polynomial) & 0xFFFF
+                    else:
+                        value = (value << 1) & 0xFFFF
+            return value
+
+        rows = []
+        for archive in sorted(glob.glob(
+                str(ROOT.parent / "GTR2Steam" / "**" / "*.gtr"),
+                recursive=True))[:10]:
+            try:
+                _mtype, entries = mas_tool.read_archive(archive)
+            except Exception:
+                continue
+            for entry in entries:
+                if not entry.name.lower().endswith(".gmt") or not entry.data:
+                    continue
+                try:
+                    parsed = gf.parse_gmt(entry.name, entry.data)
+                except Exception:
+                    continue
+                for mesh in parsed.meshes:
+                    marker = gf.mesh_marker(mesh)
+                    index = mesh.record.material_index
+                    if marker and index < len(parsed.materials):
+                        pair = gf.f0_byte_pair(marker)
+                        rows.append((pair, parsed.materials[index]))
+            if len(rows) >= 2000:
+                break
+        if not rows:
+            self.skipTest("GTR2 mesh corpus not present")
+
+        for polynomial, initial in ((0x1021, 0xFFFF), (0xA001, 0)):
+            hits = 0
+            attempts = 0
+            for pair, material in rows[:2000]:
+                for text in [material.name] + list(material.strings):
+                    if not text:
+                        continue
+                    value = crc16(text.encode("latin-1"), polynomial, initial)
+                    hits += (value & 0xFF) in pair[:2]
+                    hits += ((value >> 8) & 0xFF) in pair[:2]
+                    attempts += 2
+            self.assertGreater(attempts, 1000)
+            self.assertLess(hits / attempts, 0.02)  # ~0.78% by chance
+
     def test_f0_bytes_not_material_string_hash(self):
         """f0's two bytes are not 8-bit slices of material-name hashes."""
         import hashlib
