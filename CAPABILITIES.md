@@ -162,6 +162,7 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 - **Stream column signature**: `gmt_format.stream_column_signature()` reports which of the 8 f32 columns of a GTR2 extra stream repeat earlier columns, capturing the verified 99.73% column-7/column-1 invariant and the dominant three-value layout. Full-tier test.
 - **GTR1 UV transfer**: `gtr1_to_gmt.uvs_from_gtr1()` decodes GTR1 vertex fields 9/10 as UV pairs; conversions write them into the GTR2 UV block and reproduce source UVs exactly (30/30 sampled). Full-tier test.
 - **Two-stream cross-check**: `gmt_format.stream_cross_agreement()` measures per-vertex UV-pair agreement between GTR2 stream2 and stream3 (96% of meshes at 1.0 vs 0.023 shuffled). Full-tier test.
+- **Driver-state decoder**: `simbin_events_tool.vcr_driver_state()` reads the 53-byte replay body (u16 fields at +8, f32 position block at +29); full-tier smoothness test.
 - **Replay CLI**: `simbin_events_tool.py FILE --replay` reports participants, summary and frame-stream statistics (full-tier CLI test).
 - **Replay frame decoder**: `simbin_events_tool.parse_vcr_frames()` consumes all 9 GTR2 replay payloads exactly (declared/total frames, sub-records, time spans cross-validated; handles Latin-1 names and multi-segment streams). Full-tier test.
 - **Replay summary parser**: `simbin_events_tool.parse_replay_summary()` reads the marker/count/duration block following participant records (full-tier test on 9 GTR2 replays).

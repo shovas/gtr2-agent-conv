@@ -168,6 +168,19 @@ session variation is carried solely by `session_seconds`
 `c=8` only in Magny-Cours, but with nine samples no semantics are claimed.
 Full-tier regression test added.
 
+## Driver-state body alignment resolved (2026-11-30) — correction
+
+The apparent "varying f32 alignment" in 53-byte driver bodies was an
+off-by-one: searching every byte offset found plausible world coordinates at
+offset **29** in 288/300 sampled records (not 28). `vcr_driver_state()` now
+reads four u16s at +8 and six f32s from +29. On a 793-frame Monza sample the
+first three f32s have lag-1 autocorrelation ~0.999 and median consecutive
+displacement <5 m, versus ~100× larger for shuffled samples — they are the
+car's world position. The fourth field lies in ±pi and is associated with
+position-derived heading (|r| ~0.52 on moving frames vs 0.05 shuffled), but
+is not an exact match. Remaining fields and units are still unknown.
+Full-tier test added.
+
 ## Replay sub-record tags (2026-11-30)
 
 Classified the low byte of sub-record headers across all nine GTR2 replays.

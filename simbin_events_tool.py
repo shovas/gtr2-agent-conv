@@ -309,6 +309,23 @@ def parse_replay_summary(data: bytes) -> dict | None:
             "count_b": second, "duration": duration}
 
 
+def vcr_driver_state(body: bytes) -> dict | None:
+    """Decode a 53-byte driver-state sub-record body.
+
+    Code-grounded layout: four u16 values at offsets 8..15, then six f32s
+    starting at byte **29** (not 28 — the earlier misalignment was an
+    off-by-one in the parser). The first three f32s are world position
+    (lag-1 autocorrelation ~0.999 on a 793-frame sample); the fourth is
+    angle-like in [-pi, pi]. No unit semantics are claimed for the rest.
+    """
+    if len(body) < 53:
+        return None
+    shorts = struct.unpack_from("<4H", body, 8)
+    floats = struct.unpack_from("<6f", body, 29)
+    return {"shorts": shorts, "position": floats[:3],
+            "angle_like": floats[3], "extras": floats[4:]}
+
+
 def vcr_record_tag(header: int) -> int:
     """Return the low-byte type/car tag of a replay sub-record header.
 

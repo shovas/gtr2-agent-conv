@@ -4337,6 +4337,40 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertEqual(checked, 4)
 
+    def test_vcr_driver_state_positions_are_smooth(self):
+        """The 53-byte driver body's f32 block starts at byte 29."""
+        import math
+        import random
+        import statistics
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        for name in ("Monza.Vcr", "Imola.Vcr"):
+            path = ROOT.parent / "GTR2Steam" / "ReplayData" / name
+            if not path.is_file():
+                continue
+            payload = gz.decompress(str(path))
+            parsed = st.parse_vcr_frames(payload)
+            if not parsed:
+                continue
+            positions = []
+            for frame in parsed["frames"]:
+                for record in frame["records"]:
+                    if st.vcr_record_tag(record["header"]) != 0:
+                        continue
+                    state = st.vcr_driver_state(record["data"])
+                    if state:
+                        positions.append(state["position"])
+                    break
+            self.assertGreater(len(positions), 100)
+            deltas = [math.dist(a, b) for a, b in zip(positions, positions[1:])]
+            self.assertLess(statistics.median(deltas), 5.0)
+            random.seed(132)
+            shuffled = random.sample(positions, len(positions))
+            shuffled_deltas = [math.dist(a, b) for a, b in
+                               zip(shuffled, shuffled[1:])]
+            self.assertLess(statistics.median(deltas),
+                            0.2 * statistics.median(shuffled_deltas))
+
     def test_vcr_subrecord_tags_follow_participants(self):
         """Sub-record tags are bounded by participant count; 0x68/0xff recur."""
         import gzip_simbin_tool as gz
