@@ -4374,6 +4374,38 @@ class CorpusDeep2Test(unittest.TestCase):
                              path.read_bytes(), str(path))
         self.assertEqual(set(extensions), {".dsi", ".hat", ".gtt", ".vcr"})
 
+    def test_driver_state_u16s_form_wheel_pairs(self):
+        """The four u16 fields are paired values, not four independent counts."""
+        import statistics
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        path = ROOT.parent / "GTR2Steam" / "ReplayData" / "Monza.Vcr"
+        if not path.is_file():
+            self.skipTest("Monza.Vcr not present")
+        parsed = st.parse_vcr_frames(gz.decompress(str(path)))
+        if not parsed:
+            self.skipTest("frame stream unparsed")
+        rows = []
+        for frame in parsed["frames"]:
+            for record in frame["records"]:
+                if st.vcr_record_tag(record["header"]) != 0:
+                    continue
+                state = st.vcr_driver_state(record["data"])
+                if state:
+                    rows.append(state["shorts"])
+                break
+        self.assertGreater(len(rows), 100)
+        rear_gap = statistics.median(abs(row[2] - row[3]) for row in rows)
+        scale = statistics.median(max(row) for row in rows)
+        self.assertLess(rear_gap, 0.01 * scale)
+        import random
+        random.seed(153)
+        shuffled = [list(row) for row in rows]
+        for row in shuffled:
+            random.shuffle(row)
+        shuffled_gap = statistics.median(abs(row[2] - row[3]) for row in shuffled)
+        self.assertLess(rear_gap, 0.1 * shuffled_gap)
+
     def test_hat_payloads_are_gmb_wrapped_high_entropy(self):
         """`.hat` files share the gMb container but use an undecoded body."""
         import math

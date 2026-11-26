@@ -199,6 +199,17 @@ phantom empty frames from those zeros; `parse_vcr_frames()` now rejects
 zero-count summaries and zero-subcount frames, returning None for GTL replays
 while all nine GTR2 replays still parse exactly. Full-tier test added.
 
+## Driver u16 pairing and AIW ordinal negative (2026-11-30)
+
+Following the EXE reader/consumer paths produced no new semantics: the u16
+fields show no meaningful correlation with AIW waypoint ordinals along a DSI
+ghost line (|r| <= 0.073, comparable to permutation baselines) or with path
+curvature. Structurally, the four values behave as wheel-like pairs — on
+Monza.Vcr the median rear pair gap is 5 out of a ~19,000 scale (<0.1%), far
+below shuffled values — but the encoding/scale is not consistent across cars
+(Imola samples are ~136/0/1280). Recorded as a structural observation plus
+negatives; no decoder claimed. Full-tier test added.
+
 ## Driver u16 fields vs curvature (2026-11-30) — negative
 
 The four u16 fields at driver-body +8 show no meaningful association with

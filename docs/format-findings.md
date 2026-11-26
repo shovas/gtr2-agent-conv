@@ -225,7 +225,9 @@ regression tests or an explicitly documented negative.
   the first three are smooth world positions (median frame-to-frame step <5 m
   vs ~100× larger for shuffled samples), the fifth (byte 45, `angle_like`) is
   angle-like and correlates with position-derived heading (|r| >0.4 vs a
-  shuffled baseline), and fields four/six are small.
+  shuffled baseline), and fields four/six are small. The four u16s form
+  wheel-like pairs: the rear-left/rear-right gap is <1% of the value scale in
+  Monza.Vcr, versus a much larger gap after shuffling.
 - Every ghost ends with a **20-byte tail** (5 f32s). Its first two floats are
   a per-track fixed point (median distance 0.6 between ghosts of the same
   track vs 178 for random pairs) near that track's final frame position —

@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-30 21:45:00 -0500 - Driver u16 pairing observation
+- Verified the four driver-state u16s form wheel-like pairs (rear gap <1% of scale in Monza); no AIW-ordinal or curvature semantics found. Full-tier test added.
+
 ## 2026-11-30 21:15:00 -0500 - Hat cipher negative and u16 curvature negative
 - Ruled out the three known gMb keys for .hat bodies (entropy rises to ~7.91). Recorded that driver-state u16 fields have no curvature association. Documentation-only.
 
