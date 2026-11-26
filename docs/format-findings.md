@@ -229,7 +229,10 @@ regression tests or an explicitly documented negative.
   shuffled baseline). The fourth float (`small_a`, byte 41) tracks **vertical
   motion**: r=0.13–0.96 (mean 0.641) against position y-delta in 8/8 replays
   (seeded permutation p<0.001); the sixth (`small_b`) remains unexplained.
-  Full-tier test: `test_driver_small_a_tracks_elevation_change`. The four u16s form
+  Full-tier test: `test_driver_small_a_tracks_elevation_change`. Calibration
+  against AIW-derived road gradient is track-dependent (Brno HOT LAP r=0.98,
+  Imola r=0.00), so no universal scale conversion is claimed; guarded by
+  `test_driver_small_a_aiw_slope_calibration_is_track_dependent`. The four u16s form
   wheel-like pairs: the rear-left/rear-right gap is <1% of the value scale in
   Monza.Vcr, versus a much larger gap after shuffling. Wrapped frame-to-frame
   **Verified signal:** the *difference* `shorts[0] - shorts[1]` correlates

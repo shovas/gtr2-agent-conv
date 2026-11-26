@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 09:20:00 -0500 - Small_a gradient calibration caveat
+- Tested small_a against AIW-derived road gradient: correlations range from 0.98 (Brno) to 0.00 (Imola), so no universal scale conversion is claimed. Full-tier test added.
+
 ## 2026-11-26 08:50:00 -0500 - Driver small_a tracks elevation
 - Found a second driver-state channel: small_a correlates with frame-to-frame elevation change in 8/8 replays (mean r=0.641, seeded permutation p<0.001). Full-tier test added.
 

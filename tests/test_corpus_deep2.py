@@ -4582,6 +4582,63 @@ class CorpusDeep2Test(unittest.TestCase):
                              path.read_bytes(), str(path))
         self.assertEqual(set(extensions), {".dsi", ".hat", ".gtt", ".vcr"})
 
+    def test_driver_small_a_aiw_slope_calibration_is_track_dependent(self):
+        """small_a is not a universal AIW gradient reading."""
+        import math
+        import random
+        import statistics
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        import simbin_text_tool as stt
+
+        def correlate(x, y):
+            mx, my = statistics.mean(x), statistics.mean(y)
+            numerator = sum((a - mx) * (b - my) for a, b in zip(x, y))
+            denominator = (sum((a - mx) ** 2 for a in x)
+                           * sum((b - my) ** 2 for b in y)) ** 0.5
+            return numerator / denominator if denominator else 0.0
+
+        results = {}
+        for key, name, aiw_name in (("brno", "Brno HOT LAP.Vcr", "3Brno.AIW"),
+                                    ("imola", "Imola.Vcr", "4Imol.AIW")):
+            path = ROOT.parent / "GTR2Steam" / "ReplayData" / name
+            aiw = next((p for p in (ROOT.parent / "GTR2Steam" / "GameData"
+                                    / "Locations").rglob(aiw_name)), None)
+            if not path.is_file() or aiw is None:
+                continue
+            payload = gz.decompress(str(path))
+            parsed = st.parse_vcr_frames(payload)
+            states = []
+            for frame in parsed["frames"]:
+                for record in frame["records"]:
+                    if st.vcr_record_tag(record["header"]) == 0:
+                        state = st.vcr_driver_state(record["data"])
+                        if state:
+                            states.append(state)
+                        break
+            waypoints = [wp.pos for wp in stt.parse_aiw(
+                stt.read_text(aiw)).waypoints if wp.pos]
+            slopes = []
+            for index in range(len(waypoints)):
+                before = waypoints[(index - 3) % len(waypoints)]
+                after = waypoints[(index + 3) % len(waypoints)]
+                distance = math.dist((before[0], before[2]), (after[0], after[2]))
+                slopes.append((after[1] - before[1]) / distance if distance else 0.0)
+            sample = states[::max(1, len(states) // 400)]
+            pairs = []
+            for state in sample:
+                x, z = state["position"][0], state["position"][2]
+                index = min(range(len(waypoints)),
+                            key=lambda k: (waypoints[k][0] - x) ** 2
+                            + (waypoints[k][2] - z) ** 2)
+                pairs.append((state["small_a"], slopes[index]))
+            results[key] = correlate([p[0] for p in pairs],
+                                     [p[1] for p in pairs])
+        if len(results) < 2:
+            self.skipTest("replay/AIW pairs not present")
+        self.assertGreater(results["brno"], 0.5)
+        self.assertLess(results["imola"], 0.3)
+
     def test_driver_small_a_tracks_elevation_change(self):
         """The replay's small_a field follows vertical motion."""
         import random

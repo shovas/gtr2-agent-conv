@@ -112,6 +112,15 @@ deterministic (61/123 pairs byte-identical after byte 4), with 8 long-prefix
 pairs showing layout revisions. The `media_tool.py hat-layout` CLI therefore
 works unchanged across all three games. Full-tier test added.
 
+## Driver small_a vs AIW gradient (2026-11-26) — track-dependent
+
+Tried to calibrate `small_a` as a road-gradient reading by mapping replay
+positions to the nearest AIW waypoint and computing local slope over ±3
+waypoints. Correlations vary widely: Brno HOT LAP r=0.98, Magny-Cours 0.72,
+Monza HOT LAP 0.65, Monza 0.11, Imola 0.00 (all vs seeded shuffles near 0).
+So `small_a` is gradient-like on some tracks but is not a universal AIW slope
+reading; no scale conversion is claimed. Full-tier test records the spread.
+
 ## Driver small_a tracks elevation (2026-11-26)
 
 The fourth f32 in the 53-byte driver-state body (`small_a`, byte 41, values
