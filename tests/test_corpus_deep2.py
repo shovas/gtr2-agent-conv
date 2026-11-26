@@ -4337,6 +4337,26 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertEqual(checked, 4)
 
+    def test_vcr_subrecord_tags_follow_participants(self):
+        """Sub-record tags are bounded by participant count; 0x68/0xff recur."""
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        checked = 0
+        for path in (ROOT.parent / "GTR2Steam" / "ReplayData").glob("*.Vcr"):
+            payload = gz.decompress(str(path))
+            parsed = st.parse_vcr_frames(payload)
+            if parsed is None:
+                continue
+            participants = len(st.parse_object_records(payload))
+            tags = {st.vcr_record_tag(record["header"])
+                    for frame in parsed["frames"] for record in frame["records"]}
+            self.assertIn(0x68, tags)
+            self.assertIn(0xFF, tags)
+            self.assertTrue(all(tag < participants for tag in tags
+                                if tag not in (0x68, 0xFF)))
+            checked += 1
+        self.assertEqual(checked, 9)
+
     def test_vcr_frame_subrecord_decoder(self):
         """The EXE-derived frame layout consumes the replay payload exactly."""
         import struct

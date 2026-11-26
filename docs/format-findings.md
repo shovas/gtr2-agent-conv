@@ -207,7 +207,10 @@ regression tests or an explicitly documented negative.
   window start. Bulk data also shows a 20-byte lag excess in 7/9 replays.
   Variants: `Anderstorp.Vcr` has a second continuous 82-frame segment (203
   total, exact EOF), and `Dubai International.Vcr` uses Latin-1 accented
-  participant names.
+  participant names. Sub-record low-byte tags follow participants: `0..N-2`
+  are driver state records, `0x68` accompanies the `Safety Marshal`, and
+  `0xff` marks event records whose bodies can contain texture names such as
+  `DYTEX000`/`SRTEX000`/`SSTEX000`.
 - Every ghost ends with a **20-byte tail** (5 f32s). Its first two floats are
   a per-track fixed point (median distance 0.6 between ghosts of the same
   track vs 178 for random pairs) near that track's final frame position —

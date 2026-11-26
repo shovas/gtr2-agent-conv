@@ -168,6 +168,18 @@ session variation is carried solely by `session_seconds`
 `c=8` only in Magny-Cours, but with nine samples no semantics are claimed.
 Full-tier regression test added.
 
+## Replay sub-record tags (2026-11-30)
+
+Classified the low byte of sub-record headers across all nine GTR2 replays.
+Tags `0..N-2` appear once per driver participant (counts thousands per
+replay), `0x68` accompanies the `Safety Marshal` entry, and `0xff` marks event
+records. Some `0xff` bodies contain NUL-separated texture names such as
+`DYTEX000`, `SRTEX000`, `SSTEX000`; others carry short numeric payloads whose
+sub-types are not yet decoded. The 53-byte driver-state bodies contain four
+u16 values plus six f32 fields, but alignment of the f32 block varies between
+records, so no field-level decoder is claimed. Added `vcr_record_tag()` and a
+full-tier test.
+
 ## Replay CLI reporting (2026-11-30)
 
 `simbin_events_tool.py FILE --replay` now reports participants (with decoded

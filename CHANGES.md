@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-30 13:45:00 -0500 - Replay sub-record tag classification
+- Classified sub-record low-byte tags: 0..N-2 driver state, 0x68 marshal, 0xff events (some carry texture names). Added `vcr_record_tag()` and a full-tier test; field-level body decoding remains unclaimed.
+
 ## 2026-11-30 13:15:00 -0500 - Replay CLI reporting
 - Added `simbin_events_tool.py --replay` to report participants, summary and parsed frame stream; CLI test added. PHS producer/consumer revisited with no new evidence (no GTL.exe archive reference, no 0.9.01 updater found).
 

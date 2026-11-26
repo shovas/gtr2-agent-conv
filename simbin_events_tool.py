@@ -309,6 +309,16 @@ def parse_replay_summary(data: bytes) -> dict | None:
             "count_b": second, "duration": duration}
 
 
+def vcr_record_tag(header: int) -> int:
+    """Return the low-byte type/car tag of a replay sub-record header.
+
+    In the local corpus tags ``0..N-2`` appear once per driver participant,
+    ``0x68`` accompanies the `Safety Marshal` entry, and ``0xff`` marks event
+    records whose bodies can contain texture names such as `DYTEX000`.
+    """
+    return header & 0xFF
+
+
 def vcr_subrecord_size(header: int) -> int:
     """Payload size packed into a replay sub-record's u32 header.
 
