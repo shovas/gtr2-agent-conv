@@ -1125,6 +1125,21 @@ class MediaToolTest(unittest.TestCase):
                 self.assertGreater(grid[1], 0.03)
                 self.assertGreater(grid[3], 0.03)
 
+    def test_identify_reports_hat_decoded_fields(self):
+        """`media_tool info` exposes the decoded HAT header to users."""
+        path = (ROOT.parent / "GTR2Steam" / "GameData" / "Locations"
+                / "HAT_Dedicated" / "3Brno.hat")
+        if not path.is_file():
+            self.skipTest("GTR2 HAT_Dedicated not present")
+        info = media_tool.identify(path)
+        self.assertEqual(info.format, "hat-gzip")
+        self.assertEqual(info.details["polygons"], 70987)
+        self.assertEqual(info.details["bisection_nodes"], 76437)
+        self.assertEqual(info.details["records"], 40189)
+        self.assertAlmostEqual(info.details["grid_origin_x"], -1537.27, delta=0.01)
+        self.assertAlmostEqual(info.details["grid_inv_cell_z"], 0.02603,
+                               delta=1e-4)
+
     def test_hat_second_count_is_bisection_tree_size(self):
         """body[40] is exactly T(body[36]) across every HAT file."""
         roots = ("GTR2Steam", "GTLSteam", "Race07Vanilla", "Race07Complete",

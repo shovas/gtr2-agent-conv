@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-27 07:20:00 -0500 - Expose decoded HAT fields in media_tool info
+- `media_tool.py info <file.hat>` now reports the decoded polygon count, bisection-node count, record count and grid origin/inverse-cell parameters; regression test added.
+
 ## 2026-11-27 06:50:00 -0500 - Steering channel lag negative
 - Cross-correlated the replay steering pair difference with heading rate over lags -5..+5: no sharp peak (best lag -1 only -0.180 vs -0.171 at lag 0). Consolidated into the existing steering signal test.
 

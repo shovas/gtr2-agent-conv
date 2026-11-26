@@ -406,7 +406,18 @@ def identify(path: str | Path) -> MediaInfo:
     if ext == ".hat" and b[:2] == b"\x1f\x8b":
         hat = hat_decompress(p)
         if hat is not None:
-            _data, info = hat
+            payload, info = hat
+            counts = hat_declared_counts(payload)
+            grid = hat_grid_params(payload)
+            if counts is not None:
+                info["polygons"] = counts[0]
+                info["bisection_nodes"] = counts[1]
+                info["records"] = counts[2]
+            if grid is not None:
+                info["grid_origin_x"] = grid[0]
+                info["grid_inv_cell_x"] = grid[1]
+                info["grid_origin_z"] = grid[2]
+                info["grid_inv_cell_z"] = grid[3]
             return MediaInfo(str(p), size, "hat-gzip", info)
     # NASCAR-era .hdr/.dat audio pair: the .hdr is an index and the companion
     # .dat is a plain MP3 stream. Content-based so it cannot collide with
