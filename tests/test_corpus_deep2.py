@@ -1334,6 +1334,42 @@ class CorpusDeep2Test(unittest.TestCase):
                 break
         self.assertGreaterEqual(checked, 40)
 
+    def test_rf1_gdb_filter_properties_not_simbin_car_classes(self):
+        """rF1 Filter Properties are track properties, not SimBin class tags."""
+        import glob
+        import re
+        import media_tool as mt
+        import simbin_text_tool as stt
+
+        rf1_tokens: set[str] = set()
+        rf1_count = 0
+        for root in ("RF1Vanilla", "F1C", "F12002", "NT2003"):
+            base = ROOT.parent / root
+            for name in sorted(glob.glob(
+                    str(base / "**" / "*.gdb"), recursive=True))[:40]:
+                path = Path(name)
+                text = stt.read_text(path)
+                for match in re.finditer(
+                        r"(?mi)^[ \t]*Filter Properties[ \t]*=[ \t]*(.*)$", text):
+                    rf1_tokens.update(token.strip().lower()
+                                      for token in match.group(1).split())
+                    rf1_count += 1
+        self.assertGreater(rf1_count, 20)
+        self.assertTrue(rf1_tokens & {"2005", "2006", "roadcourse",
+                                      "superspeedway", "streetcircuit"})
+
+        simbin_classes: set[str] = set()
+        for root in ("GTR2Steam", "GTLSteam"):
+            base = ROOT.parent / root
+            for name in sorted(glob.glob(
+                    str(base / "**" / "*.gdb"), recursive=True))[:40]:
+                text = mt.decrypt_jca_text(Path(name).read_bytes()).decode("latin-1")
+                for block in stt.parse_gdb_class_blocks(text).values():
+                    simbin_classes.update(block)
+        self.assertGreater(len(simbin_classes), 10)
+        overlap = rf1_tokens & simbin_classes
+        self.assertLess(len(overlap) / len(rf1_tokens), 0.1)
+
     def test_f0_bytes_not_stage_indices(self):
         """f0 bytes do not index the material's stage strings."""
         import glob

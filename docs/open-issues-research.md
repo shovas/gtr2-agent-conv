@@ -1,5 +1,16 @@
 # Open issues — offline research record (2026-11-23)
 
+## GDB class mapping is not cross-era (2026-11-26)
+
+Re-examined the rF1 `Filter Properties` vs SimBin `SpecialClasses` gap as a
+possible conversion rule. rF1 tokens are track/season descriptors
+(`srgrandprix`, `owchallenge`, `roadcourse`, `2005`, `lienz`, `nscrs`, ...)
+and do not resolve to `.veh`/`.hdv` class tags (<1%). SimBin class-block keys
+resolve to `.car` tags (>95%). Token overlap is <10%, and no GTR2/GTL GDB key
+or value carries the rF1 track properties. The fields are semantically
+different, so no class-mapping rule exists — this is a corpus negative, not a
+missing implementation. Full-tier test added.
+
 ## HAT u32 as fixed-point fraction (2026-11-26) — partial negative
 
 The top u32 values are recognizable fractions of 2^32: Brno 0x33333334~0.2,

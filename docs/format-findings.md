@@ -459,6 +459,19 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
   sample. The scale is track-specific, so no unit mapping is claimed. Full-tier
   test: `test_hat_field_b_tracks_local_elevation`.
 
+## 5. GDB class filters are not cross-era mappable
+
+rF1-era GDBs carry `Filter Properties =` tokens describing **track/season
+properties** (`srgrandprix`, `roadcourse`, `2005`, `lienz`, `nscrs`, ...);
+across 39 sampled lines only 12 distinct tokens occur and none are `.veh`/`.hdv`
+class tags. SimBin GDBs instead use `SpecialClasses` / filter blocks whose keys
+resolve to local `.car` class tags (112/117 in an earlier 252-file sweep). The
+two token sets overlap by <10%, and no GTR2/GTL GDB field carries the rF1 track
+properties (only coincidental `2006` substrings in names/paths). Therefore
+**no rF1→SimBin GDB class-mapping rule is derivable** and none is implemented;
+a superficial string mapping would be wrong. Full-tier test:
+`test_rf1_gdb_filter_properties_not_simbin_car_classes`.
+
 ## 5. Vertex `f0` (per-mesh marker on vertex 0)
 
 - f0 is **preserved from the GMT**, not assigned by GTR2.exe; the shader

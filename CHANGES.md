@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 16:50:00 -0500 - GDB class mapping negative
+- Established that rF1 GDB `Filter Properties` (track/season descriptors) and SimBin `SpecialClasses` (car-class tags) are semantically different with <10% token overlap; no cross-era class-mapping rule is derivable. Full-tier test added.
+
 ## 2026-11-26 16:20:00 -0500 - Hat u32 fractional negative
 - Characterized the HAT record u32 as a [0,1] fixed-point-like fraction with simple-fraction modes, but no universal quantization and no correlation with arc length or elevation; no decoder claimed. Full-tier test added.
 
