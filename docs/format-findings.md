@@ -445,7 +445,11 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
   (`T(0)=0, T(1)=T(2)=1, T(n)=1+T(n//2)+T(n-n//2)` for `n>=3`), exposed as
   `media_tool.hat_bisection_count()` and verified on **178/178** files — no
   clamping is involved (values like 32767/65535 are genuine `T(n)` plateaus).
-  The record count is computed by the quadtree node counter `0x459480`. `hat_record_count()` now uses the declared
+  The record count is computed by the quadtree node counter `0x459480`.
+  The polygon count is not a waypoint-count proxy (r=0.35, p=0.098), but it
+  does scale with the grid's covered area across 34 GTR2 layouts (r=0.553,
+  seeded permutation p=0.001), consistent with area-driven tessellation.
+  Full-tier test: `test_hat_polygon_count_tracks_grid_area`. `hat_record_count()` now uses the declared
   count: the old bounded scan stopped at valid records with `B = 0.0` and
   `U = 0`, undercounting 6/34 files (e.g. Enna 7,558 vs 15,417). Full-tier
   test: `test_hat_record_count_uses_declared_header_count`.

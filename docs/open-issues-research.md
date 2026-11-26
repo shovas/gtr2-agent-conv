@@ -22,6 +22,15 @@ or value carries the rF1 track properties. The fields are semantically
 different, so no class-mapping rule exists — this is a corpus negative, not a
 missing implementation. Full-tier test added.
 
+## HAT polygon count vs grid area (2026-11-27)
+
+Since `body[36]` is the input polygon count, tested whether it tracks track
+complexity. AIW waypoint count gives only r=0.353 (p=0.098, not significant),
+but the area covered by the decoded grid (32/inv_cell_x x 32/inv_cell_z)
+gives r=0.553 across 34 GTR2 layouts with seeded permutation p=0.001 —
+consistent with tessellation density being chosen per physical layout extent.
+This is an association, not a decoder. Full-tier test added.
+
 ## HAT tail alignment negative (2026-11-27)
 
 Motivated by the writer's 32-byte structures, tested whether tail u32s are

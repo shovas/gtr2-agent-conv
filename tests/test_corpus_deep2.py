@@ -6156,6 +6156,42 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertGreaterEqual(checked, 1)
 
+    def test_hat_polygon_count_tracks_grid_area(self):
+        """The declared polygon count scales with the HAT grid's coverage."""
+        import random
+        import statistics
+        import gzip_simbin_tool as gz
+        import media_tool as mt
+
+        def correlate(x, y):
+            mx, my = statistics.mean(x), statistics.mean(y)
+            numerator = sum((a - mx) * (b - my) for a, b in zip(x, y))
+            denominator = (sum((a - mx) ** 2 for a in x)
+                           * sum((b - my) ** 2 for b in y)) ** 0.5
+            return numerator / denominator if denominator else 0.0
+
+        polygons = []
+        areas = []
+        for path in sorted((ROOT.parent / "GTR2Steam" / "GameData"
+                            / "Locations" / "HAT_Dedicated").glob("*.hat")):
+            if not path.is_file():
+                continue
+            payload = gz.decompress(str(path))
+            counts = mt.hat_declared_counts(payload)
+            grid = mt.hat_grid_params(payload)
+            if counts is None or grid is None:
+                continue
+            polygons.append(counts[0])
+            areas.append((32 / grid[1]) * (32 / grid[3]))
+        self.assertGreaterEqual(len(polygons), 20)
+        observed = correlate(polygons, areas)
+        self.assertGreater(observed, 0.4)
+        random.seed(2026)
+        controls = [correlate(polygons, random.sample(areas, len(areas)))
+                    for _ in range(1000)]
+        self.assertLess(sum(abs(value) >= abs(observed) for value in controls)
+                        / len(controls), 0.01)
+
     def test_hat_field_b_tracks_local_elevation(self):
         """Record field B follows the road elevation at the same (x, z)."""
         import random

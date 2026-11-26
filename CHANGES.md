@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-27 03:20:00 -0500 - HAT polygon count scales with grid area
+- Verified the decoded HAT polygon count tracks grid-covered area across 34 layouts (r=0.553, seeded permutation p=0.001); waypoint count is not a proxy (p=0.098). Full-tier test added.
+
 ## 2026-11-27 02:50:00 -0500 - GTL CAM/TRK conversion regression
 - Verified on the GTL Anderstorp tree that conversion preserves all CAM files byte-for-byte (CAM coordinates use a gMotor-wide negation convention) and emits GTR2-style TRK MASFile references (.gtr, teammaps2, Misc). Full-tier test added.
 
