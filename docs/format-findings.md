@@ -698,6 +698,13 @@ a superficial string mapping would be wrong. Full-tier test:
 
 ## 9. Methodology rules learned the hard way
 
+- A shuffle control preserves the multiset, so it cannot test whether a value
+  distribution is special (e.g. "fraction of packed u16s decoding as small
+  floats" is unchanged by shuffling). Use a fresh random-u32 baseline instead:
+  replay packed u16 pairs gave 28.7%/36.8% small-f32 rate versus 50.8% random,
+  so they are not floats.
+## 9. Methodology rules learned the hard way
+
 1. Prefer the producer/consumer code over more byte statistics; but packed EXEs
    can make this impossible — record the blocker, don't fake it.
 2. **Permutation baselines must preserve the observed distribution.** A uniform

@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 05:20:00 -0500 - Packed replay u16 floats ruled out
+- Ruled out replay u16 pairs as packed floats (28.7%/36.8% small-f32 rate vs 50.8% random-u32 baseline); recorded that shuffle controls cannot test distributional specialness.
+
 ## 2026-11-28 04:50:00 -0500 - HAT body[0] negative
 - Characterized the HAT u32 after the version string: per-layout stable but no tested hash of signature/name and no meaningful float reading; remains opaque.
 
