@@ -97,7 +97,7 @@ python3 gmt_tool.py relayout <input.gmt> <output.gmt>   # rebuild offsets after 
 
 ## 4. Inspect/round-trip DSI/HAT/GTT/VCR gzip containers
 
-**What it does**: Reads gzip-wrapped SimBin `.dsi`/`.hat`/`.gtt`/`.vcr` files, reports metadata, and round-trips content byte-for-byte (verified on all 197 shipped GTR2 containers). `.hat` payload bodies are partly decoded: the header holds a spatial-grid origin/scale (the former "signature"), the declared polygon count, its bisection-tree size and the record count, and a table of track-space height samples; `media_tool.py hat-layout FILE CORPUS_DIR` reports all of these and matches layouts across GTL/GTR2/Race07. The opaque per-record identifier and trailing stream remain undecoded.
+**What it does**: Reads gzip-wrapped SimBin `.dsi`/`.hat`/`.gtt`/`.vcr` files, reports metadata, and round-trips content byte-for-byte (verified on all 197 shipped GTR2 containers). `.hat` payload bodies are partly decoded: the header holds a spatial-grid origin/scale (the former "signature"), the declared polygon count, its bisection-tree size and the record count, and a table of track-space height samples; `media_tool.py hat-layout FILE CORPUS_DIR` reports all of these and matches layouts across GTL/GTR2/Race07. The opaque per-record identifier has no decoder in either shipped executable; the trailing stream is known from code to be a tree of typed 34-byte nodes, but its framing transform and field semantics remain undecoded.
 
 **How to ask**:
 - "Inspect this HAT/DSI file."

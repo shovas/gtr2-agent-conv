@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-27 20:50:00 -0500 - Sync HAT tail status in FEATURES
+- Updated the HAT limitations to reflect the code-level findings: no runtime decoder for the per-record identifier, and the trailing stream is a typed 34-byte node tree whose framing/field semantics remain open.
+
 ## 2026-11-27 20:20:00 -0500 - HAT CLI variant coverage
 - Extended the all-variants regression to check `media_tool.py hat-layout` on a Race07 `ver008` HAT, including grid parameters.
 
