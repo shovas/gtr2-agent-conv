@@ -168,6 +168,16 @@ session variation is carried solely by `session_seconds`
 `c=8` only in Magny-Cours, but with nine samples no semantics are claimed.
 Full-tier regression test added.
 
+## Replay time-shift editor (2026-11-30)
+
+Added `shift_replay_times()` on top of the verified decoders: it patches every
+frame's f32 time word and each participant's finite activity-window bounds in
+place, leaving sub-record bodies and the summary duration (a span) unchanged.
+Verified on three GTR2 replays: per-frame deltas are 64.0 s within f32
+tolerance (Monza's 4,920 frames show max rounding ~1e-5 s), participant starts
+shift identically, and re-parsing yields identical frame counts, sub-record
+counts and end offsets. Full-tier test added.
+
 ## GTL v1.01 replay format resolved (2026-11-30) — correction
 
 The earlier "GTL declares zero frames" conclusion was an artifact of applying

@@ -209,7 +209,9 @@ regression tests or an explicitly documented negative.
   window start. Bulk data also shows a 20-byte lag excess in 7/9 replays.
   Variants: `Anderstorp.Vcr` has a second continuous 82-frame segment (203
   total, exact EOF), and `Dubai International.Vcr` uses Latin-1 accented
-  participant names. Sub-record low-byte tags follow participants: `0..N-2`
+  participant names. `shift_replay_times()` shifts all frame times and
+  participant windows consistently while leaving spans and sub-records
+  untouched. Sub-record low-byte tags follow participants: `0..N-2`
   are driver state records, `0x68` accompanies the `Safety Marshal`, and
   `0xff` marks event records whose bodies can contain texture names such as
   `DYTEX000`/`SRTEX000`/`SSTEX000`. A 53-byte driver-state body decodes via

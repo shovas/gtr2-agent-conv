@@ -4400,6 +4400,42 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertEqual(checked, 4)
 
+    def test_shift_replay_times_is_consistent(self):
+        """Frame times and participant windows shift together; spans do not."""
+        import statistics
+        import struct
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        checked = 0
+        for name in ("Brno.Vcr", "Monza.Vcr", "Anderstorp.Vcr"):
+            path = ROOT.parent / "GTR2Steam" / "ReplayData" / name
+            if not path.is_file():
+                continue
+            payload = gz.decompress(str(path))
+            shifted = st.shift_replay_times(payload, 64.0)
+            before = st.parse_vcr_frames(payload)
+            after = st.parse_vcr_frames(shifted)
+            if before is None or after is None:
+                continue
+            self.assertEqual(len(before["frames"]), len(after["frames"]))
+            self.assertEqual(after["end_offset"], before["end_offset"])
+            self.assertEqual(after["summary"]["duration"],
+                             before["summary"]["duration"])
+            deltas = []
+            for old, new in zip(before["frames"], after["frames"]):
+                old_t = struct.unpack("<f", struct.pack("<I", old["time_word"]))[0]
+                new_t = struct.unpack("<f", struct.pack("<I", new["time_word"]))[0]
+                deltas.append(new_t - old_t)
+                self.assertEqual(len(old["records"]), len(new["records"]))
+            self.assertLess(abs(statistics.median(deltas) - 64.0), 0.01)
+            windows_before = st.parse_object_records(payload)
+            windows_after = st.parse_object_records(shifted)
+            self.assertEqual(len(windows_before), len(windows_after))
+            for old, new in zip(windows_before, windows_after):
+                self.assertLess(abs((new["window_start"] - old["window_start"]) - 64.0), 0.01)
+            checked += 1
+        self.assertEqual(checked, 3)
+
     def test_vcr_driver_state_positions_are_smooth(self):
         """The 53-byte driver body's f32 block starts at byte 29."""
         import math

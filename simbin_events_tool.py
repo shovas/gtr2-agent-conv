@@ -410,12 +410,39 @@ def parse_vcr_frames(data: bytes) -> list[dict] | None:
             break
         if declared < summary["count_a"]:
             declared += 1
-        frames.append({"time_word": time_word, "records": records})
+        frames.append({"offset": offset, "time_word": time_word, "records": records})
         offset = cursor
     if declared != summary["count_a"]:
         return None
     return {"frames": frames, "declared_frames": declared,
             "end_offset": offset, "summary": summary}
+
+
+def shift_replay_times(data: bytes, delta: float) -> bytes:
+    """Return a copy with all replay timestamps shifted by ``delta`` seconds.
+
+    Frame time words and participant activity windows are patched in place;
+    the summary duration is a span and therefore unchanged. Only those f32
+    fields are modified, so the container and all sub-record bodies survive.
+    """
+    parsed = parse_vcr_frames(data)
+    if parsed is None:
+        raise ValueError("no parseable replay frame stream")
+    output = bytearray(data)
+    for frame in parsed["frames"]:
+        current = struct.unpack_from("<f", output, frame["offset"])[0]
+        struct.pack_into("<f", output, frame["offset"], current + delta)
+    for record in parse_object_records(data):
+        position = record["offset"]
+        window = position + 3 + len(record["name"]) + len(record["label"]) + 128
+        current = struct.unpack_from("<f", output, window)[0]
+        if struct.unpack_from("<I", output, window)[0] != UNBOUNDED_TIME:
+            struct.pack_into("<f", output, window, current + delta)
+        end_offset = window + 4
+        if struct.unpack_from("<I", output, end_offset)[0] != UNBOUNDED_TIME:
+            current_end = struct.unpack_from("<f", output, end_offset)[0]
+            struct.pack_into("<f", output, end_offset, current_end + delta)
+    return bytes(output)
 
 
 def parse_payload(data: bytes) -> EventFile:
