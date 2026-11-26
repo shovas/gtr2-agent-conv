@@ -1,5 +1,19 @@
 # Open issues — offline research record (2026-11-23)
 
+## `.hat` u32 field negatives (2026-11-26)
+
+Tested the remaining u32 in the 16-byte record:
+- correlation with record ordinal is 0.012 (Brno), -0.002 (Monza), -0.0003
+  (Dubai) — not a sequence number;
+- no byte position or low-bit band correlates with the ordinal, and low 4 bits
+  are near-uniform;
+- 93 duplicated `(x, z)` points in Brno carry **zero** matching u32 values,
+  and Dubai shows only 44/822 (5%, chance-level) — not a hash of position;
+- previously tested CRC32/adler32/MD5 of packed float fields and raw float
+  interpretation also failed (58% plausible vs 57.5% random).
+
+The u32 stays opaque. Full-tier test added.
+
 ## `.hat` record A/C are track-space points (2026-11-26)
 
 Earlier tests ruled out exact equality with AIW waypoints or CAM cameras, but

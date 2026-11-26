@@ -4986,6 +4986,52 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertGreaterEqual(checked, 3)
 
+    def test_hat_record_u32_is_not_a_counter_or_position_hash(self):
+        """The record's u32 is neither sequential nor derived from its point."""
+        import collections
+        import random
+        import statistics
+        import struct
+        import gzip_simbin_tool as gz
+
+        path = (ROOT.parent / "GTR2Steam" / "GameData" / "Locations"
+                / "HAT_Dedicated" / "3Brno.hat")
+        if not path.is_file():
+            self.skipTest("GTR2 hat sample not present")
+        payload = gz.decompress(str(path))
+        marker = payload.find(b"generated\x00")
+        body = payload[marker + 10:]
+        rows = []
+        for offset in range(48, len(body) - 16, 16):
+            first, unknown, second, third = struct.unpack_from("<fIff", body, offset)
+            if not (-1e6 < first < 1e6 and first == first
+                    and second == second and 0.01 < abs(second) < 20
+                    and -1e6 < third < 1e6 and third == third):
+                break
+            rows.append((first, third, unknown))
+        self.assertGreater(len(rows), 20000)
+
+        values = [row[2] for row in rows]
+        indices = list(range(len(values)))
+        mean_index, mean_value = statistics.mean(indices), statistics.mean(values)
+        numerator = sum((i - mean_index) * (v - mean_value)
+                        for i, v in zip(indices, values))
+        denominator = (sum((i - mean_index) ** 2 for i in indices)
+                       * sum((v - mean_value) ** 2 for v in values)) ** 0.5
+        correlation = numerator / denominator if denominator else 0.0
+        self.assertLess(abs(correlation), 0.05)
+
+        grouped = collections.defaultdict(list)
+        for x, z, value in rows:
+            grouped[(x, z)].append(value)
+        duplicates = [values for values in grouped.values() if len(values) > 1]
+        self.assertGreater(len(duplicates), 20)
+        reused = sum(len(set(values)) == 1 for values in duplicates)
+        self.assertLess(reused / len(duplicates), 0.05)
+
+        low_bits = collections.Counter(value & 0xF for value in values)
+        self.assertLess(max(low_bits.values()) / len(values), 0.1)
+
     def test_hat_records_lie_near_track_polyline(self):
         """Record (A, C) pairs are track-space points, not random coordinates."""
         import math

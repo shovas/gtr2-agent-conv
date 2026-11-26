@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 05:20:00 -0500 - Hat u32 field negatives
+- Ruled out the .hat record u32 as a counter or position hash (correlation with ordinal <0.012; zero U reuse across 93 duplicate points in Brno). Full-tier test added.
+
 ## 2026-11-26 04:50:00 -0500 - Hat records are track-space points
 - Showed .hat record (A,C) pairs lie near the AIW track polyline: median 18.2 m (Brno) and 6.2 m (Monza) vs 84.7/96.5 m under a C-column shuffle. Full-tier permutation-controlled test added.
 
