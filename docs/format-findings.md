@@ -13,7 +13,10 @@ regression tests or an explicitly documented negative.
   108-byte mesh records at `0x16C`), and **GTR1 third magic** (handled by
   `gmt_semantic.read_gtr1_geometry()`).
 - `gmt_layout.is_old()/is_new()` detect layouts; `old_to_new_semantic()` rebuilds
-  a new-layout mesh from decoded old-layout geometry.
+  a new-layout mesh from decoded old-layout geometry. The semantic reader now
+  recognizes all eight observed mesh-record magic low words (`0x4001/11/13/15/35`
+  and `0x6011/15/35`); previously `0x60xx` files (BRIDGE1, cameras, etc.) had
+  zero recognized submeshes.
 - A **template-free container** can be synthesized: `gmt_format.build_synthetic_gmt()`
   builds a valid new-layout GMT from mesh objects alone (zeroed 0x18..0x16C
   header, empty material tail). It parses, round-trips and passes

@@ -199,6 +199,16 @@ phantom empty frames from those zeros; `parse_vcr_frames()` now rejects
 zero-count summaries and zero-subcount frames, returning None for GTL replays
 while all nine GTR2 replays still parse exactly. Full-tier test added.
 
+## Semantic GMT reader magic gap fixed (2026-11-30)
+
+`gmt_semantic.find_submeshes()` only accepted magic low words 0x4011/0x4015/
+0x4035. The corpus also contains 0x6011 (189 meshes), 0x6035 (18), 0x6015 (3),
+0x4001 and 0x4013 — used by BRIDGE1, camera and speaker meshes. Those files
+returned zero submeshes from the semantic reader even though the structural
+parser found them. Expanded `MAGIC_LO` to all eight variants; verified zero
+mesh/submesh count mismatches across 3,199 archived GMTs. Full-tier test and
+`tests.test_gmt_semantic` pass.
+
 ## f0 vs material metadata lengths (2026-11-30) — negative
 
 Tested whether f0's byte components encode material name length, stage count,

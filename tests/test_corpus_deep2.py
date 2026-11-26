@@ -4165,6 +4165,33 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertGreater(statistics.median(observed),
                            5 * statistics.median(baseline))
 
+    def test_gmt_semantic_reader_recognizes_all_mesh_magics(self):
+        """find_submeshes handles 0x60xx variants as well as 0x40xx."""
+        import glob
+        import gmt_format
+        import gmt_semantic
+        import mas_tool
+        checked = 0
+        for archive in glob.glob(str(ROOT.parent / "GTR2Steam" / "**" / "*.gtr"),
+                                 recursive=True)[:60]:
+            try:
+                _, entries = mas_tool.read_archive(archive)
+            except Exception:
+                continue
+            for entry in entries:
+                if not entry.name.lower().endswith(".gmt") or not entry.data:
+                    continue
+                try:
+                    parsed = gmt_format.parse_gmt("x.gmt", entry.data)
+                except Exception:
+                    continue
+                self.assertEqual(len(gmt_semantic.find_submeshes(entry.data)),
+                                 len(parsed.meshes), entry.name)
+                checked += 1
+            if checked >= 2000:
+                break
+        self.assertGreater(checked, 1000)
+
     def test_phs_members_have_no_recognizable_cipher_header(self):
         """The five GTL PHS members expose no ISI/JCA/gMb header."""
         import isi_crypt

@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-30 18:15:00 -0500 - Semantic GMT reader magic fix
+- Fixed a parser gap: `find_submeshes()` now recognizes 0x60xx mesh magics (previously returning zero submeshes for BRIDGE1/camera meshes). Zero mismatches across 3,199 GMTs; full-tier test added.
+
 ## 2026-11-30 17:45:00 -0500 - Replay CLI covers GTL v1.01
 - Extended the `--replay` CLI test to cover GTL v1.01 summaries (10564 frames, exact EOF); no code change needed since the decoder is version-aware.
 
