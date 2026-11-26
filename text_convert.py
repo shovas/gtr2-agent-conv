@@ -25,8 +25,9 @@ def scn_to_trk(data: str, track_name: str = "") -> str:
     out = []
     searchpath_written = False
     for line in data.splitlines(keepends=True):
-        m = KEYVALUE.match(line.rstrip("\r\n"))
-        newline = "\n" if line.endswith("\n") else ""
+        body = line.rstrip("\r\n")
+        m = KEYVALUE.match(body)
+        newline = line[len(body):]
         if not m:
             out.append(line)
             continue
@@ -57,12 +58,16 @@ def trk_extensions_to_gtr2(data: str) -> str:
     """Rewrite GTL MASFile `.gtl` references to GTR2 `.gtr` (data-driven rule)."""
     out = []
     for line in data.splitlines(keepends=True):
-        stripped = line.strip()
-        if stripped.lower().startswith("masfile=") and stripped.lower().endswith(".gtl"):
-            prefix = line[:len(line) - len(line.lstrip())]
-            name = stripped.split("=", 1)[1].strip().strip('"')
-            newline = "\n" if line.endswith("\n") else ""
-            out.append(f'{prefix}MASFile={name[:-4]}.gtr{newline}')
+        body = line.rstrip("\r\n")
+        newline = line[len(body):]
+        stripped = body.strip()
+        code, separator, comment = stripped.partition("//")
+        code = code.strip()
+        if code.lower().startswith("masfile=") and code.lower().endswith(".gtl"):
+            prefix = body[:len(body) - len(body.lstrip())]
+            name = code.split("=", 1)[1].strip().strip('"')
+            suffix = f" //{comment}" if separator else ""
+            out.append(f'{prefix}MASFile={name[:-4]}.gtr{suffix}{newline}')
         else:
             out.append(line)
     return "".join(out)

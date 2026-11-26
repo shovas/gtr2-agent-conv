@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 01:20:00 -0500 - Fix CRLF handling in TRK/SCN rewrites
+- Fixed the same CRLF normalization bug in `text_convert.scn_to_trk()` and `trk_extensions_to_gtr2()`: rewritten lines now keep CRLF endings and trailing comments. Verified on all 25 GTL TRK files (zero mixed-ending outputs); regression tests added.
+
 ## 2026-11-26 00:45:00 -0500 - Fix CRLF handling in AIW conversion
 - Fixed a corpus-discovered bug in `aiw_for_simbin()`: CRLF line endings previously corrupted keys into `wpwp_galpha` and left commented `wp_galpha` values unscaled. Indentation, comments and line endings are preserved; already-SimBin inputs are left unchanged. Full-tier tests verify all 39 rF1 AIWs convert to galpha <= 0.45.
 

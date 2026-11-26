@@ -35,6 +35,34 @@ class TextConvertTest(unittest.TestCase):
         self.assertNotIn(".gtl", out)
         self.assertIn("SearchPath=GameData\\Locations", out)
 
+    def test_crlf_preserved_by_rewrites(self):
+        """Rewritten lines keep CRLF endings and inline comments."""
+        scn = ("CUBEASF\r\n"
+               "SearchPath=.\r\n"
+               "MASFile=COMMONMAPS.MAS\r\n")
+        out = tc.scn_to_trk(scn, "JOESVILLE")
+        self.assertEqual(out.count("\n"), 4)
+        self.assertEqual(out.count("\r\n"), 4)
+        self.assertEqual(out.count("\n") - out.count("\r\n"), 0)
+        trk = ("  MASFile=Anderstorp.gtl // track map\r\n"
+               "SearchPath=GameData\\Locations\r\n")
+        out = tc.trk_extensions_to_gtr2(trk)
+        self.assertIn("MASFile=Anderstorp.gtr // track map\r\n", out)
+        self.assertEqual(out.count("\n") - out.count("\r\n"), 0)
+
+    def test_gtl_trk_corpus_keeps_crlf(self):
+        """All GTL TRK rewrites preserve uniform CRLF endings."""
+        checked = 0
+        for path in (ROOT.parent / "GTLSteam").rglob("*"):
+            if path.suffix.lower() != ".trk":
+                continue
+            with path.open(encoding="latin-1", newline="") as handle:
+                source = handle.read()
+            output = tc.trk_extensions_to_gtr2(source)
+            self.assertEqual(output.count("\n"), output.count("\r\n"), path)
+            checked += 1
+        self.assertGreaterEqual(checked, 20)
+
     def test_tree_check_on_real_corpus(self):
         src = ROOT.parent / "RF1Vanilla/GameData/Locations/Joesville"
         if not src.is_dir():
