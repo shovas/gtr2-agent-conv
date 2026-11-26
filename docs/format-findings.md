@@ -252,7 +252,11 @@ regression tests or an explicitly documented negative.
     for shuffled pairings). x is longitudinal progress;
   - path-heading field follows its own x/z tangent (0.973 vs 0.086);
   - frame/path-record count ratio median 2.44, range 1.93–3.49;
-  - `+32/speed` clusters near `.grb`-derived gear bands (p≈0.01);
+  - `+32/speed` clusters near `.grb`-derived gear bands (p≈0.01); `+32/1024`
+    is RPM-shaped (1177–5807 across 44,631 frames, 100% in 800–9000, lag-1
+    0.992 vs ~0 shuffled), matching the live shared-memory RPM units;
+  - `+16` (and ~99.9% of `+8`) lies in [-1,1], consistent with the normalized
+    control ranges of the live shared-memory telemetry;
   - `path_f4` decreases with gear index (r −0.200 vs −0.005) — throttle-like;
   - `path_f3` rises mildly with racing-line curvature (median |r| 0.060 vs
     0.019 permuted) and with AIW-derived waypoint curvature (0.142 vs 0.068;

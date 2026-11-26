@@ -5102,6 +5102,43 @@ class CorpusDeep2Test(unittest.TestCase):
                                      for target, span in zip(targets, shuffled))
         self.assertGreater(baseline, 10)
 
+    def test_gttf_field_units_match_runtime_telemetry(self):
+        """Frame ranges match the live shared-memory units from gtr2-agent-tools."""
+        import glob
+        import random
+        import statistics
+        import struct
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+
+        def lag1(values):
+            a, b = values[:-1], values[1:]
+            ma, mb = statistics.mean(a), statistics.mean(b)
+            numerator = sum((x - ma) * (y - mb) for x, y in zip(a, b))
+            denominator = (sum((x - ma) ** 2 for x in a)
+                           * sum((y - mb) ** 2 for y in b)) ** 0.5
+            return numerator / denominator if denominator else 0.0
+
+        controls = []
+        rpms = []
+        for path in glob.glob(str(ROOT.parent / "GTR2Steam" / "TimeTrial" / "**" / "*.GTT"),
+                              recursive=True):
+            payload = gz.decompress(path)
+            grid = st.find_frame_grid(payload)
+            if not grid:
+                continue
+            for index in range(grid["count"]):
+                offset = grid["offset"] + index * grid["stride"]
+                controls.append(struct.unpack_from("<f", payload, offset + 16)[0])
+                rpms.append(struct.unpack_from("<I", payload, offset + 32)[0] / 1024)
+        self.assertGreater(len(controls), 40000)
+        self.assertGreater(sum(-1 <= value <= 1 for value in controls) / len(controls),
+                           0.999)
+        self.assertGreater(sum(800 <= value <= 9000 for value in rpms) / len(rpms), 0.999)
+        self.assertGreater(lag1(rpms), 0.9)
+        random.seed(171)
+        self.assertLess(lag1(random.sample(rpms, len(rpms))), 0.1)
+
     def test_gttf_frame_marker_prefix_constant(self):
         """Bytes +24..+30 are a fixed marker; only byte +31 varies."""
         import glob

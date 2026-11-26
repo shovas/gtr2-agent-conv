@@ -1,5 +1,18 @@
 # Open issues — offline research record (2026-11-23)
 
+## GTTF units cross-checked against live runtime telemetry (2026-12-01)
+
+The updated `../gtr2-agent-tools` repo documents live GTR2 shared-memory units
+(steering/throttle/brake in [-1,1], RPM as a float). Using those as an
+independent units oracle on 44,631 GTTF frames:
+- `+32 / 1024` spans 1177–5807, 100% inside a plausible 800–9000 RPM band,
+  lag-1 autocorrelation 0.992 versus ~0 for shuffled values — RPM-shaped;
+- `+16` is entirely within [-1,1] (range -0.21..1.00), and 99.94% of `+8` is
+  too — consistent with normalized control channels.
+
+This is a units/range corroboration, not proof of exact field identity; no new
+semantics are claimed. Permutation-controlled full-tier test added.
+
 ## GSC-family EXE static loader trace — blocked by packing (2026-11-28)
 
 Tried to trace the GSC-family mesh loader statically to derive the ISI decryption skip from code. Result:

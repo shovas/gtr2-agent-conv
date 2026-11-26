@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-12-01 03:15:00 -0500 - GTTF units cross-check
+- Cross-checked GTTF frame ranges against live shared-memory units: +32/1024 is RPM-shaped (1177-5807, lag-1 0.992 vs shuffled ~0); +16/+8 are normalized controls. Permutation-controlled test added.
+
 ## 2026-12-01 02:45:00 -0500 - External tool review documented
 - Reviewed the updated ../gtr2-agent-tools repo (commit b1c7f50): recorded its live GTR2 telemetry layout, independent parsers used as regression oracle, Driving School/GTT/HAT findings and CC BY-NC 4.0 reference-only status in docs/tools-reference.md.
 
