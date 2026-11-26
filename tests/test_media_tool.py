@@ -119,6 +119,24 @@ class MediaToolTest(unittest.TestCase):
                     break
             self.assertGreaterEqual(checked, 3, root)
 
+    def test_jca_text_decryption_success_broad(self):
+        """Every sampled JCA-wrapped config in all corpora decrypts successfully."""
+        import glob
+
+        exts = (".gdb", ".car", ".aud", ".cam", ".trk", ".scn", ".rcd", ".aiw")
+        for root in ("Race07Complete", "Race07Vanilla", "VolvoTheGame",
+                     "RaceRoomTheGame", "RaceRoomTheGame2"):
+            paths = sorted(p for p in glob.glob(
+                str(ROOT.parent / root / "**" / "*"), recursive=True)
+                if Path(p).is_file() and Path(p).suffix.lower() in exts
+                and Path(p).read_bytes()[:4] == b"\x0f\xb1\xff\xff")
+            self.assertGreater(len(paths), 0, root)
+            # Deterministic stratified sample across the sorted file list.
+            step = max(1, len(paths) // 25)
+            for name in paths[::step][:25]:
+                data = Path(name).read_bytes()
+                self.assertNotEqual(media_tool.decrypt_jca_text(data), data, name)
+
     def test_jca_encrypted_textures(self):
         import glob
         for ext, magic in ((".dds", b"DDS "), (".tga", None)):
