@@ -580,7 +580,7 @@ a superficial string mapping would be wrong. Full-tier test:
   independent read, and a metamorphic test verifies that flipping a triangle
   index in the second submesh fails the cross-check. Full-tier tests.
 - Tests: `python3 run_tests.py --mode quick|normal|full`; quick tier is kept
-  under its budget (20 modules / ~30 s). Normal tier 261 s / 265 tests /
+  under its budget (20 modules / ~30 s). Normal tier 261 s / 266 tests /
   0 failures, below its 300 s budget; two corpus-wide tests were moved from
   quick-tier modules to full tier to restore the budget.
 - Safety: `python3 pre_push_check.py` before any push; no push without explicit
