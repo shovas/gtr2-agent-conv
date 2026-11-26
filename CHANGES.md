@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-30 23:15:00 -0500 - Feature docs refreshed
+- Updated FEATURES.md replay/container sections to describe the decoded frame stream, participant and time-editing capabilities, and the remaining .hat limitation. Final PHS EXE sweep recorded as blocked.
+
 ## 2026-11-30 22:45:00 -0500 - CAM orientation negative
 - Recorded weak camera-yaw vs AIW-heading correlation (0.062 vs 0.031 shuffled); no orientation transform claimed. Quick tier: 125 tests, 0 failures, 27.1s.
 

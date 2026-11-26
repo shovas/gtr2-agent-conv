@@ -199,6 +199,15 @@ phantom empty frames from those zeros; `parse_vcr_frames()` now rejects
 zero-count summaries and zero-subcount frames, returning None for GTL replays
 while all nine GTR2 replays still parse exactly. Full-tier test added.
 
+## PHS final EXE sweep (2026-11-30)
+
+A final case-insensitive string sweep of `GTL.exe` found no `PHS`,
+`Physics2.gtl`, `AIStrat.gtl` or `LiveTrack2` references (only an unrelated
+`PhSUW` instruction-byte match). The executable imports generic file
+enumeration and `CreateFile`, but no PHS-specific consumer was identified.
+Combined with PAR2 metadata naming `GTL_Update_0901.exe` and insufficient
+recovery slices, PHS remains blocked by the missing updater.
+
 ## CAM orientation vs AIW heading (2026-11-30) — weak negative
 
 Across 112 matched cameras from GTR2 tracks, camera orientation yaw showed
