@@ -22,6 +22,15 @@ or value carries the rF1 track properties. The fields are semantically
 different, so no class-mapping rule exists — this is a corpus negative, not a
 missing implementation. Full-tier test added.
 
+## HAT height scale has no universal law (2026-11-27)
+
+Fitted B against matched AIW elevation per track: the regression slope spans
+roughly 0.01 to 16 world-units per metre, and neither z-score (`1/std`) nor
+min-max (`range`) normalisation fits across layouts. Combined with the
+track-specific affine fit reported earlier, this rules out a simple shared
+unit conversion from local corpora. Consolidated into
+`test_hat_field_b_tracks_local_elevation`.
+
 ## HAT polygon count vs grid area (2026-11-27)
 
 Since `body[36]` is the input polygon count, tested whether it tracks track

@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-27 04:20:00 -0500 - HAT height scale negative
+- Ruled out a universal unit/normalisation law for the HAT height field (per-track B/elevation slopes vary >10x; no z-score or min-max fit). Consolidated into the existing elevation test.
+
 ## 2026-11-27 03:50:00 -0500 - Extend JCA autodetection regression
 - Added RaceRoomTheGame and RaceRoomTheGame2 media files to the JCA key autodetection test; both resolve to the volvo key via `detect_jca_key()` and `identify()`.
 

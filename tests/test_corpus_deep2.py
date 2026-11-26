@@ -6251,6 +6251,18 @@ class CorpusDeep2Test(unittest.TestCase):
             random.shuffle(shuffled)
             self.assertLess(abs(correlate(bs, shuffled)), 0.1, name)
 
+        # No universal scale/normalisation law: per-track B/height slopes vary
+        # widely, so a unit conversion is not derivable from these corpora.
+        slopes = []
+        for name, (_observed, bs, heights) in results.items():
+            mean_h = statistics.mean(heights)
+            mean_b = statistics.mean(bs)
+            variance = sum((value - mean_h) ** 2 for value in heights)
+            if variance:
+                slopes.append(sum((h - mean_h) * (b - mean_b)
+                                  for h, b in zip(heights, bs)) / variance)
+        self.assertGreater(max(slopes) / min(abs(value) for value in slopes), 10)
+
     def test_hat_field_b_not_a_track_width(self):
         """The table's B scalar is not AIW width or groove width."""
         import random

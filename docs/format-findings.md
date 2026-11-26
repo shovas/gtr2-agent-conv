@@ -516,8 +516,9 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
   has mean r ≈ 0. On flat Dubai the relationship is almost exactly affine
   (robust slope 0.0156, intercept 2.499, MAD 0.0003); on hilly layouts
   outliers arise where an adjacent road section lies directly above/below the
-  sample. The scale is track-specific, so no unit mapping is claimed. Full-tier
-  test: `test_hat_field_b_tracks_local_elevation`.
+  sample. The scale is track-specific (slopes vary by >10x across layouts,
+  with no z-score/min-max law), so no unit mapping is claimed. Full-tier test:
+  `test_hat_field_b_tracks_local_elevation`.
 
 ## 5. HAT placement in converted trees
 
