@@ -6676,6 +6676,20 @@ class CorpusDeep2Test(unittest.TestCase):
                 self.assertIn("teammaps2.gtr", values)
                 self.assertIn("misc.gtr", values)
 
+    def test_validate_cli_on_real_gtr2_tree(self):
+        """`gtl_to_gtr2.py --validate` reports zero problems on real GTR2 data."""
+        import subprocess
+        import sys
+
+        root = ROOT.parent / "GTR2Steam" / "GameData"
+        if not root.is_dir():
+            self.skipTest("GTR2 GameData not present")
+        result = subprocess.run(
+            [sys.executable, str(ROOT / "gtl_to_gtr2.py"), "--validate",
+             str(root)], capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        self.assertIn("0 problem(s)", result.stdout)
+
     def test_validator_clean_on_real_gtr2_tree(self):
         """validate_gtr2_tree reports no false positives on the real game."""
         import gtl_to_gtr2 as g2g

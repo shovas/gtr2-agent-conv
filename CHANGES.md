@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 04:20:00 -0500 - Validator CLI regression
+- Added a full-tier test that `gtl_to_gtr2.py --validate` exits 0 with zero problems on the real GTR2 GameData tree.
+
 ## 2026-11-28 03:50:00 -0500 - External GMT exporter context
 - Recorded the official gMotor exporter note that vertex lists are capped at 65535, consistent with the format's 16-bit structures; f0 remains undecoded.
 
