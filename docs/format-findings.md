@@ -485,7 +485,13 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
   phase yields u32 words that are valid record indices, and no embedded zlib
   framing was found, so an additional stream framing layer remains unresolved.
   Full-tier guard in `test_hat_trailing_stream_is_not_plain_float_records`. Full-tier tests: `test_hat_producer_strings_in_dedicated_exe`,
-  `test_hat_trailing_stream_is_not_plain_float_records`. Although 18 signatures are shared
+  In GTL.exe the stream's read method is a plain `fread` with no transform;
+  the 34-byte node parser receives a separate heap buffer. The reader allocates
+  **b44 x 92-byte** runtime nodes and **b40 x 16-byte** stream records
+  (`shl eax,4; add eax,4`), though the tail length does not decompose exactly
+  into those strides. Full-tier tests:
+  `test_hat_trailing_stream_is_not_plain_float_records`,
+  `test_hat_producer_strings_in_dedicated_exe`. Although 18 signatures are shared
   across games, the matching bodies are **not reusable**: GTR2 Brno has 40,189
   records vs Race07's 41,530 (3/40,189 records identical at the same index),
   and GTR2 Anderstorp 27,357 vs GTL's 27,185 (24/27,185). Full-tier test:

@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-27 23:50:00 -0500 - HAT reader array strides
+- Confirmed GTL.exe's HAT reader allocates b44 x 92-byte runtime nodes and b40 x 16-byte stream records; no exact tail-length decomposition exists. Code-evidence test extended.
+
 ## 2026-11-27 23:20:00 -0500 - HAT node stream is memory-backed
 - Clarified GTL.exe stream methods (0x570070 fwrite, 0x5700c0 fread) and that the 34-byte node parser receives a separate heap buffer, not the file stream — explaining why raw tail bytes do not match the node layout.
 
