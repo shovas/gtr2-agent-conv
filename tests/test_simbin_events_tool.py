@@ -485,5 +485,23 @@ class SimbinEventsToolTest(unittest.TestCase):
             self.assertLessEqual(frame["slot48_high"], 32767)
 
 
+    def test_replay_cli_reports_decoded_stream(self):
+        """--replay reports participants, summary and the parsed frame stream."""
+        import subprocess
+        import sys
+        path = ROOT.parent / "GTR2Steam" / "ReplayData" / "Anderstorp.Vcr"
+        if not path.is_file():
+            self.skipTest("Anderstorp.Vcr not present")
+        result = subprocess.run(
+            [sys.executable, str(ROOT / "simbin_events_tool.py"), str(path),
+             "--replay", "--strings", "0"], capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("participants=2", result.stdout)
+        self.assertIn("summary=", result.stdout)
+        self.assertIn("frames_declared=121", result.stdout)
+        self.assertIn("frames_total=203", result.stdout)
+        self.assertIn("exact_end=True", result.stdout)
+
+
 if __name__ == "__main__":
     unittest.main()

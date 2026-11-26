@@ -749,6 +749,8 @@ def main(argv=None) -> int:
     ap.add_argument("--strings", type=int, default=12)
     ap.add_argument("--frames", action="store_true", help="report the GTTF frame grid")
     ap.add_argument("--ghost-line", action="store_true", help="report a .dsi instructor polyline")
+    ap.add_argument("--replay", action="store_true",
+                    help="report IRSR replay participants and frame stream")
     args = ap.parse_args(argv)
     raw = Path(args.file).read_bytes()
     if raw[:2] == b"\x1f\x8b":
@@ -766,6 +768,27 @@ def main(argv=None) -> int:
     print(f"printable_strings={len(e.strings)}")
     for off, s in e.strings[:args.strings]:
         print(f"  {off}: {s[:80]}")
+    if args.replay:
+        participants = parse_object_records(raw)
+        summary = parse_replay_summary(raw)
+        frames = parse_vcr_frames(raw)
+        print(f"participants={len(participants)}")
+        for record in participants:
+            end = "unbounded" if record["window_end"] is None else f"{record['window_end']:.3f}"
+            print(f"  {record['name'][:32]!r} car={record['car']!r} "
+                  f"skin={record['skin'][:32]!r} window=[{record['window_start']:.3f}, {end}]")
+        print(f"summary={summary}")
+        if frames:
+            times = [struct.unpack("<f", struct.pack("<I", frame["time_word"]))[0]
+                     for frame in frames["frames"]]
+            print(f"frames_declared={frames['declared_frames']} "
+                  f"frames_total={len(frames['frames'])} "
+                  f"subrecords={sum(len(f['records']) for f in frames['frames'])} "
+                  f"first_time={times[0]:.3f} last_time={times[-1]:.3f} "
+                  f"exact_end={frames['end_offset'] == len(raw)}")
+        else:
+            print("frame_stream=unparsed")
+        return 0
     if args.frames:
         grid = find_frame_grid(raw)
         if grid:

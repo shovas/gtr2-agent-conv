@@ -168,6 +168,16 @@ session variation is carried solely by `session_seconds`
 `c=8` only in Magny-Cours, but with nine samples no semantics are claimed.
 Full-tier regression test added.
 
+## Replay CLI reporting (2026-11-30)
+
+`simbin_events_tool.py FILE --replay` now reports participants (with decoded
+CAR/skin names and activity windows), the summary record, and the parsed frame
+stream (declared/total frames, sub-record count, first/last times, exact EOF).
+The PHS producer/consumer avenue was revisited: GTL.exe contains no
+`Physics2.gtl`/`AIStrat.gtl` string (only generic `.GTL` archive references),
+and searches for the GTL 0.9.01 updater again found only v1.1 material. No new
+PHS evidence; that avenue remains blocked by the missing updater.
+
 ## Replay variants resolved: all 9 GTR2 files parse (2026-11-30)
 
 Two exceptions to the frame decoder were traced to data handling, not new

@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-30 13:15:00 -0500 - Replay CLI reporting
+- Added `simbin_events_tool.py --replay` to report participants, summary and parsed frame stream; CLI test added. PHS producer/consumer revisited with no new evidence (no GTL.exe archive reference, no 0.9.01 updater found).
+
 ## 2026-11-30 12:45:00 -0500 - All GTR2 replay variants parse
 - Resolved both replay exceptions: Anderstorp has a second 82-frame segment (203 total), and Dubai uses a Latin-1 accented participant name. All 9 GTR2 replay payloads now parse exactly to EOF; full-tier test updated.
 
