@@ -5032,10 +5032,15 @@ class CorpusDeep2Test(unittest.TestCase):
                     for before, after in zip(states, states[1:])]
                 series["lateral"] = [step * rate for step, rate in zip(
                     series["speed"], series["heading_rate"])]
+                series["longitudinal_accel"] = [
+                    (after_step - before_step)
+                    for before_step, after_step in zip(series["speed"],
+                                                       series["speed"][1:])]
                 data.append(series)
         self.assertGreaterEqual(len(data), 6)
 
-        for channel in ("elevation_delta", "speed", "heading_rate", "lateral"):
+        for channel in ("elevation_delta", "speed", "heading_rate", "lateral",
+                        "longitudinal_accel"):
             values = []
             for series in data:
                 target = series[channel]

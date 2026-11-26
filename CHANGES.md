@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 23:20:00 -0500 - small_b longitudinal negative
+- Tested replay `small_b` against longitudinal acceleration (raw and per-second): mean r ~0.003, permutation p=0.89. Consolidated into the existing small_b negative test.
+
 ## 2026-11-26 22:50:00 -0500 - RaceGMT header triple invariant
 - Verified the 12 header floats in all 643 RaceGMT files are four finite f32 triples with the third repeated as the fourth; corrected `race_gmt.py` guidance and CLI reporting. Full-tier test extended.
 

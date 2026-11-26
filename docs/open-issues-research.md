@@ -249,6 +249,14 @@ deterministic (61/123 pairs byte-identical after byte 4), with 8 long-prefix
 pairs showing layout revisions. The `media_tool.py hat-layout` CLI therefore
 works unchanged across all three games. Full-tier test added.
 
+## Driver small_b vs longitudinal acceleration (2026-11-26) — negative
+
+Added the untested longitudinal channel (frame-to-frame change in step
+distance, both raw and per-second) to the `small_b` probe. Across eight long
+replays the mean correlation is 0.003 (raw) and 0.002 (per-second), with a
+seeded permutation p = 0.89 — at chance. Consolidated into the existing
+`small_b` kinematic negative test rather than adding a duplicate.
+
 ## Driver small_b negatives (2026-11-26)
 
 Probed the sixth f32 (`small_b`) against elevation delta, speed, heading rate
