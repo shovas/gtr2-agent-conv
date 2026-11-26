@@ -323,7 +323,8 @@ def vcr_driver_state(body: bytes) -> dict | None:
     shorts = struct.unpack_from("<4H", body, 8)
     floats = struct.unpack_from("<6f", body, 29)
     return {"shorts": shorts, "position": floats[:3],
-            "angle_like": floats[3], "extras": floats[4:]}
+            "small_a": floats[3], "angle_like": floats[4],
+            "small_b": floats[5]}
 
 
 def vcr_record_tag(header: int) -> int:

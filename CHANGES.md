@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-30 14:45:00 -0500 - Replay driver angle field
+- Corrected the angle field label (byte 45, not 41) and validated its association with derived heading (|r| ~0.52 vs 0.05 shuffled). Full-tier test added.
+
 ## 2026-11-30 14:15:00 -0500 - Replay driver-state alignment fixed
 - Corrected an off-by-one: the f32 block in 53-byte driver bodies starts at byte 29, not 28. `vcr_driver_state()` exposes four u16s plus six f32s; first three are confirmed smooth world positions. Full-tier test added.
 

@@ -168,6 +168,16 @@ session variation is carried solely by `session_seconds`
 `c=8` only in Magny-Cours, but with nine samples no semantics are claimed.
 Full-tier regression test added.
 
+## Driver-state angle field (2026-11-30)
+
+Corrected a labeling error in `vcr_driver_state()`: the angle-like f32 is at
+byte 45 (`floats[4]`), not byte 41. At byte 41 and 49 the values are small
+(typically |v| < 0.05). On 542 moving frames of Monza.Vcr the byte-45 field
+correlates with `atan2(dx, dz)` derived from consecutive decoded positions at
+|r| ≈ 0.52 (shuffled baseline ≈ 0.05), so it is heading-related but not an
+exact match — likely a steering/YAW value with different smoothing or
+wrapping. Added a full-tier permutation-controlled test.
+
 ## Driver-state body alignment resolved (2026-11-30) — correction
 
 The apparent "varying f32 alignment" in 53-byte driver bodies was an

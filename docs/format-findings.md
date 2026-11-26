@@ -213,7 +213,9 @@ regression tests or an explicitly documented negative.
   `DYTEX000`/`SRTEX000`/`SSTEX000`. A 53-byte driver-state body decodes via
   `vcr_driver_state()`: four u16s at +8 and six f32s starting at byte **29**;
   the first three are smooth world positions (median frame-to-frame step <5 m
-  vs ~100× larger for shuffled samples), and the fourth is angle-like.
+  vs ~100× larger for shuffled samples), the fifth (byte 45, `angle_like`) is
+  angle-like and correlates with position-derived heading (|r| >0.4 vs a
+  shuffled baseline), and fields four/six are small.
 - Every ghost ends with a **20-byte tail** (5 f32s). Its first two floats are
   a per-track fixed point (median distance 0.6 between ghosts of the same
   track vs 178 for random pairs) near that track's final frame position —

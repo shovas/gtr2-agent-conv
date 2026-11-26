@@ -4337,6 +4337,51 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertEqual(checked, 4)
 
+    def test_vcr_driver_angle_tracks_heading(self):
+        """The driver-state angle-like field is associated with path heading."""
+        import math
+        import random
+        import statistics
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        path = ROOT.parent / "GTR2Steam" / "ReplayData" / "Monza.Vcr"
+        if not path.is_file():
+            self.skipTest("Monza.Vcr not present")
+        parsed = st.parse_vcr_frames(gz.decompress(str(path)))
+        if not parsed:
+            self.skipTest("frame stream unparsed")
+        samples = []
+        for frame in parsed["frames"]:
+            for record in frame["records"]:
+                if st.vcr_record_tag(record["header"]) != 0:
+                    continue
+                state = st.vcr_driver_state(record["data"])
+                if state:
+                    samples.append((state["position"], state["angle_like"]))
+                break
+        headings = []
+        angles = []
+        for (a, angle_a), (b, angle_b) in zip(samples, samples[1:]):
+            dx, dz = b[0] - a[0], b[2] - a[2]
+            if math.hypot(dx, dz) > 0.5:
+                headings.append(math.atan2(dx, dz))
+                angles.append(angle_b)
+
+        def correlation(xs, ys):
+            mx, my = statistics.mean(xs), statistics.mean(ys)
+            numerator = sum((x - mx) * (y - my) for x, y in zip(xs, ys))
+            denominator = (sum((x - mx) ** 2 for x in xs)
+                           * sum((y - my) ** 2 for y in ys)) ** 0.5
+            return numerator / denominator if denominator else 0.0
+
+        self.assertGreater(len(angles), 200)
+        observed = abs(correlation(angles, headings))
+        self.assertGreater(observed, 0.4)
+        random.seed(133)
+        baseline = statistics.mean(abs(correlation(random.sample(angles, len(angles)),
+                                                   headings)) for _ in range(5))
+        self.assertGreater(observed, 3 * baseline)
+
     def test_vcr_driver_state_positions_are_smooth(self):
         """The 53-byte driver body's f32 block starts at byte 29."""
         import math
