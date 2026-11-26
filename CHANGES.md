@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-27 01:20:00 -0500 - Decode both HAT auxiliary counts
+- Fully decoded the HAT header counts: body[36] is the input polygon count and body[40] is T(n), the recursive bisection-tree size from GTR2.exe function 0x45b1d0; verified 178/178 files with no saturation. Added `media_tool.hat_bisection_count()` and a full-tier test.
+
 ## 2026-11-27 00:50:00 -0500 - HAT writer record loop traced
 - Traced the HAT writer's record loop: 16-byte records are emitted from runtime pointers as [x][opaque u32 + height f32][z], with the count computed by 0x459480 and records in runtime-list order. Documented with the existing code-evidence finding.
 

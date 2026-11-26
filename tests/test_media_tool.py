@@ -1123,6 +1123,29 @@ class MediaToolTest(unittest.TestCase):
                 self.assertGreater(grid[1], 0.03)
                 self.assertGreater(grid[3], 0.03)
 
+    def test_hat_second_count_is_bisection_tree_size(self):
+        """body[40] is exactly T(body[36]) across every HAT file."""
+        roots = ("GTR2Steam", "GTLSteam", "Race07Vanilla", "Race07Complete",
+                 "BMWM3Challenge", "GTR1Vanilla", "RF1Vanilla",
+                 "Automobilista", "StockCarExtreme")
+        checked = 0
+        for root in roots:
+            directory = ROOT.parent / root
+            if not directory.is_dir():
+                continue
+            for path in directory.rglob("*.hat"):
+                result = media_tool.hat_decompress(path)
+                if not result:
+                    continue
+                counts = media_tool.hat_declared_counts(result[0])
+                if counts is None:
+                    continue
+                polygons, bisection, _records = counts
+                self.assertEqual(media_tool.hat_bisection_count(polygons),
+                                 bisection, str(path))
+                checked += 1
+        self.assertGreaterEqual(checked, 170)
+
     def test_hat_record_count_uses_declared_header_count(self):
         """The header's declared count includes valid zero-valued records."""
         import struct

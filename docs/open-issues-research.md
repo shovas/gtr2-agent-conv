@@ -22,6 +22,24 @@ or value carries the rF1 track properties. The fields are semantically
 different, so no class-mapping rule exists — this is a corpus negative, not a
 missing implementation. Full-tier test added.
 
+## HAT aux counts fully decoded (2026-11-27)
+
+Traced the two count-computing functions called by the HAT writer:
+- `0x459480` recursively counts nodes in a tree whose nodes hold four child
+  pointers at `+0x54..+0x60` plus one at `+0x64` — a quadtree-like structure;
+  its result is written as `body[44]`, the 16-byte record count.
+- `0x45b1d0` is a **pure function of one integer**:
+  `T(0)=0; T(1)=T(2)=1; T(n)=1+T(n//2)+T(n-n//2)` for `n>=3` — the node count
+  of recursively halving an n-gon until at most two pieces remain (related to
+  the "Gaussian elimination for HAT poly" producer diagnostic).
+
+Testing `T(body[36])` against `body[40]` on **all 178** local HAT files gives
+exact equality in 178/178 cases, including the files whose value is 32767 or
+65535 (these are genuine plateaus of the step function, not u16 saturation).
+Thus `body[36]` is the input polygon count and `body[40]` its bisection-tree
+size — both aux counts are now decoded. `media_tool.hat_bisection_count()`
+exposes the recurrence; full-tier test added.
+
 ## HAT writer record loop (2026-11-27)
 
 Continuing at 0x45e606: the record count (`body[44]`) is computed by

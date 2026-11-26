@@ -681,10 +681,9 @@ def hat_declared_counts(payload: bytes) -> tuple[int, int, int] | None:
     """Return the three u32 counts declared in a `.hat` body header.
 
     The producer (`htree.cpp` in `GTR2.exe`) writes three counts at body
-    offsets 36, 40 and 44. The third is the authoritative number of 16-byte
-    records in the table at offset 48; it is layout-specific and identical for
-    byte-identical bodies. The first two are larger auxiliary counts (the
-    second saturates at 65535 in some layouts, suggesting a u16 counter).
+    offsets 36, 40 and 44: the input polygon count, its bisection-tree node
+    count (``hat_bisection_count()``), and the authoritative number of 16-byte
+    records in the table at offset 48. All three are layout-specific.
     Returns ``None`` when the ``generated\\x00`` header marker is absent.
     """
     marker = payload.find(b"generated\x00")
@@ -692,6 +691,31 @@ def hat_declared_counts(payload: bytes) -> tuple[int, int, int] | None:
         return None
     body = payload[marker + 10:]
     return struct.unpack_from("<3I", body, 36)
+
+
+def hat_bisection_count(polygons: int) -> int:
+    """Return ``T(n)``, the node count of GTR2.exe's HAT bisection tree.
+
+    Function ``0x45b1d0`` in ``GTR2.exe``/``GTR2Dedicated.exe`` is a pure
+    recursion: ``T(0)=0, T(1)=T(2)=1`` and, for ``n >= 3``,
+    ``T(n) = 1 + T(n // 2) + T(n - n // 2)`` (recursive halving of a polygon
+    until at most two remain). The HAT header stores this at body offset 40,
+    with the polygon count at offset 36. Verified on all 178 local HAT files.
+    """
+    if polygons <= 0:
+        return 0
+    total = 0
+    stack = [polygons]
+    while stack:
+        value = stack.pop()
+        if value < 3:
+            total += 1
+            continue
+        half = value // 2
+        total += 1
+        stack.append(half)
+        stack.append(value - half)
+    return total
 
 
 def hat_record_count(payload: bytes) -> int:

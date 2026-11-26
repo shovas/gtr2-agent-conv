@@ -432,8 +432,12 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
   The body header declares **three u32 counts at offsets 36/40/44**
   (`media_tool.hat_declared_counts()`); the third is the authoritative record
   count, verified on **178/178** `.hat` files in 9 corpora (all three header
-  variants). The first two are larger auxiliary counts; the second saturates
-  at 65535 in 9/34 GTR2 files. `hat_record_count()` now uses the declared
+  variants). The first is the input polygon count `n`; the second is exactly
+  `T(n)` from GTR2.exe's recursive bisection function `0x45b1d0`
+  (`T(0)=0, T(1)=T(2)=1, T(n)=1+T(n//2)+T(n-n//2)` for `n>=3`), exposed as
+  `media_tool.hat_bisection_count()` and verified on **178/178** files — no
+  clamping is involved (values like 32767/65535 are genuine `T(n)` plateaus).
+  The record count is computed by the quadtree node counter `0x459480`. `hat_record_count()` now uses the declared
   count: the old bounded scan stopped at valid records with `B = 0.0` and
   `U = 0`, undercounting 6/34 files (e.g. Enna 7,558 vs 15,417). Full-tier
   test: `test_hat_record_count_uses_declared_header_count`.
