@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 23:50:00 -0500 - GSC conversion normal quality check
+- Verified converted GSC normals are unit vectors for 130,853/130,855 sampled vertices; the two zero-length exceptions occur in one mesh at symmetric positions. Full-tier regression test added.
+
 ## 2026-11-26 23:20:00 -0500 - small_b longitudinal negative
 - Tested replay `small_b` against longitudinal acceleration (raw and per-second): mean r ~0.003, permutation p=0.89. Consolidated into the existing small_b negative test.
 

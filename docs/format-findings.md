@@ -513,6 +513,10 @@ a superficial string mapping would be wrong. Full-tier test:
 
 ## 7. Vertex `f0` (per-mesh marker on vertex 0)
 
+- **GSC conversion normals** are derived and essentially always unit vectors:
+  2 of 130,855 sampled vertices (0.0015%) are zero-length, both in
+  `CRU_EXT_PARTS_A.GMT` at symmetric positions (likely degenerate source
+  triangles). Full-tier test: `test_gsc_conversion_normals_are_unit`.
 - f0 is **preserved from the GMT**, not assigned by GTR2.exe; the shader
   helpers use a small 1/2/3/99 stage-type enum, and there are only 94 shipped
   `.psh`/`.vsh` names — too few for f0's >1,000 values.

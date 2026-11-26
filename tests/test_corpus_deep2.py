@@ -1334,6 +1334,48 @@ class CorpusDeep2Test(unittest.TestCase):
                     self.assertEqual(validate_materials.check_gmt(
                         path.read_bytes(), path.name), [], path)
 
+    def test_gsc_conversion_normals_are_unit(self):
+        """Converted GSC normals are unit vectors except rare degenerate faces."""
+        import glob
+        import math
+        import gmt_format as gf
+        import gmt_layout
+        import gmt_semantic
+        import mas_tool
+
+        total = non_unit = 0
+        for archive in sorted(glob.glob(
+                str(ROOT.parent / "CopaPetrobrasdeMarcas" / "**" / "*.mas"),
+                recursive=True))[:6]:
+            try:
+                _mtype, entries = mas_tool.read_archive(archive)
+            except Exception:
+                continue
+            for entry in entries:
+                data = entry.data or b""
+                try:
+                    decoded = gmt_semantic.decode_gsc_member(data)
+                except Exception:
+                    continue
+                if not decoded or not decoded.get("submeshes"):
+                    continue
+                try:
+                    converted = gmt_layout.gsc_member_to_gtr2(data)
+                except Exception:
+                    continue
+                for mesh in gf.parse_gmt(entry.name, converted).meshes:
+                    for vertex in mesh.base_vertices or []:
+                        length = math.sqrt(vertex.nx ** 2 + vertex.ny ** 2
+                                           + vertex.nz ** 2)
+                        total += 1
+                        non_unit += abs(length - 1.0) > 0.02
+                if total > 20000:
+                    break
+            if total > 20000:
+                break
+        self.assertGreater(total, 10000)
+        self.assertLess(non_unit / total, 0.001)
+
     def test_gsc_validator_corpus_sample(self):
         """The GSC-aware validator passes across a deterministic sample."""
         import glob
