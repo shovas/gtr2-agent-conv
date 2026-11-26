@@ -1,5 +1,20 @@
 # Open issues — offline research record (2026-11-23)
 
+## Driver u16s vs live per-wheel units (2026-12-01) — negative
+
+Used the live shared-memory per-wheel units from `../gtr2-agent-tools` as an
+independent oracle for the replay driver-state u16s:
+- fixed-point `/256` interpreted as tyre temperature fits Monza.Vcr (86% in
+  60–110 C, matching the live 73–76 C observations) but fails on Imola.Vcr
+  (12%) and Magny-Cours.Vcr (3%);
+- half-float interpreted as tyre pressure fits only 3.9% of 17,500 samples in
+  the live 1.5–3.0 bar range;
+- neither field correlates with derived speed or lateral acceleration.
+
+So the four u16s remain wheel-like but undecoded. Full-tier test guards the
+negative so a future session does not re-test the same units without new
+evidence.
+
 ## GTTF units cross-checked against live runtime telemetry (2026-12-01)
 
 The updated `../gtr2-agent-tools` repo documents live GTR2 shared-memory units

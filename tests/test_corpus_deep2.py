@@ -4459,6 +4459,41 @@ class CorpusDeep2Test(unittest.TestCase):
                              path.read_bytes(), str(path))
         self.assertEqual(set(extensions), {".dsi", ".hat", ".gtt", ".vcr"})
 
+    def test_driver_u16s_not_universal_tyre_units(self):
+        """Live per-wheel units do not decode the u16s across all cars."""
+        import struct
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        temperature_fits = []
+        pressure_fits = []
+        for name in ("Monza.Vcr", "Imola.Vcr", "Magny-Cours.Vcr"):
+            path = ROOT.parent / "GTR2Steam" / "ReplayData" / name
+            if not path.is_file():
+                continue
+            parsed = st.parse_vcr_frames(gz.decompress(str(path)))
+            if not parsed:
+                continue
+            raw = []
+            for frame in parsed["frames"][:200]:
+                for record in frame["records"]:
+                    if st.vcr_record_tag(record["header"]) != 0:
+                        continue
+                    state = st.vcr_driver_state(record["data"])
+                    if state:
+                        raw.extend(state["shorts"])
+                    break
+            if not raw:
+                continue
+            temperature_fits.append(sum(60 <= value / 256 <= 110 for value in raw)
+                                    / len(raw))
+            halves = [struct.unpack("<e", struct.pack("<H", value))[0]
+                      for value in raw]
+            pressure_fits.append(sum(1.5 <= value <= 3.0 for value in halves)
+                                 / len(halves))
+        self.assertGreaterEqual(len(temperature_fits), 2)
+        self.assertLess(min(temperature_fits), 0.5)
+        self.assertLess(min(pressure_fits), 0.5)
+
     def test_driver_state_u16s_form_wheel_pairs(self):
         """The four u16 fields are paired values, not four independent counts."""
         import statistics

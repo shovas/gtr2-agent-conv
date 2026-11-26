@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-12-01 03:45:00 -0500 - Driver u16 units negative
+- Cross-checked replay u16s against live per-wheel units: fixed-point temperature and half-float pressure interpretations both fail across cars; full-tier test guards the negative.
+
 ## 2026-12-01 03:15:00 -0500 - GTTF units cross-check
 - Cross-checked GTTF frame ranges against live shared-memory units: +32/1024 is RPM-shaped (1177-5807, lag-1 0.992 vs shuffled ~0); +16/+8 are normalized controls. Permutation-controlled test added.
 
