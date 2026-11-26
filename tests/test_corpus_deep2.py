@@ -4382,14 +4382,21 @@ class CorpusDeep2Test(unittest.TestCase):
                                                    headings)) for _ in range(5))
         self.assertGreater(observed, 3 * baseline)
 
-    def test_gtl_replays_have_no_declared_frame_stream(self):
-        """GTL v1.01 replays must not produce phantom GTR2-style frames."""
+    def test_gtl_v101_replay_frames_parse(self):
+        """GTL v1.01 replays use u24 counts after the -1e32 sentinel."""
         import gzip_simbin_tool as gz
         import simbin_events_tool as st
         checked = 0
         for path in (ROOT.parent / "GTLSteam" / "ReplayData").glob("*.Vcr"):
             payload = gz.decompress(str(path))
-            self.assertIsNone(st.parse_vcr_frames(payload))
+            summary = st.parse_replay_summary(payload)
+            self.assertIsNotNone(summary)
+            self.assertEqual(summary["version"], "v1.01")
+            self.assertGreater(summary["count_a"], 0)
+            parsed = st.parse_vcr_frames(payload)
+            self.assertIsNotNone(parsed)
+            self.assertEqual(len(parsed["frames"]), summary["count_a"])
+            self.assertEqual(parsed["end_offset"], len(payload))
             checked += 1
         self.assertEqual(checked, 4)
 

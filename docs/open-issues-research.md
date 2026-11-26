@@ -168,6 +168,18 @@ session variation is carried solely by `session_seconds`
 `c=8` only in Magny-Cours, but with nine samples no semantics are claimed.
 Full-tier regression test added.
 
+## GTL v1.01 replay format resolved (2026-11-30) — correction
+
+The earlier "GTL declares zero frames" conclusion was an artifact of applying
+the v1.05 summary layout to a v1.01 file. The v1.01 summary starts after the
+participant records with the f32 sentinel `-1e32`, then three zero-prefixed
+fields: u24 frame count, u24 sub-record count, and f32 duration. Example:
+`ae c5 9d f4 | 00 cc 04 00 | 00 55 06 00 | 00 ca 63 76 42` decodes to
+1228 frames, 1621 sub-records, 61.6 s. `parse_replay_summary()` now detects
+both versions and `parse_vcr_frames()` uses a version-aware start offset.
+**All 13 local replays (9 GTR2 + 4 GTL) parse exactly to their final byte.**
+Full-tier tests updated.
+
 ## GTL replay v1.01 frame variant (2026-11-30)
 
 The four GTL `.Vcr` replays parse as IRSR v1.01 but their summary declares

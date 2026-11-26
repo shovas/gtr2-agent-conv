@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-30 16:15:00 -0500 - GTL v1.01 replay decoded
+- Resolved the GTL replay variant: v1.01 uses a -1e32 sentinel with zero-prefixed u24 counts and f32 duration. All 13 local replays (9 GTR2 + 4 GTL) now parse exactly to EOF. Full-tier tests updated.
+
 ## 2026-11-30 15:45:00 -0500 - GTL replay variant guard
 - GTL v1.01 replays declare zero frames; added guards to reject phantom frames. All 9 GTR2 replays still parse exactly. Full-tier test added.
 

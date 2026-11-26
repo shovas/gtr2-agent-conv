@@ -289,12 +289,16 @@ def parse_object_records(data: bytes, search_limit: int = 4096) -> list[dict]:
     return best
 
 
-def parse_replay_summary(data: bytes) -> dict | None:
-    """Parse the 13-byte summary immediately after the participant records.
+def _u24(data: bytes, offset: int) -> int:
+    return data[offset] | (data[offset + 1] << 8) | (data[offset + 2] << 16)
 
-    Layout observed in the local corpus: u8 marker (0 in 8/9 GTR2 replays),
-    two u32 counts (first < second in all 8 well-formed files), and an f32
-    duration in seconds (8.97–284 s). Exact count semantics are unclaimed.
+
+def parse_replay_summary(data: bytes) -> dict | None:
+    """Parse the summary block following participant records.
+
+    v1.05 (GTR2): u8 marker 0, u32 frame count, u32 sub-record count, f32
+    duration. v1.01 (GTL): the f32 -1e32 sentinel followed by each field
+    prefixed with a zero byte, counts encoded as 24-bit little-endian.
     """
     records = parse_object_records(data)
     if not records:
@@ -302,11 +306,27 @@ def parse_replay_summary(data: bytes) -> dict | None:
     offset = records[-1]["next_offset"]
     if offset + 13 > len(data):
         return None
-    marker = data[offset]
-    first, second = struct.unpack_from("<II", data, offset + 1)
-    duration = struct.unpack_from("<f", data, offset + 9)[0]
-    return {"offset": offset, "marker": marker, "count_a": first,
-            "count_b": second, "duration": duration}
+    if data[offset] == 0:
+        first, second = struct.unpack_from("<II", data, offset + 1)
+        duration = struct.unpack_from("<f", data, offset + 9)[0]
+        if 0 < first < 10_000_000 and first <= second < 10_000_000 \
+                and 0 <= duration < 100_000:
+            return {"offset": offset, "marker": 0, "count_a": first,
+                    "count_b": second, "duration": duration, "version": "v1.05"}
+    # v1.01: locate the sentinel after the participant records.
+    sentinel = struct.pack("<I", UNBOUNDED_TIME)
+    index = data.find(sentinel, offset)
+    if index < 0 or index + 13 > len(data):
+        return None
+    if data[index + 4] != 0 or data[index + 8] != 0 or data[index + 12] != 0:
+        return None
+    first = _u24(data, index + 5)
+    second = _u24(data, index + 9)
+    duration = struct.unpack_from("<f", data, index + 13)[0]
+    if first <= 0 or second < first or not 0 <= duration < 100_000:
+        return None
+    return {"offset": index, "marker": 0, "count_a": first,
+            "count_b": second, "duration": duration, "version": "v1.01"}
 
 
 def vcr_driver_state(body: bytes) -> dict | None:
@@ -361,7 +381,7 @@ def parse_vcr_frames(data: bytes) -> list[dict] | None:
     summary = parse_replay_summary(data)
     if summary is None or summary["marker"] != 0 or summary["count_a"] == 0:
         return None
-    offset = summary["offset"] + 13
+    offset = summary["offset"] + (17 if summary.get("version") == "v1.01" else 13)
     frames = []
     declared = 0
     # Anderstorp.Vcr declares fewer frames than are present: a second,

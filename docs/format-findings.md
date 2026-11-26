@@ -154,8 +154,10 @@ regression tests or an explicitly documented negative.
   `gzip_simbin_tool.compress_simbin()` writes byte-identical containers by
   patching the XFL/OS header bytes to `00 0b` (verified on 29 GTT + 9 VCR
   files), so a payload-level ghost writer is feasible. GTL replays use the
-  same container at version **1.01** (vs GTR2's 1.05); all four local GTL
-  `.Vcr` files parse and rewrap byte-identically.
+  same container at version **1.01** (vs GTR2's 1.05): its summary is
+  `-1e32` followed by zero-prefixed u24 frame/sub-record counts and an f32
+  duration. All four GTL `.Vcr` files parse to exact EOF and rewrap
+  byte-identically; all 13 local replays across both games are decoded.
   `simbin_events_tool.set_session_seconds()` already edits that field in place
   (at most four bytes change) and the result rewraps byte-identically apart
   from the edited value.
