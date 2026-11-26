@@ -5485,6 +5485,39 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertGreater(observed, statistics.mean(permuted))
         self.assertGreater(observed, max(permuted))
 
+    def test_hat_trailing_stream_has_34_and_77_byte_periodicity(self):
+        """The tail repeats structure at 34- and 77-byte strides."""
+        import random
+        import gzip_simbin_tool as gz
+        import media_tool as mt
+
+        def agreement(data, stride):
+            return (sum(a == b for a, b in zip(data[:-stride], data[stride:]))
+                    / (len(data) - stride))
+
+        random.seed(2026)
+        checked = 0
+        for name in ("3Brno.hat", "3Monza.hat", "3Enna.hat"):
+            path = (ROOT.parent / "GTR2Steam" / "GameData" / "Locations"
+                    / "HAT_Dedicated" / name)
+            if not path.is_file():
+                continue
+            payload = gz.decompress(str(path))
+            body = payload[payload.find(b"generated\x00") + 10:]
+            count = mt.hat_declared_counts(payload)[2]
+            start = 48 + 16 * count + 8
+            tail = body[start:start + 65536]
+            self.assertGreater(len(tail), 60000)
+            for stride in (34, 77):
+                observed = agreement(tail, stride)
+                shuffled = bytearray(tail)
+                random.shuffle(shuffled)
+                control = agreement(bytes(shuffled), stride)
+                self.assertGreater(observed, 0.08, (name, stride))
+                self.assertGreater(observed, control * 5, (name, stride))
+            checked += 1
+        self.assertGreaterEqual(checked, 2)
+
     def test_hat_trailing_stream_is_not_plain_float_records(self):
         """Float plausibility in the tail is explained by its byte histogram."""
         import random

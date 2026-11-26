@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 17:20:00 -0500 - HAT tail 34/77-byte periodicity
+- Found strong, cross-track byte-lag periodicity in the HAT trailing stream at strides 34 and 77 (11-16% agreement vs ~1.4% shuffled); no fixed record layout claimed yet. Full-tier test added.
+
 ## 2026-11-26 16:50:00 -0500 - GDB class mapping negative
 - Established that rF1 GDB `Filter Properties` (track/season descriptors) and SimBin `SpecialClasses` (car-class tags) are semantically different with <10% token overlap; no cross-era class-mapping rule is derivable. Full-tier test added.
 

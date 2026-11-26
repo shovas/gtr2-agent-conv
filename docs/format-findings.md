@@ -438,6 +438,13 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
   However no 8-byte phase yields a convincing run of plausible f32 pairs
   (~48% at every phase, same as random), so the stream is not plain packed
   floats. Full-tier test: `test_hat_trailing_stream_has_eight_byte_periodicity`.
+  Stronger periodicity exists at **34- and 77-byte strides**: byte agreement
+  11.2–16.3% (34) and 11.6–16.1% (77) across Brno/Monza/Enna/Dubai/Anderstorp
+  versus ~1.4% for a seeded byte shuffle, with agreement spread fairly evenly
+  across all phases of the period (not a single constant field). 43 and 87
+  bytes are weaker companions (77 = 34 + 43). No fixed record layout has been
+  derived from this yet. Full-tier test:
+  `test_hat_trailing_stream_has_34_and_77_byte_periodicity`.
   The ~49% of 8-byte windows that decode as two plausible IEEE floats is fully
   explained by the tail's byte histogram (byte-shuffled control 48.5%), so no
   float-record layout is present.

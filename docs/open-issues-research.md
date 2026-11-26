@@ -1,5 +1,16 @@
 # Open issues — offline research record (2026-11-23)
 
+## HAT tail periodicity at 34 and 77 bytes (2026-11-26)
+
+Byte-lag autocorrelation on 64-KB tail windows found much stronger structure
+than the previously reported 8-byte exponent-byte effect: agreement at stride
+34 is 11.2–16.3% and at stride 77 is 11.6–16.1% across Brno, Monza, Enna,
+Dubai and Anderstorp, versus ~1.4% for a seeded byte shuffle (a >7x signal).
+43 and 87 bytes are weaker companion lags; 77 = 34 + 43. The agreement is
+spread fairly evenly across all phases of each period, so it is not a single
+constant field in a fixed-size record, and no record layout is claimed.
+Full-tier test added.
+
 ## GDB class mapping is not cross-era (2026-11-26)
 
 Re-examined the rF1 `Filter Properties` vs SimBin `SpecialClasses` gap as a
