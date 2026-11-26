@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 11:20:00 -0500 - Document decoded replay channels
+- Refined small_a: raw per-frame elevation delta fits slightly better than per-second velocity; synced FEATURES/CAPABILITIES with the decoded steering-like and vertical-motion channels.
+
 ## 2026-11-26 10:50:00 -0500 - Driver u16 wrap modulus negative
 - Searched wrap moduli 1024..65536 for a wheel-speed channel in the replay u16s; none produced a consistent speed correlation. Full-tier test added.
 

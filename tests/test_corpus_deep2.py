@@ -4773,30 +4773,39 @@ class CorpusDeep2Test(unittest.TestCase):
                 parsed = st.parse_vcr_frames(gz.decompress(str(path)))
                 if not parsed:
                     continue
-                states = []
+                samples = []
                 for frame in parsed["frames"]:
                     for record in frame["records"]:
                         if st.vcr_record_tag(record["header"]) == 0:
                             state = st.vcr_driver_state(record["data"])
                             if state:
-                                states.append(state)
+                                samples.append((state, frame["time_word"]))
                             break
-                if len(states) < 300:
+                if len(samples) < 300:
                     continue
-                elevation = [after["position"][1] - before["position"][1]
-                             for before, after in zip(states, states[1:])]
-                values = [state["small_a"] for state in states][:len(elevation)]
-                data.append((values, elevation))
+                elevation = [after[0]["position"][1] - before[0]["position"][1]
+                             for before, after in zip(samples, samples[1:])]
+                elapsed = [max((after[1] - before[1]) / 1e6, 1e-6)
+                           for before, after in zip(samples, samples[1:])]
+                values = [sample[0]["small_a"] for sample in samples][:-1]
+                data.append((values, elevation, elapsed))
         self.assertGreaterEqual(len(data), 6)
-        observed = [correlate(values, elevation) for values, elevation in data]
+        observed = [correlate(values, elevation) for values, elevation, _ in data]
         self.assertGreater(sum(value > 0 for value in observed), len(data) - 1)
         self.assertGreater(statistics.mean(observed), 0.4)
+
+        # Raw per-frame delta fits slightly better than per-second velocity.
+        rate_correlations = [correlate(
+            values, [change / seconds for change, seconds in zip(elevation, elapsed)])
+            for values, elevation, elapsed in data]
+        self.assertGreaterEqual(statistics.mean(observed),
+                                statistics.mean(rate_correlations))
 
         random.seed(2026)
         permuted = []
         for _ in range(500):
             totals = []
-            for values, elevation in data:
+            for values, elevation, _elapsed in data:
                 shuffled = values[:]
                 random.shuffle(shuffled)
                 totals.append(correlate(shuffled, elevation))
