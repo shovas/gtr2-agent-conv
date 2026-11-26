@@ -86,7 +86,13 @@ handle)` when its mode word at +0x14 is zero. There is **no decompress or
 transform** in the read path. Therefore the 34-byte node stream must be read
 from a different file or stream position than the raw HAT tail section we
 examined; the reader function takes a filename argument and opens it through
-this stream, so identifying which file is passed is the remaining step.
+this stream, so identifying which file is passed is the remaining step. Clarification:
+`0x570070` (vtable +0x14) is `fwrite(buffer,1,size,handle)` and `0x5700c0`
+(+0x1c) is the matching `fread`; the 0x4528xx function is the writer and
+0x4529e0 the reader. Crucially, the node parser `0x451080` is passed a
+separately allocated buffer (`operator new` at 0x452bcc), not the file stream —
+so the 34-byte node records are read from an in-memory structure derived from
+the file, which explains why raw tail bytes do not match.
 
 ## HAT node layout vs raw tail (2026-11-27) — framing gap
 

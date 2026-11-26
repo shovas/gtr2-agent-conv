@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-27 23:20:00 -0500 - HAT node stream is memory-backed
+- Clarified GTL.exe stream methods (0x570070 fwrite, 0x5700c0 fread) and that the 34-byte node parser receives a separate heap buffer, not the file stream — explaining why raw tail bytes do not match the node layout.
+
 ## 2026-11-27 22:50:00 -0500 - Cross-format steering negative
 - Found replay pair-difference and GTTF +16 steering have incompatible standardized distributions (kurtosis 4.9 vs 635 with rare ±1 clamps); no joint calibration claimed.
 
