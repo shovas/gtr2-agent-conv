@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-12-01 10:50:00 -0500 - Hat records not waypoints
+- Ruled out .hat record triples as AIW waypoint or CAM camera positions (zero near matches in Brno/Monza, shuffled control equal); full-tier test added.
+
 ## 2026-12-01 10:20:00 -0500 - Hat body record table
 - Found a fixed 16-byte record table at .hat body offset 48: `[f32, u32, f32, f32]`, with layout-specific counts (7-61,412) that fingerprint byte-identical bodies under permutation (p<0.001). Full-tier test added; field semantics still undecoded.
 

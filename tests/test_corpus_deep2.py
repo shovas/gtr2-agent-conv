@@ -4883,6 +4883,60 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertGreater(observed, statistics.mean(permuted))
         self.assertGreater(observed, max(permuted))
 
+    def test_hat_records_are_not_aiw_or_cam_positions(self):
+        """The .hat f32 triples do not reproduce AIW waypoints or CAM points."""
+        import random
+        import re
+        import struct
+        import gzip_simbin_tool as gz
+        import simbin_text_tool as stt
+
+        def records(path):
+            payload = gz.decompress(str(path))
+            marker = payload.find(b"generated\x00")
+            body = payload[marker + 10:]
+            out = []
+            for offset in range(48, len(body) - 16, 16):
+                first, _unknown, second, third = struct.unpack_from("<fIff", body, offset)
+                if not (-1e6 < first < 1e6 and first == first
+                        and second == second and 0.01 < abs(second) < 20
+                        and -1e6 < third < 1e6 and third == third):
+                    break
+                out.append((first, second, third))
+            return out
+
+        def near_matches(points, triples, tolerance=0.5):
+            buckets = {(round(x / tolerance), round(y / tolerance),
+                        round(z / tolerance)) for x, y, z in points}
+            return sum((round(x / tolerance), round(y / tolerance),
+                        round(z / tolerance)) in buckets for x, y, z in triples)
+
+        random.seed(2026)
+        checked = 0
+        for track, aiw_name in (("Brno", "3Brno.AIW"), ("Monza", "4Monza.AIW")):
+            base_dir = ROOT.parent / "GTR2Steam" / "GameData" / "Locations" / track
+            hat = sorted((ROOT.parent / "GTR2Steam" / "GameData" / "Locations"
+                          / "HAT_Dedicated").glob(f"*{track}*.hat"))
+            if not hat or not (base_dir / aiw_name).is_file():
+                continue
+            triples = records(hat[0])
+            self.assertGreater(len(triples), 1000)
+            aiw = stt.parse_aiw((base_dir / aiw_name).read_text(encoding="latin-1"))
+            waypoints = [wp.pos for wp in aiw.waypoints if wp.pos]
+            self.assertNotEqual(len(triples), len(waypoints))
+            self.assertEqual(near_matches(waypoints, triples), 0)
+            shuffled = waypoints[:]
+            random.shuffle(shuffled)
+            self.assertEqual(near_matches(shuffled, triples), 0)
+            for cam in base_dir.glob("*.cam"):
+                numbers = [float(x) for x in re.findall(
+                    r"-?\d+\.\d+", cam.read_text(encoding="latin-1",
+                                                    errors="ignore"))]
+                points = list(zip(numbers[0::3], numbers[1::3], numbers[2::3]))
+                self.assertEqual(near_matches(points, triples), 0, cam.name)
+            checked += 1
+        self.assertGreaterEqual(checked, 2)
+
     def test_hat_body_is_deterministic_per_layout(self):
         """Same-layout .hat bodies are byte-identical after the 4-byte prefix."""
         import random

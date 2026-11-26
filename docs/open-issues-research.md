@@ -1,5 +1,17 @@
 # Open issues — offline research record (2026-11-23)
 
+## `.hat` records vs AIW/CAM positions (2026-12-01) — negative
+
+Tested whether the 16-byte record table's f32 triples are track waypoints:
+- Brno has 40,189 records vs 1,304 AIW waypoints; Monza 29,286 vs 1,397;
+- with a 0.5-unit match tolerance, zero records coincide with any AIW waypoint
+  or CAM camera point in Brno or Monza, and zero under a shuffled control;
+- nearest-waypoint distance medians were identical to shuffled baselines
+  (30.05 for Brno, 22.87 for Monza), so the triples are not a sparse subset
+  of the waypoint set either.
+
+The coordinate interpretation is not supported. Full-tier test added.
+
 ## `.hat` body has a 16-byte record table (2026-12-01)
 
 Hexdump of `body[36:]` showed a repeating pattern: from offset 48, 16-byte

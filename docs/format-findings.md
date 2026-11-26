@@ -352,6 +352,10 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
   permutation mean 0.125 / max 3, seed 2026). An 8-byte zero pair follows the
   table before a second stream. Field semantics remain undecoded. Full-tier
   test: `test_hat_body_starts_with_16_byte_record_table`.
+  The f32 triples are **not** AIW waypoint or CAM camera positions: Brno has
+  40,189 records vs 1,304 waypoints, and zero records fall within 0.5 units of
+  any AIW waypoint or CAM point (same for a shuffled control). Full-tier test:
+  `test_hat_records_are_not_aiw_or_cam_positions`.
 
 ## 5. Vertex `f0` (per-mesh marker on vertex 0)
 
