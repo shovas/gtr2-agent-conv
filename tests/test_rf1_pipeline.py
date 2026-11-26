@@ -36,6 +36,19 @@ class Rf1PipelineTest(unittest.TestCase):
                 self.assertGreater(len(g.meshes), 0, e.name)
                 self.assertEqual(gmt_format.write_gmt(g), e.data)
 
+            reference_path = (ROOT.parent / "gtr2-agent-tools" / "scripts"
+                              / "gtr2_driving" / "gmt.py")
+            if reference_path.is_file():
+                import importlib.util
+                spec = importlib.util.spec_from_file_location("reference_gmt", reference_path)
+                reference = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(reference)
+                for e in gmts[:5]:
+                    parsed = reference.parse(e.data)
+                    self.assertEqual(len(parsed),
+                                     len(gmt_format.parse_gmt(e.name, e.data).meshes),
+                                     e.name)
+
 
     def test_relayout_mode(self):
         if not SOURCE.exists():

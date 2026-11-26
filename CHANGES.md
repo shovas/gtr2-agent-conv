@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-12-01 01:45:00 -0500 - Archive round-trip independent validation
+- Extended the rF1→GTR2 archive round-trip test to validate converted GMTs with the independent reference parser; tests pass.
+
 ## 2026-12-01 01:15:00 -0500 - f0 direct-reuse negative
 - Ruled out f0 as a directly reused u32 in material records or an ASCII tag; matches were trivial common values. Consolidated negative list updated.
 
