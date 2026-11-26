@@ -1184,6 +1184,18 @@ class MediaToolTest(unittest.TestCase):
         self.assertEqual(len(variants), 3)
         self.assertEqual(set(variants), {"gMb1.000f", "gMb1.002f", "ver008"})
 
+        import json
+        import subprocess
+        import sys
+        report = subprocess.run(
+            [sys.executable, str(ROOT / "media_tool.py"), "hat-layout",
+             str(samples[2]), str(ROOT.parent / "Race07Vanilla")],
+            capture_output=True, text=True)
+        self.assertEqual(report.returncode, 0, report.stderr)
+        result = json.loads(report.stdout)
+        self.assertEqual(result["variant"], "ver008")
+        self.assertTrue(result["grid_params"])
+
     def test_hat_second_count_is_bisection_tree_size(self):
         """body[40] is exactly T(body[36]) across every HAT file."""
         roots = ("GTR2Steam", "GTLSteam", "Race07Vanilla", "Race07Complete",

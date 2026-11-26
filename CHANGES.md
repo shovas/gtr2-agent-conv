@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-27 20:20:00 -0500 - HAT CLI variant coverage
+- Extended the all-variants regression to check `media_tool.py hat-layout` on a Race07 `ver008` HAT, including grid parameters.
+
 ## 2026-11-27 19:50:00 -0500 - GMT variant identification coverage
 - Extended the media-tool regression to assert all four loose/archived GMT variants: plain `gmt`, `gmt-jca`, `racegmt` and `gmt-gtr1`.
 
