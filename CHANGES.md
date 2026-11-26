@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-27 18:50:00 -0500 - Guard rf1 CLI structural opt-out
+- Verified `rf1_to_gtr2.py --structural` still selects the legacy bridge (`decrypt+layout`) while the default uses the semantic one; extended the CLI regression test.
+
 ## 2026-11-27 18:20:00 -0500 - HAT node framing gap
 - Tried parsing real HAT tails with the code-derived 34-byte node layout: no raw phase yields valid record indices and no zlib framing exists, so an additional stream transform remains unresolved. Full-tier guard added.
 

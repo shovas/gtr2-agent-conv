@@ -1417,6 +1417,14 @@ class CorpusDeep2Test(unittest.TestCase):
             self.assertTrue(any(entry.name.lower().endswith(".gmt")
                                 for entry in entries))
 
+            legacy = subprocess.run(
+                [sys.executable, str(ROOT / "rf1_to_gtr2.py"),
+                 str(archive), str(Path(td) / "legacy.gtr"), "--structural"],
+                capture_output=True, text=True)
+            self.assertEqual(legacy.returncode, 0, legacy.stderr)
+            self.assertIn("decrypt+layout", legacy.stdout)
+            self.assertNotIn("decrypt+semantic", legacy.stdout)
+
     def test_rf1_semantic_conversion_validates(self):
         """The semantic bridge preserves all submeshes where the structural one does not."""
         import random
