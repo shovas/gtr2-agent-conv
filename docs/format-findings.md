@@ -200,11 +200,14 @@ regression tests or an explicitly documented negative.
   Bulk data shows a separate **20-byte lag excess** over neighbouring
 
 - **Replay frame stream decoded:** `parse_vcr_frames()` consumes the payload
-  exactly in 7/9 GTR2 replays: `count_a` frames, each u32 absolute time + u16
-  sub-record count, each sub-record u32 header + packed size; total sub-record
-  count equals `count_b`, and `last − first` frame time equals the summary
-  duration. The first frame time equals the participant window start.  lags in 7/9 replays (median +0.16 matching bytes), consistent with a small
-  repeating record. The frame stream is now decoded (below).
+  exactly in **all 9** GTR2 replays: `count_a` frames (declared), each u32
+  absolute time + u16 sub-record count, each sub-record u32 header + packed
+  size; total sub-record count equals `count_b`, and `last − first` frame time
+  equals the summary duration. The first frame time equals the participant
+  window start. Bulk data also shows a 20-byte lag excess in 7/9 replays.
+  Variants: `Anderstorp.Vcr` has a second continuous 82-frame segment (203
+  total, exact EOF), and `Dubai International.Vcr` uses Latin-1 accented
+  participant names.
 - Every ghost ends with a **20-byte tail** (5 f32s). Its first two floats are
   a per-track fixed point (median distance 0.6 between ghosts of the same
   track vs 178 for random pairs) near that track's final frame position —

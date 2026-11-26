@@ -168,6 +168,24 @@ session variation is carried solely by `session_seconds`
 `c=8` only in Magny-Cours, but with nine samples no semantics are claimed.
 Full-tier regression test added.
 
+## Replay variants resolved: all 9 GTR2 files parse (2026-11-30)
+
+Two exceptions to the frame decoder were traced to data handling, not new
+formats:
+- `Anderstorp.Vcr`: after the declared 121 frames, a second continuous
+  82-frame segment follows; parsing until EOF yields 203 frames and lands
+  exactly on the payload end. Frame time wraps from 18.85 s to 0 at index 81
+  (lap boundary). `parse_vcr_frames()` reports both declared and total counts.
+- `Dubai International.Vcr`: the participant name `René Wijnen` contains a
+  Latin-1 byte (0xE9), rejected by an ASCII-only printable check. That stopped
+  the participant chain at two records and mislocated the summary. Allowing
+  high Latin-1 bytes finds all four participants; the real summary is at
+  offset 740 (`count_a=24`, `count_b=64`, duration 28.954 s) and frames parse
+  exactly.
+
+All nine GTR2 replay payloads now parse to their exact final byte. Full-tier
+test updated.
+
 ## Replay frame decoder complete (2026-11-30) — correction
 
 Re-reading `fcn.00527890` revealed that the `+1` applies **only** in the

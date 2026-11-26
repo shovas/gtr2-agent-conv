@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-30 12:45:00 -0500 - All GTR2 replay variants parse
+- Resolved both replay exceptions: Anderstorp has a second 82-frame segment (203 total), and Dubai uses a Latin-1 accented participant name. All 9 GTR2 replay payloads now parse exactly to EOF; full-tier test updated.
+
 ## 2026-11-30 12:15:00 -0500 - Replay frame decoder complete
 - Fixed a misread of the packed sub-record size (+1 only in the special branch) and added `parse_vcr_frames()`: 7/9 GTR2 replays parse exactly to payload end, sub-record totals equal count_b, frame time spans equal summary durations, and first frame times equal participant window starts. Full-tier test added.
 
