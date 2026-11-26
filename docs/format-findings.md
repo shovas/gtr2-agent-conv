@@ -14,8 +14,9 @@ regression tests or an explicitly documented negative.
   `gmt_semantic.read_gtr1_geometry()`).
 - A fourth variant, **`RaceGMT\0`**, occurs in 643 Race07Complete meshes. It is
   not a standard GMT: `race_gmt.parse_header()` verifies an 8-byte magic,
-  u32 printable-name length, the name, a constant flag word `0x04000020`, then
-  a payload of mixed f32/u16 records. All 643 files parse cleanly; the payload
+  u32 printable-name length, the name, a constant flag word `0x04000020`, four
+  finite f32 triples (the third repeated as the fourth in **643/643** files),
+  then a payload of mixed f32/u16 records. All 643 files parse cleanly; the payload
   geometry is **not** decoded and `parse_gmt()` returns zero meshes for them.
   Payload probing found f32 triples and u16 index triples at 36-/72-byte
   strides in several models (e.g. `PEOPLE_STAND_01`, `SEATS29_LODA`), but the

@@ -149,7 +149,9 @@ def cmd_info(args: argparse.Namespace) -> int:
         print(f"racegmt_name: {header.name}")
         print(f"racegmt_flags: {header.flags} (0x{header.flags:08x})")
         print(f"payload_offset: {16 + len(header.name)}")
-        print(f"bbox_floats: {len(header.floats)}")
+        triples = [header.floats[i:i + 3] for i in range(0, len(header.floats), 3)]
+        print(f"quad_triples: {len(triples)}")
+        print(f"triple3_equals_triple4: {len(triples) == 4 and triples[2] == triples[3]}")
         print("geometry: not decoded (RaceGMT container only)")
         return 0
     h = read_header(args.file, parse_meshes=args.meshes)

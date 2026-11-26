@@ -2,7 +2,7 @@
 """Partial parser for the `RaceGMT\\0` mesh variant (Race 07 DLC content).
 
 Verified from ../Race07Complete (643 files): `magic[8], u32 name_len, name,
-u32 flags (0x04000020), bounding-box floats ...`. Vertex/index table layout is
+u32 flags (0x04000020), then four f32 triples (the third repeated as the fourth in all 643 files) ...`. Vertex/index table layout is
 NOT decoded — do not assume new-layout GMT geometry offsets apply.
 """
 from __future__ import annotations

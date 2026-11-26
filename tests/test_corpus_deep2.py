@@ -1489,6 +1489,9 @@ class CorpusDeep2Test(unittest.TestCase):
             self.assertTrue(parsed.name, name)
             self.assertEqual(parsed.flags, 0x04000020, name)
             self.assertEqual(len(parsed.floats), 12, name)
+            self.assertTrue(all(value == value and abs(value) < 1e6
+                                for value in parsed.floats), name)
+            self.assertEqual(parsed.floats[6:9], parsed.floats[9:12], name)
             found += 1
         self.assertGreater(found, 600)
         sample = (ROOT.parent / "Race07Complete" / "GameData" / "Locations"
@@ -1504,6 +1507,7 @@ class CorpusDeep2Test(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertIn("variant: racegmt", result.stdout)
             self.assertIn("racegmt_name: people_stand_01", result.stdout)
+            self.assertIn("triple3_equals_triple4: True", result.stdout)
             self.assertIn("geometry: not decoded", result.stdout)
 
     def test_f0_bytes_not_stage_indices(self):

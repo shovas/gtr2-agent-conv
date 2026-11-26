@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 22:50:00 -0500 - RaceGMT header triple invariant
+- Verified the 12 header floats in all 643 RaceGMT files are four finite f32 triples with the third repeated as the fourth; corrected `race_gmt.py` guidance and CLI reporting. Full-tier test extended.
+
 ## 2026-11-26 22:20:00 -0500 - RaceGMT container validation and CLI
 - Full-tier validation of `race_gmt.parse_header()` across all 643 `RaceGMT\0` meshes in Race07Complete (magic, name, constant flags, 12 bounding-box floats); `gmt_tool.py info` now reports these fields instead of meaningless standard-GMT header values. Payload geometry remains undecoded (36-/72-byte index-triple strides in some models, but no universal record layout).
 
