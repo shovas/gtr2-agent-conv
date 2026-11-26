@@ -21,6 +21,8 @@ import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 
+import gzip_simbin_tool as gz
+
 MAGICS = (b"GTTF", b"IRSR")
 
 
@@ -826,10 +828,22 @@ def main(argv=None) -> int:
     ap.add_argument("--ghost-line", action="store_true", help="report a .dsi instructor polyline")
     ap.add_argument("--replay", action="store_true",
                     help="report IRSR replay participants and frame stream")
+    ap.add_argument("--shift", type=float,
+                    help="shift all replay timestamps by this many seconds")
+    ap.add_argument("--out", help="output file for --shift (default: stdout bytes)")
     args = ap.parse_args(argv)
     raw = Path(args.file).read_bytes()
     if raw[:2] == b"\x1f\x8b":
         raw = gzip.decompress(raw)
+    if args.shift is not None:
+        shifted = shift_replay_times(raw, args.shift)
+        if args.out:
+            Path(args.out).write_bytes(gz.compress_simbin(shifted))
+            print(f"wrote {args.out}: {len(shifted)} payload bytes")
+        else:
+            import sys
+            sys.stdout.buffer.write(gz.compress_simbin(shifted))
+        return 0
     if args.ghost_line:
         pts = read_ghost_line(raw)
         print(f"ghost_points={len(pts)} first={pts[0] if pts else None} "

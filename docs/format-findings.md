@@ -214,7 +214,8 @@ regression tests or an explicitly documented negative.
   total, exact EOF), and `Dubai International.Vcr` uses Latin-1 accented
   participant names. `shift_replay_times()` shifts all frame times and
   participant windows consistently while leaving spans and sub-records
-  untouched. Driving-school `.dsi` files use the same IRSR/replay frame
+  untouched. `simbin_events_tool.py FILE --shift S --out OUT` exposes this as
+  a CLI. Driving-school `.dsi` files use the same IRSR/replay frame
   stream: their instructor ghost line equals the decoded driver-state
   positions exactly, one point per frame. All 142 shipped `.dsi` files parse
   to exact EOF (68,916 frames total). Sub-record low-byte tags follow participants: `0..N-2`

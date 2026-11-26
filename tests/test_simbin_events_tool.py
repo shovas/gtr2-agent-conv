@@ -514,5 +514,29 @@ class SimbinEventsToolTest(unittest.TestCase):
             self.assertIn("exact_end=True", result.stdout)
 
 
+    def test_replay_shift_cli(self):
+        """--shift writes a valid container with consistently shifted times."""
+        import subprocess
+        import sys
+        import tempfile
+        path = ROOT.parent / "GTR2Steam" / "ReplayData" / "Brno.Vcr"
+        if not path.is_file():
+            self.skipTest("Brno.Vcr not present")
+        with tempfile.TemporaryDirectory() as td:
+            output = Path(td) / "shifted.Vcr"
+            result = subprocess.run(
+                [sys.executable, str(ROOT / "simbin_events_tool.py"), str(path),
+                 "--shift", "64", "--out", str(output)], capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertTrue(output.is_file())
+            self.assertEqual(output.read_bytes()[:2], b"\x1f\x8b")
+            report = subprocess.run(
+                [sys.executable, str(ROOT / "simbin_events_tool.py"), str(output),
+                 "--replay", "--strings", "0"], capture_output=True, text=True)
+            self.assertEqual(report.returncode, 0, report.stderr)
+            self.assertIn("first_time=2412.187", report.stdout)
+            self.assertIn("exact_end=True", report.stdout)
+
+
 if __name__ == "__main__":
     unittest.main()

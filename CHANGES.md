@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-12-01 02:15:00 -0500 - Replay time-shift CLI
+- Added `simbin_events_tool.py FILE --shift SECONDS --out OUT` to write a valid shifted replay container; CLI test added.
+
 ## 2026-12-01 01:45:00 -0500 - Archive round-trip independent validation
 - Extended the rF1→GTR2 archive round-trip test to validate converted GMTs with the independent reference parser; tests pass.
 
