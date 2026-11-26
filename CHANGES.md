@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-30 19:45:00 -0500 - gMb container inventory
+- Verified byte-identical gzip round-trip for all 197 gMb files (.dsi/.gtt/.hat/.vcr); `.hat` payload remains undecoded (no periodicity). Full-tier test added.
+
 ## 2026-11-30 19:15:00 -0500 - Full DSI corpus validation
 - Verified all 142 shipped .dsi files parse exactly to EOF (68,916 frames); full-tier test extended.
 

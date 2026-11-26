@@ -4362,6 +4362,18 @@ class CorpusDeep2Test(unittest.TestCase):
             replays += 1
         self.assertEqual(replays, 9)
 
+        extensions = collections.Counter()
+        for path in (ROOT.parent / "GTR2Steam").rglob("*"):
+            if not path.is_file() or path.stat().st_size > 2_000_000:
+                continue
+            if path.read_bytes()[:2] != b"\x1f\x8b":
+                continue
+            extension = path.suffix.lower()
+            extensions[extension] += 1
+            self.assertEqual(gz.compress_simbin(gz.decompress(str(path))),
+                             path.read_bytes(), str(path))
+        self.assertEqual(set(extensions), {".dsi", ".hat", ".gtt", ".vcr"})
+
     def test_gtl_replays_use_irsr_v101(self):
         """GTL .Vcr replays parse as IRSR v1.01 and rewrap byte-identically."""
         import gzip_simbin_tool as gz
