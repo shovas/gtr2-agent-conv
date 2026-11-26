@@ -185,6 +185,15 @@ function 0x45b1d0 (0x10 bytes/element). This is consistent with the decoded
 `body[36]/[40]` aux counts but does not resolve their semantic units.
 Full-tier code-evidence test added.
 
+## RaceGMT opening record layout (2026-11-27)
+
+Parsed the 36-byte opening records of `PEOPLE_STAND_01/02`, `STAND_25` and
+`SEATS29_LODA`: `[3x u16 indices (0,1,2)...][6 zero bytes][u32 ordinal][5 f32]`.
+The u32 at record offset +12 equals the record ordinal (0..7 in all four
+files) and the five f32 values are finite and bounded. Later records diverge
+(NaNs, varying index resets), so the layout is verified for the opening run
+only. Full-tier regression test extended.
+
 ## RaceGMT payload indexed records (2026-11-27)
 
 Located the first `(0,1,2)` u16 triple in several RaceGMT payloads (offset 292

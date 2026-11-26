@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-27 21:50:00 -0500 - RaceGMT opening record layout
+- Decoded RaceGMT's opening 36-byte records as `[3x u16 indices][6 zero bytes][u32 ordinal][5 f32]` with ordinal == record index in four models; full-tier test extended.
+
 ## 2026-11-27 21:20:00 -0500 - HAT virtual read is plain fread
 - Confirmed the HAT stream vtable read method is a plain `fread` (no transform), so the 34-byte node stream must originate at a different file/position than the raw tail; documented as the remaining framing question.
 

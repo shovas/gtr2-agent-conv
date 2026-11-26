@@ -1666,8 +1666,12 @@ class CorpusDeep2Test(unittest.TestCase):
                 base = 3 * ordinal
                 self.assertEqual(record, (base, base + 1, base + 2),
                                  (name, ordinal))
-                values = struct.unpack_from("<5f", payload,
-                                            start + 36 * ordinal + 16)
+                record = start + 36 * ordinal
+                self.assertEqual(struct.unpack_from("<I", payload,
+                                                    record + 12)[0], ordinal,
+                                 (name, ordinal))
+                self.assertEqual(payload[record + 6:record + 12], b"\x00" * 6)
+                values = struct.unpack_from("<5f", payload, record + 16)
                 self.assertTrue(all(value == value and abs(value) < 1000
                                     for value in values), (name, ordinal))
             checked += 1
