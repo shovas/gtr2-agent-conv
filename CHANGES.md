@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 07:20:00 -0500 - Validator source detection guard
+- Confirmed the new GSC auto-detection in `validate_conversion` does not misclassify old-layout rF1 GMTs (300/300 correctly detected as plain sources with f0/tail checks enabled); regression assertions added.
+
 ## 2026-11-26 06:50:00 -0500 - Expose steering-like replay channel
 - `vcr_driver_state()` now exposes the verified `short_pair_difference` channel (shorts[0]-shorts[1]) and the replay CLI reports `first_driver_pair_diff`. Full-tier test added.
 

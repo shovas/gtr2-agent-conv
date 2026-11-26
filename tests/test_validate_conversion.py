@@ -44,6 +44,9 @@ class ValidateConversionTest(unittest.TestCase):
             self.assertTrue(report["independent_cross_check"])
             self.assertTrue(report["material_tail_equal"])
             self.assertTrue(report["f0_equal"])
+            self.assertFalse(report["gsc_source"])
+            self.assertTrue(report["material_tail_checked"])
+            self.assertTrue(report["f0_checked"])
             checked += 1
         if not checked:
             self.skipTest("old-layout GMTs not present")
