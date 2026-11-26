@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-27 15:50:00 -0500 - f0 simple packing negative
+- Ruled out simple 16-bit packings of mesh/material counts, vertex/index counts and file size as GTR2 mesh-0 f0 markers (0 exact matches in 3,157 samples); consolidated with existing f0 negatives.
+
 ## 2026-11-27 15:20:00 -0500 - Quantify f0 material association
 - Measured MI(material name, f0 low half) = 5.475 bits vs 4.249 permuted: a real ~1.2-bit excess, far from determining the marker. Permutation-controlled full-tier test added.
 
