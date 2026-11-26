@@ -4465,6 +4465,19 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertGreaterEqual(checked, 4)
 
+        all_dsi = [path for path in
+                   (ROOT.parent / "GTR2Steam" / "GameData" / "DrivingSchool").rglob("*")
+                   if path.is_file() and path.suffix.lower() == ".dsi"]
+        total_frames = 0
+        for path in all_dsi:
+            payload = gz.decompress(str(path))
+            parsed = st.parse_vcr_frames(payload)
+            self.assertIsNotNone(parsed, path.name)
+            self.assertEqual(parsed["end_offset"], len(payload), path.name)
+            total_frames += len(parsed["frames"])
+        self.assertEqual(len(all_dsi), 142)
+        self.assertGreater(total_frames, 60000)
+
     def test_shift_replay_times_is_consistent(self):
         """Frame times and participant windows shift together; spans do not."""
         import statistics

@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-30 19:15:00 -0500 - Full DSI corpus validation
+- Verified all 142 shipped .dsi files parse exactly to EOF (68,916 frames); full-tier test extended.
+
 ## 2026-11-30 18:45:00 -0500 - DSI files share replay frame stream
 - Verified driving-school .dsi files parse with the replay decoders; their ghost polyline equals the decoded driver-state positions exactly (byte-exact). Full-tier test added.
 
