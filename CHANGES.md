@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-27 19:50:00 -0500 - GMT variant identification coverage
+- Extended the media-tool regression to assert all four loose/archived GMT variants: plain `gmt`, `gmt-jca`, `racegmt` and `gmt-gtr1`.
+
 ## 2026-11-27 19:20:00 -0500 - All HAT header variants decode
 - Verified all three HAT header variants (gMb1.000f, gMb1.002f, ver008) expose the decoded grid parameters, declared counts, bisection relation and record count; full-tier coverage test added.
 

@@ -917,6 +917,27 @@ class MediaToolTest(unittest.TestCase):
         race = glob.glob(str(ROOT.parent / "Race07Complete" / "**" / "*.gmt"),
                          recursive=True)
         self.assertGreater(len(race), 0)
+        racegmt = [name for name in race
+                   if Path(name).read_bytes().startswith(b"RaceGMT\x00")]
+        self.assertTrue(racegmt)
+        self.assertEqual(media_tool.identify(racegmt[0]).format, "racegmt")
+        jca = [name for name in race
+               if Path(name).read_bytes().startswith(b"\x0f\xb1\xff\xff")]
+        self.assertTrue(jca)
+        self.assertEqual(media_tool.identify(jca[0]).format, "gmt-jca")
+
+        import tempfile
+        import mas_tool
+        archives = sorted((ROOT.parent / "GTR1Vanilla").rglob("*.gtr"))
+        self.assertTrue(archives)
+        _mtype, entries = mas_tool.read_archive(archives[0])
+        member = next((entry for entry in entries
+                       if entry.name.lower().endswith(".gmt") and entry.data), None)
+        self.assertIsNotNone(member)
+        with tempfile.NamedTemporaryFile(suffix=".gmt", delete=False) as handle:
+            handle.write(member.data)
+            gtr1_path = handle.name
+        self.assertEqual(media_tool.identify(gtr1_path).format, "gmt-gtr1")
 
     def test_png_and_veh_identification(self):
         """PNG and .veh descriptors are identified corpus-wide."""
