@@ -1966,6 +1966,62 @@ class CorpusDeep2Test(unittest.TestCase):
                            for half in (lo, hi) if half == values[name])
             self.assertLess(observed, 10)  # chance level for 2 x 12k halfwords
 
+    def test_f0_material_name_carries_limited_information(self):
+        """Material names share ~1 bit with f0, far short of determining it."""
+        import glob
+        import math
+        import random
+        import statistics
+        import collections
+        import gmt_format as gf
+        import mas_tool
+
+        def mutual_information(first, second):
+            counts_a = collections.Counter(first)
+            counts_b = collections.Counter(second)
+            joint = collections.Counter(zip(first, second))
+            total = len(first)
+            return sum(value / total * math.log2(
+                (value / total) / ((counts_a[a] / total) * (counts_b[b] / total)))
+                for (a, b), value in joint.items())
+
+        rows = []
+        for archive in glob.glob(
+                str(ROOT.parent / "GTR2Steam" / "**" / "*.gtr"),
+                recursive=True)[:15]:
+            try:
+                _mtype, entries = mas_tool.read_archive(archive)
+            except Exception:
+                continue
+            for entry in entries:
+                if not entry.name.lower().endswith(".gmt") or not entry.data:
+                    continue
+                try:
+                    parsed = gf.parse_gmt(entry.name, entry.data)
+                except Exception:
+                    continue
+                for mesh in parsed.meshes:
+                    marker = gf.mesh_marker(mesh)
+                    index = mesh.record.material_index
+                    if marker and index < len(parsed.materials):
+                        rows.append((parsed.materials[index].name.upper(),
+                                     marker & 0xFFFF))
+            if len(rows) >= 4000:
+                break
+        self.assertGreater(len(rows), 2000)
+        materials = [row[0] for row in rows]
+        halves = [row[1] for row in rows]
+        observed = mutual_information(materials, halves)
+        random.seed(2026)
+        controls = []
+        for _ in range(3):
+            shuffled = halves[:]
+            random.shuffle(shuffled)
+            controls.append(mutual_information(materials, shuffled))
+        excess = observed - statistics.mean(controls)
+        self.assertGreater(excess, 0.5)
+        self.assertLess(excess, 3.0)
+
     def test_f0_mesh0_not_member_filename_hash(self):
         """GTR2 mesh-0 markers are not hashes of the GMT member filename."""
         import glob

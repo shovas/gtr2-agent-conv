@@ -611,6 +611,10 @@ a superficial string mapping would be wrong. Full-tier test:
   99.97% of meshes; all "material index" findings are really mesh position.
 - f0 is strongly associated with material identity (raw-material-equal groups
   show P(f0 equal) 0.347 vs 0.036) but no tested name/record hash reproduces it.
+  Information-theoretically, MI(material name, f0 low half) is 5.475 bits vs
+  4.249 for shuffled controls — a real ~1.2-bit excess, far short of the
+  marker's entropy. Full-tier test:
+  `test_f0_material_name_carries_limited_information`.
   **Working hypothesis only (not established):** an external authoring
   identifier. Decoding it is not required for conversion as long as the word is
   preserved byte-for-byte.

@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-27 15:20:00 -0500 - Quantify f0 material association
+- Measured MI(material name, f0 low half) = 5.475 bits vs 4.249 permuted: a real ~1.2-bit excess, far from determining the marker. Permutation-controlled full-tier test added.
+
 ## 2026-11-27 14:50:00 -0500 - Converted AIW semantic regression
 - Verified all 39 converted rF1 AIWs introduce no waypoint semantic problems; the only issue (Lienz_24H wp_perp norm) is source-side. Full-tier test added.
 
