@@ -4349,21 +4349,23 @@ class CorpusDeep2Test(unittest.TestCase):
             if parsed is None:
                 continue
             summary = parsed["summary"]
-            self.assertEqual(len(parsed["frames"]), summary["count_a"])
+            self.assertEqual(parsed["end_offset"], len(payload))
+            self.assertEqual(parsed["declared_frames"], summary["count_a"])
+            self.assertGreaterEqual(len(parsed["frames"]), summary["count_a"])
             self.assertTrue(all(0 <= record["header"] <= 0xFFFFFFFF
                                 for frame in parsed["frames"]
                                 for record in frame["records"]))
-            if parsed["end_offset"] != len(payload):
-                continue
             exact += 1
             total = sum(len(frame["records"]) for frame in parsed["frames"])
-            self.assertEqual(total, summary["count_b"])
-            first = struct.unpack("<f", struct.pack("<I",
-                                  parsed["frames"][0]["time_word"]))[0]
-            last = struct.unpack("<f", struct.pack("<I",
-                                 parsed["frames"][-1]["time_word"]))[0]
-            self.assertLess(abs((last - first) - summary["duration"]), 0.05)
-        self.assertGreaterEqual(exact, 7)
+            if parsed["declared_frames"] == len(parsed["frames"]):
+                self.assertEqual(total, summary["count_b"])
+            if parsed["declared_frames"] == len(parsed["frames"]):
+                first = struct.unpack("<f", struct.pack("<I",
+                                      parsed["frames"][0]["time_word"]))[0]
+                last = struct.unpack("<f", struct.pack("<I",
+                                     parsed["frames"][-1]["time_word"]))[0]
+                self.assertLess(abs((last - first) - summary["duration"]), 0.05)
+        self.assertEqual(exact, 9)
 
     def test_replay_post_object_summary(self):
         """A 13-byte summary follows the participant records in most replays."""

@@ -219,6 +219,11 @@ def shift_frame_times(data: bytes, delta: float) -> bytes:
 UNBOUNDED_TIME = 0xF49DC5AE  # f32 -1e32: the game's "no bound" sentinel
 
 
+def _latin1_text(raw: bytes) -> bool:
+    """Accept printable ASCII plus Latin-1 high bytes (e.g. accented names)."""
+    return all(32 <= byte < 127 or byte >= 0xA0 for byte in raw)
+
+
 def parse_object_records(data: bytes, search_limit: int = 4096) -> list[dict]:
     """Parse the variable-length object records in a replay payload.
 
@@ -236,14 +241,14 @@ def parse_object_records(data: bytes, search_limit: int = 4096) -> list[dict]:
         if not 1 <= first_length <= 32 or position + 2 + first_length + 1 > len(data):
             return None
         first = data[position + 2:position + 2 + first_length]
-        if not all(32 <= byte < 127 for byte in first):
+        if not _latin1_text(first):
             return None
         second_length = data[position + 2 + first_length]
         end_of_strings = position + 3 + first_length + second_length
         if not 0 <= second_length <= 32 or end_of_strings + 136 > len(data):
             return None
         second = data[position + 3 + first_length:end_of_strings]
-        if second_length and not all(32 <= byte < 127 for byte in second):
+        if second_length and not _latin1_text(second):
             return None
         def fixed_string(start: int) -> str:
             return data[start:start + 64].split(b"\0", 1)[0].decode("latin-1", "replace")
@@ -330,24 +335,39 @@ def parse_vcr_frames(data: bytes) -> list[dict] | None:
         return None
     offset = summary["offset"] + 13
     frames = []
-    for _ in range(summary["count_a"]):
-        if offset + 6 > len(data):
-            return None
+    declared = 0
+    # Anderstorp.Vcr declares fewer frames than are present: a second,
+    # continuous segment follows the declared one. Keep parsing while the
+    # layout remains valid; the 7 well-formed files stop at payload end.
+    while offset + 6 <= len(data):
         time_word, subcount = struct.unpack_from("<IH", data, offset)
-        offset += 6
+        if subcount > 500:
+            break
+        cursor = offset + 6
         records = []
+        valid = True
         for _ in range(subcount):
-            if offset + 4 > len(data):
-                return None
-            header = struct.unpack_from("<I", data, offset)[0]
-            offset += 4
+            if cursor + 4 > len(data):
+                valid = False
+                break
+            header = struct.unpack_from("<I", data, cursor)[0]
+            cursor += 4
             size = vcr_subrecord_size(header)
-            if offset + size > len(data):
-                return None
-            records.append({"header": header, "data": data[offset:offset + size]})
-            offset += size
+            if cursor + size > len(data):
+                valid = False
+                break
+            records.append({"header": header, "data": data[cursor:cursor + size]})
+            cursor += size
+        if not valid:
+            break
+        if declared < summary["count_a"]:
+            declared += 1
         frames.append({"time_word": time_word, "records": records})
-    return {"frames": frames, "end_offset": offset, "summary": summary}
+        offset = cursor
+    if declared != summary["count_a"]:
+        return None
+    return {"frames": frames, "declared_frames": declared,
+            "end_offset": offset, "summary": summary}
 
 
 def parse_payload(data: bytes) -> EventFile:
