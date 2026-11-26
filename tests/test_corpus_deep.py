@@ -585,6 +585,51 @@ class CorpusDeepTest(unittest.TestCase):
                 self.assertGreater(len(gmt_format.parse_gmt(f).meshes), 0, f.name)
                 self.assertEqual(validate_materials.check_gmt(data, f.name), [], f.name)
 
+    def test_batch_convert_gsc_uv_verification(self):
+        """GSC batch conversion rejects a UV mismatch byte-for-byte."""
+        import batch_convert
+        import gmt_format
+        import gmt_layout
+        import gmt_semantic
+        import mas_tool
+
+        found = False
+        for archive in sorted((ROOT.parent / "CopaPetrobrasdeMarcas").rglob("*.mas")):
+            try:
+                _mtype, entries = mas_tool.read_archive(archive)
+            except Exception:
+                continue
+            for entry in entries:
+                data = entry.data or b""
+                try:
+                    decoded = gmt_semantic.decode_gsc_member(data)
+                except Exception:
+                    continue
+                if not decoded or not any(s.get("uvs") for s in decoded["submeshes"]):
+                    continue
+                try:
+                    output = gmt_layout.gsc_member_to_gtr2(data)
+                    parsed = gmt_format.parse_gmt("out.gmt", output)
+                except Exception:
+                    continue
+                if not any(gmt_format.read_mesh_uvs(m) for m in parsed.meshes):
+                    continue
+                self.assertEqual(batch_convert.verify_gsc_uvs(decoded, parsed), [])
+                mesh = next(m for m in parsed.meshes if gmt_format.read_mesh_uvs(m))
+                uv_offset = output.find(mesh.stream2_data)
+                self.assertGreater(uv_offset, 0)
+                corrupted = bytearray(output)
+                corrupted[uv_offset + 4] ^= 0x01
+                reparsed = gmt_format.parse_gmt("bad.gmt", bytes(corrupted))
+                self.assertIn("uv_mismatch",
+                              batch_convert.verify_gsc_uvs(decoded, reparsed))
+                found = True
+                break
+            if found:
+                break
+        if not found:
+            self.skipTest("decodable GSC member with UVs not present")
+
     def test_gtr1_descriptorless_fallback(self):
         """Descriptor-less GTR1 shadow meshes convert via object-mesh streams."""
         import glob

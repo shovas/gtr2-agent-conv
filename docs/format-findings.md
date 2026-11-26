@@ -406,7 +406,9 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
 - Converted GSC→GTR2 GMTs were validated against the independent
   `gtr2-agent-tools` GMT reader (runtime reference only, no code copied):
   20/20 real and converted samples agree on mesh/vertex counts and exact
-  triangle lists (17,588 converted faces); GTR1 conversions validated likewise. A full-tier test uses that parser when the
+  triangle lists (17,588 converted faces); GTR1 conversions validated likewise.
+  `batch_convert.py` additionally compares GSC source and output UVs byte-for-byte
+  (60/60 sampled members) before writing a converted GMT. A full-tier test uses that parser when the
   reference tree is present.
 - `validate_conversion.independent_read()` uses only the published field-offset
   schema; with its early `break` removed it finds exactly the same submeshes as

@@ -48,6 +48,21 @@ def archive_members(root: Path, extension: str, kind: str):
                 yield arc, entry
 
 
+def verify_gsc_uvs(decoded: dict, parsed) -> list[str]:
+    """Byte-exact UV check between a decoded GSC member and its GTR2 output."""
+    def packed(pairs):
+        return b"".join(struct.pack("<2f", u, v) for u, v in pairs)
+
+    source = [uv for sub in decoded.get("submeshes", []) for uv in sub.get("uvs", [])]
+    output = [uv for mesh in parsed.meshes
+              for uv in (gmt_format.read_mesh_uvs(mesh) or [])]
+    if not source:
+        return []
+    if len(source) != len(output):
+        return ["uv_count_mismatch"]
+    return [] if packed(source) == packed(output) else ["uv_mismatch"]
+
+
 def convert_member(kind: str, data: bytes, template: bytes, name: str,
                    reasons: dict[str, int] | None = None) -> bytes | None:
     """Convert and verify one member; return GMT bytes or None when skipped."""
@@ -70,6 +85,7 @@ def convert_member(kind: str, data: bytes, template: bytes, name: str,
         expected = sum(len(s["positions"]) for s in decoded["submeshes"])
         if sum(len(m.base_vertices) for m in parsed.meshes) != expected:
             problems.append("vertex_count_mismatch")
+        problems.extend(verify_gsc_uvs(decoded, parsed))
     elif kind == "vrl":
         vrl = stt.read_vrl(data)
         if not vrl or vrl["vertex_count"] == 0:

@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-12-01 08:20:00 -0500 - Batch GSC UV verification
+- `batch_convert.py` now verifies byte-exact UV preservation for GSC→GTR2 conversions before writing output (60/60 sampled members); a metamorphic test proves a corrupted UV is rejected.
+
 ## 2026-12-01 07:45:00 -0500 - f0 material-string hash negative
 - Ruled out f0's two bytes as material/stage string hashes or indices under distribution-preserving controls; full-tier regression test added.
 
