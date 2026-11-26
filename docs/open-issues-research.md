@@ -22,6 +22,15 @@ or value carries the rF1 track properties. The fields are semantically
 different, so no class-mapping rule exists — this is a corpus negative, not a
 missing implementation. Full-tier test added.
 
+## Replay car labels vs HDC configs (2026-11-27) — negative
+
+Tried to calibrate the replay steering channel using each car's
+`SteerLockRange`/`SteerLockSetting` from `.hdc`. Replay metadata gives a car
+label such as `03002_GT_SALEEN_S7R.CAR`, but the 5-digit prefix does not occur
+in any shipped GTR2 `.hdc` file (zero matches across all replays/HDCs). The
+labels are menu IDs, not HDC identifiers, so no per-car scale rule can be
+derived from the local corpora. Full-tier guard added.
+
 ## HAT height scale has no universal law (2026-11-27)
 
 Fitted B against matched AIW elevation per track: the regression slope spans

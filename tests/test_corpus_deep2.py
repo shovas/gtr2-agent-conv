@@ -6156,6 +6156,36 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertGreaterEqual(checked, 1)
 
+    def test_replay_car_labels_do_not_resolve_to_hdc(self):
+        """Replay car prefixes are menu IDs, not .hdc filenames or contents."""
+        import glob
+        import gzip_simbin_tool as gz
+        import media_tool as mt
+        import simbin_events_tool as st
+
+        hdc_texts = []
+        for path in glob.glob(
+                str(ROOT.parent / "GTR2Steam" / "**" / "*.hdc"),
+                recursive=True):
+            try:
+                hdc_texts.append(mt.decrypt_jca_text(
+                    Path(path).read_bytes()).decode("latin-1"))
+            except Exception:
+                continue
+        self.assertGreater(len(hdc_texts), 10)
+
+        checked = 0
+        for path in sorted((ROOT.parent / "GTR2Steam" / "ReplayData").glob("*.Vcr")):
+            event = st.parse_payload(gz.decompress(str(path)))
+            car = (getattr(event, "car", None) or "").lower()
+            if not car:
+                continue
+            prefix = car.split("_")[0]
+            self.assertEqual(len(prefix), 5)
+            self.assertFalse(any(prefix in text for text in hdc_texts), car)
+            checked += 1
+        self.assertGreaterEqual(checked, 5)
+
     def test_hat_polygon_count_tracks_grid_area(self):
         """The declared polygon count scales with the HAT grid's coverage."""
         import random
