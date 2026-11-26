@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-27 11:50:00 -0500 - RaceGMT opening record float check
+- Extended the RaceGMT payload regression: the first eight 36-byte records' five f32 fields are finite and bounded, while later records contain NaNs under the same stride, confirming the alignment is local.
+
 ## 2026-11-27 11:20:00 -0500 - RaceGMT payload indexed-record start
 - Found a bounded RaceGMT payload structure: 36-byte records whose first eight u16 index triples are sequential (0,1,2)...(21,22,23) in four sampled models; later resets are model-dependent, so no full decoder claimed. Full-tier test added.
 

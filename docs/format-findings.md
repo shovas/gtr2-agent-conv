@@ -27,6 +27,8 @@ regression tests or an explicitly documented negative.
   least the first eight records (verified in `PEOPLE_STAND_01/02`, `STAND_25`,
   `SEATS29_LODA`). The index sequence later resets with a model-dependent
   period, so only the opening run is asserted. Full-tier test:
+  Their five f32 fields are finite and bounded (<1000) in that opening run
+  but contain NaNs later, so the alignment is not global. Full-tier test:
   `test_racegmt_payload_has_indexed_36_byte_records`.
 - `gmt_layout.is_old()/is_new()` detect layouts; `old_to_new_semantic()` rebuilds
   a new-layout mesh from decoded old-layout geometry. The semantic reader now
