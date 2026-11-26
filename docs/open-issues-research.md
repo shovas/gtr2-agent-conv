@@ -1,5 +1,21 @@
 # Open issues — offline research record (2026-11-23)
 
+## `.hat` ID vs track assets (2026-12-01) — negative
+
+Tried to derive the header's 12-byte track ID from the corresponding track's
+assets:
+- raw u32 bytes of `body[4:8]` appeared in 9/15 track folders, but mostly in
+  `.tga`/`.bik`/`.jpg` media. A distribution-preserving control matching the
+  zero-byte mask produced hits in 24.9/15 — the real values occur *less* often
+  than chance, so this is coincidence, not an embedded ID;
+- 1,669 candidate strings (track name, `.hat` name, every asset filename and
+  stem, with/without extension, upper/lower) hashed with CRC32, adler32 and
+  MD5 low/high vs both ID slots: **zero** matches;
+- CRC32/adler32/MD5 of the contents of 408 asset files in those folders:
+  **zero** matches.
+
+The identifier remains opaque. Full-tier test guards the negative.
+
 ## `.hat` body is deterministic per layout (2026-12-01)
 
 Following the header finding, all 34 bodies were compared after byte 4:

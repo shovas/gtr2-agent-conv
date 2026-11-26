@@ -4585,6 +4585,65 @@ class CorpusDeep2Test(unittest.TestCase):
                                      for r, label in zip(rows, labels)])[0])
         self.assertGreater(observed, max(permuted))
 
+    def test_hat_track_id_not_a_track_asset_hash(self):
+        """The .hat header ID is not a hash of track filenames or file contents."""
+        import hashlib
+        import struct
+        import zlib
+        import gzip_simbin_tool as gz
+        tracks = {"ANDERSTORP": "Anderstorp", "Barcelona": "Barcelona",
+                  "Brno": "Brno", "Donington": "Donington", "Enna": "Enna",
+                  "Estoril": "Estoril", "Magny": "Magny-Cours", "Monza": "Monza",
+                  "Oschersleben": "Oschersleben", "Spa": "Spa", "Dubai": "Dubai",
+                  "Valencia": "Valencia", "Imol": "Imola", "Zhuhai": "Zhuhai",
+                  "Hockenheim": "Hockenheim"}
+        representatives = {}
+        for path in sorted((ROOT.parent / "GTR2Steam").rglob("*.hat")):
+            payload = gz.decompress(str(path))
+            marker = payload.find(b"generated\x00")
+            if marker < 0:
+                continue
+            header = payload[marker + 10:marker + 22]
+            for key, directory in tracks.items():
+                if key.lower() in path.stem.lower() and key not in representatives:
+                    representatives[key] = (path.stem, header)
+        self.assertGreaterEqual(len(representatives), 14)
+
+        def digest_values(data):
+            return (zlib.crc32(data), zlib.adler32(data),
+                    struct.unpack("<I", hashlib.md5(data).digest()[:4])[0],
+                    struct.unpack("<I", hashlib.md5(data).digest()[-4:])[0])
+
+        total = 0
+        for key, directory in tracks.items():
+            if key not in representatives:
+                continue
+            header = representatives[key][1]
+            targets = {struct.unpack_from("<I", header, offset)[0]
+                       for offset in (0, 8)}
+            root = ROOT.parent / "GTR2Steam" / "GameData" / "Locations" / directory
+            strings = set()
+            for asset in root.rglob("*"):
+                if not asset.is_file():
+                    continue
+                strings.update((asset.name, asset.stem, asset.stem.lower(),
+                                asset.stem.lstrip("0123456789")))
+                if asset.stat().st_size <= 20_000_000:
+                    content = asset.read_bytes()
+                    for value in digest_values(content):
+                        self.assertNotIn(value, targets)
+                    total += 1
+            for stem in {representatives[key][0], directory, key,
+                         representatives[key][0].lstrip("0123456789")}:
+                for extension in ("", ".trk", ".aiw", ".mas", ".gtr", ".gdb"):
+                    for candidate in (stem + extension, (stem + extension).upper(),
+                                      (stem + extension).lower()):
+                        strings.add(candidate)
+            for candidate in strings:
+                for value in digest_values(candidate.encode()):
+                    self.assertNotIn(value, targets)
+        self.assertGreater(total, 300)
+
     def test_hat_body_is_deterministic_per_layout(self):
         """Same-layout .hat bodies are byte-identical after the 4-byte prefix."""
         import random

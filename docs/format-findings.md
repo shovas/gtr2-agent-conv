@@ -319,6 +319,14 @@ match rate is the same 24/28 (permutation mean 1.24, max 6).
 Semantics of the blob remain undecoded; gMb keys and inner zlib streams are
 still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stable`,
 `test_hat_body_is_deterministic_per_layout`.
+- **Negative — not a track-asset hash:** neither `body[4:8]` nor `body[12:16]`
+  matches CRC32/adler32/MD5(lo/hi) of any of 1,669 candidate strings derived
+  from the track name, `.hat` filename or actual asset filenames, nor of the
+  contents of 408 files in that track's `Locations` folder. Raw u32 bytes in
+  media files looked significant (9/15 tracks) but a distribution-preserving
+  control (matching the zero-byte mask) gave 24.9/15 — the hits are coincidences
+  in `.tga`/`.bik`/`.jpg` data. Full-tier test:
+  `test_hat_track_id_not_a_track_asset_hash`.
 
 ## 5. Vertex `f0` (per-mesh marker on vertex 0)
 

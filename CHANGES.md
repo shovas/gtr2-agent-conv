@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-12-01 05:25:00 -0500 - Hat ID hash negative
+- Ruled out the .hat track ID as a hash of track/asset filenames or file contents; raw-byte matches in media were coincidences under a distribution-preserving control. Full-tier test added.
+
 ## 2026-12-01 04:55:00 -0500 - Hat body deterministic per layout
 - Extended the .hat finding: bodies are byte-identical after byte 4 within physical layouts (11 files in 5 classes, up to 3.78 MB identical), and body[16:36] is a 20-byte layout signature (17 values). Corrected the earlier "high-entropy random" reading. Full-tier test added.
 
