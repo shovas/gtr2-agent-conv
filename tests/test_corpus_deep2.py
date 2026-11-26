@@ -4931,6 +4931,51 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertLess(sum(value >= actual for value in permuted) / len(permuted),
                         0.01)
 
+    def test_driver_steering_channel_has_no_universal_scale(self):
+        """A fixed bicycle-model scale does not calibrate the pair difference."""
+        import math
+        import statistics
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+
+        medians = []
+        mixed_sign = 0
+        for root in (ROOT.parent / "GTR2Steam" / "ReplayData",
+                     ROOT.parent / "GTLSteam" / "ReplayData"):
+            for path in sorted(root.glob("*.Vcr")):
+                parsed = st.parse_vcr_frames(gz.decompress(str(path)))
+                if not parsed:
+                    continue
+                states = []
+                for frame in parsed["frames"]:
+                    for record in frame["records"]:
+                        if st.vcr_record_tag(record["header"]) == 0:
+                            state = st.vcr_driver_state(record["data"])
+                            if state:
+                                states.append(state)
+                            break
+                if len(states) < 300:
+                    continue
+                ratios = []
+                for before, after in zip(states, states[1:]):
+                    speed = math.dist(before["position"], after["position"])
+                    rate = ((after["angle_like"] - before["angle_like"] + math.pi)
+                            % (2 * math.pi) - math.pi)
+                    if speed < 1.0:
+                        continue
+                    delta = math.atan(2.5 * rate / speed)
+                    if abs(delta) < 0.02:
+                        continue
+                    ratios.append((after["shorts"][0] - after["shorts"][1]) / delta)
+                if len(ratios) < 30:
+                    continue
+                medians.append(abs(statistics.median(ratios)))
+                negative_fraction = sum(value < 0 for value in ratios) / len(ratios)
+                mixed_sign += 0.4 <= negative_fraction <= 0.6
+        self.assertGreaterEqual(len(medians), 4)
+        self.assertGreater(max(medians) / min(medians), 3)
+        self.assertGreaterEqual(mixed_sign, 2)
+
     def test_driver_short_pair_difference_tracks_heading_rate(self):
         """shorts[0]-shorts[1] is a consistent steering-like signal."""
         import math

@@ -245,8 +245,10 @@ regression tests or an explicitly documented negative.
   corpus permutation p = 0.004), far more consistent than any individual slot
   or speed relationship. Lateral acceleration (speed x heading rate) is only
   a weaker companion (7/8 negative, mean -0.108, p=0.028), so heading rate is
-  the primary association. This is a steering-like channel, but no unit mapping
-  is claimed. Full-tier test:
+  the primary association. A fixed bicycle-model calibration (wheelbase 2.5 m)
+  gives median raw/radian ratios spanning 10^3..10^5 with inconsistent signs,
+  so no universal scale conversion is claimed. This is a steering-like channel,
+  but no unit mapping is claimed. Full-tier test:
   `test_driver_short_pair_difference_tracks_heading_rate`.
   Raw deltas appeared to correlate with derived speed in 4 of 28 replay/slot pairs
   (|r| > 0.15), but the signs were inconsistent and linear detrending collapsed

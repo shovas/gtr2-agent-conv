@@ -167,6 +167,14 @@ the heading-rate association (8/8, mean -0.171, p=0.004), so heading rate is
 the primary driver and lateral acceleration a derived/secondary effect. The
 full-tier signal test now asserts both orderings.
 
+## Driver steering channel calibration (2026-11-26) — negative
+
+Tried scaling the pair difference into a steering angle using a bicycle-model
+estimate atan(L*yaw_rate/speed) with fixed L=2.5 m across the long replays.
+Median raw/radian ratios span roughly 10^3 to 10^5 and several replays show
+no dominant sign, so no universal scale or units can be derived. Full-tier
+test added.
+
 ## Driver u16 wrap-modulus search (2026-11-26) — negative
 
 Tested whether the four u16s are wheel counters wrapping at a modulus other
