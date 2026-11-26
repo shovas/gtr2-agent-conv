@@ -1077,6 +1077,35 @@ class MediaToolTest(unittest.TestCase):
         self.assertEqual(len(signatures), 1)
         self.assertEqual(len(counts), 4)
 
+    def test_hat_record_count_uses_declared_header_count(self):
+        """The header's declared count includes valid zero-valued records."""
+        import struct
+        dedicated = (ROOT.parent / "GTR2Steam" / "GameData" / "Locations"
+                     / "HAT_Dedicated")
+        if not dedicated.is_dir():
+            self.skipTest("GTR2 HAT_Dedicated not present")
+        # The old bounded scan stopped at these records (B = 0.0, U = 0),
+        # undercounting the table by thousands.
+        expected = {"3Enna.hat": 15417, "3Oschersleben.hat": 31770,
+                    "4Zhuhai.hat": 41910, "NBarcelona.hat": 21291,
+                    "4BOschersleben.hat": 31812, "4Oschersleben.hat": 31738}
+        for name, count in expected.items():
+            result = media_tool.hat_decompress(dedicated / name)
+            self.assertIsNotNone(result, name)
+            payload = result[0]
+            declared = media_tool.hat_declared_counts(payload)
+            self.assertIsNotNone(declared, name)
+            self.assertEqual(declared[2], count, name)
+            self.assertEqual(media_tool.hat_record_count(payload), count, name)
+            body = payload[payload.find(b"generated\x00") + 10:]
+            self.assertLessEqual(48 + 16 * count + 8, len(body))
+            # Boundary records parse as finite track-space points.
+            for index in (0, count - 1):
+                first, _unknown, second, third = struct.unpack_from(
+                    "<fIff", body, 48 + 16 * index)
+                self.assertTrue(-1e6 < first < 1e6 and -1e6 < third < 1e6)
+                self.assertTrue(second == second and abs(second) < 100)
+
     def test_hat_signature_across_three_games(self):
         """The same 32-byte .hat signature is used by GTR2, GTL and Race07."""
         import glob

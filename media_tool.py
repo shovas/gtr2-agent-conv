@@ -634,17 +634,48 @@ def hat_layout_signature(payload: bytes) -> bytes | None:
     return payload[marker + 14:marker + 46]
 
 
-def hat_record_count(payload: bytes) -> int:
-    """Count the 16-byte `[f32, u32, f32, f32]` records at body offset 48.
+def hat_declared_counts(payload: bytes) -> tuple[int, int, int] | None:
+    """Return the three u32 counts declared in a `.hat` body header.
 
-    Verified on all 34 GTR2 `.hat` files: the count is layout-specific (7 to
-    61,412) and identical for byte-identical bodies, so it disambiguates
-    layouts that share the same 32-byte signature.
+    The producer (`htree.cpp` in `GTR2.exe`) writes three counts at body
+    offsets 36, 40 and 44. The third is the authoritative number of 16-byte
+    records in the table at offset 48; it is layout-specific and identical for
+    byte-identical bodies. The first two are larger auxiliary counts (the
+    second saturates at 65535 in some layouts, suggesting a u16 counter).
+    Returns ``None`` when the ``generated\\x00`` header marker is absent.
+    """
+    marker = payload.find(b"generated\x00")
+    if marker < 0 or marker + 10 + 48 > len(payload):
+        return None
+    body = payload[marker + 10:]
+    return struct.unpack_from("<3I", body, 36)
+
+
+def hat_record_count(payload: bytes) -> int:
+    """Return the number of 16-byte `[f32, u32, f32, f32]` records.
+
+    Uses the header's authoritative count at body offset 44. Previously this
+    scanned records until an implausible one, which undercounted 6/34 GTR2
+    files because valid records can carry ``B = 0.0`` and ``U = 0`` (e.g.
+    Enna's record 7558). Falls back to the bounded scan only when the declared
+    count does not fit the body or its boundary records are implausible.
     """
     marker = payload.find(b"generated\x00")
     if marker < 0:
         return 0
     body = payload[marker + 10:]
+    declared = hat_declared_counts(payload)
+    if declared is not None:
+        count = declared[2]
+        if 0 < count and 48 + 16 * count + 8 <= len(body):
+            def plausible(offset: int) -> bool:
+                first, _unknown, second, third = struct.unpack_from("<fIff", body, offset)
+                return (-1e6 < first < 1e6 and first == first
+                        and second == second and abs(second) < 100
+                        and -1e6 < third < 1e6 and third == third)
+
+            if plausible(48) and plausible(48 + 16 * (count - 1)):
+                return count
     count = 0
     for offset in range(48, len(body) - 16, 16):
         first, _unknown, second, third = struct.unpack_from("<fIff", body, offset)
@@ -681,7 +712,8 @@ def identify_hat_layout(path: str | Path, corpus: str | Path) -> dict:
     return {"path": str(path), "variant": info["variant"],
             "body_size": len(payload) - payload.find(b"generated\x00") - 10,
             "signature": signature.hex(),
-            "record_count": hat_record_count(payload), "matches": matches}
+            "record_count": hat_record_count(payload),
+            "declared_counts": hat_declared_counts(payload), "matches": matches}
 
 
 def hdr_dat_mp3(hdr_path: str | Path) -> tuple[bytes, dict] | None:

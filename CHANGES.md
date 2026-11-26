@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 14:20:00 -0500 - Fix hat record count from producer header
+- Corrected `media_tool.hat_record_count()`: it now reads the authoritative count declared in the HAT header (body offset 44) instead of a bounded scan that undercounted six GTR2 layouts by stopping at valid zero-valued records. The `hat-layout` CLI also reports all three declared header counts; verified on 178/178 files across nine corpora. Full-tier regression test added.
+
 ## 2026-11-26 13:50:00 -0500 - Steering scale negative
 - Tested a fixed bicycle-model scale for the replay steering-like channel: median ratios vary by >3x across replays with inconsistent signs, so no universal calibration is claimed. Full-tier test added.
 
