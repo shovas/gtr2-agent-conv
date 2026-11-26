@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-30 23:15:00 -0500 - Independent parser validation
+- Validated 20/20 real and converted GMTs against the independent gtr2-agent-tools GMT reader (mesh/vertex counts agree); full-tier test added, skipping when the reference tree is absent.
+
 ## 2026-11-30 23:45:00 -0500 - f0 filename negative
 - Ruled out CRC32/byte-sum of GMT member filename as f0 source (chance-level across 21,481 markers). Added to consolidated f0 negative list.
 

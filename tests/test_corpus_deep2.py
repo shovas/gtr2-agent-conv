@@ -4165,6 +4165,48 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertGreater(statistics.median(observed),
                            5 * statistics.median(baseline))
 
+    def test_converted_gmts_agree_with_independent_parser(self):
+        """Converted meshes parse in gtr2-agent-tools' independent reader."""
+        import importlib.util
+        import gmt_format
+        import gmt_layout
+        import gmt_semantic
+        import mas_tool
+        reference_path = (ROOT.parent / "gtr2-agent-tools" / "scripts"
+                          / "gtr2_driving" / "gmt.py")
+        if not reference_path.is_file():
+            self.skipTest("independent reference parser not present")
+        spec = importlib.util.spec_from_file_location("reference_gmt", reference_path)
+        reference = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(reference)
+        checked = 0
+        for archive in glob.glob(str(ROOT.parent / "CopaPetrobrasdeMarcas" / "**" / "*.mas"),
+                                 recursive=True)[:20]:
+            try:
+                _, entries = mas_tool.read_archive(archive)
+            except Exception:
+                continue
+            for entry in entries:
+                if not entry.name.lower().endswith(".gmt") or len(entry.data) < 0x400:
+                    continue
+                if not gmt_semantic.decode_gsc_member(entry.data):
+                    continue
+                output = gmt_layout.gsc_member_to_gtr2(entry.data)
+                if output is None:
+                    continue
+                ours = gmt_format.parse_gmt("x.gmt", output)
+                theirs = reference.parse(output)
+                self.assertEqual(len(ours.meshes), len(theirs))
+                for mesh, other in zip(ours.meshes, theirs):
+                    self.assertEqual(len(mesh.base_vertices), len(other["vertices"]))
+                    self.assertEqual(len(mesh.record.raw[11:12]), 1)
+                checked += 1
+                if checked >= 10:
+                    break
+            if checked >= 10:
+                break
+        self.assertGreaterEqual(checked, 5)
+
     def test_gmt_semantic_reader_recognizes_all_mesh_magics(self):
         """find_submeshes handles 0x60xx variants as well as 0x40xx."""
         import glob
