@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-27 12:20:00 -0500 - small_a scale negative
+- Found no universal elevation-to-small_a scale (regression slopes vary ~91x across replays); consolidated into the existing elevation-channel test.
+
 ## 2026-11-27 11:50:00 -0500 - RaceGMT opening record float check
 - Extended the RaceGMT payload regression: the first eight 36-byte records' five f32 fields are finite and bounded, while later records contain NaNs under the same stride, confirming the alignment is local.
 

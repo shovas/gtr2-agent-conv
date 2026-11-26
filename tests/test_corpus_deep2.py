@@ -5358,6 +5358,17 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertLess(sum(value >= actual for value in permuted) / len(permuted),
                         0.01)
 
+        # The elevation-to-small_a scale varies widely across replays.
+        slopes = []
+        for values, elevation, _elapsed in data:
+            mean_h = statistics.mean(elevation)
+            mean_v = statistics.mean(values)
+            variance = sum((value - mean_h) ** 2 for value in elevation)
+            if variance:
+                slopes.append(sum((h - mean_h) * (v - mean_v)
+                                  for h, v in zip(elevation, values)) / variance)
+        self.assertGreater(max(slopes) / min(slopes), 10)
+
     def test_driver_steering_channel_has_no_universal_scale(self):
         """A fixed bicycle-model scale does not calibrate the pair difference."""
         import math

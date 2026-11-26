@@ -254,7 +254,8 @@ regression tests or an explicitly documented negative.
   angle-like and correlates with position-derived heading (|r| >0.4 vs a
   shuffled baseline). The fourth float (`small_a`, byte 41) tracks **vertical
   motion**: r=0.13–0.96 (mean 0.641) against position y-delta in 8/8 replays
-  (slightly better than per-second vertical velocity)
+  (slightly better than per-second vertical velocity); the elevation-to-value
+  slope varies ~91x across replays, so the channel has no universal scale
   (seeded permutation p<0.001); the sixth (`small_b`) remains unexplained:
   across the eight long replays its correlations with elevation delta, speed,
   heading rate, lateral acceleration and longitudinal acceleration change
