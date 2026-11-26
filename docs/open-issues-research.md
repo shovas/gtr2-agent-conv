@@ -1,5 +1,21 @@
 # Open issues — offline research record (2026-11-23)
 
+## `.hat` record A/C are track-space points (2026-11-26)
+
+Earlier tests ruled out exact equality with AIW waypoints or CAM cameras, but
+a polyline-distance test shows the `(A, C)` pairs are track-related:
+- median distance to the nearest AIW waypoint segment over ~600 sampled
+  records: Brno 18.2 m, Monza 6.2 m;
+- distribution-preserving control (shuffling the C column among records):
+  84.7 m and 96.5 m — ratios 0.21 and 0.06;
+- the points are therefore interpolated/surface samples near the track, not
+  waypoints themselves.
+
+Together with B's near-constant per layout and the opaque u32, the 16-byte
+record is now understood structurally: `[track x, unknown u32, layout
+scalarB, track z]`. No exact semantic decoder is claimed. Full-tier test
+added.
+
 ## `.hat` field B vs track scale (2026-11-26) — weak / pseudo-replication caveat
 
 A pooled correlation of the table's near-constant B against AIW waypoint count

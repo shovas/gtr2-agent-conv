@@ -4986,6 +4986,69 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertGreaterEqual(checked, 3)
 
+    def test_hat_records_lie_near_track_polyline(self):
+        """Record (A, C) pairs are track-space points, not random coordinates."""
+        import math
+        import random
+        import statistics
+        import struct
+        import gzip_simbin_tool as gz
+        import simbin_text_tool as stt
+
+        def segment_distance(point, segment):
+            px, pz = point
+            ax, az, bx, bz = segment
+            dx, dz = bx - ax, bz - az
+            squared = dx * dx + dz * dz
+            if squared == 0:
+                return math.hypot(px - ax, pz - az)
+            fraction = max(0.0, min(1.0, ((px - ax) * dx + (pz - az) * dz) / squared))
+            return math.hypot(px - (ax + fraction * dx),
+                              pz - (az + fraction * dz))
+
+        random.seed(2026)
+        checked = 0
+        for track, hat_name in (("Brno", "3Brno.hat"), ("Monza", "4Monza.hat")):
+            base = ROOT.parent / "GTR2Steam" / "GameData" / "Locations" / track
+            aiws = sorted(base.glob("*.AIW"))
+            hat = (ROOT.parent / "GTR2Steam" / "GameData" / "Locations"
+                   / "HAT_Dedicated" / hat_name)
+            if not aiws or not hat.is_file():
+                continue
+            waypoints = [wp.pos for wp in stt.parse_aiw(
+                stt.read_text(aiws[0])).waypoints if wp.pos]
+            segments = [(a[0], a[2], b[0], b[2]) for a, b in
+                        zip(waypoints, waypoints[1:] + waypoints[:1])]
+            payload = gz.decompress(str(hat))
+            marker = payload.find(b"generated\x00")
+            body = payload[marker + 10:]
+            points = []
+            for offset in range(48, len(body) - 16, 16):
+                first, _unknown, second, third = struct.unpack_from("<fIff", body, offset)
+                if not (-1e6 < first < 1e6 and first == first
+                        and second == second and 0.01 < abs(second) < 20
+                        and -1e6 < third < 1e6 and third == third):
+                    break
+                points.append((first, third))
+            sample = points[::max(1, len(points) // 600)]
+
+            def median_distance(items):
+                return statistics.median(min(segment_distance(p, s) for s in segments)
+                                         for p in items)
+
+            observed = median_distance(sample)
+            columns = [p[1] for p in sample]
+            permuted = []
+            for _ in range(50):
+                shuffled = columns[:]
+                random.shuffle(shuffled)
+                permuted.append(median_distance([(p[0], value)
+                                                 for p, value in zip(sample, shuffled)]))
+            self.assertLess(observed, statistics.mean(permuted) * 0.5)
+            self.assertLess(observed, min(permuted))
+            checked += 1
+        self.assertGreaterEqual(checked, 2)
+
     def test_hat_record_b_weak_track_scale_association(self):
         """Field B has only a weak track-scale trend; duplicates inflate it.
 

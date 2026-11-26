@@ -356,6 +356,12 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
   40,189 records vs 1,304 waypoints, and zero records fall within 0.5 units of
   any AIW waypoint or CAM point (same for a shuffled control). Full-tier test:
   `test_hat_records_are_not_aiw_or_cam_positions`.
+- The `(A, C)` pair is nevertheless **track-space coordinates**: median
+  distance from a sampled record point to the nearest AIW waypoint *segment*
+  is 18.2 m (Brno) and 6.2 m (Monza), versus 84.7 m / 96.5 m under a
+  distribution-preserving shuffle of the C column (ratio 0.21 / 0.06). They
+  are track-surface/boundary samples, not exact waypoints. Full-tier test:
+  `test_hat_records_lie_near_track_polyline`.
 - After the table's 8-byte zero terminator, the trailing stream is also
   non-random but harder to parse: byte-lag 8 agreement is 7.5–10.7% versus
   1.3–1.7% for a seeded shuffle, uniformly across 64 KB blocks, and the most

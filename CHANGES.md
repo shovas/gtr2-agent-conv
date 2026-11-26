@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 04:50:00 -0500 - Hat records are track-space points
+- Showed .hat record (A,C) pairs lie near the AIW track polyline: median 18.2 m (Brno) and 6.2 m (Monza) vs 84.7/96.5 m under a C-column shuffle. Full-tier permutation-controlled test added.
+
 ## 2026-11-26 04:20:00 -0500 - Validator supports GSC sources
 - `validate_conversion.py` now validates ISI-encrypted GSC→GTR2 conversions against decoded geometry, with explicit N/A flags for raw-container checks. Full-tier test added.
 
