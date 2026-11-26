@@ -68,9 +68,11 @@ def decrypt_jca_text(data: bytes) -> bytes:
     """Decrypt a JCA-wrapped text config (.aud/.car/.gdb/.scn/...) to plain text.
 
     Unlike media payloads, text has no recognisable magic, so each known key
-    is tried and the candidate with >90% printable bytes plus a '=' is chosen.
+    is tried and the >90%-printable candidate with config syntax is chosen:
+    either a '=' (key/value) or both '{' and '}' (a section with no keys).
     Non-JCA input is returned unchanged; undecryptable input is preserved.
-    Corpus-verified on 153 JCA-wrapped .aud files (Race07/Volvo).
+    Corpus-verified on 153 JCA-wrapped .aud files (Race07/Volvo) and on
+    section-only configs such as Volvo's `DefTweak.gdb`.
     """
     if data[:4] != JCA_MAGIC:
         return data
@@ -81,8 +83,9 @@ def decrypt_jca_text(data: bytes) -> bytes:
         except Exception:
             continue
         sample = out[:4096]
-        if b"=" in sample and sum(32 <= c < 127 or c in (9, 10, 13)
-                                  for c in sample) > 0.9 * len(sample):
+        config_syntax = b"=" in sample or (b"{" in sample and b"}" in sample)
+        if config_syntax and sum(32 <= c < 127 or c in (9, 10, 13)
+                                 for c in sample) > 0.9 * len(sample):
             return out
     return data
 

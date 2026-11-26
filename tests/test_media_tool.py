@@ -92,6 +92,33 @@ class MediaToolTest(unittest.TestCase):
                 self.assertEqual(media_tool.detect_jca_key(Path(sample).read_bytes()), expected)
                 self.assertEqual(media_tool.identify(sample).details["jca_key"], expected)
 
+    def test_jca_text_configs_in_all_key_corpora(self):
+        """JCA-wrapped configs decrypt to printable text with autodetected keys."""
+        import glob
+
+        for root in ("Race07Complete", "VolvoTheGame", "RaceRoomTheGame",
+                     "RaceRoomTheGame2"):
+            checked = 0
+            for name in glob.glob(
+                    str(ROOT.parent / root / "**" / "*"), recursive=True):
+                path = Path(name)
+                if not path.is_file() or path.suffix.lower() not in (
+                        ".gdb", ".car", ".aud", ".cam"):
+                    continue
+                data = path.read_bytes()
+                if data[:4] != b"\x0f\xb1\xff\xff":
+                    continue
+                # detect_jca_key is media-only; text uses decrypt_jca_text's
+                # own printable-output key search.
+                out = media_tool.decrypt_jca_text(data)
+                sample = out[:200]
+                self.assertGreater(sum(32 <= byte < 127 or byte in (9, 10, 13)
+                                       for byte in sample) / len(sample), 0.9, name)
+                checked += 1
+                if checked >= 3:
+                    break
+            self.assertGreaterEqual(checked, 3, root)
+
     def test_jca_encrypted_textures(self):
         import glob
         for ext, magic in ((".dds", b"DDS "), (".tga", None)):

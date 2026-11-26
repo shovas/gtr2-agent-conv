@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 02:20:00 -0500 - Fix JCA text decryption of section-only configs
+- Fixed `decrypt_jca_text()`: configs with sections but no key/value `=` (e.g. Volvo's `DefTweak.gdb`) now decrypt correctly; added a four-corpus regression test.
+
 ## 2026-11-28 01:50:00 -0500 - rF1 archived GMT end-to-end validation
 - Verified 253/253 converted GMTs from five rF1 track archives pass the full validator with the semantic bridge; bounded full-tier regression test added.
 
