@@ -5330,6 +5330,24 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertLess(statistics.mean(abs(value) for value in lateral_correlations),
                         statistics.mean(abs(value) for value in observed))
 
+        # No sharp temporal lag: across -2..+2 frames the best mean correlation
+        # is only marginally stronger than at lag 0.
+        lag_means = {}
+        for lag in range(-2, 3):
+            values = []
+            for difference, rate, _lateral in data:
+                if lag >= 0:
+                    first = difference[:len(rate) - lag] if lag else difference[:len(rate)]
+                    second = rate[lag:]
+                else:
+                    first = difference[-lag:len(rate)]
+                    second = rate[:len(rate) + lag]
+                values.append(correlate(first, second))
+            lag_means[lag] = statistics.mean(values)
+        self.assertLess(min(lag_means.values()), 0)
+        self.assertGreater(min(lag_means.values()),
+                           statistics.mean(observed) * 1.3)
+
     def test_driver_u16_wrap_moduli_not_wheel_speed(self):
         """No tested wrap modulus makes u16 deltas a wheel-speed channel."""
         import math

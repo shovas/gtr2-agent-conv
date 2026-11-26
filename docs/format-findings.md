@@ -269,8 +269,10 @@ regression tests or an explicitly documented negative.
   so no universal scale conversion is claimed. Per-car calibration is also
   unavailable: replay `car` labels are 5-digit menu IDs absent from all shipped
   `.hdc` configs (0 matches). Full-tier guard:
-  `test_replay_car_labels_do_not_resolve_to_hdc`. This is a steering-like
-  channel, but no unit mapping is claimed. Full-tier test:
+  `test_replay_car_labels_do_not_resolve_to_hdc`. Cross-correlation over lags
+  -5..+5 frames has no sharp peak (best lag -1, mean r -0.180 versus -0.171 at
+  lag 0), so no timing offset is implied. This is a steering-like channel, but
+  no unit mapping is claimed. Full-tier test:
   `test_driver_short_pair_difference_tracks_heading_rate`.
   Raw deltas appeared to correlate with derived speed in 4 of 28 replay/slot pairs
   (|r| > 0.15), but the signs were inconsistent and linear detrending collapsed

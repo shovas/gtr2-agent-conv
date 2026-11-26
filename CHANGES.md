@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-27 06:50:00 -0500 - Steering channel lag negative
+- Cross-correlated the replay steering pair difference with heading rate over lags -5..+5: no sharp peak (best lag -1 only -0.180 vs -0.171 at lag 0). Consolidated into the existing steering signal test.
+
 ## 2026-11-27 06:20:00 -0500 - HAT tail height-cache negative
 - Ruled out the HAT trailing stream as a flat copy of record-table heights (exact bit-pattern hits match shuffled controls). Consolidated into the existing tail test.
 
