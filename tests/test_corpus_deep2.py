@@ -5789,6 +5789,7 @@ class CorpusDeep2Test(unittest.TestCase):
         import statistics
         import struct
         import gzip_simbin_tool as gz
+        import media_tool as mt
 
         path = (ROOT.parent / "GTR2Steam" / "GameData" / "Locations"
                 / "HAT_Dedicated" / "3Brno.hat")
@@ -5840,6 +5841,19 @@ class CorpusDeep2Test(unittest.TestCase):
         random.shuffle(shuffled)
         self.assertLess(abs(observed_aligned - aligned_fraction(bytes(shuffled))),
                         0.02)
+
+        # The tail does not embed a copy of the record table's height values.
+        body = payload[payload.find(b"generated\x00") + 10:]
+        count = mt.hat_record_count(payload)
+        heights = {struct.unpack("<I", struct.pack("<f", struct.unpack_from(
+            "<fIff", body, 48 + 16 * k)[2]))[0]
+            for k in range(0, count, max(1, count // 1000))}
+        words = struct.unpack_from("<%dI" % (len(tail) // 4), tail, 0)
+        observed_hits = sum(word in heights for word in words) / len(words)
+        shuffled_words = list(words)
+        random.shuffle(shuffled_words)
+        control_hits = sum(word in heights for word in shuffled_words) / len(words)
+        self.assertLess(abs(observed_hits - control_hits), 0.0005)
 
     def test_hat_trailing_stream_has_eight_byte_periodicity(self):
         """The .hat stream after the record table is not byte-random."""

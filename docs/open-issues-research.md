@@ -60,6 +60,14 @@ gives r=0.553 across 34 GTR2 layouts with seeded permutation p=0.001 —
 consistent with tessellation density being chosen per physical layout extent.
 This is an association, not a decoder. Full-tier test added.
 
+## HAT tail does not embed record heights (2026-11-27)
+
+Tested whether the trailing stream stores copies of the record table's height
+floats: exact bit-pattern hits in Brno are 0.074% of tail words versus 0.057–0.085%
+for shuffled controls; Monza 0.021% versus 0.015–0.026%. At chance — the tail
+is not a flat height cache. Consolidated into
+`test_hat_trailing_stream_is_not_plain_float_records`.
+
 ## HAT tail alignment negative (2026-11-27)
 
 Motivated by the writer's 32-byte structures, tested whether tail u32s are

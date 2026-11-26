@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-27 06:20:00 -0500 - HAT tail height-cache negative
+- Ruled out the HAT trailing stream as a flat copy of record-table heights (exact bit-pattern hits match shuffled controls). Consolidated into the existing tail test.
+
 ## 2026-11-27 05:50:00 -0500 - User-facing conversion paths use semantic bridge
 - `rf1_to_gtr2.py` CLI now defaults to the semantic bridge (`--structural` opts out) and `text_convert.convert_tree()` passes `relayout=True`, so user-facing conversions preserve all submeshes. Full-tier CLI regression test added; docs updated.
 
