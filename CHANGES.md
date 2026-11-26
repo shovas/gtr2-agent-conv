@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-30 06:45:00 -0500 - Stream parser regression fix
+- Scoped the vc*32 single-block stream check to the rec6-only fallback so two-stream meshes with declared blob sizes are preserved verbatim. Caught by `tests.test_gmt_relayout`; 40 module tests and the normal tier pass.
+
 ## 2026-11-30 06:30:00 -0500 - Normal-tier performance optimizations
 - Optimized three test-suite bottlenecks without weakening assertions: `gmt_semantic.find_submeshes()` now searches the six magic byte patterns (15.7x faster, exact equivalence on 698 samples); `find_frame_grid()` uses the GTTF marker fast path (42s -> 17s module time, equivalent on all 42 event files); `test_gmt_layout` caches its fixture scan. Normal tier now 263.5s / 250 tests / 0 failures, back inside the 300s budget.
 

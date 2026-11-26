@@ -437,9 +437,19 @@ def parse_gmt(path: str | Path, data: bytes | None = None) -> GmtFile:
             # rec[7]/rec[8], or a single block at rec[6] that runs up to the
             # index array (86% of sampled GTR2 meshes). Expose both so the UV
             # candidate stream is visible to decoders.
-            end = rec.stream2_end if rec.stream2_end > rec.raw[6] else rec.index_offset
-            if end - rec.raw[6] == rec.vertex_count * 32 and end <= len(d):
-                s2 = d[rec.raw[6]:end]
+            if rec.stream2_end > rec.raw[6]:
+                # Explicit stream end (two-stream layout): preserve the
+                # declared blob verbatim, whatever its size.
+                end = rec.stream2_end
+                if end <= len(d):
+                    s2 = d[rec.raw[6]:end]
+            else:
+                # Single-block fallback: rec[6] runs to the index array.
+                # Require the verified vc*32 size so a few anomalous files
+                # do not expose misaligned blocks.
+                end = rec.index_offset
+                if end - rec.raw[6] == rec.vertex_count * 32 and end <= len(d):
+                    s2 = d[rec.raw[6]:end]
             if rec.stream3_end > rec.stream2_end and rec.stream2_end > 0:
                 s3 = (d[rec.stream2_end:rec.stream3_end]
                       if rec.stream3_end <= len(d) else b"")
