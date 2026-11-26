@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-27 10:50:00 -0500 - rF1 SearchPath corpus regression
+- Verified all 15 rF1 track directories convert their SCNs to the exact GTR2 two-line SearchPath pair (`Shared` plus track folder); full-tier regression test added.
+
 ## 2026-11-27 10:20:00 -0500 - JCA key corpus usage note
 - Documented that all four JCA keys have round-trip tests but a 1,200-file sample across four corpora detected only `default` and `volvo` in shipped files; `raceroom_plr` and `old_raceroom` remain corpus-unexercised.
 

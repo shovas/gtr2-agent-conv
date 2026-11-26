@@ -6235,6 +6235,32 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertGreaterEqual(checked, 2)
 
+    def test_rf1_scn_searchpath_conventions(self):
+        """Every rF1 track's SCN converts to the two-line GTR2 SearchPath pair."""
+        import media_tool as mt
+        import text_convert as tc
+
+        root = ROOT.parent / "RF1Vanilla" / "GameData" / "Locations"
+        if not root.is_dir():
+            self.skipTest("RF1Vanilla locations not present")
+        checked = 0
+        for directory in sorted(root.iterdir()):
+            if not directory.is_dir():
+                continue
+            scenes = list(directory.rglob("*.SCN"))
+            if not scenes:
+                continue
+            source = mt.decrypt_jca_text(scenes[0].read_bytes()).decode("latin-1")
+            converted = tc.scn_to_trk(source, directory.name)
+            paths = [line.split("=", 1)[1].strip()
+                     for line in converted.splitlines()
+                     if line.lower().startswith("searchpath")]
+            self.assertEqual(paths, [
+                "GameData\\Locations\\Shared",
+                f"GameData\\Locations\\{directory.name}"], directory.name)
+            checked += 1
+        self.assertGreaterEqual(checked, 10)
+
     def test_gtl_tree_conversion_preserves_cam_and_trk_conventions(self):
         """GTL CAM files pass through; TRK references become GTR2-style."""
         import tempfile
