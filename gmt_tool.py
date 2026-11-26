@@ -139,6 +139,19 @@ def scan_gmts(root: str | os.PathLike) -> list[Path]:
 
 
 def cmd_info(args: argparse.Namespace) -> int:
+    raw = Path(args.file).read_bytes()
+    import race_gmt
+    if raw.startswith(race_gmt.MAGIC):
+        header = race_gmt.parse_header(raw)
+        print(f"path: {args.file}")
+        print(f"size: {len(raw)}")
+        print("variant: racegmt")
+        print(f"racegmt_name: {header.name}")
+        print(f"racegmt_flags: {header.flags} (0x{header.flags:08x})")
+        print(f"payload_offset: {16 + len(header.name)}")
+        print(f"bbox_floats: {len(header.floats)}")
+        print("geometry: not decoded (RaceGMT container only)")
+        return 0
     h = read_header(args.file, parse_meshes=args.meshes)
     print(f"path: {h.path}")
     print(f"size: {h.size}")

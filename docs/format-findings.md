@@ -13,7 +13,7 @@ regression tests or an explicitly documented negative.
   108-byte mesh records at `0x16C`), and **GTR1 third magic** (handled by
   `gmt_semantic.read_gtr1_geometry()`).
 - A fourth variant, **`RaceGMT\0`**, occurs in 643 Race07Complete meshes. It is
-  not a standard GMT: `gmt_format.parse_racegmt()` verifies an 8-byte magic,
+  not a standard GMT: `race_gmt.parse_header()` verifies an 8-byte magic,
   u32 printable-name length, the name, a constant flag word `0x04000020`, then
   a payload of mixed f32/u16 records. All 643 files parse cleanly; the payload
   geometry is **not** decoded and `parse_gmt()` returns zero meshes for them.

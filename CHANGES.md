@@ -2,8 +2,8 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
-## 2026-11-26 21:50:00 -0500 - Parse RaceGMT container variant
-- Added `gmt_format.parse_racegmt()` for the 643 `RaceGMT\0` meshes in Race07Complete: verifies the magic, printable name and constant flag word, and exposes the payload offset. Geometry inside the payload remains undecoded (36-/72-byte index-triple strides in some models, but no universal record layout). Full-tier test added.
+## 2026-11-26 22:20:00 -0500 - RaceGMT container validation and CLI
+- Full-tier validation of `race_gmt.parse_header()` across all 643 `RaceGMT\0` meshes in Race07Complete (magic, name, constant flags, 12 bounding-box floats); `gmt_tool.py info` now reports these fields instead of meaningless standard-GMT header values. Payload geometry remains undecoded (36-/72-byte index-triple strides in some models, but no universal record layout).
 
 ## 2026-11-26 21:20:00 -0500 - HAT fields separated by mutual information
 - Showed the HAT u32 carries no grid-position information (MI 7.765 bits vs 7.740 shuffled) while height B carries 4.86 bits; consolidates the u32 negatives with a permutation-controlled test.
