@@ -112,6 +112,16 @@ deterministic (61/123 pairs byte-identical after byte 4), with 8 long-prefix
 pairs showing layout revisions. The `media_tool.py hat-layout` CLI therefore
 works unchanged across all three games. Full-tier test added.
 
+## Driver small_b negatives (2026-11-26)
+
+Probed the sixth f32 (`small_b`) against elevation delta, speed, heading rate
+and lateral acceleration across all 8 long replays, including lags -10..+10
+for lateral acceleration. Every channel has mixed signs across replays and
+mean |r| below 0.25; no lagged peak is consistent. Absolute elevation and
+heading show track-dependent correlations (e.g. 0.63 at Anderstorp North,
+-0.45 at Monza) that do not generalize. `small_b` remains undecoded.
+Full-tier test added.
+
 ## Driver small_a vs AIW gradient (2026-11-26) — track-dependent
 
 Tried to calibrate `small_a` as a road-gradient reading by mapping replay

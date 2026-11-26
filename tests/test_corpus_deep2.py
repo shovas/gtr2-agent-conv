@@ -4639,6 +4639,62 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertGreater(results["brno"], 0.5)
         self.assertLess(results["imola"], 0.3)
 
+    def test_driver_small_b_unexplained_by_kinematics(self):
+        """No tested kinematic channel explains small_b consistently."""
+        import math
+        import statistics
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+
+        def correlate(x, y):
+            mx, my = statistics.mean(x), statistics.mean(y)
+            numerator = sum((a - mx) * (b - my) for a, b in zip(x, y))
+            denominator = (sum((a - mx) ** 2 for a in x)
+                           * sum((b - my) ** 2 for b in y)) ** 0.5
+            return numerator / denominator if denominator else 0.0
+
+        data = []
+        for root in (ROOT.parent / "GTR2Steam" / "ReplayData",
+                     ROOT.parent / "GTLSteam" / "ReplayData"):
+            for path in sorted(root.glob("*.Vcr")):
+                parsed = st.parse_vcr_frames(gz.decompress(str(path)))
+                if not parsed:
+                    continue
+                states = []
+                for frame in parsed["frames"]:
+                    for record in frame["records"]:
+                        if st.vcr_record_tag(record["header"]) == 0:
+                            state = st.vcr_driver_state(record["data"])
+                            if state:
+                                states.append(state)
+                            break
+                if len(states) < 300:
+                    continue
+                series = {"small_b": [state["small_b"] for state in states]}
+                series["elevation_delta"] = [
+                    after["position"][1] - before["position"][1]
+                    for before, after in zip(states, states[1:])]
+                series["speed"] = [math.dist(before["position"], after["position"])
+                                   for before, after in zip(states, states[1:])]
+                series["heading_rate"] = [
+                    ((after["angle_like"] - before["angle_like"] + math.pi)
+                     % (2 * math.pi) - math.pi)
+                    for before, after in zip(states, states[1:])]
+                series["lateral"] = [step * rate for step, rate in zip(
+                    series["speed"], series["heading_rate"])]
+                data.append(series)
+        self.assertGreaterEqual(len(data), 6)
+
+        for channel in ("elevation_delta", "speed", "heading_rate", "lateral"):
+            values = []
+            for series in data:
+                target = series[channel]
+                values.append(correlate(series["small_b"][:len(target)], target))
+            self.assertGreater(sum(value > 0 for value in values), 1, channel)
+            self.assertGreater(sum(value < 0 for value in values), 1, channel)
+            self.assertLess(statistics.mean(abs(value) for value in values),
+                            0.25, channel)
+
     def test_driver_small_a_tracks_elevation_change(self):
         """The replay's small_a field follows vertical motion."""
         import random

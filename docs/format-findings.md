@@ -228,7 +228,10 @@ regression tests or an explicitly documented negative.
   angle-like and correlates with position-derived heading (|r| >0.4 vs a
   shuffled baseline). The fourth float (`small_a`, byte 41) tracks **vertical
   motion**: r=0.13–0.96 (mean 0.641) against position y-delta in 8/8 replays
-  (seeded permutation p<0.001); the sixth (`small_b`) remains unexplained.
+  (seeded permutation p<0.001); the sixth (`small_b`) remains unexplained:
+  across the eight long replays its correlations with elevation delta, speed,
+  heading rate and lateral acceleration change sign between files and average
+  |r| < 0.25 (full-tier test `test_driver_small_b_unexplained_by_kinematics`).
   Full-tier test: `test_driver_small_a_tracks_elevation_change`. Calibration
   against AIW-derived road gradient is track-dependent (Brno HOT LAP r=0.98,
   Imola r=0.00), so no universal scale conversion is claimed; guarded by

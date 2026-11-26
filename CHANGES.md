@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 09:50:00 -0500 - Driver small_b kinematics negative
+- Probed small_b against elevation, speed, heading rate and lateral acceleration (with lags): signs are inconsistent across replays and mean |r|<0.25, so it remains undecoded. Full-tier test added.
+
 ## 2026-11-26 09:20:00 -0500 - Small_a gradient calibration caveat
 - Tested small_a against AIW-derived road gradient: correlations range from 0.98 (Brno) to 0.00 (Imola), so no universal scale conversion is claimed. Full-tier test added.
 
