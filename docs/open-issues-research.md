@@ -168,6 +168,20 @@ session variation is carried solely by `session_seconds`
 `c=8` only in Magny-Cours, but with nine samples no semantics are claimed.
 Full-tier regression test added.
 
+## Per-frame replay records not located (2026-11-30)
+
+Attempted to extend the participant/summary decoders into the bulk payload by
+using the `0x52a540` writer loop and the summary counts. The bytes immediately
+after the summary contain a one-off header-like block (e.g. 26 bytes beginning
+`06 00 68 34 00 21 00 40` in Anderstorp.Vcr) that does **not** repeat. Bulk
+autocorrelation peaks vary per file (86/120 for Anderstorp.Vcr, 20/86 for
+Brno.Vcr, 166/40 for Monza.Vcr), and the summary counts divide the remaining
+payload with non-integer, file-dependent quotients (22–90 bytes). `fcn.00527700`
+writes another variable-length record type (u32 + u8-prefixed string) for a
+list at `edi+0x6d0`, but those records were not found in the sampled payloads
+either. No per-frame/per-object state decoder is claimed — this is a negative
+with structural observations for the next attempt.
+
 ## Post-object replay summary (2026-11-30)
 
 Immediately after the participant records, eight of nine GTR2 replays have a

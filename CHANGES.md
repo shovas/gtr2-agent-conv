@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-30 10:45:00 -0500 - Per-frame replay negative
+- Recorded that the post-summary payload has no repeating frame record: variable lag peaks, non-integer count divisions, and a one-off header-like block. No per-frame decoder claimed.
+
 ## 2026-11-30 10:15:00 -0500 - Replay post-object summary parser
 - Added `parse_replay_summary()` for the 13-byte structure after participant records (marker, two counts, duration); validated on 9 GTR2 replays with a full-tier test. Count semantics remain unclaimed.
 
