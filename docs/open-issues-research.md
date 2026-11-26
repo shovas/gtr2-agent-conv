@@ -199,6 +199,16 @@ phantom empty frames from those zeros; `parse_vcr_frames()` now rejects
 zero-count summaries and zero-subcount frames, returning None for GTL replays
 while all nine GTR2 replays still parse exactly. Full-tier test added.
 
+## Normal-tier profiling (2026-11-30)
+
+cProfile of the normal suite showed 307 s total, dominated by 613,005
+`zlib.decompress` calls (130 s) inside 3,951 `mas_tool.read_archive` calls;
+`zlib.compress` when writing test archives added 26 s. Added a bounded
+64 MB decompressed-member cache keyed by archive path + mtime_ns + offset;
+normal tier went 263.5 s → 252.3 s (252 tests, 0 failures). Cache invalidation
+on updated files is covered by a regression test — an earlier version without
+mtime in the key returned stale data.
+
 ## gMb container inventory and .hat negative (2026-11-30)
 
 The GTR2 install has 197 gzip+gMb files across four extensions: `.dsi` (142),

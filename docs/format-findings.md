@@ -333,7 +333,8 @@ regression tests or an explicitly documented negative.
 ## 8. Verification
 
 - Tests: `python3 run_tests.py --mode quick|normal|full`; quick tier is kept
-  under its budget (currently 20 modules / ~27 s).
+  under its budget (currently 20 modules / ~27 s). Normal tier 252 s / 252
+  tests / 0 failures, below its 300 s budget.
 - Safety: `python3 pre_push_check.py` before any push; no push without explicit
   authorization.
 - Full suite evidence is recorded in `CHANGES.md` with its starting commit

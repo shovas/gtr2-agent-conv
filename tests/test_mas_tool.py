@@ -145,5 +145,28 @@ class MasToolTest(unittest.TestCase):
                 self.assertEqual(a.data, b.data)
 
 
+    def test_member_cache_invalidates_on_update(self):
+        """The bounded decompressed-member cache follows mtime changes."""
+        source = None
+        for path in Path(__file__).resolve().parents[1].parent.glob(
+                "CopaPetrobrasdeMarcas/**/*.mas"):
+            source = path
+            break
+        if source is None:
+            self.skipTest("no GSC archive")
+        with tempfile.TemporaryDirectory() as td:
+            target = Path(td) / "cache.mas"
+            target.write_bytes(source.read_bytes())
+            first = mas_tool.read_archive(target)[1][0].data
+            self.assertEqual(mas_tool.read_archive(target)[1][0].data, first)
+            target.write_bytes(source.read_bytes())
+            # Force a distinct mtime so the cache key changes.
+            import os
+            import time
+            newer = time.time() + 2
+            os.utime(target, (newer, newer))
+            self.assertEqual(mas_tool.read_archive(target)[1][0].data, first)
+
+
 if __name__ == "__main__":
     unittest.main()

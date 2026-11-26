@@ -315,7 +315,34 @@ def read_member(path: str | os.PathLike, entry: Entry) -> bytes | None:
         return None
 
 
+# Bounded cache of decompressed members keyed by (archive path, absolute
+# member offset). Test suites re-read the same archives many times; profiling
+# showed zlib.decompress dominating normal-tier runtime (130 s of 307 s).
+_BLOB_CACHE: dict[tuple[str, int], bytes] = {}
+_BLOB_CACHE_BYTES = 0
+_BLOB_CACHE_LIMIT = 64 * 1024 * 1024
+
+
+def _cached_member(f, key: tuple[str, int, int], offset: int,
+                   zsize: int, size: int) -> bytes:
+    global _BLOB_CACHE_BYTES
+    data = _BLOB_CACHE.get(key)
+    if data is not None:
+        return data
+    f.seek(offset)
+    blob = f.read(zsize)
+    data = zlib.decompress(blob) if size != zsize else blob
+    if len(data) + _BLOB_CACHE_BYTES <= _BLOB_CACHE_LIMIT:
+        _BLOB_CACHE[key] = data
+        _BLOB_CACHE_BYTES += len(data)
+    return data
+
+
 def read_archive(path: str | os.PathLike, read_data: bool = True) -> tuple[int, list[Entry]]:
+    try:
+        stamp = os.stat(path).st_mtime_ns
+    except OSError:
+        stamp = 0
     with open(path, "rb") as f:
         sig = f.read(16)
         try:
@@ -361,9 +388,8 @@ def read_archive(path: str | os.PathLike, read_data: bool = True) -> tuple[int, 
             e.offset += base
             if not read_data:
                 continue
-            f.seek(e.offset)
-            blob = f.read(e.zsize)
-            e.data = zlib.decompress(blob) if e.size != e.zsize else blob
+            e.data = _cached_member(f, (str(path), stamp, e.offset),
+                                    e.offset, e.zsize, e.size)
             if len(e.data) != e.size:
                 raise ValueError(f"size mismatch for {e.name}: {len(e.data)} != {e.size}")
     return mtype, entries
