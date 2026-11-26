@@ -1,5 +1,12 @@
 # Open issues — offline research record (2026-11-23)
 
+## `.hat` field B vs track widths (2026-11-26) — negative
+
+Compared each layout's median |B| against median AIW `wp_width[0]` and
+`dwidth[0]` across 14 independent GTR2 layouts: r=0.113 (permutation max 0.305)
+and r=0.237 (max above observed). B is not a track-width or groove-width
+parameter. Full-tier test added.
+
 ## `.hat` u32 field negatives (2026-11-26)
 
 Tested the remaining u32 in the 16-byte record:

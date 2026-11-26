@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 05:50:00 -0500 - Hat field B width negative
+- Ruled out .hat field B as AIW track width or groove width (r=0.11/0.24 across 14 layouts, below permutation baselines). Full-tier test added.
+
 ## 2026-11-26 05:20:00 -0500 - Hat u32 field negatives
 - Ruled out the .hat record u32 as a counter or position hash (correlation with ordinal <0.012; zero U reuse across 93 duplicate points in Brno). Full-tier test added.
 

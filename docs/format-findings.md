@@ -366,6 +366,9 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
   Brno/Monza/Dubai, and repeated `(x, z)` points carry different u32 values
   (0/93 duplicate pairs in Brno agree). Full-tier test:
   `test_hat_record_u32_is_not_a_counter_or_position_hash`.
+  B is also not AIW `wp_width` or groove width (r=0.11 / 0.24 across 14
+  layouts, both below seeded permutation maxima). Full-tier test:
+  `test_hat_field_b_not_a_track_width`.
 - After the table's 8-byte zero terminator, the trailing stream is also
   non-random but harder to parse: byte-lag 8 agreement is 7.5–10.7% versus
   1.3–1.7% for a seeded shuffle, uniformly across 64 KB blocks, and the most

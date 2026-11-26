@@ -5095,6 +5095,76 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertGreaterEqual(checked, 2)
 
+    def test_hat_field_b_not_a_track_width(self):
+        """The table's B scalar is not AIW width or groove width."""
+        import random
+        import statistics
+        import struct
+        import gzip_simbin_tool as gz
+        import simbin_text_tool as stt
+
+        tracks = ("ANDERSTORP", "Barcelona", "Brno", "Donington", "Enna",
+                  "Estoril", "Magny", "Monza", "Oschersleben", "Spa", "Dubai",
+                  "Valencia", "Imol", "Zhuhai", "Hockenheim")
+        rows = {}
+        for path in sorted((ROOT.parent / "GTR2Steam" / "GameData" / "Locations"
+                            / "HAT_Dedicated").glob("*.hat")):
+            name = path.stem
+            track = next((t for t in tracks if t.lower() in name.lower()), None)
+            if track is None or track in rows:
+                continue
+            parents = [p for p in (ROOT.parent / "GTR2Steam" / "GameData"
+                                   / "Locations").iterdir()
+                       if p.is_dir() and track.lower() in p.name.lower()]
+            aiws = sorted(parents[0].glob("*.AIW")) if parents else []
+            if not aiws:
+                continue
+            payload = gz.decompress(str(path))
+            marker = payload.find(b"generated\x00")
+            body = payload[marker + 10:]
+            values = []
+            for offset in range(48, len(body) - 16, 16):
+                first, _unknown, second, third = struct.unpack_from("<fIff", body, offset)
+                if not (-1e6 < first < 1e6 and first == first
+                        and second == second and 0.01 < abs(second) < 20
+                        and -1e6 < third < 1e6 and third == third):
+                    break
+                values.append(second)
+            if not values:
+                continue
+            try:
+                waypoints = stt.parse_aiw(stt.read_text(aiws[0])).waypoints
+            except Exception:
+                continue
+            widths = [wp.width[0] for wp in waypoints
+                      if wp.width and len(wp.width) >= 3]
+            grooves = [wp.dwidth[0] for wp in waypoints
+                       if wp.dwidth and len(wp.dwidth) >= 3]
+            rows[track] = (abs(statistics.median(values)),
+                           statistics.median(widths) if widths else float("nan"),
+                           statistics.median(grooves) if grooves else float("nan"))
+        if len(rows) < 10:
+            self.skipTest("hat/AIW track pairs not present")
+
+        def correlate(x, y):
+            mx, my = statistics.mean(x), statistics.mean(y)
+            numerator = sum((a - mx) * (b - my) for a, b in zip(x, y))
+            denominator = (sum((a - mx) ** 2 for a in x)
+                           * sum((b - my) ** 2 for b in y)) ** 0.5
+            return numerator / denominator if denominator else 0.0
+
+        random.seed(2026)
+        for index, label in ((1, "width"), (2, "groove")):
+            magnitudes = [value[0] for value in rows.values()]
+            properties = [value[index] for value in rows.values()]
+            if not all(value == value for value in properties):
+                continue
+            observed = correlate(magnitudes, properties)
+            permuted = [correlate(magnitudes, random.sample(properties, len(properties)))
+                        for _ in range(500)]
+            self.assertLess(abs(observed), max(abs(value) for value in permuted),
+                            label)
+
     def test_hat_record_b_weak_track_scale_association(self):
         """Field B has only a weak track-scale trend; duplicates inflate it.
 
