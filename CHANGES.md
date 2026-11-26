@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 08:20:00 -0500 - Steering channel primary association
+- Refined the replay steering-like channel: heading rate is the primary association (8/8 replays, mean r=-0.171) while lateral acceleration is weaker (7/8, mean -0.108). Full-tier test updated.
+
 ## 2026-11-26 07:50:00 -0500 - Full rF1 tree conversion audit
 - Audited tree conversion on all 16 rF1 location directories: zero exceptions and zero structural TRK/MASFile violations (remaining gaps are template-only session/AIW keys and shared archives outside the subtree). Quick-tier regression test over two tracks added.
 

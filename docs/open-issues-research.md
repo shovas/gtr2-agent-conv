@@ -112,6 +112,15 @@ deterministic (61/123 pairs byte-identical after byte 4), with 8 long-prefix
 pairs showing layout revisions. The `media_tool.py hat-layout` CLI therefore
 works unchanged across all three games. Full-tier test added.
 
+## Driver short-pair vs lateral acceleration (2026-11-26) — secondary
+
+The same pair difference was tested against position-derived lateral
+acceleration (step distance x wrapped heading rate) on the 8 long replays:
+7/8 negative, mean r=-0.108, seeded permutation p=0.028. This is weaker than
+the heading-rate association (8/8, mean -0.171, p=0.004), so heading rate is
+the primary driver and lateral acceleration a derived/secondary effect. The
+full-tier signal test now asserts both orderings.
+
 ## Driver short-pair difference vs heading rate (2026-11-26)
 
 A fresh kinematic probe found the first useful driver-state signal:

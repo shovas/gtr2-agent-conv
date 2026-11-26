@@ -233,7 +233,9 @@ regression tests or an explicitly documented negative.
   with position-derived heading rate (next minus current angle) in **8/8**
   replays with >=300 driver states (r = -0.087 to -0.365, mean -0.171; seeded
   corpus permutation p = 0.004), far more consistent than any individual slot
-  or speed relationship. This is a steering-like channel, but no unit mapping
+  or speed relationship. Lateral acceleration (speed x heading rate) is only
+  a weaker companion (7/8 negative, mean -0.108, p=0.028), so heading rate is
+  the primary association. This is a steering-like channel, but no unit mapping
   is claimed. Full-tier test:
   `test_driver_short_pair_difference_tracks_heading_rate`.
   Raw deltas appeared to correlate with derived speed in 4 of 28 replay/slot pairs

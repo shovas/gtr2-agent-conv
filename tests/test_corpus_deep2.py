@@ -4621,9 +4621,15 @@ class CorpusDeep2Test(unittest.TestCase):
                     for before, after in zip(states, states[1:])]
                 difference = [state["shorts"][0] - state["shorts"][1]
                               for state in states]
-                data.append((difference, heading_rate))
+                lateral = []
+                for before, after in zip(states, states[1:]):
+                    step = math.dist(before["position"], after["position"])
+                    rate = ((after["angle_like"] - before["angle_like"] + math.pi)
+                            % (2 * math.pi) - math.pi)
+                    lateral.append(step * rate)
+                data.append((difference, heading_rate, lateral))
         self.assertGreaterEqual(len(data), 6)
-        observed = [correlate(difference, rate) for difference, rate in data]
+        observed = [correlate(item[0], item[1]) for item in data]
         self.assertGreater(sum(value < 0 for value in observed), len(data) - 1)
         self.assertLess(statistics.mean(observed), -0.1)
 
@@ -4631,7 +4637,7 @@ class CorpusDeep2Test(unittest.TestCase):
         positives = []
         for _ in range(500):
             count = 0
-            for difference, rate in data:
+            for difference, rate, _lateral in data:
                 shuffled = difference[:]
                 random.shuffle(shuffled)
                 count += correlate(shuffled, rate) < 0
@@ -4639,6 +4645,10 @@ class CorpusDeep2Test(unittest.TestCase):
         actual = sum(value < 0 for value in observed)
         self.assertLess(sum(count >= actual for count in positives) / len(positives),
                         0.01)
+        # Lateral acceleration is a weaker companion, not the primary driver.
+        lateral_correlations = [correlate(item[0], item[2]) for item in data]
+        self.assertLess(statistics.mean(abs(value) for value in lateral_correlations),
+                        statistics.mean(abs(value) for value in observed))
 
     def test_driver_u16_deltas_not_wheel_speed(self):
         """Apparent u16-delta/speed correlations are shared slow trends."""
