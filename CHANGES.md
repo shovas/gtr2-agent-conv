@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-27 19:20:00 -0500 - All HAT header variants decode
+- Verified all three HAT header variants (gMb1.000f, gMb1.002f, ver008) expose the decoded grid parameters, declared counts, bisection relation and record count; full-tier coverage test added.
+
 ## 2026-11-27 18:50:00 -0500 - Guard rf1 CLI structural opt-out
 - Verified `rf1_to_gtr2.py --structural` still selects the legacy bridge (`decrypt+layout`) while the default uses the semantic one; extended the CLI regression test.
 

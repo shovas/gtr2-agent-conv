@@ -1140,6 +1140,29 @@ class MediaToolTest(unittest.TestCase):
         self.assertAlmostEqual(info.details["grid_inv_cell_z"], 0.02603,
                                delta=1e-4)
 
+    def test_all_hat_header_variants_decode(self):
+        """gMb1.000f, gMb1.002f and ver008 all expose the decoded header."""
+        samples = (
+            ROOT.parent / "GTR2Steam/GameData/Locations/HAT_Dedicated/3Brno.hat",
+            ROOT.parent / "StockCarExtreme/UserData/LOG/HAT/BUENOSAIRES15.hat",
+            ROOT.parent / "Race07Vanilla/GameData/Locations/Brno_2007/2007_Brno.hat",
+        )
+        variants = []
+        for path in samples:
+            if not path.is_file():
+                continue
+            result = media_tool.hat_decompress(path)
+            self.assertIsNotNone(result, str(path))
+            payload, info = result
+            counts = media_tool.hat_declared_counts(payload)
+            self.assertIsNotNone(counts)
+            self.assertEqual(counts[1], media_tool.hat_bisection_count(counts[0]))
+            self.assertEqual(counts[2], media_tool.hat_record_count(payload))
+            self.assertIsNotNone(media_tool.hat_grid_params(payload))
+            variants.append(info["variant"])
+        self.assertEqual(len(variants), 3)
+        self.assertEqual(set(variants), {"gMb1.000f", "gMb1.002f", "ver008"})
+
     def test_hat_second_count_is_bisection_tree_size(self):
         """body[40] is exactly T(body[36]) across every HAT file."""
         roots = ("GTR2Steam", "GTLSteam", "Race07Vanilla", "Race07Complete",
