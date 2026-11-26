@@ -1532,6 +1532,37 @@ class CorpusDeep2Test(unittest.TestCase):
         overlap = rf1_tokens & simbin_classes
         self.assertLess(len(overlap) / len(rf1_tokens), 0.1)
 
+    def test_f0_compare_cli(self):
+        """`gmt_tool.py f0-compare` reports the cross-game tail invariant."""
+        import subprocess
+        import sys
+        import tempfile
+        import mas_tool
+
+        gtr2 = (ROOT.parent / "GTR2Steam" / "GameData" / "Locations"
+                / "Monza" / "Monza.gtr")
+        gtl = (ROOT.parent / "GTLSteam" / "GameData" / "Locations"
+               / "Monza" / "Monza.gtl")
+        if not gtr2.is_file() or not gtl.is_file():
+            self.skipTest("matched GTR2/GTL Monza archives not present")
+        with tempfile.TemporaryDirectory() as td:
+            paths = []
+            for archive, name in ((gtr2, "left.gmt"), (gtl, "right.gmt")):
+                _mtype, entries = mas_tool.read_archive(archive)
+                entry = next((entry for entry in entries
+                              if entry.name.lower() == "adboard02.gmt"), None)
+                if entry is None or not entry.data:
+                    self.skipTest("ADBOARD02.GMT missing from archive")
+                path = Path(td) / name
+                path.write_bytes(entry.data)
+                paths.append(str(path))
+            result = subprocess.run(
+                [sys.executable, str(ROOT / "gmt_tool.py"), "f0-compare"]
+                + paths, capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn("tail_equal=True", result.stdout)
+            self.assertIn("first_equal=False", result.stdout)
+
     def test_f0_preserved_cross_game_except_first_submesh(self):
         """Submesh >=1 f0 markers match across GTR2/GTL for the same asset."""
         import glob

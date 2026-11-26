@@ -283,6 +283,27 @@ def cmd_f0(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_f0_compare(args: argparse.Namespace) -> int:
+    """Compare two meshes' f0 marker lists (cross-game preservation check)."""
+    def markers(path):
+        data = Path(path).read_bytes()
+        parsed = gmt_format.parse_gmt(path, data)
+        return [gmt_format.mesh_marker(mesh) or 0 for mesh in parsed.meshes]
+
+    left = markers(args.left)
+    right = markers(args.right)
+    same_length = len(left) == len(right)
+    tail_equal = same_length and left[1:] == right[1:]
+    first_equal = bool(left) and left[0] == right[0]
+    print(f"left_markers={len(left)} right_markers={len(right)}")
+    print(f"same_length={same_length} tail_equal={tail_equal} "
+          f"first_equal={first_equal}")
+    if same_length and left:
+        print(f"first=({left[0]}, {right[0]}) "
+              f"tail={'(equal)' if tail_equal else '(different)'}")
+    return 0 if tail_equal and left else 1
+
+
 def cmd_decode_gsc(args: argparse.Namespace) -> int:
     """Decode an ISI-encrypted GSC GMT member and write a GTR2-layout GMT."""
     import gmt_layout
@@ -358,6 +379,11 @@ def main(argv: list[str] | None = None) -> int:
     p = sub.add_parser("f0", help="report per-mesh f0 marker structure")
     p.add_argument("file")
     p.set_defaults(func=cmd_f0)
+
+    p = sub.add_parser("f0-compare", help="compare f0 marker lists of two GMTs")
+    p.add_argument("left")
+    p.add_argument("right")
+    p.set_defaults(func=cmd_f0_compare)
 
     p = sub.add_parser("uv", help="report GTR2 UV blocks and decoded UV pairs")
     p.add_argument("file")

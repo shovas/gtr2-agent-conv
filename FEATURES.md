@@ -89,6 +89,7 @@ python3 gsc_exe_tool.py extract "../CopaPetrobrasdeMarcas/Marcas.exe" out/
 python3 gmt_tool.py info <file.gmt>
 python3 gmt_tool.py scan <dir>
 python3 gmt_tool.py diff <a.gmt> <b.gmt>
+python3 gmt_tool.py f0-compare <a.gmt> <b.gmt>   # compare per-mesh f0 markers
 python3 gmt_tool.py relayout <input.gmt> <output.gmt>   # rebuild offsets after mesh data grows
 ```
 

@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-27 09:20:00 -0500 - Add f0 comparison CLI
+- `gmt_tool.py f0-compare A B` reports same-length/tail/first-marker equality for two GMTs, exposing the verified cross-game f0 preservation rule. Full-tier CLI test added.
+
 ## 2026-11-27 08:50:00 -0500 - Tree check mode for rF1 converter
 - Added `rf1_to_gtr2.py <directory> --tree`, which checks every MAS/GTR/GTL archive under a directory with the semantic bridge and reports per-archive failures. Full-tier CLI test added.
 
