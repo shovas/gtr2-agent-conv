@@ -1240,6 +1240,60 @@ class CorpusDeep2Test(unittest.TestCase):
                           for half in (lo, hi) if half in values[name])
             self.assertLess(matches, 20)  # chance level for 2 x 12k halfwords
 
+    def test_f0_predicts_material_family_weakly(self):
+        """Equal f0 markers share material-name prefixes above chance."""
+        import collections
+        import glob
+        import random
+        import statistics
+        import gmt_format as gf
+        import mas_tool
+
+        rows = []
+        for archive in sorted(glob.glob(
+                str(ROOT.parent / "GTR2Steam" / "**" / "*.gtr"),
+                recursive=True))[:40]:
+            try:
+                _mtype, entries = mas_tool.read_archive(archive)
+            except Exception:
+                continue
+            for entry in entries:
+                if not entry.name.lower().endswith(".gmt") or not entry.data:
+                    continue
+                try:
+                    parsed = gf.parse_gmt(entry.name, entry.data)
+                except Exception:
+                    continue
+                for mesh in parsed.meshes:
+                    marker = gf.mesh_marker(mesh)
+                    index = mesh.record.material_index
+                    if marker and index < len(parsed.materials):
+                        rows.append((marker, parsed.materials[index].name))
+            if len(rows) >= 12000:
+                break
+        if len(rows) < 5000:
+            self.skipTest("GTR2 mesh corpus not present")
+
+        def agreement(items):
+            grouped = collections.defaultdict(list)
+            for marker, name in items:
+                grouped[marker].append(name[:3])
+            pairs = [(v[i], v[j]) for v in grouped.values() if len(v) > 1
+                     for i in range(len(v)) for j in range(i + 1, len(v))]
+            return sum(a == b for a, b in pairs) / len(pairs)
+
+        observed = agreement(rows)
+        random.seed(2026)
+        permuted = []
+        for _ in range(30):
+            shuffled = rows[:]
+            random.shuffle(shuffled)
+            permuted.append(agreement([(marker, shuffled[i][1])
+                                       for i, (marker, _name) in enumerate(rows)]))
+        self.assertGreater(observed, statistics.mean(permuted) * 3)
+        self.assertGreater(observed, max(permuted))
+        self.assertLess(observed, 0.4)  # weak association, not a material ID
+
     def test_f0_bytes_not_material_string_hash(self):
         """f0's two bytes are not 8-bit slices of material-name hashes."""
         import hashlib

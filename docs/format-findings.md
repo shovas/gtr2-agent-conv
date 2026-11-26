@@ -399,7 +399,12 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
   exact f0 u32 reuse in material records (matches were trivial sentinel/ASCII
   values), printable-ASCII reinterpretation of the u32 (1.2% of markers), and
   8-bit slices of hashes of material names / stage strings (`sum`, CRC32, MD5 —
-  all at the distribution-preserving expectation, e.g. 47 vs 46.7 expected). The cross-family scope is also
+  all at the distribution-preserving expectation, e.g. 47 vs 46.7 expected).
+  The reverse association is weak but real: across 16,547 GTR2 markers,
+  equal-f0 pairs share an exact material name only 6.7% of the time (vs 0.29%
+  shuffled) but share a 3-character material-name prefix 18.8% (vs 3.5%) — a
+  family-level association, not a material ID. Full-tier test:
+  `test_f0_predicts_material_family_weakly`. The cross-family scope is also
   constrained: f0 byte semantics differ in JCA-encrypted Volvo/Race07 GMTs.
   See `docs/open-issues-research.md` for each experiment.
 - Tooling: `gmt_format.split_f0()`, `gmt_format.f0_byte_pair()`, `gmt_tool.py info --meshes` and

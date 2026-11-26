@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 02:50:00 -0500 - f0 material-family association
+- Quantified the reverse f0/material association on 16,547 markers: equal f0 values share a material-name 3-char prefix 18.8% vs 3.5% permuted, but exact names only 6.7% — family-level, not an ID. Full-tier test added.
+
 ## 2026-11-26 02:20:00 -0500 - Extended AIW corpus validation
 - Verified the CRLF-fixed converter on 223 additional rF1-lineage AIWs (Automobilista, Stock Car Extreme, BMW M3 Challenge, Superleague 2009): no key corruption and all galpha values <= 0.45. Full-tier regression test added.
 

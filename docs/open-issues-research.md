@@ -1,5 +1,21 @@
 # Open issues — offline research record (2026-11-23)
 
+## f0 reverse association with material families (2026-11-26)
+
+Using 16,547 nonzero f0 markers from 40 GTR2 `.gtr` archives, tested the
+reverse of the known material→f0 association under seeded, distribution-
+preserving permutation:
+- equal-f0 pairs share an exact material name in 6.7% of cases (permutation
+  mean 0.29%) — too weak for an ID;
+- they share the first 3 characters of the material name in 18.8% of cases
+  (permutation mean 3.5%), and the first 2 in 19.3% (4.2%) — a family-level
+  association;
+- name length agreement is 21.3% vs 11.8% permuted, mostly a by-product of
+  common name lengths.
+
+This refines "associated with material identity" to "weakly associated with
+material family"; no decoder is claimed. Full-tier test added.
+
 ## `.hat` trailing stream periodicity (2026-12-01)
 
 After the record table and its 8 zero bytes, byte-lag autocorrelation was
