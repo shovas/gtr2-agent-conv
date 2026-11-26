@@ -1,5 +1,25 @@
 # Open issues — offline research record (2026-11-23)
 
+## `.hat` header bytes 4:16 are a per-track identifier (2026-12-01)
+
+The earlier `.hat` characterization only sampled the high-entropy body. A
+separate seeded, permutation-controlled test on all 34 GTR2 `.hat` headers
+found structure the earlier scan missed:
+- after the `generated\x00` marker, `body[4:16]` is identical in 24/28
+  within-track pairs (15 track groups), versus permutation mean 1.2 / max 6
+  (1000 shuffles, seed 2026), `p < 0.001`;
+- the four mismatches are Monza GP vs Jn and Hockenheim GP vs national/short —
+  genuinely different layouts, so they are exceptions rather than failures;
+- `body[0:4]` is mostly per-file (10/28 matches), localizing the identifier to
+  the trailing 12 bytes.
+
+`isi_crypt.crypt_info()` reads the block as a signature/key pair whose derived
+signature is not in `GAMES`; CRC32/adler32/MD5 of the track name do not produce
+`body[12:16]`. No cipher or field semantics are claimed — only that the
+header is structured and track-derived. This corrects the earlier "no
+structure" wording in the gMb inventory note for the header region; the
+body-after-header negative stands. Full-tier regression test added.
+
 ## Driver u16s vs live per-wheel units (2026-12-01) — negative
 
 Used the live shared-memory per-wheel units from `../gtr2-agent-tools` as an

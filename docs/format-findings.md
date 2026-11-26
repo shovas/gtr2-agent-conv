@@ -287,6 +287,26 @@ regression tests or an explicitly documented negative.
   - `+48` raw u32 is misleading; decode as two signed 16-bit halves.
   - `+40/+52/+56/+60` are at chance against kinematics.
 
+### `.hat` header (gMb-wrapped track data) — verified 2026-12-01
+
+The `.hat` body after `generated\x00` begins with a **16-byte header whose
+bytes 4:16 are a per-track constant**. Across all 34 GTR2 `.hat` files:
+- grouping by track name (15 groups), `body[4:16]` is identical in **24 of 28**
+  within-track pairs; a seeded label permutation (1000 shuffles, seed 2026)
+  gives mean 1.2 and max 6 matches — `p < 0.001`;
+- the 4 mismatches are genuinely different physical layouts (Monza GP vs Jn,
+  Hockenheim GP vs national/short), not contradictions;
+- `body[0:4]` varies per file even within a track (10/28 matches), so the
+  stable identifier is specifically the trailing 12 bytes.
+
+Under `isi_crypt.crypt_info()` this block reads as a 16-byte signature/key
+pair, but the derived signature is not in `GAMES` and no cipher is claimed.
+The high 32 bits of the "key" (`body[12:16]`) and the f32 at `+8` are both
+track-stable; earlier attempts to interpret them as CRC32/adler32/MD5 of the
+track name failed. **The body after the 16-byte header remains undecoded**
+(high entropy, no periodicity, gMb keys ruled out). Full-tier permutation
+test: `test_hat_header_bytes_4_to_16_are_track_stable`.
+
 ## 5. Vertex `f0` (per-mesh marker on vertex 0)
 
 - f0 is **preserved from the GMT**, not assigned by GTR2.exe; the shader

@@ -4546,6 +4546,45 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertGreaterEqual(checked, 10)
 
+    def test_hat_header_bytes_4_to_16_are_track_stable(self):
+        """The .hat 16-byte header carries a per-track identifier at 4:16."""
+        import random
+        import gzip_simbin_tool as gz
+        tracks = ("ANDERSTORP", "Barcelona", "Brno", "Donington", "Enna",
+                  "Estoril", "Magny", "Monza", "Oschersleben", "Spa", "Dubai",
+                  "Valencia", "Imol", "Zhuhai", "Hockenheim")
+        rows = []
+        for path in sorted((ROOT.parent / "GTR2Steam").rglob("*.hat")):
+            payload = gz.decompress(str(path))
+            marker = payload.find(b"generated\x00")
+            if marker < 0:
+                continue
+            body = payload[marker + 10:]
+            name = path.stem
+            track = next((x for x in tracks if x.lower() in name.lower()), None)
+            rows.append((name, track, body[4:16]))
+        self.assertGreaterEqual(len(rows), 30)
+        self.assertTrue(all(row[1] for row in rows))
+
+        def matches(rows):
+            groups = collections.defaultdict(list)
+            for name, track, header in rows:
+                groups[track].append((name, track, header))
+            pairs = [(a, b) for group in groups.values()
+                     for i, a in enumerate(group) for b in group[i + 1:]]
+            return sum(a[2] == b[2] for a, b in pairs), len(pairs)
+
+        observed, total = matches(rows)
+        self.assertGreaterEqual(observed / total, 0.8)
+        labels = [row[1] for row in rows]
+        random.seed(2026)
+        permuted = []
+        for _ in range(1000):
+            random.shuffle(labels)
+            permuted.append(matches([(r[0], label, r[2])
+                                     for r, label in zip(rows, labels)])[0])
+        self.assertGreater(observed, max(permuted))
+
     def test_gtl_replays_use_irsr_v101(self):
         """GTL .Vcr replays parse as IRSR v1.01 and rewrap byte-identically."""
         import gzip_simbin_tool as gz
