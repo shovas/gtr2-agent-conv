@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-27 02:20:00 -0500 - HAT tail alignment negative
+- Ruled out 32-byte-aligned pointers in the HAT tail: the apparent 16.3% alignment enrichment matches a byte-shuffled control (16.6%). Consolidated into the existing tail test.
+
 ## 2026-11-27 01:50:00 -0500 - HAT trailing stream writer evidence
 - Traced the post-record writer path (0x459610 / 0x45c3d0): 32-byte structures with 8-byte prefixes and variable linked-list metadata explain the trailing stream's lack of a fixed stride. Documented; no field-level decoder claimed.
 

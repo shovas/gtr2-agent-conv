@@ -428,8 +428,11 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
   (96 = 3 x 32 bytes allocated per polygon) and `0x45c3d0` writes 8-byte
   prefixes of those structures plus variable linked-list metadata (chains of
   up to three nodes), so the trailing stream is variable-length — consistent
-  with the lack of a fixed stride. Full-tier test:
-  `test_hat_producer_strings_in_dedicated_exe`. Although 18 signatures are shared
+  with the lack of a fixed stride. The apparent 32-byte alignment of tail u32s
+  (16.3% vs 3.2% for random bytes) disappears under a byte-shuffled control
+  (16.6%), so it is a zero-byte-histogram artifact, not pointer evidence.
+  Full-tier tests: `test_hat_producer_strings_in_dedicated_exe`,
+  `test_hat_trailing_stream_is_not_plain_float_records`. Although 18 signatures are shared
   across games, the matching bodies are **not reusable**: GTR2 Brno has 40,189
   records vs Race07's 41,530 (3/40,189 records identical at the same index),
   and GTR2 Anderstorp 27,357 vs GTL's 27,185 (24/27,185). Full-tier test:

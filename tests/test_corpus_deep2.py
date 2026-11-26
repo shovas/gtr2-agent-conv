@@ -5766,6 +5766,18 @@ class CorpusDeep2Test(unittest.TestCase):
             controls.append(plausible(bytes(shuffled)))
         self.assertLess(abs(observed - statistics.mean(controls)), 0.02)
 
+        # The apparent 32-byte alignment of tail u32s is also a byte-histogram
+        # artifact: a byte-shuffled control matches the observed rate.
+        def aligned_fraction(data):
+            values = struct.unpack_from("<%dI" % (len(data) // 4), data, 0)
+            return sum(value % 32 == 0 for value in values) / len(values)
+
+        observed_aligned = aligned_fraction(tail)
+        shuffled = bytearray(tail)
+        random.shuffle(shuffled)
+        self.assertLess(abs(observed_aligned - aligned_fraction(bytes(shuffled))),
+                        0.02)
+
     def test_hat_trailing_stream_has_eight_byte_periodicity(self):
         """The .hat stream after the record table is not byte-random."""
         import collections

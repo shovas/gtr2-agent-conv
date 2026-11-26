@@ -22,6 +22,15 @@ or value carries the rF1 track properties. The fields are semantically
 different, so no class-mapping rule exists — this is a corpus negative, not a
 missing implementation. Full-tier test added.
 
+## HAT tail alignment negative (2026-11-27)
+
+Motivated by the writer's 32-byte structures, tested whether tail u32s are
+32-byte-aligned offsets: 16.3% of Brno tail words are multiples of 32 versus
+3.2% for random bytes, and 0.6% are aligned offsets inside the tail. A
+byte-shuffled control preserving the histogram gives 16.6% — the enrichment is
+entirely due to the tail's zero-byte distribution, not pointers. Consolidated
+into `test_hat_trailing_stream_is_not_plain_float_records`; no decoder claimed.
+
 ## HAT trailing stream writer code (2026-11-27)
 
 Continuing past the record loop: `0x459610` reads a count and an array base
