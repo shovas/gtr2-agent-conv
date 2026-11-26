@@ -303,9 +303,22 @@ Under `isi_crypt.crypt_info()` this block reads as a 16-byte signature/key
 pair, but the derived signature is not in `GAMES` and no cipher is claimed.
 The high 32 bits of the "key" (`body[12:16]`) and the f32 at `+8` are both
 track-stable; earlier attempts to interpret them as CRC32/adler32/MD5 of the
-track name failed. **The body after the 16-byte header remains undecoded**
-(high entropy, no periodicity, gMb keys ruled out). Full-tier permutation
-test: `test_hat_header_bytes_4_to_16_are_track_stable`.
+track name failed.
+
+The body after byte 4 is **deterministic per physical layout**, not salted
+ciphertext: grouping all 34 GTR2 files by `body[4:]` yields 28 exact classes,
+five of them multi-member (3 Donington, 2 ANDERSTORP, 2 Brno, 2 Magny,
+2 Monza — 11 files). Within each class the entire remaining body (1.4–4.7 MB)
+is byte-identical, e.g. `3Brno`/`4Brno` agree over 3,782,765 bytes and
+`3Monza`/`4Monza` over 2,649,256 bytes. The earlier "high entropy" result
+measured byte diversity, not per-file randomness. `body[16:36]` is a distinct
+20-byte layout signature (17 values): it groups Dubai ×4, Donington ×3,
+Magny ×3 (incl `NTMagny`), Oschersleben ×3, Valencia ×3 and pairs of
+ANDERSTORP/Barcelona/Brno/Monza/Spa/NT+SH Hockenheim; its within-track
+match rate is the same 24/28 (permutation mean 1.24, max 6).
+Semantics of the blob remain undecoded; gMb keys and inner zlib streams are
+still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stable`,
+`test_hat_body_is_deterministic_per_layout`.
 
 ## 5. Vertex `f0` (per-mesh marker on vertex 0)
 

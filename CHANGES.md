@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-12-01 04:55:00 -0500 - Hat body deterministic per layout
+- Extended the .hat finding: bodies are byte-identical after byte 4 within physical layouts (11 files in 5 classes, up to 3.78 MB identical), and body[16:36] is a 20-byte layout signature (17 values). Corrected the earlier "high-entropy random" reading. Full-tier test added.
+
 ## 2026-12-01 04:20:00 -0500 - Hat header track identifier
 - Found a per-track identifier in the .hat header: bytes 4:16 match in 24/28 within-track pairs vs 1.2 by permutation (p<0.001); the 4 exceptions are different physical layouts. Body after the header remains undecoded. Full-tier test added.
 

@@ -4585,6 +4585,43 @@ class CorpusDeep2Test(unittest.TestCase):
                                      for r, label in zip(rows, labels)])[0])
         self.assertGreater(observed, max(permuted))
 
+    def test_hat_body_is_deterministic_per_layout(self):
+        """Same-layout .hat bodies are byte-identical after the 4-byte prefix."""
+        import random
+        import gzip_simbin_tool as gz
+        tracks = ("ANDERSTORP", "Barcelona", "Brno", "Donington", "Enna",
+                  "Estoril", "Magny", "Monza", "Oschersleben", "Spa", "Dubai",
+                  "Valencia", "Imol", "Zhuhai", "Hockenheim")
+        rows = []
+        for path in sorted((ROOT.parent / "GTR2Steam").rglob("*.hat")):
+            payload = gz.decompress(str(path))
+            marker = payload.find(b"generated\x00")
+            if marker < 0:
+                continue
+            body = payload[marker + 10:]
+            track = next((x for x in tracks if x.lower() in path.stem.lower()), None)
+            rows.append((path.stem, track, body))
+        self.assertGreaterEqual(len(rows), 30)
+        # Exact identity classes on body[4:] prove the high-entropy body is a
+        # deterministic per-layout blob, not ciphertext with per-file salt.
+        classes = collections.defaultdict(list)
+        for name, _track, body in rows:
+            classes[body[4:]].append(name)
+        multi = [v for v in classes.values() if len(v) > 1]
+        self.assertGreaterEqual(len(multi), 5)
+        self.assertGreaterEqual(sum(len(v) for v in multi), 10)
+        self.assertTrue(any(len(v) >= 3 for v in multi))
+        # body[16:36] is a 20-byte layout signature, stable across series
+        # prefixes for the same physical layout.
+        signatures = collections.Counter(body[16:36] for _, _, body in rows)
+        self.assertGreaterEqual(len(signatures), 15)
+        self.assertGreaterEqual(sum(1 for v in signatures.values() if v >= 2), 10)
+        bodies = {name: body for name, _track, body in rows}
+        for first, second in (("3Brno", "4Brno"), ("3Monza", "4Monza"),
+                              ("3ANDERSTORP", "SANDERSTORP"),
+                              ("3Donington", "4Donington")):
+            self.assertEqual(bodies[first][4:], bodies[second][4:])
+
     def test_gtl_replays_use_irsr_v101(self):
         """GTL .Vcr replays parse as IRSR v1.01 and rewrap byte-identically."""
         import gzip_simbin_tool as gz

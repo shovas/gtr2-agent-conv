@@ -1,5 +1,25 @@
 # Open issues — offline research record (2026-11-23)
 
+## `.hat` body is deterministic per layout (2026-12-01)
+
+Following the header finding, all 34 bodies were compared after byte 4:
+- 28 exact equivalence classes on `body[4:]`, five with 2–4 members
+  (11 files total). Within each class the rest of the 1.4–4.7 MB body is
+  **byte-identical** — e.g. `3Brno`/`4Brno` over 3,782,765 bytes and
+  `3Monza`/`4Monza` over 2,649,256 bytes.
+- `body[16:36]` is a separate 20-byte layout signature with 17 values,
+  grouping Dubai ×4, Donington ×3, Magny ×3, Oschersleben ×3, Valencia ×3,
+  and pairs of ANDERSTORP/Barcelona/Brno/Monza/Spa/Hockenheim. Its
+  within-track match rate matches the header's 24/28 (permutation mean 1.24,
+  max 6, seed 2026).
+- Different physical layouts sharing a track name (Monza Jn, Hockenheim GP,
+  Barcelona N, Dubai variants) diverge at offsets 16 and 36 respectively —
+  useful for identifying which `.hat` belongs to which layout.
+
+This corrects the earlier "high-entropy, no structure" reading: the entropy is
+high but the data is a deterministic per-layout blob, not per-file ciphertext.
+No semantic decoder is claimed. Full-tier test added.
+
 ## `.hat` header bytes 4:16 are a per-track identifier (2026-12-01)
 
 The earlier `.hat` characterization only sampled the high-entropy body. A
