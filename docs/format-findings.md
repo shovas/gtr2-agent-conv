@@ -31,7 +31,16 @@ regression tests or an explicitly documented negative.
   but contain NaNs later, so the alignment is not global. The opening records
   follow `[3x u16 triangle indices][6 zero bytes][u32 record ordinal][5 f32]`
   with the ordinal equal to the record index (0..7 verified in four models).
-  Full-tier test: `test_racegmt_payload_has_indexed_36_byte_records`.
+  Full-tier test: `test_racegmt_payload_has_indexed_36_byte_records`. The
+  framing refines further: the six "zero bytes" are actually a **u16 pad plus
+  a u32 group index**, giving `[3x u16 indices][u16 0][u32 group][u32 ordinal][5 f32]`.
+  In `PEOPLE_STAND_01..05` the table begins at body offset 292 and runs for
+  **48 records** with groups 0..4 (counts 8/12/8/14/6); indices restart at
+  (0,1,2) at each group boundary. `race_gmt.read_triangle_records()` decodes
+  this framing and stops before the following float tables. Full-tier test:
+  `test_triangle_record_framing`. The five f32 values have no established
+  semantic assignment; 113/643 files carry a table at offset 292, so no
+  universal payload layout is claimed.
 - `gmt_layout.is_old()/is_new()` detect layouts; `old_to_new_semantic()` rebuilds
   a new-layout mesh from decoded old-layout geometry. The semantic reader now
   recognizes all eight observed mesh-record magic low words (`0x4001/11/13/15/35`

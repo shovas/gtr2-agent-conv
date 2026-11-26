@@ -82,6 +82,34 @@ def read_positions(data: bytes) -> list[tuple[tuple[float, float, float], ...]]:
     return out
 
 
+def read_triangle_records(data: bytes) -> list[dict]:
+    """Decode the 36-byte triangle records that begin at body offset 292.
+
+    Verified on the five PEOPLE_STAND_* meshes in ``../Race07Complete``: each
+    record is ``3 u16 vertex indices, u16 zero, u32 group, u32 ordinal, 5 f32``.
+    The ordinal equals the record index and the group increments at submesh
+    boundaries; indices restart at 0,1,2 for each group. Reading stops at the
+    first record that breaks this framing, before the following float tables.
+
+    Returns empty for RaceGMT files that use a different payload layout (the
+    corpus is heterogeneous — only 113/643 files carry this table at 292).
+    """
+    header = parse_header(data)
+    off = 16 + len(header.name.encode("latin-1")) + 48 + 292
+    out = []
+    while off + 36 <= len(data):
+        indices = struct.unpack_from("<3H", data, off)
+        pad = struct.unpack_from("<H", data, off + 6)[0]
+        group, ordinal = struct.unpack_from("<II", data, off + 8)
+        if pad or group > 63 or ordinal != len(out):
+            break
+        floats = struct.unpack_from("<5f", data, off + 16)
+        out.append({"indices": indices, "group": group, "ordinal": ordinal,
+                    "floats": floats})
+        off += 36
+    return out
+
+
 def read_material_strings(data: bytes) -> list[str]:
     """Extract NUL-terminated ASCII material/stage strings from the payload."""
     import re

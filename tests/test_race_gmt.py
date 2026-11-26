@@ -138,6 +138,27 @@ class RaceGmtTest(unittest.TestCase):
         self.assertIn("L0DIFFUSET0", text)
         self.assertIn("PESSOAS_E", text)
 
+    def test_triangle_record_framing(self):
+        """PEOPLE_STAND's 36-byte records carry indices, group, ordinal, 5 f32."""
+        p = ROOT.parent / "Race07Complete/GameData/Locations/Marrakech/Models/PEOPLE_STAND_01.gmt"
+        if not p.is_file():
+            self.skipTest("PEOPLE_STAND sample not present")
+        recs = race_gmt.read_triangle_records(p.read_bytes())
+        self.assertEqual(len(recs), 48)
+        from collections import Counter
+        self.assertEqual(dict(sorted(Counter(r["group"] for r in recs).items())),
+                         {0: 8, 1: 12, 2: 8, 3: 14, 4: 6})
+        self.assertTrue(all(r["ordinal"] == i for i, r in enumerate(recs)))
+        # Indices restart at (0,1,2) at each group boundary and advance by 3.
+        group_indices = {}
+        for rec in recs:
+            group_indices.setdefault(rec["group"], []).append(rec["indices"])
+        for indices in group_indices.values():
+            self.assertEqual(indices[0], (0, 1, 2))
+            for offset, triple in enumerate(indices):
+                self.assertEqual(triple, (3 * offset, 3 * offset + 1, 3 * offset + 2))
+        self.assertTrue(all(len(rec["floats"]) == 5 for rec in recs))
+
     def test_triangles_share_vertices(self):
         p = ROOT.parent / "Race07Complete/GameData/Locations/Marrakech/Models/PEOPLE_STAND_01.gmt"
         if not p.is_file():
