@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-12-01 02:45:00 -0500 - External tool review documented
+- Reviewed the updated ../gtr2-agent-tools repo (commit b1c7f50): recorded its live GTR2 telemetry layout, independent parsers used as regression oracle, Driving School/GTT/HAT findings and CC BY-NC 4.0 reference-only status in docs/tools-reference.md.
+
 ## 2026-12-01 02:15:00 -0500 - Replay time-shift CLI
 - Added `simbin_events_tool.py FILE --shift SECONDS --out OUT` to write a valid shifted replay container; CLI test added.
 

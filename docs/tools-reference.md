@@ -37,6 +37,19 @@ Verified findings from its documentation and code:
 - `isi_gm_crypt.py`'s rfactorgmdec algorithm **does not** decrypt GTL's own `gMb` files (0.34 printability with key 0), and `gtl_files.decrypt_file()` **does not** decrypt our rFactor `.svm` / `gMb1.002f` files (0.34 printability). The two algorithms share the `//[[gMb...]]` header but are unrelated — an important correction to earlier assumptions.
 - The file explicitly records that the `*.PHS` members are **not** this cipher (tested as text, binary and zlib), corroborating `docs/phs-research.md`.
 
+## `../gtr2-agent-tools/` — runtime telemetry and independent parsers (reviewed 2026-12-01, commit `b1c7f50`)
+
+**License:** CC BY-NC 4.0, no game files. **Reference only** — no code, binaries or game data are copied into this repo. Our full-tier tests load `scripts/gtr2_driving/gmt.py` at runtime as an *independent validation oracle* (skipping when the tree is absent); that use is documented here for attribution. Its `AGENTS.md` defers to `CLAUDE.md`, with topic evidence in `docs/`.
+
+Relevant to our format work:
+
+- **Live GTR2 shared-memory telemetry** (`scripts/gtr2_driving/telemetry.py`, mapping `$rFactorShared$`, 40960 bytes): rFactor-1 `TelemInfoV2` fields, but orientation is **nine f32s at 176** (not rF1 doubles). Verified live: lap at 4, vehicle/track names at 12/76, position at 140, local velocity at 152 (z negative forward), local acceleration at 164 (x lateral, y vertical, z longitudinal), gear (int) at 240, rpm (f32) at 244. Processed driver inputs: throttle 260, brake 264, steering 268, clutch 272 (all verified via `gtr2-axis-probe.py`); per-wheel blocks are 67 bytes from 319 with rotation rad/s, deflection, ride height, load N, lateral force N, grip fraction, brake temp, pressure, 3 tyre temps and wear. Heading is `atan2(o[2], o[0])` — the same convention we verified for GTTF frame `+12`. This is independent runtime corroboration for our GTTF steering/engine/gear hypotheses, not a file-format decoder.
+- **Independent parsers** in `scripts/gtr2_driving/`: `mas.py` (GMOTORMAS10), `gmt.py` (mesh table at `0x16C`, 108-byte records, 32-byte vertices), `trackmap.py` (AIW), `garage.py`/`boxplan.py` (collision meshes). `gmt.py` agrees with our parser on 30 real meshes and on 20 converted GSC→GTR2 meshes including exact triangle lists; used as a regression oracle.
+- **Driving School** (docs/driving-and-driving-school.md): `.ds` files are plain text CRLF settings (e.g. `MaxTrackCollisionImpulse=3500`), while the instructor recordings are binary `.DSI` — the same files our `parse_vcr_frames()`/`read_ghost_line()` decode (142 shipped, 68,916 frames). A passed challenge writes progress to `stats.stc` (gMb-encoded) and `Career.blt` at game exit; `GameData/DrivingSchool` is not modified.
+- **GTT naming**: a script-driven Time Trial save produced `<profile> - 2_51_604.GTT`, confirming the lap-time filename layout our `test_gttf_frame_time_span_equals_lap_time` relies on.
+- **HAT has two distinct meanings**: static `GameData/Locations/HAT_Dedicated/*.hat` (34 track-named files, high-entropy, still undecoded by us) and per-session `UserData/Log/HAT/*.hat` logs written on exit. Do not conflate them.
+- Recent upstream commits (2026-12-01) are driving-controller work (front-grip-aware steering limits, paired spin tests); no new file-format findings in that batch.
+
 ## Full accounting of `../aluigi-mirror-261124/` (2026-11-26)
 
 **4,405 files / 198,889,526 bytes (189.7 MiB).** Complete generated inventories:
