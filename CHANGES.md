@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-27 09:50:00 -0500 - f0-compare empty-list fix
+- `gmt_tool.py f0-compare` now treats two marker-free GMTs as equal (exit 0) instead of failing; regression test extended.
+
 ## 2026-11-27 09:20:00 -0500 - Add f0 comparison CLI
 - `gmt_tool.py f0-compare A B` reports same-length/tail/first-marker equality for two GMTs, exposing the verified cross-game f0 preservation rule. Full-tier CLI test added.
 

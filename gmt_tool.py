@@ -301,7 +301,7 @@ def cmd_f0_compare(args: argparse.Namespace) -> int:
     if same_length and left:
         print(f"first=({left[0]}, {right[0]}) "
               f"tail={'(equal)' if tail_equal else '(different)'}")
-    return 0 if tail_equal and left else 1
+    return 0 if tail_equal and same_length else 1
 
 
 def cmd_decode_gsc(args: argparse.Namespace) -> int:

@@ -1563,6 +1563,13 @@ class CorpusDeep2Test(unittest.TestCase):
             self.assertIn("tail_equal=True", result.stdout)
             self.assertIn("first_equal=False", result.stdout)
 
+            # Two marker-free GMTs compare equal rather than failing.
+            empty = subprocess.run(
+                [sys.executable, str(ROOT / "gmt_tool.py"), "f0-compare",
+                 str(gtr2), str(gtr2)],
+                capture_output=True, text=True)
+            self.assertEqual(empty.returncode, 0)
+
     def test_f0_preserved_cross_game_except_first_submesh(self):
         """Submesh >=1 f0 markers match across GTR2/GTL for the same asset."""
         import glob
