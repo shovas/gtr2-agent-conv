@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-30 17:45:00 -0500 - Replay CLI covers GTL v1.01
+- Extended the `--replay` CLI test to cover GTL v1.01 summaries (10564 frames, exact EOF); no code change needed since the decoder is version-aware.
+
 ## 2026-11-30 17:15:00 -0500 - f0 material metadata negative
 - Recorded that f0 bytes do not encode material name/stage/string lengths (21,481 markers, all correlations below threshold). F0 remains opaque; preservation is sufficient for conversion.
 

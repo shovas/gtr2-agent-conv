@@ -503,6 +503,15 @@ class SimbinEventsToolTest(unittest.TestCase):
         self.assertIn("exact_end=True", result.stdout)
         self.assertIn("first_driver_position=", result.stdout)
         self.assertIn("first_driver_angle=", result.stdout)
+        gtl = ROOT.parent / "GTLSteam" / "ReplayData" / "Anderstorp North.Vcr"
+        if gtl.is_file():
+            result = subprocess.run(
+                [sys.executable, str(ROOT / "simbin_events_tool.py"), str(gtl),
+                 "--replay", "--strings", "0"], capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn("'version': 'v1.01'", result.stdout)
+            self.assertIn("frames_declared=10564", result.stdout)
+            self.assertIn("exact_end=True", result.stdout)
 
 
 if __name__ == "__main__":
