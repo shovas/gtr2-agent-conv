@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-27 05:20:00 -0500 - Prefer semantic bridge for rF1 GMTs
+- Verified that rF1 GMT conversions must use the semantic bridge (`relayout=True`): 150/150 pass full validator checks vs 0/150 for the default structural bridge on multi-submesh sources. Full-tier regression test added.
+
 ## 2026-11-27 04:50:00 -0500 - Replay car-to-HDC negative
 - Ruled out per-car steering calibration from HDC files: replay car labels are 5-digit menu IDs absent from all shipped HDC configs. Full-tier guard added. Normal-tier regression after the recent module changes: 266 tests, 0 failures (270 s).
 

@@ -1376,6 +1376,45 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertGreater(total, 10000)
         self.assertLess(non_unit / total, 0.001)
 
+    def test_rf1_semantic_conversion_validates(self):
+        """The semantic bridge preserves all submeshes where the structural one does not."""
+        import random
+        import glob
+        import gmt_layout
+        import mas_tool
+        import rf1_to_gtr2 as rf1
+        import validate_conversion as vc
+
+        archives = sorted(glob.glob(
+            str(ROOT.parent / "RF1Vanilla" / "**" / "*.mas"),
+            recursive=True))
+        random.seed(2026)
+        random.shuffle(archives)
+        checked = 0
+        for archive in archives[:40]:
+            try:
+                _mtype, entries = mas_tool.read_archive(archive)
+            except Exception:
+                continue
+            for entry in entries:
+                data = entry.data or b""
+                if not entry.name.lower().endswith(".gmt") or not gmt_layout.is_old(data):
+                    continue
+                try:
+                    converted, action = rf1.convert_bytes(
+                        entry.name, data, relayout=True)
+                except Exception:
+                    continue
+                self.assertIn("semantic", action)
+                report = vc.validate(data, converted)
+                self.assertTrue(report["pass"], (entry.name, report))
+                checked += 1
+                if checked >= 100:
+                    break
+            if checked >= 100:
+                break
+        self.assertGreaterEqual(checked, 100)
+
     def test_gsc_validator_corpus_sample(self):
         """The GSC-aware validator passes across a deterministic sample."""
         import glob

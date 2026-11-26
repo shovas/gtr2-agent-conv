@@ -22,6 +22,17 @@ or value carries the rF1 track properties. The fields are semantically
 different, so no class-mapping rule exists — this is a corpus negative, not a
 missing implementation. Full-tier test added.
 
+## rF1 bridge choice matters for validation (2026-11-27)
+
+Compared the two rF1→GTR2 GMT paths on a seeded 150-member sample from
+`../RF1Vanilla`: the default structural bridge (`old_to_new`) passes
+`validate_conversion.validate()` in 0/150 cases because 82 sources have
+multiple submeshes and only the first record is rebuilt; the semantic bridge
+(`old_to_new_semantic`, used when `relayout=True`) passes 150/150 with exact
+positions, UVs, faces and f0. This is a tool-path choice, not a format
+discovery, but it materially affects conversion correctness. Full-tier test
+added.
+
 ## Replay car labels vs HDC configs (2026-11-27) — negative
 
 Tried to calibrate the replay steering channel using each car's

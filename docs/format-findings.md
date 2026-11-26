@@ -41,6 +41,14 @@ regression tests or an explicitly documented negative.
   With `skip=4`, 150/150 sampled members have submeshes, plausible positions and
   faces. `gmt_semantic.decode_gsc_member()` implements the validated path;
   `decode_gsc_xor_gmt()` is retained only as a historical artifact path.
+- **rF1 structural vs semantic bridge:** `rf1_to_gtr2.convert_bytes()` defaults
+  to `gmt_layout.old_to_new()`, which fills only the first mesh record of a
+  multi-object GMT; on a 150-member sample that path passes
+  `validate_conversion.validate()` **0/150** times (82 sources have >1
+  submesh). Passing `relayout=True` uses `old_to_new_semantic()` and passes
+  **150/150** with all positions/UVs/faces/f0 preserved. Prefer the semantic
+  path for rF1 conversions. Full-tier test:
+  `test_rf1_semantic_conversion_validates`.
 - `gmt_semantic.find_submeshes()` scans both layouts; `read_gsc_geometry()`
   applies a quality gate (`finite_positions`, `plausible_positions`, `face_count`)
   before any geometry is trusted.
