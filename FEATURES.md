@@ -96,7 +96,7 @@ python3 gmt_tool.py relayout <input.gmt> <output.gmt>   # rebuild offsets after 
 
 ## 4. Inspect/round-trip DSI/HAT/GTT/VCR gzip containers
 
-**What it does**: Reads gzip-wrapped SimBin `.dsi`/`.hat`/`.gtt`/`.vcr` files, reports metadata, and round-trips content byte-for-byte (verified on all 197 shipped GTR2 containers). `.hat` payload bodies are high-entropy and not yet decoded.
+**What it does**: Reads gzip-wrapped SimBin `.dsi`/`.hat`/`.gtt`/`.vcr` files, reports metadata, and round-trips content byte-for-byte (verified on all 197 shipped GTR2 containers). `.hat` payload bodies are not yet decoded, but their 32-byte header signature identifies the track layout — even across GTL/GTR2 — via `media_tool.py hat-layout FILE CORPUS_DIR`.
 
 **How to ask**:
 - "Inspect this HAT/DSI file."

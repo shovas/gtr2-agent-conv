@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-12-01 09:20:00 -0500 - Hat layout identification CLI
+- Added `media_tool.py hat-layout FILE CORPUS_DIR` to identify a .hat track layout from its verified 32-byte signature, including cross-game GTL/GTR2 matches. Full-tier test added.
+
 ## 2026-12-01 08:50:00 -0500 - Driver u16 delta trend negative
 - Showed apparent u16-delta/speed correlations are shared slow trends: detrending collapses all four outlier-robust cases to |r|<=0.109. Full-tier regression test added.
 

@@ -1016,6 +1016,40 @@ class MediaToolTest(unittest.TestCase):
         self.assertIn("gMb1.000f", variants)
         self.assertIn("ver008", variants)
 
+    def test_hat_layout_identification(self):
+        """The 32-byte .hat signature identifies layout across game prefixes."""
+        import subprocess
+        import sys
+        corpus = ROOT.parent / "GTR2Steam"
+        dedicated = corpus / "GameData" / "Locations" / "HAT_Dedicated"
+        if not dedicated.is_dir():
+            self.skipTest("GTR2 HAT_Dedicated not present")
+
+        def names(report):
+            return {Path(p).stem for p in report["matches"]}
+
+        brno = media_tool.identify_hat_layout(dedicated / "3Brno.hat", corpus)
+        self.assertEqual(names(brno), {"3Brno", "4Brno"})
+        self.assertEqual(len(brno["signature"]), 64)
+        self.assertEqual(brno["variant"], "gMb1.000f")
+
+        monza = media_tool.identify_hat_layout(dedicated / "JnMonza.hat", corpus)
+        self.assertEqual(names(monza), {"JnMonza"})
+
+        gtl = (ROOT.parent / "GTLSteam" / "UserData" / "LOG" / "HAT"
+               / "NANDERSTORP.hat")
+        if gtl.is_file():
+            report = media_tool.identify_hat_layout(gtl, corpus)
+            self.assertEqual(names(report), {"3ANDERSTORP", "SANDERSTORP"})
+
+        result = subprocess.run(
+            [sys.executable, str(ROOT / "media_tool.py"), "hat-layout",
+             str(dedicated / "3Brno.hat"), str(corpus)],
+            capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("3Brno.hat", result.stdout)
+        self.assertIn("4Brno.hat", result.stdout)
+
     def test_hdr_dat_audio_pairs(self):
         """NASCAR-era .hdr/.dat pairs are MP3 streams with a block index."""
         import glob

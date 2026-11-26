@@ -7,6 +7,7 @@ Lossless byte copy is always possible for supported identified files.
 from __future__ import annotations
 
 import argparse
+import json
 import struct
 import wave
 from dataclasses import dataclass, asdict, field
@@ -617,6 +618,47 @@ def hat_decompress(path: str | Path) -> tuple[bytes, dict] | None:
         variant = "unknown"
     return data, {"variant": variant, "compressed_size": len(raw),
                   "decompressed_size": len(data)}
+
+
+def hat_layout_signature(payload: bytes) -> bytes | None:
+    """Return the 32-byte per-layout identifier from a decompressed `.hat`.
+
+    Verified on all 34 GTR2 `.hat` files: after the ``generated\\x00`` marker,
+    ``body[4:36]`` is constant for every variant of a physical layout and
+    identical between GTL and GTR2 for the same layout. Returns ``None`` for
+    header variants that do not carry the marker.
+    """
+    marker = payload.find(b"generated\x00")
+    if marker < 0 or len(payload) < marker + 50:
+        return None
+    return payload[marker + 14:marker + 46]
+
+
+def identify_hat_layout(path: str | Path, corpus: str | Path) -> dict:
+    """Identify a `.hat` layout by matching its 32-byte signature in a corpus.
+
+    ``corpus`` is scanned recursively (read-only). Matching is on the full
+    32-byte signature, so different layouts sharing a track name are told
+    apart. Only header identification is claimed — the body is not converted.
+    """
+    result = hat_decompress(path)
+    if result is None:
+        return {"path": str(path), "error": "not a gzip .hat file"}
+    payload, info = result
+    signature = hat_layout_signature(payload)
+    if signature is None:
+        return {"path": str(path), "variant": info["variant"],
+                "error": "no layout signature"}
+    matches = []
+    for candidate in sorted(Path(corpus).rglob("*.hat")):
+        other = hat_decompress(candidate)
+        if other is None:
+            continue
+        if hat_layout_signature(other[0]) == signature:
+            matches.append(str(candidate))
+    return {"path": str(path), "variant": info["variant"],
+            "body_size": len(payload) - payload.find(b"generated\x00") - 10,
+            "signature": signature.hex(), "matches": matches}
 
 
 def hdr_dat_mp3(hdr_path: str | Path) -> tuple[bytes, dict] | None:
@@ -1741,6 +1783,12 @@ def main(argv=None):
     p.add_argument("dst")
     p.set_defaults(func=lambda a: print(
         _hat_cmd(a.src, a.dst)) or 0)
+    p = sub.add_parser("hat-layout",
+                       help="identify a .hat layout from a reference corpus")
+    p.add_argument("src")
+    p.add_argument("corpus", help="directory of reference .hat files (read-only)")
+    p.set_defaults(func=lambda a: print(
+        json.dumps(identify_hat_layout(a.src, a.corpus), indent=2)) or 0)
     p = sub.add_parser("hdr-dat-decode",
                        help="decode a NASCAR-era .hdr/.dat MP3 audio pair to WAV")
     p.add_argument("hdr")
