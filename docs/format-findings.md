@@ -300,13 +300,22 @@ regression tests or an explicitly documented negative.
   99.97% of meshes; all "material index" findings are really mesh position.
 - f0 is strongly associated with material identity (raw-material-equal groups
   show P(f0 equal) 0.347 vs 0.036) but no tested name/record hash reproduces it.
-  Treat it as an **external authoring identifier**; do not invent semantics.
+  **Working hypothesis only (not established):** an external authoring
+  identifier. Decoding it is not required for conversion as long as the word is
+  preserved byte-for-byte.
 - **Byte-level structure:** in 69.6% of 30,000 sampled markers both u16 halves
   are byte-sized (bytes 1 and 3 are zero), so the real payload is byte 0 and
   byte 2. Those two bytes are usually **consecutive integers**: for an even
   low byte, `high == low + 1` in 60.3% of markers vs 0.8% under a
   distribution-preserving shuffle (odd low bytes most often pair with
   `low - 3`). f0 is therefore a pair of small structured IDs, not a hash.
+- **Tested and rejected** (all with distribution-preserving controls where
+  applicable): material index (a mesh-0 artefact), material stage indices,
+  geometry CRC, material-name/record hashes, shader registry indices, shader
+  type enums, material name/stage/string lengths, object-list-offset and file
+  bytes, and MOS 8-bit element counts. The cross-family scope is also
+  constrained: f0 byte semantics differ in JCA-encrypted Volvo/Race07 GMTs.
+  See `docs/open-issues-research.md` for each experiment.
 - Tooling: `gmt_format.split_f0()`, `gmt_format.f0_byte_pair()`, `gmt_tool.py info --meshes` and
   `gmt_tool.py f0 FILE` (with invariant warnings).
 

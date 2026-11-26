@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-30 22:15:00 -0500 - f0 findings consolidated
+- Corrected "external authoring identifier" from conclusion to working hypothesis and consolidated all rejected f0 hypotheses in `docs/format-findings.md`; added the object-list-offset negative to the research log.
+
 ## 2026-11-30 21:45:00 -0500 - Driver u16 pairing observation
 - Verified the four driver-state u16s form wheel-like pairs (rear gap <1% of scale in Monza); no AIW-ordinal or curvature semantics found. Full-tier test added.
 

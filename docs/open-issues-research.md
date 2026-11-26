@@ -199,6 +199,14 @@ phantom empty frames from those zeros; `parse_vcr_frames()` now rejects
 zero-count summaries and zero-subcount frames, returning None for GTL replays
 while all nine GTR2 replays still parse exactly. Full-tier test added.
 
+## f0 vs object-list offset / file bytes (2026-11-30) — negative
+
+Across 21,481 GTR2 markers, f0's byte pair matched the low/high byte of the
+object-list offset, GMT file length, or mesh vertex offset at rates
+indistinguishable from seeded permutation baselines (e.g. 102 vs 84 for
+`obj_list_offset & 0xFF`). No file-offset encoding. This experiment is listed
+in the consolidated f0 section of `docs/format-findings.md`.
+
 ## Driver u16 pairing and AIW ordinal negative (2026-11-30)
 
 Following the EXE reader/consumer paths produced no new semantics: the u16
