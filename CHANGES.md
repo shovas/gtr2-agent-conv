@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-27 22:50:00 -0500 - Cross-format steering negative
+- Found replay pair-difference and GTTF +16 steering have incompatible standardized distributions (kurtosis 4.9 vs 635 with rare ±1 clamps); no joint calibration claimed.
+
 ## 2026-11-27 22:20:00 -0500 - f0 association holdout validation
 - Confirmed the f0/material MI excess replicates on disjoint GTR2 archives (train 1.400 bits, holdout 1.486 bits vs shuffled baselines); independent-holdout regression test added.
 

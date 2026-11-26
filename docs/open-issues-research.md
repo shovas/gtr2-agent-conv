@@ -68,6 +68,16 @@ for shuffled controls; Monza 0.021% versus 0.015–0.026%. At chance — the tai
 is not a flat height cache. Consolidated into
 `test_hat_trailing_stream_is_not_plain_float_records`.
 
+## Cross-format steering comparison (2026-11-27) — negative
+
+Compared standardized distributions of the two independently decoded steering
+channels: replay `short_pair_difference` (4 replays) has median skew −0.07,
+kurtosis 4.9 and 58% of samples near zero; GTTF frame `+16` steering (20
+ghosts, 29,053 frames) has skew 20.2, kurtosis 635 and 20% near zero, with
+18/40 file extrema exactly ±1.0 clamp values. The channels are therefore not
+directly comparable across formats (different normalization/clamping), so no
+joint calibration is claimed.
+
 ## HAT virtual read is plain fread (2026-11-27)
 
 Resolved one part of the framing question: the stream vtable `0x6dce18` maps
