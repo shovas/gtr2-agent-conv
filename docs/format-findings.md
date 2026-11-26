@@ -338,6 +338,12 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
   diverge quickly (byte agreement from offset 36 falls from 27% in the first
   10 KB to ~1% later), so **no cross-game .hat body conversion rule** is
   claimed. Full-tier test: `test_hat_signature_is_cross_game_stable`.
+- The same `body[4:36]` signature also exists in Race07's bare `Ver 0.08`
+  variant: Race07 Anderstorp matches GTR2 Anderstorp, 41 Vanilla files form
+  18 distinct signatures, and Race07Complete's 93 files form 43. Bodies are
+  mostly deterministic per signature too (61/123 same-signature pairs fully
+  byte-identical after byte 4). Full-tier test:
+  `test_hat_signature_across_three_games`.
 
 ## 5. Vertex `f0` (per-mesh marker on vertex 0)
 

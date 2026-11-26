@@ -1050,6 +1050,41 @@ class MediaToolTest(unittest.TestCase):
         self.assertIn("3Brno.hat", result.stdout)
         self.assertIn("4Brno.hat", result.stdout)
 
+    def test_hat_signature_across_three_games(self):
+        """The same 32-byte .hat signature is used by GTR2, GTL and Race07."""
+        import glob
+        gtr2 = ROOT.parent / "GTR2Steam"
+        race07 = ROOT.parent / "Race07Vanilla" / "GameData" / "Locations"
+        if not race07.is_dir():
+            self.skipTest("Race07Vanilla track data not present")
+
+        def signature(path):
+            result = media_tool.hat_decompress(path)
+            return media_tool.hat_layout_signature(result[0]) if result else None
+
+        gtr2_signatures = set()
+        for path in glob.glob(str(gtr2 / "**" / "*.hat"), recursive=True):
+            value = signature(path)
+            if value:
+                gtr2_signatures.add(value)
+
+        candidates = [Path(p) for p in glob.glob(str(race07 / "**" / "*.hat"),
+                                                 recursive=True)]
+        matched = [p for p in candidates if signature(p) in gtr2_signatures]
+        self.assertGreater(len(candidates), 30)
+        self.assertGreaterEqual(len(matched), 5)
+        anderstorp = [p for p in candidates
+                      if "ANDERSTORP" in p.name.upper()]
+        self.assertTrue(anderstorp)
+        self.assertTrue(any(signature(p) in gtr2_signatures for p in anderstorp))
+
+        report = media_tool.identify_hat_layout(anderstorp[0], gtr2)
+        self.assertEqual(report["variant"], "ver008")
+        self.assertTrue(any("ANDERSTORP" in Path(p).name.upper()
+                            for p in report["matches"]))
+        distinct = {signature(p) for p in candidates}
+        self.assertGreaterEqual(len(distinct), 15)
+
     def test_hdr_dat_audio_pairs(self):
         """NASCAR-era .hdr/.dat pairs are MP3 streams with a block index."""
         import glob

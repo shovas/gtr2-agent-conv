@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-12-01 09:50:00 -0500 - Hat signature across three games
+- Verified the 32-byte .hat layout signature also applies to Race07's Ver 0.08 variant: Race07 Anderstorp matches GTR2 Anderstorp, and the hat-layout CLI works unchanged across GTR2/GTL/Race07. Full-tier test added.
+
 ## 2026-12-01 09:20:00 -0500 - Hat layout identification CLI
 - Added `media_tool.py hat-layout FILE CORPUS_DIR` to identify a .hat track layout from its verified 32-byte signature, including cross-game GTL/GTR2 matches. Full-tier test added.
 

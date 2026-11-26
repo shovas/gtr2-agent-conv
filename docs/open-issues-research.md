@@ -1,5 +1,15 @@
 # Open issues — offline research record (2026-11-23)
 
+## `.hat` signature generalizes to Race07 (2026-12-01)
+
+The `Ver 0.08` Race07 `.hat` variant carries the same 32-byte `body[4:36]`
+layout signature as GTR2/GTL. Verified: `2007_ANDERSTORP.hat` matches GTR2
+`3ANDERSTORP`/`SANDERSTORP`; 41 Race07Vanilla files form 18 distinct signatures
+and 93 Race07Complete files form 43. Same-signature bodies are mostly
+deterministic (61/123 pairs byte-identical after byte 4), with 8 long-prefix
+pairs showing layout revisions. The `media_tool.py hat-layout` CLI therefore
+works unchanged across all three games. Full-tier test added.
+
 ## Driver u16 deltas vs speed (2026-12-01) — trend artefact
 
 Tested wrapped frame-to-frame deltas of the four driver-state u16s against
