@@ -300,7 +300,7 @@ python3 race_gmt.py --triangles <file.gmt>
 python3 gtl_to_gtr2.py <source.gtl> <target.gtr>
 python3 gtl_to_gtr2.py <source.gtl> --check
 python3 gtl_to_gtr2.py <source-dir> <target-dir> --tree [--templates <GTR2-dir>] [--check]
-python3 gtl_to_gtr2.py --validate <GameData-dir>
+python3 gtl_to_gtr2.py --validate <GameData-dir> [--json]
 ```
 
 `--tree` converts a whole GTL subtree (archives and loose configs); `--templates` supplies GTR2 files keyed by filename so the same-track session/key rules are applied. `--check` writes nothing in either mode.

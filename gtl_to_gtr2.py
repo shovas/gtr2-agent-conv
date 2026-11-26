@@ -734,12 +734,18 @@ def main(argv=None) -> int:
                          "(source/target are directory roots)")
     ap.add_argument("--templates", metavar="DIR",
                     help="directory of GTR2 template files for --tree key-addition rules")
+    ap.add_argument("--json", action="store_true",
+                    help="emit --validate problems as JSON")
     args = ap.parse_args(argv)
     if args.validate:
         problems = validate_gtr2_tree(args.validate)
-        print(f"validate: {len(problems)} problem(s)")
-        for msg in problems[:20]:
-            print(" ", msg)
+        if args.json:
+            import json
+            print(json.dumps(problems, indent=2))
+        else:
+            print(f"validate: {len(problems)} problem(s)")
+            for msg in problems[:20]:
+                print(" ", msg)
         return 1 if problems else 0
     if not args.source:
         ap.error("source required unless --validate is used")

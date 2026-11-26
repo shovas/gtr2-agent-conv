@@ -6730,6 +6730,29 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
         self.assertIn("0 problem(s)", result.stdout)
 
+    def test_validate_json_cli(self):
+        """`--validate --json` emits a JSON array of problem strings."""
+        import json
+        import subprocess
+        import sys
+        import tempfile
+        import gtl_to_gtr2 as gtl
+
+        src = ROOT.parent / "GTLSteam/GameData/Locations/Anderstorp"
+        if not src.is_dir():
+            self.skipTest("Anderstorp GTL track not present")
+        with tempfile.TemporaryDirectory(dir="/tmp/opencode") as td:
+            tree = Path(td) / "GameData"
+            gtl.convert_tree(src, tree, include_others=False)
+            result = subprocess.run(
+                [sys.executable, str(ROOT / "gtl_to_gtr2.py"),
+                 "--validate", str(tree), "--json"],
+                capture_output=True, text=True)
+            self.assertEqual(result.returncode, 1)
+            problems = json.loads(result.stdout)
+            self.assertGreater(len(problems), 0)
+            self.assertTrue(all(isinstance(p, str) for p in problems))
+
     def test_validator_clean_on_real_gtr2_tree(self):
         """validate_gtr2_tree reports no false positives on the real game."""
         import gtl_to_gtr2 as g2g

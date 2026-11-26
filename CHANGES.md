@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 11:00:00 -0500 - GTL validator JSON output
+- `gtl_to_gtr2.py --validate --json` emits problems as a JSON array for batch pipelines; full-tier test added.
+
 ## 2026-11-28 10:30:00 -0500 - RaceGMT triangle CLI
 - `race_gmt.py --triangles FILE` reports the decoded 36-byte record framing (count, groups, first records).
 
