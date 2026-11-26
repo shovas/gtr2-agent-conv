@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 07:50:00 -0500 - Full rF1 tree conversion audit
+- Audited tree conversion on all 16 rF1 location directories: zero exceptions and zero structural TRK/MASFile violations (remaining gaps are template-only session/AIW keys and shared archives outside the subtree). Quick-tier regression test over two tracks added.
+
 ## 2026-11-26 07:20:00 -0500 - Validator source detection guard
 - Confirmed the new GSC auto-detection in `validate_conversion` does not misclassify old-layout rF1 GMTs (300/300 correctly detected as plain sources with f0/tail checks enabled); regression assertions added.
 
