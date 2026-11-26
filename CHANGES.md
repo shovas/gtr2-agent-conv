@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-27 08:20:00 -0500 - small_b lag negative
+- Cross-correlated replay small_b against elevation and heading rate over lags -10..+10: no consistent peak (best |mean r| < 0.15). Consolidated into the existing small_b negative test.
+
 ## 2026-11-27 07:50:00 -0500 - Document f0 absolute-delta trap
 - Clarified that `gmt_format.split_f0()` returns an absolute halfword delta; raw signed ordering is mixed. A spurious "nonnegative invariant" was caught and retracted before committing. Full-tier guard and methodology note added.
 

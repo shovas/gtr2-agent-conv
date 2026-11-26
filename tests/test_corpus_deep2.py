@@ -5190,6 +5190,24 @@ class CorpusDeep2Test(unittest.TestCase):
             self.assertLess(statistics.mean(abs(value) for value in values),
                             0.25, channel)
 
+        # No lag in [-10, +10] produces a consistent channel either.
+        for channel in ("elevation_delta", "heading_rate"):
+            best = 0.0
+            for lag in (-10, -5, -2, -1, 0, 1, 2, 5, 10):
+                values = []
+                for series in data:
+                    target = series[channel]
+                    if lag >= 0:
+                        first = series["small_b"][:len(target) - lag] if lag \
+                            else series["small_b"][:len(target)]
+                        second = target[lag:]
+                    else:
+                        first = series["small_b"][-lag:len(target)]
+                        second = target[:len(target) + lag]
+                    values.append(correlate(first, second))
+                best = max(best, abs(statistics.mean(values)))
+            self.assertLess(best, 0.15, channel)
+
     def test_driver_small_a_tracks_elevation_change(self):
         """The replay's small_a field follows vertical motion."""
         import random
