@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 04:20:00 -0500 - Validator supports GSC sources
+- `validate_conversion.py` now validates ISI-encrypted GSC→GTR2 conversions against decoded geometry, with explicit N/A flags for raw-container checks. Full-tier test added.
+
 ## 2026-11-26 03:50:00 -0500 - Replay shift corpus validation
 - Verified the replay time editor on all 13 shipped replays for +64 s and -64 s: exact EOF, correct frame-time deltas, unchanged summary duration and valid containers. Full-tier test added.
 

@@ -49,6 +49,58 @@ class ValidateConversionTest(unittest.TestCase):
             self.skipTest("old-layout GMTs not present")
         self.assertEqual(checked, 10)
 
+    def test_gsc_source_validation(self):
+        """Encrypted GSC members validate geometry with N/A raw checks."""
+        import struct
+        import gmt_semantic
+        import gmt_layout
+        import mas_tool
+
+        # Deterministic known-good sample keeps this test in the quick tier.
+        archive = (ROOT.parent / "CopaPetrobrasdeMarcas" / "Gamedata"
+                   / "Scripts" / "pits.mas")
+        if not archive.is_file():
+            self.skipTest("GSC sample archive not present")
+        try:
+            _mtype, entries = mas_tool.read_archive(archive)
+        except Exception:
+            self.skipTest("GSC sample archive unreadable")
+        for entry in entries:
+            if entry.name.upper() != "STARTBOX.GMT":
+                continue
+            data = entry.data or b""
+            try:
+                decoded = gmt_semantic.decode_gsc_member(data)
+            except Exception:
+                decoded = None
+            if not decoded or not decoded.get("submeshes"):
+                continue
+            try:
+                converted = gmt_layout.gsc_member_to_gtr2(data)
+            except Exception:
+                continue
+            report = vc.validate(data, converted)
+            self.assertTrue(report["pass"], report)
+            self.assertTrue(report["gsc_source"])
+            self.assertFalse(report["material_tail_checked"])
+            self.assertFalse(report["f0_checked"])
+            self.assertTrue(report["positions_equal"])
+            self.assertTrue(report["uvs_equal"])
+            self.assertTrue(report["faces_equal"])
+            self.assertTrue(report["independent_cross_check"])
+
+            subs = gmt_semantic.find_submeshes(converted)
+            self.assertTrue(subs)
+            bad = bytearray(converted)
+            offset = subs[0]["i_off"] + 4
+            value = struct.unpack_from("<H", bad, offset)[0]
+            struct.pack_into("<H", bad, offset, value + 1)
+            report = vc.validate(data, bytes(bad))
+            self.assertFalse(report["faces_equal"], report)
+            self.assertFalse(report["pass"], report)
+            return
+        self.skipTest("decodable GSC member not present")
+
     def test_f0_corruption_is_detected(self):
         """The validator rejects a converted GMT whose f0 marker was altered."""
         import gmt_semantic

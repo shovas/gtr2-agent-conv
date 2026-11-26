@@ -81,8 +81,19 @@ def _f0_markers(data: bytes) -> list[int]:
 
 
 def validate(old_data: bytes, new_data: bytes) -> dict:
-    """Return a validation report for an old→new conversion."""
-    old = gmt_semantic.read_gmt(old_data)
+    """Return a validation report for an old→new conversion.
+
+    Sources may be plain old-layout GMTs or ISI-encrypted GSC members; in the
+    latter case geometry comes from ``decode_gsc_member()`` and the material
+    tail / f0 checks (which need the raw container) are marked not applicable.
+    """
+    decoded = None
+    try:
+        decoded = gmt_semantic.decode_gsc_member(old_data)
+    except Exception:
+        pass
+    gsc_source = bool(decoded and decoded.get("submeshes"))
+    old = decoded if gsc_source else gmt_semantic.read_gmt(old_data)
     new = gmt_semantic.read_gmt(new_data)
     old_pos = [p for s in old["submeshes"] for p in s["positions"]]
     new_pos = [p for s in new["submeshes"] for p in s["positions"]]
@@ -108,21 +119,30 @@ def validate(old_data: bytes, new_data: bytes) -> dict:
             if not cross:
                 break
 
-    # Material tail preserved: locate u32 obj_list_offset at 0 and compare tail bytes.
-    old_obj = struct.unpack_from("<I", old_data, 0)[0]
-    new_obj = struct.unpack_from("<I", new_data, 0)[0]
-    tail_equal = old_data[old_obj:] == new_data[new_obj:]
+    # Material tail preserved: only comparable for plain old-layout sources.
+    tail_checked = not gsc_source
+    if tail_checked:
+        old_obj = struct.unpack_from("<I", old_data, 0)[0]
+        new_obj = struct.unpack_from("<I", new_data, 0)[0]
+        tail_equal = old_data[old_obj:] == new_data[new_obj:]
+    else:
+        tail_equal = True
 
     # f0 is an opaque per-mesh identifier that must survive conversion exactly.
-    old_f0 = _f0_markers(old_data)
-    new_f0 = _f0_markers(new_data)
-    f0_equal = bool(old_f0) and old_f0 == new_f0
+    f0_checked = not gsc_source
+    if f0_checked:
+        old_f0 = _f0_markers(old_data)
+        new_f0 = _f0_markers(new_data)
+        f0_equal = bool(old_f0) and old_f0 == new_f0
+    else:
+        f0_equal = True
 
     return {"submeshes": (len(old["submeshes"]), len(new["submeshes"])),
             "vertices": (len(old_pos), len(new_pos)), "faces": (len(old_faces), len(new_faces)),
             "positions_equal": positions_equal, "uvs_equal": uvs_equal,
             "faces_equal": faces_equal, "independent_cross_check": cross,
-            "material_tail_equal": tail_equal, "f0_equal": f0_equal,
+            "material_tail_equal": tail_equal, "material_tail_checked": tail_checked,
+            "f0_equal": f0_equal, "f0_checked": f0_checked, "gsc_source": gsc_source,
             "pass": all((positions_equal, uvs_equal, faces_equal, cross,
                          tail_equal, f0_equal))}
 
