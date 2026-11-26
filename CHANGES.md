@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-27 13:50:00 -0500 - f0 mesh-0 filename-hash negative
+- Ruled out CRC32/adler32/MD5 of GMT member filenames as GTR2 mesh-0 f0 markers (0 exact matches in 3,157 sampled markers). Full-tier test added.
+
 ## 2026-11-27 13:20:00 -0500 - Regression recheck and u32 enum negative
 - Normal-tier regression after the recent CLI/format changes: 266 tests, 0 failures (283 s). Ruled out a top-byte enum in the HAT u32 (all 256 values, exponent-style peaks); consolidated with existing u32 negatives.
 

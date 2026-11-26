@@ -599,8 +599,10 @@ a superficial string mapping would be wrong. Full-tier test:
     only mesh 0 differs. No simple constant transform explains the mesh-0
     change (287 distinct XOR values in 462 pairs). So the marker is
     authoring-state preserved across games for later meshes, with mesh 0
-    game-specific. Full-tier test:
-    `test_f0_preserved_cross_game_except_first_submesh`.
+    game-specific. Member-filename hashes (CRC32/adler32/MD5, raw/upper/lower/
+    stem) also fail for mesh 0 (0 exact matches in 3,157 markers). Full-tier
+    tests: `test_f0_preserved_cross_game_except_first_submesh`,
+    `test_f0_mesh0_not_member_filename_hash`.
 - **Terminology correction:** `material_index` equals the mesh ordinal in
   99.97% of meshes; all "material index" findings are really mesh position.
 - f0 is strongly associated with material identity (raw-material-equal groups

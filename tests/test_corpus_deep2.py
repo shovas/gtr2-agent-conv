@@ -1966,6 +1966,42 @@ class CorpusDeep2Test(unittest.TestCase):
                            for half in (lo, hi) if half == values[name])
             self.assertLess(observed, 10)  # chance level for 2 x 12k halfwords
 
+    def test_f0_mesh0_not_member_filename_hash(self):
+        """GTR2 mesh-0 markers are not hashes of the GMT member filename."""
+        import glob
+        import hashlib
+        import zlib
+        import gmt_format as gf
+        import mas_tool
+
+        rows = []
+        for archive in glob.glob(
+                str(ROOT.parent / "GTR2Steam" / "**" / "*.gtr"),
+                recursive=True)[:15]:
+            try:
+                _mtype, entries = mas_tool.read_archive(archive)
+            except Exception:
+                continue
+            for entry in entries:
+                if not entry.name.lower().endswith(".gmt") or not entry.data:
+                    continue
+                try:
+                    parsed = gf.parse_gmt(entry.name, entry.data)
+                except Exception:
+                    continue
+                marker = gf.mesh_marker(parsed.meshes[0]) if parsed.meshes else None
+                if marker:
+                    rows.append((entry.name, marker))
+            if len(rows) >= 1000:
+                break
+        self.assertGreater(len(rows), 500)
+        for name, marker in rows:
+            for digest in (zlib.crc32(name.encode("latin-1")),
+                           zlib.adler32(name.encode("latin-1")),
+                           int.from_bytes(hashlib.md5(
+                               name.encode("latin-1")).digest()[:4], "little")):
+                self.assertNotEqual(digest, marker)
+
     def test_f0_not_archive_scoped(self):
         """Adding archive identity to material names does not explain f0."""
         import collections
