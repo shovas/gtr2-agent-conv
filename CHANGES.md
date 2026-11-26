@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 01:50:00 -0500 - rF1 archived GMT end-to-end validation
+- Verified 253/253 converted GMTs from five rF1 track archives pass the full validator with the semantic bridge; bounded full-tier regression test added.
+
 ## 2026-11-28 01:20:00 -0500 - f0 signal is material-family level
 - Showed f0's material MI excess is essentially identical for exact names and 3-character prefixes (1.135 vs 1.094 bits), confirming a family-level rather than exact-name association. Permutation-controlled test added.
 

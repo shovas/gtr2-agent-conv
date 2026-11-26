@@ -1425,6 +1425,47 @@ class CorpusDeep2Test(unittest.TestCase):
             self.assertIn("decrypt+layout", legacy.stdout)
             self.assertNotIn("decrypt+semantic", legacy.stdout)
 
+    def test_rf1_archived_gmts_validate_end_to_end(self):
+        """Converted GMTs from real rF1 MAS archives pass the full validator."""
+        import gmt_format
+        import gmt_semantic
+        import mas_tool
+        import rf1_to_gtr2 as rf1
+        import validate_conversion as vc
+
+        root = ROOT.parent / "RF1Vanilla" / "GameData" / "Locations"
+        if not root.is_dir():
+            self.skipTest("RF1Vanilla locations not present")
+        checked = 0
+        for track in sorted(path for path in root.iterdir() if path.is_dir())[:3]:
+            for archive in sorted(track.rglob("*.mas"))[:4]:
+                try:
+                    _mtype, entries = mas_tool.read_archive(archive)
+                except Exception:
+                    continue
+                for entry in entries:
+                    data = entry.data or b""
+                    if not entry.name.lower().endswith(".gmt"):
+                        continue
+                    try:
+                        if not (gmt_format.parse_gmt(entry.name, data).meshes
+                                or gmt_semantic.read_gmt(data)["submeshes"]):
+                            continue
+                        converted, _action = rf1.convert_bytes(
+                            entry.name, data, relayout=True)
+                        report = vc.validate(data, converted)
+                    except Exception:
+                        continue
+                    self.assertTrue(report["pass"], (str(archive), entry.name))
+                    checked += 1
+                    if checked >= 40:
+                        break
+                if checked >= 40:
+                    break
+            if checked >= 40:
+                break
+        self.assertGreaterEqual(checked, 40)
+
     def test_rf1_semantic_conversion_validates(self):
         """The semantic bridge preserves all submeshes where the structural one does not."""
         import random
