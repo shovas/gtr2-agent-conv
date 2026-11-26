@@ -36,22 +36,58 @@ def _looks_like_media(data: bytes) -> bool:
                                   data[4:20] == GMT_MAGIC_GTR1)))
 
 
+def _looks_like_text_config(data: bytes) -> bool:
+    """ISIMotor key=value / section text: >90% printable plus '=' or braces.
+
+    Shared by ``decrypt_jca_text`` and ``detect_jca_key`` so the auto-detecting
+    CLI accepts the same payloads as the decryption API.
+    """
+    sample = data[:4096]
+    if not sample:
+        return False
+    config_syntax = b"=" in sample or (b"{" in sample and b"}" in sample)
+    return (config_syntax and
+            sum(32 <= c < 127 or c in (9, 10, 13) for c in sample)
+            > 0.9 * len(sample))
+
+
+def _looks_like_shader(data: bytes) -> bool:
+    """HLSL/PS1.1 or gMotor2 shader-description source (no '=' keys)."""
+    flat = b" ".join(data[:4096].split())
+    return (b"ps.1.1" in flat or b"register (c" in flat or
+            b"gMotor2 Shader" in flat or b"PS_OUTPUT ps2" in flat)
+
+
 def detect_jca_key(data: bytes) -> str | None:
     """Try each known JCA key and return the name that yields a valid payload.
 
     Corpus-verified: Race07/GTL/Volvo default vs Volvo's custom key, and
     RaceRoomTheGame/RaceRoomTheGame2 JCA GMTs (v1, volvo key) whose decrypted
-    ISI GMT magic sits at offset 8. Returns ``None`` if no key produces a
-    recognisable DDS/WAV/TGA/GMT payload.
+    ISI GMT magic sits at offset 8. Also recognises text configs and shaders,
+    so the ``jca-decrypt --key auto`` CLI accepts everything the dedicated
+    ``decrypt_jca_text`` / ``decrypt_jca_shader`` APIs do. Media is tried
+    across all keys first so a text-like false positive cannot win over the
+    correct media key. Returns ``None`` if no key produces a recognisable
+    payload.
     """
     import jca_crypt
-    for name in [None] + sorted(jca_crypt.CUSTOM_KEYS):
+    keys = [None] + sorted(jca_crypt.CUSTOM_KEYS)
+    candidates = []
+    for name in keys:
         try:
-            out = jca_crypt.decrypt_bytes(data, jca_crypt.CUSTOM_KEYS.get(name))
-            if _looks_like_media(out):
-                return name or "default"
+            candidates.append((name, jca_crypt.decrypt_bytes(
+                data, jca_crypt.CUSTOM_KEYS.get(name))))
         except Exception:
             continue
+    for name, out in candidates:
+        if _looks_like_media(out):
+            return name or "default"
+    for name, out in candidates:
+        if _looks_like_text_config(out):
+            return name or "default"
+    for name, out in candidates:
+        if _looks_like_shader(out):
+            return name or "default"
     return None
 
 
@@ -82,10 +118,7 @@ def decrypt_jca_text(data: bytes) -> bytes:
             out = jca_crypt.decrypt_bytes(data, jca_crypt.CUSTOM_KEYS.get(name))
         except Exception:
             continue
-        sample = out[:4096]
-        config_syntax = b"=" in sample or (b"{" in sample and b"}" in sample)
-        if config_syntax and sum(32 <= c < 127 or c in (9, 10, 13)
-                                 for c in sample) > 0.9 * len(sample):
+        if _looks_like_text_config(out):
             return out
     return data
 
@@ -105,9 +138,7 @@ def decrypt_jca_shader(data: bytes) -> bytes | None:
             out = jca_crypt.decrypt_bytes(data, jca_crypt.CUSTOM_KEYS.get(name))
         except Exception:
             continue
-        flat = b" ".join(out[:4096].split())
-        if (b"ps.1.1" in flat or b"register (c" in flat or
-                b"gMotor2 Shader" in flat or b"PS_OUTPUT ps2" in flat):
+        if _looks_like_shader(out):
             return out
     return None
 

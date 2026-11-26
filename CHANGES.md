@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 08:00:00 -0500 - Fix JCA auto-detection for configs/shaders
+- Fixed `media_tool.py jca-decrypt --key auto`: auto-detection now recognises JCA-wrapped text configs and shaders (previously reported "no known JCA key matched" for valid `.gdb`/`.gfx` files). Heuristics are shared with `decrypt_jca_text()`/`decrypt_jca_shader()`; full-tier CLI regression test added.
+
 ## 2026-11-28 07:30:00 -0500 - CLI smoke guard
 - Added a full-tier smoke test that all 28 documented CLI entrypoints import and respond to `--help`.
 

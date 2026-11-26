@@ -92,6 +92,47 @@ class MediaToolTest(unittest.TestCase):
                 self.assertEqual(media_tool.detect_jca_key(Path(sample).read_bytes()), expected)
                 self.assertEqual(media_tool.identify(sample).details["jca_key"], expected)
 
+    def test_detect_jca_key_text_and_shader(self):
+        """Auto-detection and the jca-decrypt CLI handle configs and shaders."""
+        import glob
+        import subprocess
+        import tempfile
+
+        cases = []
+        for root, expected in (("Race07Complete", "default"),
+                               ("VolvoTheGame", "volvo"),
+                               ("RaceRoomTheGame", "volvo")):
+            sample = next((p for p in glob.glob(
+                str(ROOT.parent / root / "**" / "*"), recursive=True)
+                if Path(p).is_file() and Path(p).suffix.lower() in
+                (".gdb", ".car") and Path(p).read_bytes()[:4] == b"\x0f\xb1\xff\xff"), None)
+            shader = next((p for p in glob.glob(
+                str(ROOT.parent / root / "**" / "*"), recursive=True)
+                if Path(p).is_file() and Path(p).suffix.lower() in
+                (".gfx", ".vsh", ".psh") and
+                Path(p).read_bytes()[:4] == b"\x0f\xb1\xff\xff"), None)
+            if sample:
+                cases.append((sample, expected, True))
+            if shader:
+                cases.append((shader, expected, False))
+        if not cases:
+            self.skipTest("JCA config/shader corpora not present")
+        for path, expected, is_text in cases:
+            with self.subTest(path=Path(path).name):
+                data = Path(path).read_bytes()
+                self.assertEqual(media_tool.detect_jca_key(data), expected)
+                with tempfile.TemporaryDirectory() as td:
+                    out = Path(td) / "out.bin"
+                    result = subprocess.run(
+                        [sys.executable, str(ROOT / "media_tool.py"),
+                         "jca-decrypt", str(path), str(out), "--key", "auto"],
+                        capture_output=True, text=True)
+                    self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                    self.assertTrue(out.is_file())
+                    reference = (media_tool.decrypt_jca_text(data) if is_text
+                                 else media_tool.decrypt_jca_shader(data))
+                    self.assertEqual(out.read_bytes(), reference)
+
     def test_jca_text_configs_in_all_key_corpora(self):
         """JCA-wrapped configs decrypt to printable text with autodetected keys."""
         import glob
