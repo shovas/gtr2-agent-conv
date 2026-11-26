@@ -645,7 +645,10 @@ a superficial string mapping would be wrong. Full-tier test:
   signal is family-level: 3-character material prefixes carry nearly the same
   MI excess as exact names (1.094 vs 1.135 bits), so exact spelling adds
   nothing beyond the family. Full-tier test:
-  `test_f0_material_signal_is_family_level`.
+  `test_f0_material_signal_is_family_level`. External context: the official
+  gMotor 3ds Max exporter docs state "Max List Verts" should be 65535 and extra
+  vertex lists are created beyond that, consistent with 16-bit list/vertex
+  counts in the format; this does not by itself decode f0.
   Full-tier tests: `test_f0_material_name_carries_limited_information`,
   `test_f0_material_association_replicates_on_holdout`.
   **Working hypothesis only (not established):** an external authoring

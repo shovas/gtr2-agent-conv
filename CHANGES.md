@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 03:50:00 -0500 - External GMT exporter context
+- Recorded the official gMotor exporter note that vertex lists are capped at 65535, consistent with the format's 16-bit structures; f0 remains undecoded.
+
 ## 2026-11-28 03:20:00 -0500 - Restore normal-tier budget
 - Moved `test_gmt_relayout` and `test_fixtures` to the full tier so the normal tier runs 259 tests in 284 s (within the 300 s budget) under load; both modules still pass in full tier.
 
