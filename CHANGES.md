@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-27 10:20:00 -0500 - JCA key corpus usage note
+- Documented that all four JCA keys have round-trip tests but a 1,200-file sample across four corpora detected only `default` and `volvo` in shipped files; `raceroom_plr` and `old_raceroom` remain corpus-unexercised.
+
 ## 2026-11-27 09:50:00 -0500 - f0-compare empty-list fix
 - `gmt_tool.py f0-compare` now treats two marker-free GMTs as equal (exit 0) instead of failing; regression test extended.
 
