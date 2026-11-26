@@ -214,7 +214,9 @@ regression tests or an explicitly documented negative.
   total, exact EOF), and `Dubai International.Vcr` uses Latin-1 accented
   participant names. `shift_replay_times()` shifts all frame times and
   participant windows consistently while leaving spans and sub-records
-  untouched. Sub-record low-byte tags follow participants: `0..N-2`
+  untouched. Driving-school `.dsi` files use the same IRSR/replay frame
+  stream: their instructor ghost line equals the decoded driver-state
+  positions exactly, one point per frame. Sub-record low-byte tags follow participants: `0..N-2`
   are driver state records, `0x68` accompanies the `Safety Marshal`, and
   `0xff` marks event records whose bodies can contain texture names such as
   `DYTEX000`/`SRTEX000`/`SSTEX000`. A 53-byte driver-state body decodes via

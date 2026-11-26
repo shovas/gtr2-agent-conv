@@ -4441,6 +4441,30 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertEqual(checked, 4)
 
+    def test_dsi_ghost_line_matches_decoded_frame_positions(self):
+        """Driving-school ghost points are the frames' driver-state positions."""
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        base = ROOT.parent / "GTR2Steam" / "GameData" / "DrivingSchool"
+        checked = 0
+        for path in list(base.rglob("*.dsi"))[:6]:
+            payload = gz.decompress(str(path))
+            line = st.read_ghost_line(payload)
+            parsed = st.parse_vcr_frames(payload)
+            if not line or not parsed:
+                continue
+            positions = []
+            for frame in parsed["frames"]:
+                for record in frame["records"]:
+                    state = st.vcr_driver_state(record["data"])
+                    if state:
+                        positions.append(state["position"])
+                        break
+            self.assertEqual(len(line), len(positions), path.name)
+            self.assertEqual(positions, line, path.name)
+            checked += 1
+        self.assertGreaterEqual(checked, 4)
+
     def test_shift_replay_times_is_consistent(self):
         """Frame times and participant windows shift together; spans do not."""
         import statistics

@@ -199,6 +199,17 @@ phantom empty frames from those zeros; `parse_vcr_frames()` now rejects
 zero-count summaries and zero-subcount frames, returning None for GTL replays
 while all nine GTR2 replays still parse exactly. Full-tier test added.
 
+## Driving-school .dsi files share the replay stream (2026-11-30)
+
+The `.dsi` instructor files under `GTR2Steam/GameData/DrivingSchool` are
+gzip + gMb + IRSR v1.05 payloads. The replay summary and frame decoders parse
+them exactly to EOF (e.g. 281 frames / 281 sub-records for A1_Level 4), with
+one 53-byte driver-state sub-record per frame. `read_ghost_line()`'s polyline
+is **exactly** the sequence of those sub-records' decoded positions — 281/281
+and 258/258 byte-exact matches in two sampled files. This independently
+confirms the byte-29 position layout and unifies the two decoders. Full-tier
+test added.
+
 ## Semantic GMT reader magic gap fixed (2026-11-30)
 
 `gmt_semantic.find_submeshes()` only accepted magic low words 0x4011/0x4015/
