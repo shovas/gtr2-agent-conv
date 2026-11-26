@@ -250,6 +250,9 @@ regression tests or an explicitly documented negative.
   Raw deltas appeared to correlate with derived speed in 4 of 28 replay/slot pairs
   (|r| > 0.15), but the signs were inconsistent and linear detrending collapsed
   all four to |r| <= 0.109 — a shared slow trend, not a wheel-speed decoder.
+  A search over wrap moduli 1024..65536 also found no consistent speed channel
+  (best per-replay |r| never exceeds 0.5 in any modulus; full-tier test
+  `test_driver_u16_wrap_moduli_not_wheel_speed`).
 - Every ghost ends with a **20-byte tail** (5 f32s). Its first two floats are
   a per-track fixed point (median distance 0.6 between ghosts of the same
   track vs 178 for random pairs) near that track's final frame position —

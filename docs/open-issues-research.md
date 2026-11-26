@@ -150,6 +150,14 @@ the heading-rate association (8/8, mean -0.171, p=0.004), so heading rate is
 the primary driver and lateral acceleration a derived/secondary effect. The
 full-tier signal test now asserts both orderings.
 
+## Driver u16 wrap-modulus search (2026-11-26) — negative
+
+Tested whether the four u16s are wheel counters wrapping at a modulus other
+than 65536: repeated the delta-magnitude vs speed correlation across eight
+replays for moduli 1024, 2048, 4096, 8192, 16384, 32768 and 65536. No modulus
+gives a consistent channel — the best per-replay r stays below 0.5 and at most
+2/8 replays exceed 0.2 for any modulus. Full-tier test added.
+
 ## Driver short-pair difference vs heading rate (2026-11-26)
 
 A fresh kinematic probe found the first useful driver-state signal:

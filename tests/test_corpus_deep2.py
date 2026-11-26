@@ -4873,6 +4873,56 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertLess(statistics.mean(abs(value) for value in lateral_correlations),
                         statistics.mean(abs(value) for value in observed))
 
+    def test_driver_u16_wrap_moduli_not_wheel_speed(self):
+        """No tested wrap modulus makes u16 deltas a wheel-speed channel."""
+        import math
+        import statistics
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+
+        def correlate(x, y):
+            mx, my = statistics.mean(x), statistics.mean(y)
+            numerator = sum((a - mx) * (b - my) for a, b in zip(x, y))
+            denominator = (sum((a - mx) ** 2 for a in x)
+                           * sum((b - my) ** 2 for b in y)) ** 0.5
+            return numerator / denominator if denominator else 0.0
+
+        data = []
+        for root in (ROOT.parent / "GTR2Steam" / "ReplayData",
+                     ROOT.parent / "GTLSteam" / "ReplayData"):
+            for path in sorted(root.glob("*.Vcr")):
+                parsed = st.parse_vcr_frames(gz.decompress(str(path)))
+                if not parsed:
+                    continue
+                states = []
+                for frame in parsed["frames"]:
+                    for record in frame["records"]:
+                        if st.vcr_record_tag(record["header"]) == 0:
+                            state = st.vcr_driver_state(record["data"])
+                            if state:
+                                states.append(state)
+                            break
+                if len(states) < 300:
+                    continue
+                speed = [math.dist(before["position"], after["position"])
+                         for before, after in zip(states, states[1:])]
+                data.append((states, speed))
+        self.assertGreaterEqual(len(data), 6)
+
+        for modulus in (1024, 2048, 4096, 8192, 16384, 32768, 65536):
+            best = []
+            for states, speed in data:
+                correlations = []
+                for slot in range(4):
+                    wrapped = [((after["shorts"][slot] - before["shorts"][slot])
+                                % modulus)
+                               for before, after in zip(states, states[1:])]
+                    magnitude = [min(value, modulus - value) for value in wrapped]
+                    correlations.append(correlate(magnitude, speed))
+                best.append(max(correlations))
+            self.assertLess(max(best), 0.5, modulus)
+            self.assertLess(sum(value > 0.2 for value in best), len(best) // 2)
+
     def test_driver_u16_deltas_not_wheel_speed(self):
         """Apparent u16-delta/speed correlations are shared slow trends."""
         import math
