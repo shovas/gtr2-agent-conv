@@ -4382,6 +4382,17 @@ class CorpusDeep2Test(unittest.TestCase):
                                                    headings)) for _ in range(5))
         self.assertGreater(observed, 3 * baseline)
 
+    def test_gtl_replays_have_no_declared_frame_stream(self):
+        """GTL v1.01 replays must not produce phantom GTR2-style frames."""
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        checked = 0
+        for path in (ROOT.parent / "GTLSteam" / "ReplayData").glob("*.Vcr"):
+            payload = gz.decompress(str(path))
+            self.assertIsNone(st.parse_vcr_frames(payload))
+            checked += 1
+        self.assertEqual(checked, 4)
+
     def test_vcr_driver_state_positions_are_smooth(self):
         """The 53-byte driver body's f32 block starts at byte 29."""
         import math

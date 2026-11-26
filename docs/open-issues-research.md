@@ -168,6 +168,15 @@ session variation is carried solely by `session_seconds`
 `c=8` only in Magny-Cours, but with nine samples no semantics are claimed.
 Full-tier regression test added.
 
+## GTL replay v1.01 frame variant (2026-11-30)
+
+The four GTL `.Vcr` replays parse as IRSR v1.01 but their summary declares
+zero frames and zero duration, and the post-summary region begins with zero
+bytes followed by the -1e32 sentinel. A permissive frame loop produced three
+phantom empty frames from those zeros; `parse_vcr_frames()` now rejects
+zero-count summaries and zero-subcount frames, returning None for GTL replays
+while all nine GTR2 replays still parse exactly. Full-tier test added.
+
 ## Remaining driver-state fields (2026-11-30) — negative
 
 Tested the four u16 fields at body +8 and the small f32s at bytes 41/49

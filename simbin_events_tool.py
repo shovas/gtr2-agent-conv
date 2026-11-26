@@ -359,7 +359,7 @@ def parse_vcr_frames(data: bytes) -> list[dict] | None:
     Returns ``None`` when the stream cannot be parsed cleanly.
     """
     summary = parse_replay_summary(data)
-    if summary is None or summary["marker"] != 0:
+    if summary is None or summary["marker"] != 0 or summary["count_a"] == 0:
         return None
     offset = summary["offset"] + 13
     frames = []
@@ -369,7 +369,7 @@ def parse_vcr_frames(data: bytes) -> list[dict] | None:
     # layout remains valid; the 7 well-formed files stop at payload end.
     while offset + 6 <= len(data):
         time_word, subcount = struct.unpack_from("<IH", data, offset)
-        if subcount > 500:
+        if subcount == 0 or subcount > 500:
             break
         cursor = offset + 6
         records = []
