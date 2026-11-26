@@ -199,6 +199,13 @@ phantom empty frames from those zeros; `parse_vcr_frames()` now rejects
 zero-count summaries and zero-subcount frames, returning None for GTL replays
 while all nine GTR2 replays still parse exactly. Full-tier test added.
 
+## Driver u16 fields vs curvature (2026-11-30) — negative
+
+The four u16 fields at driver-body +8 show no meaningful association with
+path curvature computed from consecutive decoded positions (|r| <= 0.049,
+comparable to seeded permutation baselines). Combined with earlier negatives
+(speed, time, fixed-point temperature), these fields remain undecoded.
+
 ## Normal-tier profiling (2026-11-30)
 
 cProfile of the normal suite showed 307 s total, dominated by 613,005
@@ -218,8 +225,10 @@ generated` but show no byte-level periodicity (best lag match 0.015), no
 meaningful u8-prefixed strings, and entropy ~7.4–7.6 bits/byte. 34 GTR2 and
 2 GTL files share this layout (1.4–4.7 MB bodies). Their f32 alignment is
 irregular and body lengths are not consistently 4-byte aligned, so the body is
-likely packed/compressed data. Recorded as a negative with the full container
-inventory. Full-tier test added.
+likely packed/compressed data. Decrypting the body with the three known gMb
+Encryptomatic keys (0x22c6, 0x1c79, 0x4d7) raised entropy to ~7.91 and produced
+no readable text, so that cipher is ruled out. Recorded as a negative with the
+full container inventory. Full-tier test added.
 
 ## Driving-school .dsi files share the replay stream (2026-11-30)
 

@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-30 21:15:00 -0500 - Hat cipher negative and u16 curvature negative
+- Ruled out the three known gMb keys for .hat bodies (entropy rises to ~7.91). Recorded that driver-state u16 fields have no curvature association. Documentation-only.
+
 ## 2026-11-30 20:45:00 -0500 - Hat payload characterization
 - Characterized .hat bodies as high-entropy (7.4-7.6 bits/byte), non-4-aligned packed data across 36 files; no decoder claimed. Full-tier test added.
 
