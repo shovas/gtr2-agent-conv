@@ -1,5 +1,25 @@
 # Open issues — offline research record (2026-11-23)
 
+## `.hat` field B is local elevation (2026-11-26)
+
+Matched each record's `(x, z)` to the nearest AIW waypoint and compared B with
+that waypoint's y:
+- r = 0.654 (Barcelona), 0.907 (Brno), 0.780 (Donington), 0.841 (Monza),
+  0.929 (Magny), 0.911 (Dubai), 0.805 (Imol);
+- seeded shuffle of y among records gives |r| < 0.1; a circular shift of the
+  y series (which preserves spatial autocorrelation) has mean r ≈ 0;
+- on flat Dubai a robust affine fit is nearly exact (slope 0.0156, intercept
+  2.499, MAD 0.00032, 61/90 points within 0.02); Magny also fits (36/60),
+  while Brno's tight hairpins put overlapping road sections at different
+  heights above/below a sample, producing outliers under nearest-waypoint
+  matching.
+
+So B is a **local surface-height value** with a track-specific scale, not a
+width or a waypoint-count proxy. Together with `htree.cpp` and the quadratic
+height-surface query in GTR2.exe, this supports the "height tree / surface
+cache" interpretation. No universal unit conversion is claimed. Full-tier
+test added.
+
 ## HAT producer strings and declared header counts (2026-11-26)
 
 New evidence source: static analysis of `../GTR2Steam/GTR2.exe` (PE32, `.text`

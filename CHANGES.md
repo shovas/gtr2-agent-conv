@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 14:50:00 -0500 - Identify hat field B as local elevation
+- Established that the .hat record's field B follows local road elevation at the record's (x,z): r=0.65-0.93 across six tracks with shuffled and circular-shift controls at zero; near-exact affine fit on flat Dubai. Supports the "height tree / surface cache" interpretation from GTR2.exe disassembly; no unit mapping claimed. Full-tier test added.
+
 ## 2026-11-26 14:20:00 -0500 - Fix hat record count from producer header
 - Corrected `media_tool.hat_record_count()`: it now reads the authoritative count declared in the HAT header (body offset 44) instead of a bounded scan that undercounted six GTR2 layouts by stopping at valid zero-valued records. The `hat-layout` CLI also reports all three declared header counts; verified on 178/178 files across nine corpora. Full-tier regression test added.
 

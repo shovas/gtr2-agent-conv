@@ -5653,6 +5653,65 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertGreaterEqual(checked, 2)
 
+    def test_hat_field_b_tracks_local_elevation(self):
+        """Record field B follows the road elevation at the same (x, z)."""
+        import random
+        import statistics
+        import struct
+        import gzip_simbin_tool as gz
+        import media_tool as mt
+        import simbin_text_tool as stt
+
+        def correlate(x, y):
+            mx, my = statistics.mean(x), statistics.mean(y)
+            numerator = sum((a - mx) * (b - my) for a, b in zip(x, y))
+            denominator = (sum((a - mx) ** 2 for a in x)
+                           * sum((b - my) ** 2 for b in y)) ** 0.5
+            return numerator / denominator if denominator else 0.0
+
+        pairs = (("3Brno", "3Brno"), ("3Monza", "3Monza"),
+                 ("3Magny", "3Magny"), ("4Dubai", "4Dubai"),
+                 ("3Estoril", "3Estoril"), ("4Imol", "4Imol"))
+        results = {}
+        for name, aiw_name in pairs:
+            hat = (ROOT.parent / "GTR2Steam" / "GameData" / "Locations"
+                   / "HAT_Dedicated" / (name + ".hat"))
+            aiws = list((ROOT.parent / "GTR2Steam" / "GameData"
+                         / "Locations").rglob(aiw_name + ".AIW"))
+            if not hat.is_file() or not aiws:
+                continue
+            payload = gz.decompress(str(hat))
+            body = payload[payload.find(b"generated\x00") + 10:]
+            count = mt.hat_declared_counts(payload)[2]
+            values = []
+            for index in range(0, count, max(1, count // 1500)):
+                first, _unknown, second, third = struct.unpack_from(
+                    "<fIff", body, 48 + 16 * index)
+                values.append((first, second, third))
+            waypoints = [wp.pos for wp in stt.parse_aiw(
+                stt.read_text(aiws[0])).waypoints if wp.pos]
+            heights = []
+            for first, second, third in values:
+                nearest = min(waypoints,
+                              key=lambda w: (w[0] - first) ** 2
+                              + (w[2] - third) ** 2)
+                heights.append(nearest[1])
+            bs = [value[1] for value in values]
+            if len(bs) < 100:
+                continue
+            results[name] = (correlate(bs, heights), bs, heights)
+        self.assertGreaterEqual(len(results), 4)
+        correlations = [value[0] for value in results.values()]
+        self.assertGreaterEqual(sum(value > 0.5 for value in correlations),
+                                len(results) - 1)
+        self.assertGreater(statistics.mean(correlations), 0.6)
+
+        random.seed(2026)
+        for name, (observed, bs, heights) in results.items():
+            shuffled = heights[:]
+            random.shuffle(shuffled)
+            self.assertLess(abs(correlate(bs, shuffled)), 0.1, name)
+
     def test_hat_field_b_not_a_track_width(self):
         """The table's B scalar is not AIW width or groove width."""
         import random

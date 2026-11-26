@@ -369,7 +369,8 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
   byte-identical after byte 4). Full-tier test:
   `test_hat_signature_across_three_games`.
 - The body begins at offset 48 with a **fixed-stride 16-byte record table**:
-  each record is `[f32 A, u32 unknown, f32 B, f32 C]`, with B roughly constant
+  each record is `[f32 x, u32 unknown, f32 height, f32 z]` (B is a local
+  elevation value — see below), with B roughly constant
   per layout (|B| 0.75–2.9) and A/C varying. Record counts span 7–61,412 and
   are identical across byte-identical bodies (5 multi-member classes, 11
   files); shuffling counts among files breaks that agreement (observed 5 vs
@@ -428,6 +429,15 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
   significance testing. B's sign does not encode track direction (18/32
   agreement with AIW signed area, chance 0.56). Full-tier test:
   `test_hat_record_b_weak_track_scale_association`.
+  **B is a local elevation value, however:** at a record's own `(x, z)` it
+  correlates strongly with the nearest AIW waypoint's y — r = 0.65–0.93 on
+  Brno/Monza/Magny/Dubai/Estoril/Imol, versus |r| < 0.1 after shuffling y
+  among records. A circular-shift control (preserving spatial autocorrelation)
+  has mean r ≈ 0. On flat Dubai the relationship is almost exactly affine
+  (robust slope 0.0156, intercept 2.499, MAD 0.0003); on hilly layouts
+  outliers arise where an adjacent road section lies directly above/below the
+  sample. The scale is track-specific, so no unit mapping is claimed. Full-tier
+  test: `test_hat_field_b_tracks_local_elevation`.
 
 ## 5. Vertex `f0` (per-mesh marker on vertex 0)
 
