@@ -553,6 +553,27 @@ class SimbinEventsToolTest(unittest.TestCase):
             checked += 1
         self.assertGreaterEqual(checked, 13)
 
+    def test_replay_channel_summary_cli(self):
+        """--summary aggregates the verified channels across a replay directory."""
+        import csv
+        import io
+        import subprocess
+        import sys
+
+        root = ROOT.parent / "GTR2Steam" / "ReplayData"
+        if not root.is_dir():
+            self.skipTest("GTR2 replay corpus not present")
+        result = subprocess.run(
+            [sys.executable, str(ROOT / "simbin_events_tool.py"),
+             str(root), "--summary"], capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        rows = list(csv.DictReader(io.StringIO(result.stdout)))
+        self.assertGreaterEqual(len(rows), 3)
+        for row in rows:
+            self.assertGreater(int(row["states"]), 300)
+            self.assertLess(float(row["steering_r"]), -0.05)
+            self.assertGreater(float(row["vertical_r"]), 0.1)
+
     def test_replay_channels_csv(self):
         """--channels emits the verified channels as parseable CSV rows."""
         import csv

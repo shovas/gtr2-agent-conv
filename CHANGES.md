@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 00:50:00 -0500 - Replay channel summary CLI
+- Added `simbin_events_tool.py <replay_dir> --summary`, printing per-replay steering/elevation channel correlations; full-tier CLI test added.
+
 ## 2026-11-28 00:20:00 -0500 - HAT b40-record negative
 - Ruled out the on-disk 16-byte table as the source of GTL.exe's b40 stream records (table ends at b44; later entries implausible); the derived-stream origin remains open.
 

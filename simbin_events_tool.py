@@ -824,9 +824,56 @@ def best_field_alignment(a: tuple, b: tuple) -> tuple[float, int]:
     return best
 
 
+def replay_channel_summary(paths) -> list[tuple]:
+    """Aggregate the two verified channels across replay files.
+
+    Returns ``(name, states, pair/heading r, small_a/elevation r)`` per
+    replay with at least 300 driver states.
+    """
+    def correlate(first, second):
+        mean_a = statistics.mean(first)
+        mean_b = statistics.mean(second)
+        numerator = sum((a - mean_a) * (b - mean_b)
+                        for a, b in zip(first, second))
+        denominator = (sum((a - mean_a) ** 2 for a in first)
+                       * sum((b - mean_b) ** 2 for b in second)) ** 0.5
+        return numerator / denominator if denominator else 0.0
+
+    rows = []
+    for path in paths:
+        raw = Path(path).read_bytes()
+        if raw[:2] == b"\x1f\x8b":
+            raw = gzip.decompress(raw)
+        parsed = parse_vcr_frames(raw)
+        if not parsed:
+            continue
+        states = []
+        for frame in parsed["frames"]:
+            for record in frame["records"]:
+                if vcr_record_tag(record["header"]) == 0:
+                    state = vcr_driver_state(record["data"])
+                    if state:
+                        states.append(state)
+                    break
+        if len(states) < 300:
+            continue
+        heading_rate = [
+            (after["angle_like"] - before["angle_like"] + math.pi)
+            % (2 * math.pi) - math.pi
+            for before, after in zip(states, states[1:])]
+        elevation = [after["position"][1] - before["position"][1]
+                     for before, after in zip(states, states[1:])]
+        pair = [state["short_pair_difference"] for state in states]
+        small_a = [state["small_a"] for state in states]
+        rows.append((Path(path).name, len(states),
+                     correlate(pair[:len(heading_rate)], heading_rate),
+                     correlate(small_a[:len(elevation)], elevation)))
+    return rows
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("file")
+    ap.add_argument("file", nargs="?")
     ap.add_argument("--strings", type=int, default=12)
     ap.add_argument("--frames", action="store_true", help="report the GTTF frame grid")
     ap.add_argument("--ghost-line", action="store_true", help="report a .dsi instructor polyline")
@@ -834,10 +881,23 @@ def main(argv=None) -> int:
                     help="report IRSR replay participants and frame stream")
     ap.add_argument("--channels", action="store_true",
                     help="emit CSV of verified replay driver-state channels")
+    ap.add_argument("--summary", action="store_true",
+                    help="aggregate verified channels across replays in a directory")
     ap.add_argument("--shift", type=float,
                     help="shift all replay timestamps by this many seconds")
     ap.add_argument("--out", help="output file for --shift (default: stdout bytes)")
     args = ap.parse_args(argv)
+    if args.summary:
+        root = Path(args.file) if args.file else Path(".")
+        if not root.is_dir():
+            ap.error("--summary requires a replay directory")
+        rows = replay_channel_summary(sorted(root.rglob("*.Vcr")))
+        print("replay,states,steering_r,vertical_r")
+        for name, count, steering, vertical in rows:
+            print(f"{name},{count},{steering:.3f},{vertical:.3f}")
+        return 0
+    if not args.file:
+        ap.error("file required unless --summary is used")
     raw = Path(args.file).read_bytes()
     if raw[:2] == b"\x1f\x8b":
         raw = gzip.decompress(raw)
