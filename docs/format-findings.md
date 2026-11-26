@@ -191,7 +191,11 @@ regression tests or an explicitly documented negative.
   slots at `0x52a6ca`, per-object linked-list serialization) — evidence for
   variable-length object records. Earlier 4-byte-aligned stride scans also
   missed 86 because it is not a multiple of 4. Frame semantics remain
-  unknown. Bulk data shows a separate **20-byte lag excess** over neighbouring
+  unknown. The EXE-derived object layout yields a working parser
+  (`simbin_events_tool.parse_object_records()`): across all nine GTR2 replays
+  it finds chains of 2–6 records whose names are the participants (driver
+  entries plus `Safety Marshal`); shuffled payloads yield ~1 chance record.
+  Bulk data shows a separate **20-byte lag excess** over neighbouring
   lags in 7/9 replays (median +0.16 matching bytes), consistent with a small
   repeating record, but no monotonic time field was found at that stride.
 - Every ghost ends with a **20-byte tail** (5 f32s). Its first two floats are

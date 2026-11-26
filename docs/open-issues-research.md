@@ -168,6 +168,19 @@ session variation is carried solely by `session_seconds`
 `c=8` only in Magny-Cours, but with nine samples no semantics are claimed.
 Full-tier regression test added.
 
+## Object-record parser validated on real replays (2026-11-30)
+
+Implemented `simbin_events_tool.parse_object_records()` from the disassembled
+layout. It walks chains of variable-length records from a scanning start and
+recovers coherent participant lists in all 13 local replays: GTR2 files yield
+2–6 records whose first two strings are entries like `Sim 10 Original` /
+`Jean-Philippe Belloc` and a final `Safety Marshal`; GTL files yield a single
+`Shovas` entry. Across the nine GTR2 files every chain has ≥2 records and
+seven or more contain `Safety Marshal`; shuffling each payload drops chains to
+~1 chance record. This is the first code-grounded parser for replay payload
+structure, though the 64-byte blocks and trailing u32s remain undecoded.
+Full-tier permutation-controlled test added.
+
 ## Replay object record format from code (2026-11-30)
 
 Disassembled the per-object serializer `fcn.005267f0` (writer) and its

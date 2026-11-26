@@ -216,6 +216,60 @@ def shift_frame_times(data: bytes, delta: float) -> bytes:
     return bytes(output)
 
 
+def parse_object_records(data: bytes, search_limit: int = 4096) -> list[dict]:
+    """Parse the variable-length object records in a replay payload.
+
+    Layout recovered from `GTR2.exe` writer `fcn.005267f0` / reader
+    `fcn.005268e0`: one flags byte (its top bit stored at in-memory +0xcc),
+    then two u8-length-prefixed strings, two 64-byte blocks and two u32s.
+    The longest consecutive chain found near the payload start is returned;
+    in the local corpus these are the replay's participants (driver entries
+    and a `Safety Marshal` entry). No field semantics are claimed.
+    """
+    def record_at(position: int) -> dict | None:
+        if position + 8 > len(data):
+            return None
+        first_length = data[position + 1]
+        if not 1 <= first_length <= 32 or position + 2 + first_length + 1 > len(data):
+            return None
+        first = data[position + 2:position + 2 + first_length]
+        if not all(32 <= byte < 127 for byte in first):
+            return None
+        second_length = data[position + 2 + first_length]
+        end_of_strings = position + 3 + first_length + second_length
+        if not 0 <= second_length <= 32 or end_of_strings + 136 > len(data):
+            return None
+        second = data[position + 3 + first_length:end_of_strings]
+        if second_length and not all(32 <= byte < 127 for byte in second):
+            return None
+        return {
+            "offset": position,
+            "flags": data[position],
+            "name": first.decode("latin-1"),
+            "label": second.decode("latin-1"),
+            "next_offset": end_of_strings + 136,
+        }
+
+    def chain_from(position: int) -> list[dict]:
+        chain = []
+        while len(chain) < 64:
+            record = record_at(position)
+            if record is None:
+                break
+            chain.append(record)
+            position = record["next_offset"]
+        return chain
+
+    best: list[dict] = []
+    for index in range(1, min(len(data) - 16, search_limit)):
+        if not 1 <= data[index] <= 32:
+            continue
+        candidate = chain_from(index - 1)
+        if len(candidate) > len(best):
+            best = candidate
+    return best
+
+
 def parse_payload(data: bytes) -> EventFile:
     kind = next((m.decode() for m in MAGICS if m in data[:64]), None)
     if kind is None:

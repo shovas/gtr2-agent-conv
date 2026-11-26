@@ -4335,6 +4335,28 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertEqual(checked, 4)
 
+    def test_replay_object_record_chains(self):
+        """The EXE-derived object layout parses real replay participants."""
+        import random
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        payloads = [gz.decompress(str(path))
+                    for path in sorted((ROOT.parent / "GTR2Steam" / "ReplayData").glob("*.Vcr"))]
+        self.assertEqual(len(payloads), 9)
+        random.seed(110)
+        chains = [st.parse_object_records(payload) for payload in payloads]
+        self.assertTrue(all(len(chain) >= 2 for chain in chains))
+        marshals = sum(any("Marshal" in record["name"] for record in chain)
+                       for chain in chains)
+        self.assertGreaterEqual(marshals, 7)
+        baselines = []
+        for payload in payloads:
+            shuffled = bytearray(payload)
+            random.shuffle(shuffled)
+            baselines.append(len(st.parse_object_records(bytes(shuffled))))
+        self.assertGreater(sum(len(chain) for chain in chains),
+                           3 * sum(baselines))
+
     def test_vcr_replay_headers_parse(self):
         """All shipped .Vcr replays parse as IRSR with known session values."""
         import gzip
