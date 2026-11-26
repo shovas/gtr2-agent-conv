@@ -491,7 +491,7 @@ properties (only coincidental `2006` substrings in names/paths). Therefore
 a superficial string mapping would be wrong. Full-tier test:
 `test_rf1_gdb_filter_properties_not_simbin_car_classes`.
 
-## 5. Vertex `f0` (per-mesh marker on vertex 0)
+## 7. Vertex `f0` (per-mesh marker on vertex 0)
 
 - f0 is **preserved from the GMT**, not assigned by GTR2.exe; the shader
   helpers use a small 1/2/3/99 stage-type enum, and there are only 94 shipped
@@ -505,6 +505,14 @@ a superficial string mapping would be wrong. Full-tier test:
   - **mesh 0 is structurally distinct**: median halves 542/678, delta 314 vs
     later meshes 63/63, delta 1; its half-sum also tracks GMT mesh count
     (r≈0.13) and member size (r≈0.16) vs ~0.009 permuted.
+  - **Cross-game preservation:** across 2,589 same-length GTR2/GTL meshes with
+    identical names, 2,261 (87.3%) have identical f0 values for **all
+    submeshes at index >= 1** (permutation mean ~5 matches); in 1,311 of those
+    only mesh 0 differs. No simple constant transform explains the mesh-0
+    change (287 distinct XOR values in 462 pairs). So the marker is
+    authoring-state preserved across games for later meshes, with mesh 0
+    game-specific. Full-tier test:
+    `test_f0_preserved_cross_game_except_first_submesh`.
 - **Terminology correction:** `material_index` equals the mesh ordinal in
   99.97% of meshes; all "material index" findings are really mesh position.
 - f0 is strongly associated with material identity (raw-material-equal groups
@@ -542,7 +550,7 @@ a superficial string mapping would be wrong. Full-tier test:
   byte-exact f0 preservation too (30/30 sampled old→new conversions; metamorphic test flips one
   marker and the report fails).
 
-## 6. `PHYSICS.PHS`
+## 8. `PHYSICS.PHS`
 
 - Five PHS members in GTL `.gtl` archives: four PAR2 `Main`/`RecvSlic` chains,
   one opaque blob. Slice size 384,000; only **3** recovery slices (exponents
@@ -551,7 +559,7 @@ a superficial string mapping would be wrong. Full-tier test:
 - No shipped GTL/GTR2 binary references PHS; GT Legends 0.9.01 updater was not
   found in local mirrors or accessible web sources. Explicitly blocked.
 
-## 7. Methodology rules learned the hard way
+## 9. Methodology rules learned the hard way
 
 1. Prefer the producer/consumer code over more byte statistics; but packed EXEs
    can make this impossible — record the blocker, don't fake it.
@@ -564,7 +572,7 @@ a superficial string mapping would be wrong. Full-tier test:
 5. Correct superseded claims in place and keep the old log for provenance;
    never silently rewrite history.
 
-## 8. Verification
+## 10. Verification
 
 - Converted GSC→GTR2 GMTs were validated against the independent
   `gtr2-agent-tools` GMT reader (runtime reference only, no code copied):

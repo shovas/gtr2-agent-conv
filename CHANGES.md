@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 19:50:00 -0500 - f0 preserved cross-game except mesh 0
+- Established that f0 markers for submeshes at index >=1 are identical across 2,261/2,589 (87.3%) same-named GTR2/GTL meshes (permutation mean ~5), with only the first marker differing in 1,311 cases. Strengthens byte-for-byte f0 preservation in conversion; the mesh-0 difference has no simple transform (287 distinct XORs). Full-tier test added.
+
 ## 2026-11-26 19:20:00 -0500 - HAT grid extent negative
 - Tested grid extent as a HAT↔track pairing validator: AIW waypoints fall inside a matching HAT's extent 11/11 times but also inside a mismatched HAT ~10.9/11, so no rule is promoted. Consolidated with the existing HAT negatives.
 

@@ -1410,6 +1410,68 @@ class CorpusDeep2Test(unittest.TestCase):
         overlap = rf1_tokens & simbin_classes
         self.assertLess(len(overlap) / len(rf1_tokens), 0.1)
 
+    def test_f0_preserved_cross_game_except_first_submesh(self):
+        """Submesh >=1 f0 markers match across GTR2/GTL for the same asset."""
+        import glob
+        import random
+        import gmt_format as gf
+        import mas_tool
+
+        def markers(root, max_archives=40):
+            result = {}
+            paths = sorted(glob.glob(str(ROOT.parent / root / "**" / "*.gtr"),
+                                     recursive=True))
+            paths += sorted(glob.glob(str(ROOT.parent / root / "**" / "*.gtl"),
+                                      recursive=True))
+            for archive in paths[:max_archives]:
+                try:
+                    _mtype, entries = mas_tool.read_archive(archive)
+                except Exception:
+                    continue
+                for entry in entries:
+                    if not entry.name.lower().endswith(".gmt") or not entry.data:
+                        continue
+                    name = entry.name.lower()
+                    if name in result:
+                        continue
+                    try:
+                        parsed = gf.parse_gmt(entry.name, entry.data)
+                    except Exception:
+                        continue
+                    values = tuple(gf.mesh_marker(mesh) or 0
+                                   for mesh in parsed.meshes)
+                    if len(values) > 1:
+                        result[name] = values
+            return result
+
+        gtr2 = markers("GTR2Steam")
+        gtl = markers("GTLSteam")
+        common = [name for name in sorted(set(gtr2) & set(gtl))
+                  if len(gtr2[name]) == len(gtl[name])]
+        self.assertGreater(len(common), 30)
+
+        def tail_match(name, candidate):
+            return gtr2[name][1:] == candidate[1:]
+
+        observed = sum(tail_match(name, gtl[name]) for name in common)
+        self.assertGreater(observed / len(common), 0.7)
+
+        random.seed(2026)
+        controls = []
+        for _ in range(100):
+            shuffled = [gtl[name] for name in random.sample(common, len(common))]
+            controls.append(sum(tail_match(name, candidate)
+                                for name, candidate in zip(common, shuffled)))
+        self.assertGreater(observed, max(controls))
+
+        first_only = sum(gtr2[name][0] != gtl[name][0] and tail_match(name, gtl[name])
+                         for name in common)
+        self.assertGreater(first_only, observed / 3)
+        # The mesh-0 difference is not a simple constant transform.
+        differences = {gtr2[name][0] ^ gtl[name][0] for name in common
+                       if gtr2[name][0] != gtl[name][0] and tail_match(name, gtl[name])}
+        self.assertGreater(len(differences), 50)
+
     def test_f0_bytes_not_stage_indices(self):
         """f0 bytes do not index the material's stage strings."""
         import glob
