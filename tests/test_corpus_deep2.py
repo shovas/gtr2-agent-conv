@@ -6676,6 +6676,46 @@ class CorpusDeep2Test(unittest.TestCase):
                 self.assertIn("teammaps2.gtr", values)
                 self.assertIn("misc.gtr", values)
 
+    def test_gtl_tree_cli_matches_api(self):
+        """`gtl_to_gtr2.py --tree` writes exactly what convert_tree() does."""
+        import subprocess
+        import tempfile
+        import gtl_to_gtr2 as gtl
+
+        src = ROOT.parent / "GTLSteam/GameData/Locations/Anderstorp"
+        if not src.is_dir():
+            self.skipTest("Anderstorp GTL track not present")
+        script = ROOT / "gtl_to_gtr2.py"
+        with tempfile.TemporaryDirectory(dir="/tmp/opencode") as td:
+            check_out = Path(td) / "check"
+            result = subprocess.run(
+                [sys.executable, str(script), str(src), str(check_out),
+                 "--tree", "--check"], capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn("files=", result.stdout)
+            self.assertFalse(check_out.exists())
+            cli_out = Path(td) / "cli"
+            api_out = Path(td) / "api"
+            result = subprocess.run(
+                [sys.executable, str(script), str(src), str(cli_out), "--tree"],
+                capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            gtl.convert_tree(src, api_out, include_others=True)
+            cli_files = {p.relative_to(cli_out): p.read_bytes()
+                         for p in cli_out.rglob("*") if p.is_file()}
+            api_files = {p.relative_to(api_out): p.read_bytes()
+                         for p in api_out.rglob("*") if p.is_file()}
+            self.assertTrue(cli_files)
+            self.assertEqual(cli_files, api_files)
+            templates = ROOT.parent / "GTR2Steam/GameData/Locations/Anderstorp"
+            if templates.is_dir():
+                result = subprocess.run(
+                    [sys.executable, str(script), str(src), str(check_out),
+                     "--tree", "--check", "--templates", str(templates)],
+                    capture_output=True, text=True)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertIn("gdb_keys:", result.stdout)
+
     def test_validate_cli_on_real_gtr2_tree(self):
         """`gtl_to_gtr2.py --validate` reports zero problems on real GTR2 data."""
         import subprocess

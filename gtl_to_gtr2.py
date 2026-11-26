@@ -729,6 +729,11 @@ def main(argv=None) -> int:
     ap.add_argument("target", nargs="?")
     ap.add_argument("--check", action="store_true",
                     help="validate conversion without writing output")
+    ap.add_argument("--tree", action="store_true",
+                    help="convert a whole source directory via convert_tree() "
+                         "(source/target are directory roots)")
+    ap.add_argument("--templates", metavar="DIR",
+                    help="directory of GTR2 template files for --tree key-addition rules")
     args = ap.parse_args(argv)
     if args.validate:
         problems = validate_gtr2_tree(args.validate)
@@ -738,6 +743,22 @@ def main(argv=None) -> int:
         return 1 if problems else 0
     if not args.source:
         ap.error("source required unless --validate is used")
+    if args.tree:
+        templates = None
+        if args.templates:
+            tdir = Path(args.templates)
+            if not tdir.is_dir():
+                ap.error("--templates requires a directory")
+            templates = {p.name: p for p in tdir.iterdir() if p.is_file()}
+        report = convert_tree(args.source, args.target, args.check,
+                              templates=templates)
+        print("files={files} trk={trk} config={config} archives={archives} "
+              "other={other}".format(**report))
+        print("changes=" + ",".join(f"{k}:{v}"
+                                    for k, v in sorted(report["changes"].items())))
+        return 0
+    if args.templates:
+        ap.error("--templates is only valid with --tree")
     report = convert_archive(args.source, args.target, args.check)
     print(f"source_type={report['source_type']} members={report['members']} "
           f"trks={report['trks']}")

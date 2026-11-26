@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 08:30:00 -0500 - GTL tree conversion CLI
+- Added `gtl_to_gtr2.py <source-dir> <target-dir> --tree [--templates DIR]` exposing the full `convert_tree()` path from the CLI; `--check` works in tree mode. Full-tier test confirms byte-identical output to the API and that check mode writes nothing.
+
 ## 2026-11-28 08:00:00 -0500 - Fix JCA auto-detection for configs/shaders
 - Fixed `media_tool.py jca-decrypt --key auto`: auto-detection now recognises JCA-wrapped text configs and shaders (previously reported "no known JCA key matched" for valid `.gdb`/`.gfx` files). Heuristics are shared with `decrypt_jca_text()`/`decrypt_jca_shader()`; full-tier CLI regression test added.
 
