@@ -1332,6 +1332,25 @@ class CorpusDeep2Test(unittest.TestCase):
             hits += pair[1] == count
         self.assertLess(hits / (2 * min(len(rows), 2000)), 0.02)
 
+    def test_rf1_track_trees_convert_structurally(self):
+        """Converted rF1 track trees have no structural TRK/MASFile violations."""
+        import tempfile
+        import text_convert as tc
+        import gtl_to_gtr2 as g2g
+        roots = sorted(p for p in (ROOT.parent / "RF1Vanilla" / "GameData"
+                                   / "Locations").iterdir() if p.is_dir())
+        roots = [p for p in roots if any(p.rglob("*.SCN"))][:2]
+        self.assertGreaterEqual(len(roots), 2)
+        with tempfile.TemporaryDirectory() as td:
+            for index, source in enumerate(roots):
+                target = Path(td) / str(index)
+                tc.convert_tree(source, target)
+                problems = g2g.validate_gtr2_tree(target)
+                structural = [p for p in problems if
+                              "non-.gtr MASFile" in p or "stale teammaps" in p
+                              or "missing Misc.gtr" in p]
+                self.assertEqual(structural, [], str(source))
+
     def test_f0_bytes_not_crc16_of_material_strings(self):
         """CRC16 variants of material/stage names do not reproduce f0 bytes."""
         import glob
@@ -1388,6 +1407,26 @@ class CorpusDeep2Test(unittest.TestCase):
                     attempts += 2
             self.assertGreater(attempts, 1000)
             self.assertLess(hits / attempts, 0.02)  # ~0.78% by chance
+
+    def test_galpha_cap_extended_rf1_corpora(self):
+        """rF1-lineage AIWs from four more corpora convert without corruption."""
+        expected = {"Automobilista": 140, "StockCarExtreme": 65,
+                    "BMWM3Challenge": 2, "SuperleagueFormula2009": 5}
+        for label, minimum in expected.items():
+            root = ROOT.parent / label
+            if not root.is_dir():
+                continue
+            paths = [p for p in root.rglob("*")
+                     if p.is_file() and p.suffix.lower() == ".aiw"]
+            self.assertGreaterEqual(len(paths), minimum, label)
+            for path in paths:
+                out = stt.aiw_for_simbin(stt.read_text(path))
+                self.assertNotIn("wpwp_", out, str(path))
+                aiw = stt.parse_aiw(out)
+                values = [wp.galpha for wp in aiw.waypoints
+                          if wp.galpha is not None]
+                if values:
+                    self.assertLessEqual(max(values), 0.4501, str(path))
 
     def test_f0_bytes_not_material_string_hash(self):
         """f0's two bytes are not 8-bit slices of material-name hashes."""

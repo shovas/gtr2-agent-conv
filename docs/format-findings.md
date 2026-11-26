@@ -499,8 +499,9 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
   independent read, and a metamorphic test verifies that flipping a triangle
   index in the second submesh fails the cross-check. Full-tier tests.
 - Tests: `python3 run_tests.py --mode quick|normal|full`; quick tier is kept
-  under its budget (currently 20 modules / ~27 s). Normal tier 252 s / 252
-  tests / 0 failures, below its 300 s budget.
+  under its budget (20 modules / ~30 s). Normal tier 261 s / 265 tests /
+  0 failures, below its 300 s budget; two corpus-wide tests were moved from
+  quick-tier modules to full tier to restore the budget.
 - Safety: `python3 pre_push_check.py` before any push; no push without explicit
   authorization.
 - Full suite evidence is recorded in `CHANGES.md` with its starting commit

@@ -105,24 +105,6 @@ class TextConvertTest(unittest.TestCase):
             self.assertFalse([p for p in problems if "non-.gtr MASFile" in p])
             self.assertFalse([p for p in problems if "missing Misc.gtr" in p])
 
-    def test_rf1_track_trees_convert_structurally(self):
-        """Converted rF1 track trees have no structural TRK/MASFile violations."""
-        import tempfile
-        import gtl_to_gtr2 as g2g
-        roots = sorted(p for p in (ROOT.parent / "RF1Vanilla" / "GameData"
-                                   / "Locations").iterdir() if p.is_dir())
-        roots = [p for p in roots if any(p.rglob("*.SCN"))][:2]
-        self.assertGreaterEqual(len(roots), 2)
-        with tempfile.TemporaryDirectory() as td:
-            for index, source in enumerate(roots):
-                target = Path(td) / str(index)
-                tc.convert_tree(source, target)
-                problems = g2g.validate_gtr2_tree(target)
-                structural = [p for p in problems if
-                              "non-.gtr MASFile" in p or "stale teammaps" in p
-                              or "missing Misc.gtr" in p]
-                self.assertEqual(structural, [], str(source))
-
     def test_jca_encrypted_scn_decryption(self):
         """Race07/Volvo .scn files are JCA-wrapped; tree conversion must decrypt."""
         import glob
