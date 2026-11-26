@@ -2022,6 +2022,41 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertLess(observed_bias, -0.2)
         self.assertLess(observed_bias, -10 * max(permuted, 0.001))
 
+    def test_f0_split_delta_is_absolute_not_signed(self):
+        """split_f0's delta is absolute; raw half ordering is not an invariant."""
+        import glob
+        import gmt_format as gf
+        import mas_tool
+
+        positive = negative = 0
+        for archive in glob.glob(
+                str(ROOT.parent / "GTR2Steam" / "**" / "*.gtr"),
+                recursive=True)[:10]:
+            try:
+                _mtype, entries = mas_tool.read_archive(archive)
+            except Exception:
+                continue
+            for entry in entries:
+                if not entry.name.lower().endswith(".gmt") or not entry.data:
+                    continue
+                try:
+                    parsed = gf.parse_gmt(entry.name, entry.data)
+                except Exception:
+                    continue
+                for mesh in parsed.meshes:
+                    marker = gf.mesh_marker(mesh)
+                    if not marker:
+                        continue
+                    low, high, delta = gf.split_f0(marker)
+                    self.assertEqual(delta, abs(high - low))
+                    signed = high - low
+                    positive += signed > 0
+                    negative += signed < 0
+            if positive + negative >= 3000:
+                break
+        self.assertGreater(positive, 300)
+        self.assertGreater(negative, 300)
+
     def test_f0_half_delta_index_zero_threshold(self):
         """Material index 0 meshes have much larger f0 half-deltas."""
         import glob

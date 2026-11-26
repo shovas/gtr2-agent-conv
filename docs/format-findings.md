@@ -568,6 +568,10 @@ a superficial string mapping would be wrong. Full-tier test:
   - half-sign is family-stable (53.4% vs 18.4%) and skewed negative for
     material/mesh slot 0;
   - half-delta and half-sum inversely track mesh ordinal (r −0.21 / −0.26);
+  - **methodology trap:** `split_f0()` returns the ABSOLUTE halfword delta;
+    a "high half is never below low half" invariant was an artifact of using
+    that helper. Raw signed high-minus-low is mixed (~42% positive, ~55%
+    negative). Full-tier guard: `test_f0_split_delta_is_absolute_not_signed`.
   - **mesh 0 is structurally distinct**: median halves 542/678, delta 314 vs
     later meshes 63/63, delta 1; its half-sum also tracks GMT mesh count
     (r≈0.13) and member size (r≈0.16) vs ~0.009 permuted.

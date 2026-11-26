@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-27 07:50:00 -0500 - Document f0 absolute-delta trap
+- Clarified that `gmt_format.split_f0()` returns an absolute halfword delta; raw signed ordering is mixed. A spurious "nonnegative invariant" was caught and retracted before committing. Full-tier guard and methodology note added.
+
 ## 2026-11-27 07:20:00 -0500 - Expose decoded HAT fields in media_tool info
 - `media_tool.py info <file.hat>` now reports the decoded polygon count, bisection-node count, record count and grid origin/inverse-cell parameters; regression test added.
 
