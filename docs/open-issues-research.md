@@ -199,6 +199,14 @@ phantom empty frames from those zeros; `parse_vcr_frames()` now rejects
 zero-count summaries and zero-subcount frames, returning None for GTL replays
 while all nine GTR2 replays still parse exactly. Full-tier test added.
 
+## CAM orientation vs AIW heading (2026-11-30) — weak negative
+
+Across 112 matched cameras from GTR2 tracks, camera orientation yaw showed
+only a weak association with the nearest AIW waypoint's tangent heading
+(r 0.062 vs 0.031 for seeded shuffles). Position inversion was already
+confirmed, but no comparable orientation transform was established. Recorded
+as a negative.
+
 ## f0 vs object-list offset / file bytes (2026-11-30) — negative
 
 Across 21,481 GTR2 markers, f0's byte pair matched the low/high byte of the

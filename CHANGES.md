@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-30 22:45:00 -0500 - CAM orientation negative
+- Recorded weak camera-yaw vs AIW-heading correlation (0.062 vs 0.031 shuffled); no orientation transform claimed. Quick tier: 125 tests, 0 failures, 27.1s.
+
 ## 2026-11-30 22:15:00 -0500 - f0 findings consolidated
 - Corrected "external authoring identifier" from conclusion to working hypothesis and consolidated all rejected f0 hypotheses in `docs/format-findings.md`; added the object-list-offset negative to the research log.
 
