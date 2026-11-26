@@ -194,6 +194,25 @@ class SimbinTextToolTest(unittest.TestCase):
         self.assertEqual(info.springs[0].direction, (0.0, 1.0, 0.0))
         self.assertEqual(info.springs[0].params, (1000.0, 225.0))
 
+    def test_cli_decrypts_jca_wrapped_scn(self):
+        """The scn CLI reports search paths from JCA-wrapped Race07 configs."""
+        import glob
+        import subprocess
+        import sys
+
+        candidates = [p for p in glob.glob(
+            str(ROOT.parent / "Race07Complete" / "**" / "*.scn"),
+            recursive=True)
+            if Path(p).read_bytes()[:4] == b"\x0f\xb1\xff\xff"]
+        if not candidates:
+            self.skipTest("JCA-wrapped SCN corpus not present")
+        result = subprocess.run(
+            [sys.executable, str(ROOT / "simbin_text_tool.py"),
+             "scn", candidates[0]], capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("SEARCH_PATH:", result.stdout.upper())
+        self.assertIn("GAMEDATA\\LOCATIONS", result.stdout.upper())
+
     def test_cas_uses_scn_parser(self):
         """.cas car graphics descriptors share the .scn key family."""
         import glob

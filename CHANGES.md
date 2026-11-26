@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 06:20:00 -0500 - Text CLI decrypts JCA configs
+- Fixed `simbin_text_tool.py scn|cam|aiw|aiw-convert` to transparently decrypt JCA-wrapped configs; JCA-wrapped Race07 `.scn` files now report real search paths. Added a full-tier CLI regression test.
+
 ## 2026-11-28 05:50:00 -0500 - JSON validation report
 - `validate_conversion.py --json` now emits the offline validation report as machine-readable JSON for batch pipelines; full-tier test confirms it matches `validate()`.
 

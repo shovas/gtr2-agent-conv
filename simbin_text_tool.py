@@ -75,6 +75,17 @@ def read_text(path: str | Path) -> str:
     return Path(path).read_bytes().decode("latin-1")
 
 
+def read_config_text(path: str | Path) -> str:
+    """Read a text config, transparently decrypting JCA-wrapped files.
+
+    Unlike ``read_text`` (raw), this is used by the CLI so that JCA-wrapped
+    Race07/Volvo/RaceRoom ``.scn``/``.cam``/``.trk`` configs parse correctly.
+    Non-JCA files pass through unchanged.
+    """
+    from media_tool import decrypt_jca_text
+    return decrypt_jca_text(Path(path).read_bytes()).decode("latin-1")
+
+
 def parse_aiw(data: str) -> AIW:
     aiw = AIW()
     section = ""
@@ -3220,7 +3231,7 @@ def aiw_for_simbin(data: str) -> str:
 
 
 def _cmd_aiw(args: argparse.Namespace) -> int:
-    aiw = parse_aiw(read_text(args.file))
+    aiw = parse_aiw(read_config_text(args.file))
     print(f"features: {len(aiw.features)}")
     for key, value in aiw.features.items():
         print(f"  {key} = {value}")
@@ -3236,7 +3247,7 @@ def _cmd_aiw(args: argparse.Namespace) -> int:
 
 
 def _cmd_scn(args: argparse.Namespace) -> int:
-    info = parse_scn(read_text(args.file))
+    info = parse_scn(read_config_text(args.file))
     print("search_path:")
     for p in info.search_path:
         print(f"  {p}")
@@ -3248,7 +3259,7 @@ def _cmd_scn(args: argparse.Namespace) -> int:
 
 
 def _cmd_cam(args: argparse.Namespace) -> int:
-    info = parse_cam(read_text(args.file))
+    info = parse_cam(read_config_text(args.file))
     print(f"cameras: {len(info.cameras)}")
     kinds: dict[str, int] = {}
     for cam in info.cameras:
@@ -3276,7 +3287,7 @@ def main(argv=None) -> int:
     p.set_defaults(func=_cmd_cam)
     p = sub.add_parser("aiw-convert", help="apply rFactor->SimBin AIW text rules to stdout")
     p.add_argument("file")
-    p.set_defaults(func=lambda a: print(aiw_for_simbin(read_text(a.file)), end=""))
+    p.set_defaults(func=lambda a: print(aiw_for_simbin(read_config_text(a.file)), end=""))
     args = ap.parse_args(argv)
     return args.func(args)
 
