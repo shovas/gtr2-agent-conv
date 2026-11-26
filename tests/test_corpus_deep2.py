@@ -1294,6 +1294,46 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertGreater(observed, max(permuted))
         self.assertLess(observed, 0.4)  # weak association, not a material ID
 
+    def test_gsc_validator_corpus_sample(self):
+        """The GSC-aware validator passes across a deterministic sample."""
+        import glob
+        import gmt_layout
+        import gmt_semantic
+        import mas_tool
+        import validate_conversion as vc
+
+        checked = 0
+        archives = sorted(glob.glob(
+            str(ROOT.parent / "CopaPetrobrasdeMarcas" / "**" / "*.mas"),
+            recursive=True))
+        for archive in archives[:6]:
+            try:
+                _mtype, entries = mas_tool.read_archive(archive)
+            except Exception:
+                continue
+            for entry in entries:
+                data = entry.data or b""
+                try:
+                    decoded = gmt_semantic.decode_gsc_member(data)
+                except Exception:
+                    continue
+                if not decoded or not decoded.get("submeshes"):
+                    continue
+                try:
+                    converted = gmt_layout.gsc_member_to_gtr2(data)
+                except Exception:
+                    continue
+                report = vc.validate(data, converted)
+                self.assertTrue(report["pass"], (entry.name, report))
+                self.assertTrue(report["gsc_source"])
+                self.assertTrue(report["independent_cross_check"])
+                checked += 1
+                if checked >= 40:
+                    break
+            if checked >= 40:
+                break
+        self.assertGreaterEqual(checked, 40)
+
     def test_f0_bytes_not_stage_indices(self):
         """f0 bytes do not index the material's stage strings."""
         import glob

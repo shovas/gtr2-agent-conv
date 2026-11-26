@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 13:20:00 -0500 - GSC validator sample and hat u32 negative
+- Verified 150/150 GSC conversions pass the GSC-aware validator (40-member full-tier test added); ruled out LE/BE/byte-swapped/sign-flipped float readings of the .hat record u32.
+
 ## 2026-11-26 12:50:00 -0500 - Test tier rebalanced
 - Moved two corpus-wide tests (extended AIW galpha, rF1 tree conversion) from quick-tier modules to full tier so quick (30 s) and normal (261 s, 265 tests, 0 failures) stay within their budgets.
 

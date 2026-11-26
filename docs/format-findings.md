@@ -387,7 +387,9 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
   The remaining u32 is opaque: correlation with record ordinal is <0.012 in
   Brno/Monza/Dubai, and repeated `(x, z)` points carry different u32 values
   (0/93 duplicate pairs in Brno agree). Full-tier test:
-  `test_hat_record_u32_is_not_a_counter_or_position_hash`.
+  `test_hat_record_u32_is_not_a_counter_or_position_hash`. Reinterpreting it
+  as a float in LE/BE, byte-swapped or sign-flipped form gives plausibility
+  rates within 0.03 of random bytes.
   B is also not AIW `wp_width` or groove width (r=0.11 / 0.24 across 14
   layouts, both below seeded permutation maxima). Full-tier test:
   `test_hat_field_b_not_a_track_width`.

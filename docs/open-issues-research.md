@@ -7,6 +7,13 @@ Compared each layout's median |B| against median AIW `wp_width[0]` and
 and r=0.237 (max above observed). B is not a track-width or groove-width
 parameter. Full-tier test added.
 
+## `.hat` u32 float reinterpretations (2026-11-26) — negative
+
+Tried reading the opaque record u32 as an IEEE float in little- and
+big-endian, byte-swapped and sign-flipped forms across Brno/Monza samples.
+"Finite <1e6" rates were 0.578–0.607 versus 0.575 for random bytes, and
+"small <100" 0.521–0.556 versus 0.521 random — all at chance.
+
 ## `.hat` trailing-stream float interpretation (2026-11-26) — negative
 
 Tested both IEEE byte orders and all four byte phases on the tail: ~70% of
