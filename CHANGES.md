@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-27 03:50:00 -0500 - Extend JCA autodetection regression
+- Added RaceRoomTheGame and RaceRoomTheGame2 media files to the JCA key autodetection test; both resolve to the volvo key via `detect_jca_key()` and `identify()`.
+
 ## 2026-11-27 03:20:00 -0500 - HAT polygon count scales with grid area
 - Verified the decoded HAT polygon count tracks grid-covered area across 34 layouts (r=0.553, seeded permutation p=0.001); waypoint count is not a proxy (p=0.098). Full-tier test added.
 

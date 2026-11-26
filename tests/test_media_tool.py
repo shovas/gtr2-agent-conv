@@ -80,7 +80,9 @@ class MediaToolTest(unittest.TestCase):
 
     def test_jca_key_autodetection(self):
         import glob
-        for root, expected in (("Race07Complete", "default"), ("VolvoTheGame", "volvo")):
+        for root, expected in (("Race07Complete", "default"), ("VolvoTheGame", "volvo"),
+                               ("RaceRoomTheGame", "volvo"),
+                               ("RaceRoomTheGame2", "volvo")):
             sample = next((p for p in glob.glob(str(ROOT.parent / root / "**" / "*"), recursive=True)
                            if Path(p).is_file() and p.lower().endswith((".dds", ".tga", ".wav"))
                            and open(p, "rb").read(4) == b"\x0f\xb1\xff\xff"), None)
