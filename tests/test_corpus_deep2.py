@@ -4085,6 +4085,10 @@ class CorpusDeep2Test(unittest.TestCase):
         # for GTTF, and the same with [0x6ead7c] for IRSR.
         self.assertEqual(data.count(bytes.fromhex("8b0d90ad6e00518bce")), 1)
         self.assertEqual(data.count(bytes.fromhex("8b0d7cad6e00518bce")), 1)
+        # Per-object writer: 64-byte blocks at +0x41/+0x81 and trailing u32s.
+        self.assertEqual(data.count(bytes.fromhex("6a408d4f41518bce")), 1)
+        # Per-object reader splits a flags byte's top bit into +0xcc.
+        self.assertEqual(data.count(bytes.fromhex("80e17fc0e807880f8887cc000000")), 1)
 
     def test_no_debug_symbols_in_game_binaries(self):
         """Game EXEs reference PDBs but ship no usable debug symbols."""

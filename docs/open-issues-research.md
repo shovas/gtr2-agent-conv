@@ -168,6 +168,22 @@ session variation is carried solely by `session_seconds`
 `c=8` only in Magny-Cours, but with nine samples no semantics are claimed.
 Full-tier regression test added.
 
+## Replay object record format from code (2026-11-30)
+
+Disassembled the per-object serializer `fcn.005267f0` (writer) and its
+counterpart `fcn.005268e0` (reader, called from the ghost reader
+`fcn.0052be30`). The record layout is now clear at the code level:
+- one flags byte, whose top bit is stored separately at record `+0xcc`;
+- two **u8 length-prefixed strings** from record `+1` and `+0x21`;
+- two 64-byte blocks at `+0x41` and `+0x81`;
+- two u32 fields at `+0xc4` and `+0xc8`.
+
+Because the strings are length-prefixed, object records are **variable-length**;
+this is direct code evidence that fixed-stride frame searches were the wrong
+abstraction for replay payloads. Combined with the 105 sixteen-byte object slots
+in the writer, the payload is best modeled as a per-object event/state stream.
+No full field semantics are claimed yet. Full-tier byte-pattern test extended.
+
 ## GTR2.exe ghost writer located statically (2026-11-30)
 
 radare2 disassembly identified `fcn.0052a540` as the GTTF/IRSR writer: it

@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-30 07:45:00 -0500 - Replay object record layout from code
+- Disassembled the per-object replay writer/reader: flags byte with top bit at +0xcc, two u8 length-prefixed strings, two 64-byte blocks, two u32 fields. Confirms variable-length object records; test extended.
+
 ## 2026-11-30 07:15:00 -0500 - Ghost writer located in GTR2.exe
 - Statically identified the GTTF/IRSR writer at RVA 0x52a540 with a 105-object serialization loop, supporting variable-length replay records. Byte-pattern regression test added; no frame layout claimed.
 
