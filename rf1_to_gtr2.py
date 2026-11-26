@@ -92,7 +92,33 @@ def main(argv=None) -> int:
     ap.add_argument("--check", action="store_true", help="run conversions and validation without writing")
     ap.add_argument("--structural", action="store_true",
                     help="use the legacy structural bridge (single submesh only)")
+    ap.add_argument("--tree", action="store_true",
+                    help="source is a directory: check every MAS/GTR/GTL archive")
     args = ap.parse_args(argv)
+    if args.tree:
+        root = Path(args.source)
+        if not root.is_dir():
+            ap.error("--tree requires a source directory")
+        archives = sorted(p for p in root.rglob("*")
+                          if p.is_file()
+                          and p.suffix.lower() in (".mas", ".gtr", ".gtl"))
+        checked = failed = members = 0
+        errors = []
+        for archive in archives:
+            try:
+                report = convert_archive(archive, check=True,
+                                         relayout=not args.structural)
+            except Exception as exc:
+                failed += 1
+                errors.append((str(archive), f"{type(exc).__name__}: {exc}"))
+                continue
+            checked += 1
+            members += report["members"]
+        print(f"archives={len(archives)} checked={checked} failed={failed} "
+              f"members={members}")
+        for name, message in errors[:10]:
+            print(f"error: {name}: {message[:120]}")
+        return 1 if failed else 0
     # The semantic bridge is required to preserve multi-submesh GMTs; the
     # library default stays structural for backward compatibility with callers
     # that pass explicit relayout, but the CLI must produce validated output.

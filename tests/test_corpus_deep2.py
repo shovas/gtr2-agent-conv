@@ -1376,6 +1376,23 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertGreater(total, 10000)
         self.assertLess(non_unit / total, 0.001)
 
+    def test_rf1_cli_tree_check_mode(self):
+        """`--tree` checks every archive in a source directory."""
+        import subprocess
+        import sys
+
+        root = (ROOT.parent / "RF1Vanilla" / "GameData" / "Locations"
+                / "Joesville")
+        if not root.is_dir():
+            self.skipTest("RF1Vanilla Joesville track not present")
+        result = subprocess.run(
+            [sys.executable, str(ROOT / "rf1_to_gtr2.py"), str(root), "--tree"],
+            capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("checked=", result.stdout)
+        self.assertIn("failed=0", result.stdout)
+        self.assertNotIn("error:", result.stdout)
+
     def test_rf1_cli_and_tree_use_semantic_bridge(self):
         """User-facing conversion entry points must preserve all submeshes."""
         import subprocess

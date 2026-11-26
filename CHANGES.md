@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-27 08:50:00 -0500 - Tree check mode for rF1 converter
+- Added `rf1_to_gtr2.py <directory> --tree`, which checks every MAS/GTR/GTL archive under a directory with the semantic bridge and reports per-archive failures. Full-tier CLI test added.
+
 ## 2026-11-27 08:20:00 -0500 - small_b lag negative
 - Cross-correlated replay small_b against elevation and heading rate over lags -10..+10: no consistent peak (best |mean r| < 0.15). Consolidated into the existing small_b negative test.
 
