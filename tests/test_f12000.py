@@ -44,6 +44,35 @@ class F12000Test(unittest.TestCase):
         self.assertEqual(total, 30909)
         self.assertEqual(counts, {0: 25392, 1: 5198, 2: 319})
 
+    def test_type25_undecoded_members_decode_with_14_byte_overread(self):
+        """315 of 319 'undecoded' BMPs decode to exact power-of-two RGB pixel counts."""
+        arcs = _archives()
+        if not arcs:
+            self.skipTest("F12000 corpus not present")
+        decoded = undecoded = 0
+        for arc in arcs:
+            if mas_tool.read_signature(arc)[:12] != mas_tool.MAS_TYPE25:
+                continue
+            _mtype, entries = mas_tool.read_archive(arc)
+            for entry in entries:
+                if entry.type != 2:
+                    continue
+                if entry.decoded is None:
+                    # Four identical tiny TRANS.BMP transparency blobs.
+                    self.assertEqual(entry.name.upper(), "TRANS.BMP")
+                    self.assertEqual((entry.size, entry.zsize), (28, 14))
+                    undecoded += 1
+                    continue
+                self.assertEqual(len(entry.decoded), entry.size, entry.name)
+                pixels = entry.size // 3
+                self.assertEqual(entry.size % 3, 0, entry.name)
+                self.assertGreaterEqual(pixels, 256)
+                self.assertLessEqual(pixels, 65536)
+                self.assertEqual(pixels & (pixels - 1), 0, entry.name)
+                decoded += 1
+        self.assertEqual(decoded, 315)
+        self.assertEqual(undecoded, 4)
+
     def test_type25_member_roundtrip(self):
         arcs = _archives()
         if not arcs:

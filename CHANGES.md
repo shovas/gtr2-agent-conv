@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 09:00:00 -0500 - Decode F1 2000 type-2.5 BMP members
+- `mas_tool.decode_type25_member()` decodes 315 of 319 previously undecoded `Entry.type == 2` BMPs in `../F12000`: a 14-byte overread past the declared `zsize` completes the zlib stream to exactly `size` pixels (power-of-two RGB dimensions). Pixels are exposed via `Entry.decoded`; raw blobs stay lossless for round-trips. Four tiny `TRANS.BMP` blobs are classified but not converted.
+
 ## 2026-11-28 08:30:00 -0500 - GTL tree conversion CLI
 - Added `gtl_to_gtr2.py <source-dir> <target-dir> --tree [--templates DIR]` exposing the full `convert_tree()` path from the CLI; `--check` works in tree mode. Full-tier test confirms byte-identical output to the API and that check mode writes nothing.
 

@@ -738,3 +738,23 @@ a superficial string mapping would be wrong. Full-tier test:
   authorization.
 - Full suite evidence is recorded in `CHANGES.md` with its starting commit
   caveat; targeted experiments have their own full-tier regression tests.
+
+## 11. MAS trailing-byte overreads (F1 2000 type 2.5)
+
+- 319 `Entry.type == 2` members in the 118 `CUBEMAS2.50` archives of
+  `../F12000` carry BMPs with a 30-byte prefix (16-byte palette, 14-byte
+  metadata) and a zlib stream at offset 30. The producer stores only the first
+  `zsize` bytes of that stream inside the member; the final **14 bytes** sit
+  immediately after it (the start of the next member's region, or the archive's
+  14-byte tail for the last member). A 14-byte overread is both necessary and
+  sufficient: `mas_tool.decode_type25_member()` yields `eof=True` and exactly
+  `size` bytes on **315/315** such members (minimal-overread sweep: 14 for all).
+- The 315 decoded sizes are all `W*H*3` with power-of-two pixel counts
+  256..65,536 (nine distinct sizes), consistent with 24-bit RGB textures.
+- The four exceptions are identical 14-byte `TRANS.BMP` transparency blobs
+  (`size=28, zsize=14`) with no zlib stream; classified, not converted.
+- This mirrors the SCGT type-2 quirk already recorded in `CAPABILITIES.md`
+  (`reconstruct_type2_member()`): archive records undercount trailing bytes.
+- Raw blobs remain in `Entry.data` so `write_archive()` round-trips unchanged;
+  decoded pixels are exposed via `Entry.decoded`. Full-tier test:
+  `test_type25_undecoded_members_decode_with_14_byte_overread`.

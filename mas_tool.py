@@ -43,6 +43,8 @@ class Entry:
     orig_size: int = 0
     # Type-6 only: original file-type field (e.g. 17 for MTS).
     orig_type: int = 0
+    # Type-2.5 only: decoded BMP pixels when the raw blob is kept losslessly.
+    decoded: bytes | None = None
 
 
 def _looks_like_type2(data: bytes) -> bool:
@@ -224,6 +226,35 @@ def _write_type6(path: str | os.PathLike, entries: list[Entry], signature: bytes
             f.write(struct.pack("<IIIII236s", e.orig_type, off, size, zsize, e.flags, name))
 
 
+def decode_type25_member(data: bytes, start: int, zsize: int, size: int) -> bytes | None:
+    """Decode an F1 2000 type-2.5 "undecoded" BMP member to its pixels.
+
+    These members carry a 30-byte prefix (16-byte palette, 14-byte metadata)
+    followed by a zlib stream at offset 30. The producer writes only the first
+    ``zsize`` bytes of that stream inside the member; the final **14 bytes** are
+    stored immediately after it (the start of the next member's region, or the
+    archive's 14-byte tail for the last member). A 14-byte overread is required
+    and sufficient: on all 315 such members in ``../F12000`` the stream then
+    ends cleanly and yields exactly ``size`` bytes of pixels.
+
+    ``start`` is the member's absolute data offset; ``data`` is the whole archive.
+    Returns ``None`` when the member is not this variant or decoding fails.
+    """
+    if zsize < 30 or size <= zsize:
+        return None
+    stream = data[start + 30:start + zsize + 14]
+    if stream[:2] not in (b"\x78\x9c", b"\x78\xda", b"\x78\x01"):
+        return None
+    try:
+        inflater = zlib.decompressobj()
+        result = inflater.decompress(stream)
+    except zlib.error:
+        return None
+    if inflater.eof and len(result) == size:
+        return result
+    return None
+
+
 def _read_type25(data: bytes) -> list[Entry]:
     count, data_size = struct.unpack_from("<II", data, 12)
     base = 20 + 256 * count
@@ -251,8 +282,10 @@ def _read_type25(data: bytes) -> list[Entry]:
             except zlib.error:
                 entry.data, entry.type, entry.orig_size = blob, 2, size
         else:
-            # 319 tiny textures use an undecoded variant; keep the blob losslessly.
+            # 319 F1 2000 BMPs: keep the blob losslessly for round-trips, and
+            # expose the decoded pixels via Entry.decoded when decodable.
             entry.data, entry.type, entry.orig_size = blob, 2, size
+            entry.decoded = decode_type25_member(data, base + offset, zsize, size)
         entries.append(entry)
         offset += zsize
     return entries
