@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 19:20:00 -0500 - HAT grid extent negative
+- Tested grid extent as a HAT↔track pairing validator: AIW waypoints fall inside a matching HAT's extent 11/11 times but also inside a mismatched HAT ~10.9/11, so no rule is promoted. Consolidated with the existing HAT negatives.
+
 ## 2026-11-26 18:50:00 -0500 - Replay channel CSV export
 - Added `simbin_events_tool.py FILE --channels`, which exports per-frame driver-state positions, heading and the verified steering-like/vertical-motion channels as CSV for cross-recording comparison. Full-tier CLI test added.
 

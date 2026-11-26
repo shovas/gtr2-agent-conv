@@ -377,7 +377,10 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
   For GTR2/GTL/Race07 all table records map into `ix,iz ∈ 0..31`; rF1/SCE
   layouts use 64x64 grids with correspondingly larger inverse cell sizes.
   Verified on all 178 local HAT files; 97.9% of sampled records fall inside
-  the nominal grid extent (the rest are boundary samples). Full-tier test:
+  the nominal grid extent (the rest are boundary samples). Grid extent is
+  **not** a track-pairing discriminator: AIW waypoints fall inside a matching
+  HAT's extent 11/11 times but also inside a mismatched one ~10.9/11 times, so
+  no `validate_hat_track_pair()` rule is promoted. Full-tier test:
   `test_hat_signature_decodes_to_spatial_grid_params`.
 - The body begins at offset 48 with a **fixed-stride 16-byte record table**:
   each record is `[f32 x, u32 unknown, f32 height, f32 z]` (B is a local
