@@ -1978,6 +1978,65 @@ class CorpusDeep2Test(unittest.TestCase):
                            for half in (lo, hi) if half == values[name])
             self.assertLess(observed, 10)  # chance level for 2 x 12k halfwords
 
+    def test_f0_material_association_replicates_on_holdout(self):
+        """The f0/material MI excess holds on disjoint source archives."""
+        import glob
+        import math
+        import random
+        import collections
+        import gmt_format as gf
+        import mas_tool
+
+        def mutual_information(first, second):
+            counts_a = collections.Counter(first)
+            counts_b = collections.Counter(second)
+            joint = collections.Counter(zip(first, second))
+            total = len(first)
+            return sum(value / total * math.log2(
+                (value / total) / ((counts_a[a] / total) * (counts_b[b] / total)))
+                for (a, b), value in joint.items())
+
+        archives = sorted(glob.glob(
+            str(ROOT.parent / "GTR2Steam" / "**" / "*.gtr"), recursive=True))
+        random.seed(2026)
+        random.shuffle(archives)
+        splits = {0: [], 1: []}
+        for ordinal, archive in enumerate(archives):
+            try:
+                _mtype, entries = mas_tool.read_archive(archive)
+            except Exception:
+                continue
+            rows = []
+            for entry in entries:
+                if not entry.name.lower().endswith(".gmt") or not entry.data:
+                    continue
+                try:
+                    parsed = gf.parse_gmt(entry.name, entry.data)
+                except Exception:
+                    continue
+                for mesh in parsed.meshes:
+                    marker = gf.mesh_marker(mesh)
+                    index = mesh.record.material_index
+                    if marker and index < len(parsed.materials):
+                        rows.append((parsed.materials[index].name.upper(),
+                                     marker & 0xFFFF))
+                if len(rows) >= 1200:
+                    break
+            splits[ordinal % 2].extend(rows)
+            if min(len(value) for value in splits.values()) >= 2000:
+                break
+        excess = []
+        for rows in splits.values():
+            self.assertGreater(len(rows), 1000)
+            names = [row[0] for row in rows]
+            halves = [row[1] for row in rows]
+            observed = mutual_information(names, halves)
+            shuffled = halves[:]
+            random.shuffle(shuffled)
+            excess.append(observed - mutual_information(names, shuffled))
+        self.assertTrue(all(value > 0.5 for value in excess), excess)
+        self.assertLess(max(excess) / min(excess), 3.0)
+
     def test_f0_material_name_carries_limited_information(self):
         """Material names share ~1 bit with f0, far short of determining it."""
         import glob

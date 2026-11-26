@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-27 22:20:00 -0500 - f0 association holdout validation
+- Confirmed the f0/material MI excess replicates on disjoint GTR2 archives (train 1.400 bits, holdout 1.486 bits vs shuffled baselines); independent-holdout regression test added.
+
 ## 2026-11-27 21:50:00 -0500 - RaceGMT opening record layout
 - Decoded RaceGMT's opening 36-byte records as `[3x u16 indices][6 zero bytes][u32 ordinal][5 f32]` with ordinal == record index in four models; full-tier test extended.
 
