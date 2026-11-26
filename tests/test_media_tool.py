@@ -1050,6 +1050,33 @@ class MediaToolTest(unittest.TestCase):
         self.assertIn("3Brno.hat", result.stdout)
         self.assertIn("4Brno.hat", result.stdout)
 
+    def test_hat_record_count_disambiguates_layouts(self):
+        """Record counts distinguish layouts sharing the same 32-byte signature."""
+        import json
+        import subprocess
+        import sys
+        dedicated = (ROOT.parent / "GTR2Steam" / "GameData" / "Locations"
+                     / "HAT_Dedicated")
+        if not dedicated.is_dir():
+            self.skipTest("GTR2 HAT_Dedicated not present")
+
+        def report(name):
+            result = subprocess.run(
+                [sys.executable, str(ROOT / "media_tool.py"), "hat-layout",
+                 str(dedicated / name), str(ROOT.parent / "GTR2Steam")],
+                capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            return json.loads(result.stdout)
+
+        self.assertEqual(report("3Brno.hat")["record_count"], 40189)
+        self.assertEqual(report("JnMonza.hat")["record_count"], 20500)
+        dubai = {name: report(name) for name in
+                 ("4Dubai.hat", "CDubai.hat", "IDubai.hat", "NDubai.hat")}
+        signatures = {value["signature"] for value in dubai.values()}
+        counts = {value["record_count"] for value in dubai.values()}
+        self.assertEqual(len(signatures), 1)
+        self.assertEqual(len(counts), 4)
+
     def test_hat_signature_across_three_games(self):
         """The same 32-byte .hat signature is used by GTR2, GTL and Race07."""
         import glob

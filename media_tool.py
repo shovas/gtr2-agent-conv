@@ -634,6 +634,28 @@ def hat_layout_signature(payload: bytes) -> bytes | None:
     return payload[marker + 14:marker + 46]
 
 
+def hat_record_count(payload: bytes) -> int:
+    """Count the 16-byte `[f32, u32, f32, f32]` records at body offset 48.
+
+    Verified on all 34 GTR2 `.hat` files: the count is layout-specific (7 to
+    61,412) and identical for byte-identical bodies, so it disambiguates
+    layouts that share the same 32-byte signature.
+    """
+    marker = payload.find(b"generated\x00")
+    if marker < 0:
+        return 0
+    body = payload[marker + 10:]
+    count = 0
+    for offset in range(48, len(body) - 16, 16):
+        first, _unknown, second, third = struct.unpack_from("<fIff", body, offset)
+        if not (-1e6 < first < 1e6 and first == first
+                and second == second and 0.01 < abs(second) < 20
+                and -1e6 < third < 1e6 and third == third):
+            break
+        count += 1
+    return count
+
+
 def identify_hat_layout(path: str | Path, corpus: str | Path) -> dict:
     """Identify a `.hat` layout by matching its 32-byte signature in a corpus.
 
@@ -658,7 +680,8 @@ def identify_hat_layout(path: str | Path, corpus: str | Path) -> dict:
             matches.append(str(candidate))
     return {"path": str(path), "variant": info["variant"],
             "body_size": len(payload) - payload.find(b"generated\x00") - 10,
-            "signature": signature.hex(), "matches": matches}
+            "signature": signature.hex(),
+            "record_count": hat_record_count(payload), "matches": matches}
 
 
 def hdr_dat_mp3(hdr_path: str | Path) -> tuple[bytes, dict] | None:

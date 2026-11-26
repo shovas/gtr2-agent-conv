@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 00:10:00 -0500 - Hat CLI reports record count
+- `media_tool.py hat-layout` now reports the verified 16-byte record-table count, distinguishing layouts that share a 32-byte signature (e.g. four Dubai variants). Full-tier test added.
+
 ## 2026-12-01 11:20:00 -0500 - Hat trailing stream periodicity
 - Measured the .hat trailing stream: byte-lag 8 agreement 7.5-10.7% vs 1.3-1.7% shuffled, with float-exponent bytes dominating; plain 8-byte f32 records excluded. Full-tier test added.
 
