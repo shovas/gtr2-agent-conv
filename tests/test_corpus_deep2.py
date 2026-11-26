@@ -4374,6 +4374,26 @@ class CorpusDeep2Test(unittest.TestCase):
                              path.read_bytes(), str(path))
         self.assertEqual(set(extensions), {".dsi", ".hat", ".gtt", ".vcr"})
 
+    def test_hat_payloads_are_gmb_wrapped_high_entropy(self):
+        """`.hat` files share the gMb container but use an undecoded body."""
+        import math
+        import gzip_simbin_tool as gz
+        paths = list((ROOT.parent / "GTR2Steam").rglob("*.hat"))
+        checked = 0
+        for path in paths[:12]:
+            payload = gz.decompress(str(path))
+            self.assertIn(b"//[[gMb", payload)
+            marker = payload.find(b"generated\x00")
+            self.assertGreater(marker, 0)
+            body = payload[marker + 10:]
+            self.assertGreater(len(body), 100000)
+            counts = collections.Counter(body[:65536])
+            entropy = -sum((n / len(body[:65536])) * math.log2(n / len(body[:65536]))
+                           for n in counts.values())
+            self.assertGreater(entropy, 6.5)
+            checked += 1
+        self.assertGreaterEqual(checked, 10)
+
     def test_gtl_replays_use_irsr_v101(self):
         """GTL .Vcr replays parse as IRSR v1.01 and rewrap byte-identically."""
         import gzip_simbin_tool as gz

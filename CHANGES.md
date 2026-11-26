@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-30 20:45:00 -0500 - Hat payload characterization
+- Characterized .hat bodies as high-entropy (7.4-7.6 bits/byte), non-4-aligned packed data across 36 files; no decoder claimed. Full-tier test added.
+
 ## 2026-11-30 20:15:00 -0500 - Archive read cache
 - Added a bounded 64MB decompressed-member cache in `mas_tool.read_archive()` keyed by path/mtime/offset. Normal tier 252s / 252 tests / 0 failures (was 263.5s). Invalidation regression test added.
 

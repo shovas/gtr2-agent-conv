@@ -214,9 +214,12 @@ mtime in the key returned stale data.
 The GTR2 install has 197 gzip+gMb files across four extensions: `.dsi` (142),
 `.gtt` (29), `.hat` (17), `.vcr` (9). `compress_simbin()` reproduces all 197
 byte-for-byte. `.hat` payloads begin `Ver 0.08 This file is automatically
-generated` but show no byte-level periodicity (best lag match 0.015) and no
-meaningful u8-prefixed strings; their binary body remains undecoded. Recorded
-as a negative with the full container inventory. Full-tier test added.
+generated` but show no byte-level periodicity (best lag match 0.015), no
+meaningful u8-prefixed strings, and entropy ~7.4–7.6 bits/byte. 34 GTR2 and
+2 GTL files share this layout (1.4–4.7 MB bodies). Their f32 alignment is
+irregular and body lengths are not consistently 4-byte aligned, so the body is
+likely packed/compressed data. Recorded as a negative with the full container
+inventory. Full-tier test added.
 
 ## Driving-school .dsi files share the replay stream (2026-11-30)
 
