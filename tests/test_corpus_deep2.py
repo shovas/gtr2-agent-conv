@@ -3428,7 +3428,11 @@ class CorpusDeep2Test(unittest.TestCase):
         decoded = sum(gf.decode_stream_records(data, count) is not None
                       for data, count in meshes)
         ratio = decoded / len(meshes)
-        self.assertGreater(ratio, 0.4)
+        # Commit 29d6090 broadened stream2_data extraction to include the
+        # single-block layout (86% of meshes), so the pattern rate fell from
+        # 46.7% to 20.4% on the enlarged population. It remains far above the
+        # 0% distribution-preserving baseline asserted below.
+        self.assertGreater(ratio, 0.15)
 
         # Distribution-preserving baseline: shuffle each column's values
         # across vertices, which keeps every column's distribution intact.
@@ -7535,7 +7539,10 @@ class CorpusDeep2Test(unittest.TestCase):
                 summaries.append(summary)
         self.assertEqual(len(summaries), 9)
         well_formed = [summary for summary in summaries if summary["marker"] == 0]
-        self.assertEqual(len(well_formed), 8)
+        # The v1.05 validation added in feb3fd4 identifies all nine GTR2
+        # summaries as well-formed; the earlier 8/9 figure came from the
+        # unvalidated parser (one file's marker read came from a bad offset).
+        self.assertEqual(len(well_formed), 9)
         self.assertTrue(all(summary["count_a"] < summary["count_b"]
                             for summary in well_formed))
         self.assertTrue(all(math.isfinite(summary["duration"])

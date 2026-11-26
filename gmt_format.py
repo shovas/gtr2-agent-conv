@@ -134,8 +134,11 @@ def decode_stream_records(data: bytes, vertex_count: int) -> Optional[List[tuple
 
     Corpus-verified on 1,605 GTR2 meshes whose mesh record has two extra
     32-byte-per-vertex streams (rec[6] < rec[7] < rec[8]): each 32-byte record
-    is 8 f32s, and in 46.7% of meshes every record follows the pattern
+    is 8 f32s, and in 20.4% of meshes every record follows the pattern
     ``[U, S, V, S, V, S, V, S]`` (columns 1/3/5/7 equal, columns 2/4/6 equal).
+    (The earlier 46.7% figure predated commit 29d6090, which broadened
+    ``stream2_data`` extraction to include the single-block layout; the rate
+    is measured against a 0% distribution-preserving shuffled baseline.)
     Such streams therefore carry only three distinct values per vertex. This
     helper returns those triples when the pattern holds for the whole mesh,
     and ``None`` otherwise. The values are not yet assigned UV semantics.
