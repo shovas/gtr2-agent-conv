@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-27 21:20:00 -0500 - HAT virtual read is plain fread
+- Confirmed the HAT stream vtable read method is a plain `fread` (no transform), so the 34-byte node stream must originate at a different file/position than the raw tail; documented as the remaining framing question.
+
 ## 2026-11-27 20:50:00 -0500 - Sync HAT tail status in FEATURES
 - Updated the HAT limitations to reflect the code-level findings: no runtime decoder for the per-record identifier, and the trailing stream is a typed 34-byte node tree whose framing/field semantics remain open.
 

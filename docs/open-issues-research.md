@@ -68,6 +68,16 @@ for shuffled controls; Monza 0.021% versus 0.015–0.026%. At chance — the tai
 is not a flat height cache. Consolidated into
 `test_hat_trailing_stream_is_not_plain_float_records`.
 
+## HAT virtual read is plain fread (2026-11-27)
+
+Resolved one part of the framing question: the stream vtable `0x6dce18` maps
+its read method (+0x1c) to `0x5700c0`, which calls `fread(buffer, 1, size,
+handle)` when its mode word at +0x14 is zero. There is **no decompress or
+transform** in the read path. Therefore the 34-byte node stream must be read
+from a different file or stream position than the raw HAT tail section we
+examined; the reader function takes a filename argument and opens it through
+this stream, so identifying which file is passed is the remaining step.
+
 ## HAT node layout vs raw tail (2026-11-27) — framing gap
 
 Attempted to parse real HAT trailing streams using the code-derived 34-byte
