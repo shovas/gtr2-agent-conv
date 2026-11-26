@@ -112,6 +112,16 @@ deterministic (61/123 pairs byte-identical after byte 4), with 8 long-prefix
 pairs showing layout revisions. The `media_tool.py hat-layout` CLI therefore
 works unchanged across all three games. Full-tier test added.
 
+## Driver small_a tracks elevation (2026-11-26)
+
+The fourth f32 in the 53-byte driver-state body (`small_a`, byte 41, values
+within [-1,1]) is strongly correlated with the frame-to-frame change in
+position y across all 8 long replays: r = 0.130–0.960, mean **0.641**, 8/8
+positive; seeded permutation of the series within each replay gives p<0.001.
+So it is a vertical-motion / gradient-like channel, not padding. `small_b`
+remains at chance against elevation, heading rate, speed and lateral
+acceleration. No unit mapping is claimed. Full-tier test added.
+
 ## Driver short-pair vs lateral acceleration (2026-11-26) — secondary
 
 The same pair difference was tested against position-derived lateral

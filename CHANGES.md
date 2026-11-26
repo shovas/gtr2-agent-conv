@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 08:50:00 -0500 - Driver small_a tracks elevation
+- Found a second driver-state channel: small_a correlates with frame-to-frame elevation change in 8/8 replays (mean r=0.641, seeded permutation p<0.001). Full-tier test added.
+
 ## 2026-11-26 08:20:00 -0500 - Steering channel primary association
 - Refined the replay steering-like channel: heading rate is the primary association (8/8 replays, mean r=-0.171) while lateral acceleration is weaker (7/8, mean -0.108). Full-tier test updated.
 

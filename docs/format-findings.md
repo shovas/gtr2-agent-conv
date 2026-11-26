@@ -226,7 +226,10 @@ regression tests or an explicitly documented negative.
   the first three are smooth world positions (median frame-to-frame step <5 m
   vs ~100× larger for shuffled samples), the fifth (byte 45, `angle_like`) is
   angle-like and correlates with position-derived heading (|r| >0.4 vs a
-  shuffled baseline), and fields four/six are small. The four u16s form
+  shuffled baseline). The fourth float (`small_a`, byte 41) tracks **vertical
+  motion**: r=0.13–0.96 (mean 0.641) against position y-delta in 8/8 replays
+  (seeded permutation p<0.001); the sixth (`small_b`) remains unexplained.
+  Full-tier test: `test_driver_small_a_tracks_elevation_change`. The four u16s form
   wheel-like pairs: the rear-left/rear-right gap is <1% of the value scale in
   Monza.Vcr, versus a much larger gap after shuffling. Wrapped frame-to-frame
   **Verified signal:** the *difference* `shorts[0] - shorts[1]` correlates

@@ -4582,6 +4582,59 @@ class CorpusDeep2Test(unittest.TestCase):
                              path.read_bytes(), str(path))
         self.assertEqual(set(extensions), {".dsi", ".hat", ".gtt", ".vcr"})
 
+    def test_driver_small_a_tracks_elevation_change(self):
+        """The replay's small_a field follows vertical motion."""
+        import random
+        import statistics
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+
+        def correlate(x, y):
+            mx, my = statistics.mean(x), statistics.mean(y)
+            numerator = sum((a - mx) * (b - my) for a, b in zip(x, y))
+            denominator = (sum((a - mx) ** 2 for a in x)
+                           * sum((b - my) ** 2 for b in y)) ** 0.5
+            return numerator / denominator if denominator else 0.0
+
+        data = []
+        for root in (ROOT.parent / "GTR2Steam" / "ReplayData",
+                     ROOT.parent / "GTLSteam" / "ReplayData"):
+            for path in sorted(root.glob("*.Vcr")):
+                parsed = st.parse_vcr_frames(gz.decompress(str(path)))
+                if not parsed:
+                    continue
+                states = []
+                for frame in parsed["frames"]:
+                    for record in frame["records"]:
+                        if st.vcr_record_tag(record["header"]) == 0:
+                            state = st.vcr_driver_state(record["data"])
+                            if state:
+                                states.append(state)
+                            break
+                if len(states) < 300:
+                    continue
+                elevation = [after["position"][1] - before["position"][1]
+                             for before, after in zip(states, states[1:])]
+                values = [state["small_a"] for state in states][:len(elevation)]
+                data.append((values, elevation))
+        self.assertGreaterEqual(len(data), 6)
+        observed = [correlate(values, elevation) for values, elevation in data]
+        self.assertGreater(sum(value > 0 for value in observed), len(data) - 1)
+        self.assertGreater(statistics.mean(observed), 0.4)
+
+        random.seed(2026)
+        permuted = []
+        for _ in range(500):
+            totals = []
+            for values, elevation in data:
+                shuffled = values[:]
+                random.shuffle(shuffled)
+                totals.append(correlate(shuffled, elevation))
+            permuted.append(statistics.mean(totals))
+        actual = statistics.mean(observed)
+        self.assertLess(sum(value >= actual for value in permuted) / len(permuted),
+                        0.01)
+
     def test_driver_short_pair_difference_tracks_heading_rate(self):
         """shorts[0]-shorts[1] is a consistent steering-like signal."""
         import math
