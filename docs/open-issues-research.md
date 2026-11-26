@@ -68,6 +68,15 @@ for shuffled controls; Monza 0.021% versus 0.015–0.026%. At chance — the tai
 is not a flat height cache. Consolidated into
 `test_hat_trailing_stream_is_not_plain_float_records`.
 
+## HAT reader b40-record hypothesis (2026-11-27) — negative
+
+GTL.exe's reader allocates b40 x 16-byte records and reads them from a stream
+before invoking the 34-byte node parser. Tested whether those records are the
+on-disk table: at index b44 and beyond the "records" are implausible (B in the
+1e15 range or zeros) in Brno and Monza, so the file's 16-byte table contains
+exactly b44 entries, not b40. The b40 records must come from a derived stream;
+their origin remains unresolved.
+
 ## Cross-format steering comparison (2026-11-27) — negative
 
 Compared standardized distributions of the two independently decoded steering
