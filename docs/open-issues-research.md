@@ -199,6 +199,15 @@ phantom empty frames from those zeros; `parse_vcr_frames()` now rejects
 zero-count summaries and zero-subcount frames, returning None for GTL replays
 while all nine GTR2 replays still parse exactly. Full-tier test added.
 
+## f0 direct ID reuse in material records (2026-12-01) — negative
+
+f0's exact u32 appeared in the corresponding material record in 283/3,667
+markers versus zero for random u32s, but inspection showed the matches were
+trivial common words (`0x3f800000` = 1.0f, `0xffffffff`, ASCII fragments such
+as `0x44442e31`). Excluding those left no consistent offset. Interpreting f0
+as four ASCII bytes also failed: only 264/21,481 markers (1.2%) were fully
+printable. Another negative for the consolidated f0 list.
+
 ## f0 vs member filename (2026-11-30) — negative
 
 Across 21,481 GTR2 markers, f0's bytes matched CRC32 or byte-sum values of the

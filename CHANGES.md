@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-12-01 01:15:00 -0500 - f0 direct-reuse negative
+- Ruled out f0 as a directly reused u32 in material records or an ASCII tag; matches were trivial common values. Consolidated negative list updated.
+
 ## 2026-12-01 00:45:00 -0500 - Triangle-level independent validation
 - Strengthened the independent parser test to compare exact triangle lists: 20/20 converted meshes agree across 17,588 faces.
 

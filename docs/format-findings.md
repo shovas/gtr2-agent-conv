@@ -313,7 +313,9 @@ regression tests or an explicitly documented negative.
   applicable): material index (a mesh-0 artefact), material stage indices,
   geometry CRC, material-name/record hashes, shader registry indices, shader
   type enums, material name/stage/string lengths, object-list-offset and file
-  bytes, MOS 8-bit element counts, and CRC32/sum of the GMT member filename. The cross-family scope is also
+  bytes, MOS 8-bit element counts, CRC32/sum of the GMT member filename,
+  exact f0 u32 reuse in material records (matches were trivial sentinel/ASCII
+  values), and printable-ASCII reinterpretation of the u32 (1.2% of markers). The cross-family scope is also
   constrained: f0 byte semantics differ in JCA-encrypted Volvo/Race07 GMTs.
   See `docs/open-issues-research.md` for each experiment.
 - Tooling: `gmt_format.split_f0()`, `gmt_format.f0_byte_pair()`, `gmt_tool.py info --meshes` and
