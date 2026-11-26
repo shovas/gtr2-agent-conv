@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-12-01 08:50:00 -0500 - Driver u16 delta trend negative
+- Showed apparent u16-delta/speed correlations are shared slow trends: detrending collapses all four outlier-robust cases to |r|<=0.109. Full-tier regression test added.
+
 ## 2026-12-01 08:20:00 -0500 - Batch GSC UV verification
 - `batch_convert.py` now verifies byte-exact UV preservation for GSC→GTR2 conversions before writing output (60/60 sampled members); a metamorphic test proves a corrupted UV is rejected.
 

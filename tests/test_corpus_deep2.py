@@ -4528,6 +4528,64 @@ class CorpusDeep2Test(unittest.TestCase):
                              path.read_bytes(), str(path))
         self.assertEqual(set(extensions), {".dsi", ".hat", ".gtt", ".vcr"})
 
+    def test_driver_u16_deltas_not_wheel_speed(self):
+        """Apparent u16-delta/speed correlations are shared slow trends."""
+        import math
+        import statistics
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+
+        def correlate(x, y):
+            mx, my = statistics.mean(x), statistics.mean(y)
+            numerator = sum((a - mx) * (b - my) for a, b in zip(x, y))
+            denominator = (sum((a - mx) ** 2 for a in x)
+                           * sum((b - my) ** 2 for b in y)) ** 0.5
+            return numerator / denominator if denominator else 0.0
+
+        def detrend(values):
+            indices = list(range(len(values)))
+            mean_index = statistics.mean(indices)
+            mean_value = statistics.mean(values)
+            slope = sum((i - mean_index) * (v - mean_value)
+                        for i, v in zip(indices, values)) / sum(
+                            (i - mean_index) ** 2 for i in indices)
+            return [v - mean_value - slope * (i - mean_index)
+                    for i, v in zip(indices, values)]
+
+        checked = 0
+        apparent = 0
+        for path in sorted((ROOT.parent / "GTR2Steam" / "ReplayData").glob("*.Vcr")):
+            parsed = st.parse_vcr_frames(gz.decompress(str(path)))
+            if not parsed:
+                continue
+            states = []
+            for frame in parsed["frames"]:
+                for record in frame["records"]:
+                    if st.vcr_record_tag(record["header"]) == 0:
+                        state = st.vcr_driver_state(record["data"])
+                        if state:
+                            states.append(state)
+                        break
+            if len(states) < 30:
+                continue
+            speeds = [math.dist(a["position"], b["position"])
+                      for a, b in zip(states, states[1:])]
+            keep = sorted(range(len(speeds)), key=lambda i: speeds[i])[:-3]
+            speed_series = [speeds[i] for i in keep]
+            for slot in range(4):
+                wrapped = [((b["shorts"][slot] - a["shorts"][slot]) % 65536)
+                           for a, b in zip(states, states[1:])]
+                series = [min(wrapped[i], 65536 - wrapped[i]) for i in keep]
+                raw = correlate(series, speed_series)
+                if abs(raw) < 0.15:
+                    continue
+                apparent += 1
+                cleaned = correlate(detrend(series), detrend(speed_series))
+                self.assertLess(abs(cleaned), 0.15, (path.name, slot, raw, cleaned))
+            checked += 1
+        self.assertGreaterEqual(checked, 5)
+        self.assertGreaterEqual(apparent, 2)
+
     def test_driver_u16s_not_universal_tyre_units(self):
         """Live per-wheel units do not decode the u16s across all cars."""
         import struct

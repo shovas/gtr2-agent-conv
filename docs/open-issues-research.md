@@ -1,5 +1,19 @@
 # Open issues — offline research record (2026-11-23)
 
+## Driver u16 deltas vs speed (2026-12-01) — trend artefact
+
+Tested wrapped frame-to-frame deltas of the four driver-state u16s against
+position-derived speed across seven GTR2 replays:
+- one small replay (`Anderstorp.Vcr`, 91 frames) showed r = 0.724 for slot 1,
+  but dropping its three fastest frames reduced it to 0.017;
+- across all 28 replay/slot pairs, four exceeded |r| = 0.15 after outlier
+  removal — more than a seeded speed shuffle produced (mean 2, max 2), but
+  **with inconsistent signs** (Imola positive, Monza HOT LAP negative);
+- linear detrending of both series collapsed all four to |r| <= 0.109.
+
+So the apparent association is a shared slow trend, not wheel speed. The u16s
+stay undecoded; full-tier test guards the negative.
+
 ## f0 bytes vs material strings (2026-12-01) — negative
 
 Because f0 is strongly associated with material identity, its two meaningful
