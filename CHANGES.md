@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 03:20:00 -0500 - Restore normal-tier budget
+- Moved `test_gmt_relayout` and `test_fixtures` to the full tier so the normal tier runs 259 tests in 284 s (within the 300 s budget) under load; both modules still pass in full tier.
+
 ## 2026-11-28 02:50:00 -0500 - AIW plaintext coverage guard
 - Confirmed all 357 local AIW files across seven corpora are plain text (none JCA-wrapped); full-tier guard added.
 
