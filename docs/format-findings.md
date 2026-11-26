@@ -641,7 +641,11 @@ a superficial string mapping would be wrong. Full-tier test:
   Information-theoretically, MI(material name, f0 low half) is 5.475 bits vs
   4.249 for shuffled controls — a real ~1.2-bit excess, far short of the
   marker's entropy. Independent train/holdout archives replicate the excess
-  (1.400 vs 1.486 bits), so it is not an artifact of one corpus subset.
+  (1.400 vs 1.486 bits), so it is not an artifact of one corpus subset. The
+  signal is family-level: 3-character material prefixes carry nearly the same
+  MI excess as exact names (1.094 vs 1.135 bits), so exact spelling adds
+  nothing beyond the family. Full-tier test:
+  `test_f0_material_signal_is_family_level`.
   Full-tier tests: `test_f0_material_name_carries_limited_information`,
   `test_f0_material_association_replicates_on_holdout`.
   **Working hypothesis only (not established):** an external authoring

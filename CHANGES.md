@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 01:20:00 -0500 - f0 signal is material-family level
+- Showed f0's material MI excess is essentially identical for exact names and 3-character prefixes (1.135 vs 1.094 bits), confirming a family-level rather than exact-name association. Permutation-controlled test added.
+
 ## 2026-11-28 00:50:00 -0500 - Replay channel summary CLI
 - Added `simbin_events_tool.py <replay_dir> --summary`, printing per-replay steering/elevation channel correlations; full-tier CLI test added.
 
