@@ -5653,6 +5653,42 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertGreaterEqual(checked, 2)
 
+    def test_hat_record_tables_not_cross_game_reusable(self):
+        """Matching signatures do not make HAT bodies transferable between games."""
+        import gzip_simbin_tool as gz
+        import media_tool as mt
+
+        pairs = (
+            ("GTR2Steam/GameData/Locations/HAT_Dedicated/3Brno.hat",
+             "Race07Vanilla/GameData/Locations/Brno_2007/2007_Brno.hat"),
+            ("GTR2Steam/GameData/Locations/HAT_Dedicated/3ANDERSTORP.hat",
+             "GTLSteam/UserData/LOG/HAT/NANDERSTORP.hat"),
+        )
+        checked = 0
+        for relative_a, relative_b in pairs:
+            path_a = ROOT.parent / relative_a
+            path_b = ROOT.parent / relative_b
+            if not path_a.is_file() or not path_b.is_file():
+                continue
+            payload_a = gz.decompress(str(path_a))
+            payload_b = gz.decompress(str(path_b))
+            self.assertEqual(mt.hat_layout_signature(payload_a),
+                             mt.hat_layout_signature(payload_b))
+            body_a = payload_a[payload_a.find(b"generated\x00") + 10:]
+            body_b = payload_b[payload_b.find(b"generated\x00") + 10:]
+            count_a = mt.hat_declared_counts(payload_a)[2]
+            count_b = mt.hat_declared_counts(payload_b)[2]
+            table_a = body_a[48:48 + 16 * count_a]
+            table_b = body_b[48:48 + 16 * count_b]
+            self.assertNotEqual(table_a, table_b)
+            shared = min(len(table_a), len(table_b)) // 16
+            identical = sum(table_a[16 * i:16 * i + 16]
+                            == table_b[16 * i:16 * i + 16]
+                            for i in range(shared))
+            self.assertLess(identical / shared, 0.01)
+            checked += 1
+        self.assertGreaterEqual(checked, 1)
+
     def test_hat_field_b_tracks_local_elevation(self):
         """Record field B follows the road elevation at the same (x, z)."""
         import random

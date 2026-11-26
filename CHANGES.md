@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 15:20:00 -0500 - Guard against cross-game HAT reuse
+- Documented and regression-tested that matching HAT layout signatures do not make bodies reusable across games (Brno 40,189 vs 41,530 records; only 3 identical). Conversion must keep HAT files game-specific.
+
 ## 2026-11-26 14:50:00 -0500 - Identify hat field B as local elevation
 - Established that the .hat record's field B follows local road elevation at the record's (x,z): r=0.65-0.93 across six tracks with shuffled and circular-shift controls at zero; near-exact affine fit on flat Dubai. Supports the "height tree / surface cache" interpretation from GTR2.exe disassembly; no unit mapping claimed. Full-tier test added.
 

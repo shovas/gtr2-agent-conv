@@ -383,7 +383,11 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
   (appends `HAT\`, track stem, `.hat`) and a spatial query using `QWORD`
   (double) transforms and a 3-element loop at RVA ~0x45b700 in `htree.cpp`.
   The name "height tree" and the query code support a spatial/terrain-index
-  interpretation, but no full decoder is claimed.
+  interpretation, but no full decoder is claimed. Although 18 signatures are shared
+  across games, the matching bodies are **not reusable**: GTR2 Brno has 40,189
+  records vs Race07's 41,530 (3/40,189 records identical at the same index),
+  and GTR2 Anderstorp 27,357 vs GTL's 27,185 (24/27,185). Full-tier test:
+  `test_hat_record_tables_not_cross_game_reusable`.
   The body header declares **three u32 counts at offsets 36/40/44**
   (`media_tool.hat_declared_counts()`); the third is the authoritative record
   count, verified on **178/178** `.hat` files in 9 corpora (all three header

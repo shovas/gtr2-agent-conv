@@ -1,5 +1,14 @@
 # Open issues — offline research record (2026-11-23)
 
+## HAT bodies are not cross-game reusable (2026-11-26)
+
+Among 18 signatures shared across games (GTR2/GTL/Race07), no body is
+byte-identical across games. Record tables also diverge: GTR2 Brno has 40,189
+records vs Race07 41,530 with only 3 identical 16-byte records at the same
+index; GTR2 Anderstorp 27,357 vs GTL 27,185 with 24 identical. Therefore HAT
+files must stay game-specific during conversion even when the layout signature
+matches; only the signature is transferable metadata. Full-tier test added.
+
 ## `.hat` field B is local elevation (2026-11-26)
 
 Matched each record's `(x, z)` to the nearest AIW waypoint and compared B with
