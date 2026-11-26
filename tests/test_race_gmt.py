@@ -167,6 +167,34 @@ class RaceGmtTest(unittest.TestCase):
         self.assertIn("triangles=48", result.stdout)
         self.assertIn("groups=[0, 1, 2, 3, 4]", result.stdout)
 
+    def test_f32_columns_track_header_translation(self):
+        """Two per-triangle f32 columns shift exactly with the header bbox."""
+        import statistics
+
+        base = ROOT.parent / "Race07Complete/GameData/Locations/Marrakech/Models"
+        files = [base / f"PEOPLE_STAND_0{i}.gmt" for i in range(1, 6)]
+        if not all(p.is_file() for p in files):
+            self.skipTest("PEOPLE_STAND variants not present")
+        records = [race_gmt.read_triangle_records(p.read_bytes()) for p in files]
+        headers = [race_gmt.parse_header(p.read_bytes()).floats for p in files]
+        for index in range(1, 5):
+            for column, header_index in ((1, 1), (2, 2), (3, 3)):
+                observed = statistics.mean(
+                    b["floats"][column] - a["floats"][column]
+                    for a, b in zip(records[0], records[index]))
+                expected = headers[index][header_index] - headers[0][header_index]
+                self.assertAlmostEqual(observed, expected, places=4,
+                                       msg=f"file {index} column {column}")
+        # (f3, f1, f2) is a world-space position inside each file's header bbox.
+        for recs, head in zip(records, headers):
+            x_min, x_max = head[3], head[0]
+            for rec in recs:
+                x, y, z = rec["floats"][3], rec["floats"][1], rec["floats"][2]
+                self.assertLessEqual(x_min, x)
+                self.assertLessEqual(x, x_max)
+                self.assertAlmostEqual(y, head[1], delta=10.0)
+                self.assertAlmostEqual(z, head[2], delta=3.0)
+
     def test_triangles_share_vertices(self):
         p = ROOT.parent / "Race07Complete/GameData/Locations/Marrakech/Models/PEOPLE_STAND_01.gmt"
         if not p.is_file():

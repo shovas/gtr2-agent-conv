@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 12:30:00 -0500 - RaceGMT f32 columns are positional
+- Found that three per-triangle f32 columns in `RaceGMT\0` meshes track the per-file header bounding-box translation exactly (f32 precision across five `PEOPLE_STAND` variants); `(f3, f1, f2)` is a world-space position inside the header bbox for all records. Columns 0 and 4 remain unassigned. Full-tier test added.
+
 ## 2026-11-28 12:00:00 -0500 - Fix stale full-tier expectations
 - Updated two full-tier tests whose expectations predated legitimate parser improvements: GTR2 extra-stream three-value rate is 20.4% (not 46.7%) after commit 29d6090 broadened stream extraction, still far above the 0% shuffled baseline; all 9 GTR2 replay summaries are well-formed after the v1.05 validation added in feb3fd4 (previously 8/9). Documentation figures synced.
 

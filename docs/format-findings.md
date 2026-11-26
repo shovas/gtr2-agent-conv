@@ -38,9 +38,15 @@ regression tests or an explicitly documented negative.
   **48 records** with groups 0..4 (counts 8/12/8/14/6); indices restart at
   (0,1,2) at each group boundary. `race_gmt.read_triangle_records()` decodes
   this framing and stops before the following float tables. Full-tier test:
-  `test_triangle_record_framing`. The five f32 values have no established
-  semantic assignment; 113/643 files carry a table at offset 292, so no
-  universal payload layout is claimed.
+  `test_triangle_record_framing`. Two of the five f32 columns **are positional**:
+  across the five `PEOPLE_STAND_0x` variants, columns 1, 2 and 3 shift by
+  exactly `header[1]`, `header[2]` and `header[3]`'s per-file deltas
+  (agreement at f32 precision, sd < 5e-6 over all 48 triangles). Since the
+  header triples are `(max_x, y, z)` and `(min_x, y, z)`, the triple
+  `(f3, f1, f2)` is a world-space position inside the header bbox for all
+  48 records in all five files. Columns 0 and 4 remain unassigned; 113/643 files carry a table at offset 292, so no
+  universal payload layout is claimed. Full-tier test:
+  `test_f32_columns_track_header_translation`.
 - `gmt_layout.is_old()/is_new()` detect layouts; `old_to_new_semantic()` rebuilds
   a new-layout mesh from decoded old-layout geometry. The semantic reader now
   recognizes all eight observed mesh-record magic low words (`0x4001/11/13/15/35`
