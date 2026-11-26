@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-27 02:50:00 -0500 - GTL CAM/TRK conversion regression
+- Verified on the GTL Anderstorp tree that conversion preserves all CAM files byte-for-byte (CAM coordinates use a gMotor-wide negation convention) and emits GTR2-style TRK MASFile references (.gtr, teammaps2, Misc). Full-tier test added.
+
 ## 2026-11-27 02:20:00 -0500 - HAT tail alignment negative
 - Ruled out 32-byte-aligned pointers in the HAT tail: the apparent 16.3% alignment enrichment matches a byte-shuffled control (16.6%). Consolidated into the existing tail test.
 

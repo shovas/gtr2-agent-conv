@@ -6032,6 +6032,34 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertGreaterEqual(checked, 2)
 
+    def test_gtl_tree_conversion_preserves_cam_and_trk_conventions(self):
+        """GTL CAM files pass through; TRK references become GTR2-style."""
+        import tempfile
+        import gtl_to_gtr2 as g2g
+
+        source = (ROOT.parent / "GTLSteam" / "GameData" / "Locations"
+                  / "Anderstorp")
+        if not source.is_dir():
+            self.skipTest("GTL Anderstorp track not present")
+        with tempfile.TemporaryDirectory() as td:
+            target = Path(td) / "tree"
+            g2g.convert_tree(source, target)
+            cameras = sorted(source.glob("*.cam"))
+            self.assertGreaterEqual(len(cameras), 2)
+            for path in cameras:
+                self.assertEqual((target / path.name).read_bytes(),
+                                 path.read_bytes(), path.name)
+            tracks = sorted(target.glob("*.trk"))
+            self.assertGreaterEqual(len(tracks), 2)
+            for path in tracks:
+                data = g2g.aud_plain(path.read_bytes())
+                self.assertEqual(g2g.validate_trk(data), [], path.name)
+                values = {value.lower() for value in g2g.masfile_values(data)}
+                self.assertTrue(values)
+                self.assertTrue(all(value.endswith(".gtr") for value in values))
+                self.assertIn("teammaps2.gtr", values)
+                self.assertIn("misc.gtr", values)
+
     def test_validator_clean_on_real_gtr2_tree(self):
         """validate_gtr2_tree reports no false positives on the real game."""
         import gtl_to_gtr2 as g2g
