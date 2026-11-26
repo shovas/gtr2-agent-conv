@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-30 23:45:00 -0500 - f0 filename negative
+- Ruled out CRC32/byte-sum of GMT member filename as f0 source (chance-level across 21,481 markers). Added to consolidated f0 negative list.
+
 ## 2026-11-30 23:15:00 -0500 - Feature docs refreshed
 - Updated FEATURES.md replay/container sections to describe the decoded frame stream, participant and time-editing capabilities, and the remaining .hat limitation. Final PHS EXE sweep recorded as blocked.
 

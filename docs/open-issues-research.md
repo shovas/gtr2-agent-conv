@@ -199,6 +199,13 @@ phantom empty frames from those zeros; `parse_vcr_frames()` now rejects
 zero-count summaries and zero-subcount frames, returning None for GTL replays
 while all nine GTR2 replays still parse exactly. Full-tier test added.
 
+## f0 vs member filename (2026-11-30) — negative
+
+Across 21,481 GTR2 markers, f0's bytes matched CRC32 or byte-sum values of the
+GMT's archive member name at rates indistinguishable from seeded permutation
+baselines (e.g. CRC low byte 77 vs 78). Added to the consolidated rejected
+list in `docs/format-findings.md`.
+
 ## PHS final EXE sweep (2026-11-30)
 
 A final case-insensitive string sweep of `GTL.exe` found no `PHS`,
