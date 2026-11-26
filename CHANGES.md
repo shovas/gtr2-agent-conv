@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-12-01 06:00:00 -0500 - Cross-game hat signature
+- Verified the 32-byte .hat layout signature is identical between GTL and GTR2 for the same layout (p=0.003 under name permutation); bodies still diverge, so no cross-game body conversion. Full-tier test added.
+
 ## 2026-12-01 05:25:00 -0500 - Hat ID hash negative
 - Ruled out the .hat track ID as a hash of track/asset filenames or file contents; raw-byte matches in media were coincidences under a distribution-preserving control. Full-tier test added.
 

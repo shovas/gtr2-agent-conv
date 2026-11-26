@@ -4585,6 +4585,69 @@ class CorpusDeep2Test(unittest.TestCase):
                                      for r, label in zip(rows, labels)])[0])
         self.assertGreater(observed, max(permuted))
 
+    def test_hat_signature_is_cross_game_stable(self):
+        """The 32-byte .hat layout signature is shared by GTL and GTR2."""
+        import random
+        import gzip_simbin_tool as gz
+
+        def signature(path):
+            payload = gz.decompress(str(path))
+            marker = payload.find(b"generated\x00")
+            if marker < 0:
+                return None, None
+            body = payload[marker + 10:]
+            return body[4:36], body
+
+        gtr = {}
+        for path in sorted((ROOT.parent / "GTR2Steam").rglob("*.hat")):
+            sig, body = signature(path)
+            if sig:
+                gtr[path.stem] = (sig, body)
+        self.assertGreaterEqual(len(gtr), 30)
+        gtl = {}
+        for path in sorted((ROOT.parent / "GTLSteam" / "UserData" / "LOG"
+                            / "HAT").glob("*.hat")):
+            sig, body = signature(path)
+            if sig:
+                gtl[path.stem] = (sig, body)
+        self.assertGreaterEqual(len(gtl), 2)
+        for name, (sig, body) in gtl.items():
+            matches = [n for n, (s, _b) in gtr.items() if s == sig]
+            if name == "NANDERSTORP":
+                self.assertEqual(set(matches), {"3ANDERSTORP", "SANDERSTORP"})
+            else:
+                self.assertEqual(matches, [])
+            # Sharing the signature does not make the body convertible.
+            if matches:
+                other = gtr[matches[0]][1]
+                limit = min(len(body), len(other), 200000)
+                agreement = sum(body[i] == other[i] for i in range(36, limit))
+                self.assertLess(agreement / (limit - 36), 0.4)
+        tokens = ("ANDERSTORP", "Barcelona", "Brno", "Donington", "Enna",
+                  "Estoril", "Magny", "Monza", "Oschersleben", "Spa", "Dubai",
+                  "Valencia", "Imol", "Zhuhai", "Hockenheim", "Nuerburgring")
+
+        def token(name):
+            return next((t for t in tokens if t.lower() in name.lower()), None)
+
+        def labelled_count(items, labels):
+            return sum(1 for (name, sig, _unused), label in zip(items, labels)
+                       for gtl_name, (gtl_sig, _body) in gtl.items()
+                       if label == token(gtl_name) and sig == gtl_sig)
+
+        items = [(name, sig, token(name)) for name, (sig, _b) in gtr.items()]
+        observed = labelled_count(items, [item[2] for item in items])
+        self.assertEqual(observed, 2)
+        random.seed(2026)
+        labels = [item[2] for item in items]
+        permuted = []
+        for _ in range(1000):
+            random.shuffle(labels)
+            permuted.append(labelled_count(items, labels))
+        self.assertGreater(observed, sum(permuted) / len(permuted))
+        self.assertLess(sum(value >= observed for value in permuted)
+                        / len(permuted), 0.01)
+
     def test_hat_track_id_not_a_track_asset_hash(self):
         """The .hat header ID is not a hash of track filenames or file contents."""
         import hashlib

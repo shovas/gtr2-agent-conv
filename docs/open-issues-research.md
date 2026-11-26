@@ -1,5 +1,20 @@
 # Open issues — offline research record (2026-11-23)
 
+## `.hat` signature is cross-game stable, body is not (2026-12-01)
+
+The two shipped GTL `.hat` logs share the same 32-byte `body[4:36]` signature
+as the corresponding GTR2 layout: `NANDERSTORP` matches GTR2 `3ANDERSTORP` and
+`SANDERSTORP` exactly, `MBNuerburgring` matches none of the 34 GTR2 files.
+A seeded name-to-signature permutation (1000 shuffles) gives 2 observed
+co-occurrences vs mean 0.127, `p = 0.003`.
+
+However the bodies are not convertible: total lengths differ by 39,243 bytes,
+and aligned byte agreement from offset 36 decays from 27% in the first 10 KB to
+~1% (chance is 0.4%). Shared 16-byte windows occur at varying shifts, so there
+is no simple splice/insert rule. The earlier CAPABILITIES claim that no
+header-only cross-game conversion applies is confirmed and strengthened.
+Full-tier test added.
+
 ## `.hat` ID vs track assets (2026-12-01) — negative
 
 Tried to derive the header's 12-byte track ID from the corresponding track's

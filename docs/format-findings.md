@@ -327,6 +327,14 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
   control (matching the zero-byte mask) gave 24.9/15 — the hits are coincidences
   in `.tga`/`.bik`/`.jpg` data. Full-tier test:
   `test_hat_track_id_not_a_track_asset_hash`.
+- **Cross-game (GTL vs GTR2):** the 32-byte `body[4:36]` layout signature is
+  identical for the same physical layout in both games — GTL `NANDERSTORP` and
+  GTR2 `3ANDERSTORP`/`SANDERSTORP` all agree; GTL `MBNuerburgring` matches no
+  GTR2 file. Seeded name-to-signature permutation: 2 observed co-occurrences
+  vs mean 0.127 (1000 shuffles, seed 2026), `p = 0.003`. The bodies still
+  diverge quickly (byte agreement from offset 36 falls from 27% in the first
+  10 KB to ~1% later), so **no cross-game .hat body conversion rule** is
+  claimed. Full-tier test: `test_hat_signature_is_cross_game_stable`.
 
 ## 5. Vertex `f0` (per-mesh marker on vertex 0)
 
