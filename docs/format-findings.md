@@ -198,8 +198,13 @@ regression tests or an explicitly documented negative.
   Fixed blocks hold `.CAR`/skin names; the trailing f32 pair is an activity
   window `[start, end]` with `-1e32` (`0xF49DC5AE`) meaning unbounded.
   Bulk data shows a separate **20-byte lag excess** over neighbouring
-  lags in 7/9 replays (median +0.16 matching bytes), consistent with a small
-  repeating record, but no monotonic time field was found at that stride.
+
+- **Replay frame stream decoded:** `parse_vcr_frames()` consumes the payload
+  exactly in 7/9 GTR2 replays: `count_a` frames, each u32 absolute time + u16
+  sub-record count, each sub-record u32 header + packed size; total sub-record
+  count equals `count_b`, and `last − first` frame time equals the summary
+  duration. The first frame time equals the participant window start.  lags in 7/9 replays (median +0.16 matching bytes), consistent with a small
+  repeating record. The frame stream is now decoded (below).
 - Every ghost ends with a **20-byte tail** (5 f32s). Its first two floats are
   a per-track fixed point (median distance 0.6 between ghosts of the same
   track vs 178 for random pairs) near that track's final frame position —

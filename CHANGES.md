@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-30 12:15:00 -0500 - Replay frame decoder complete
+- Fixed a misread of the packed sub-record size (+1 only in the special branch) and added `parse_vcr_frames()`: 7/9 GTR2 replays parse exactly to payload end, sub-record totals equal count_b, frame time spans equal summary durations, and first frame times equal participant window starts. Full-tier test added.
+
 ## 2026-11-30 11:45:00 -0500 - Replay frame layout from reader code
 - Disassembled the ghost reader: summary count_a frames, each a 6-byte header (u32 + u16 subcount) followed by u32-headed sub-records with a packed 10-bit size. Recorded as code-level layout; payload alignment remains unresolved. Test extended.
 

@@ -168,6 +168,24 @@ session variation is carried solely by `session_seconds`
 `c=8` only in Magny-Cours, but with nine samples no semantics are claimed.
 Full-tier regression test added.
 
+## Replay frame decoder complete (2026-11-30) — correction
+
+Re-reading `fcn.00527890` revealed that the `+1` applies **only** in the
+special branch; the normal size is `((header >> 8) & 0x3ff)` with no +1. My
+first parser incorrectly added one in both branches, which is why frame
+alignment failed. With the corrected `vcr_subrecord_size()`,
+`parse_vcr_frames()` consumes **7 of 9** GTR2 replay payloads exactly:
+- frame count = `count_a` (24–7,460);
+- each frame = u32 absolute session time + u16 sub-record count;
+- each sub-record = u32 header + packed-size payload;
+- total sub-records == `count_b` (90–142,974);
+- `last_time − first_time` == summary duration (f32 tolerance);
+- first frame time == that replay's participant window start.
+
+`Anderstorp.Vcr` parses all 121 frames but leaves trailing bytes, and
+`Dubai International.Vcr` uses a different summary marker. Both remain
+variants. Full-tier regression test added.
+
 ## Replay frame/sub-record layout from reader disassembly (2026-11-30)
 
 `fcn.0052be30` (ghost reader) loops `count_a` times (summary field stored at

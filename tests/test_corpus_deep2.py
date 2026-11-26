@@ -4337,6 +4337,34 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertEqual(checked, 4)
 
+    def test_vcr_frame_subrecord_decoder(self):
+        """The EXE-derived frame layout consumes the replay payload exactly."""
+        import struct
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        exact = 0
+        for path in (ROOT.parent / "GTR2Steam" / "ReplayData").glob("*.Vcr"):
+            payload = gz.decompress(str(path))
+            parsed = st.parse_vcr_frames(payload)
+            if parsed is None:
+                continue
+            summary = parsed["summary"]
+            self.assertEqual(len(parsed["frames"]), summary["count_a"])
+            self.assertTrue(all(0 <= record["header"] <= 0xFFFFFFFF
+                                for frame in parsed["frames"]
+                                for record in frame["records"]))
+            if parsed["end_offset"] != len(payload):
+                continue
+            exact += 1
+            total = sum(len(frame["records"]) for frame in parsed["frames"])
+            self.assertEqual(total, summary["count_b"])
+            first = struct.unpack("<f", struct.pack("<I",
+                                  parsed["frames"][0]["time_word"]))[0]
+            last = struct.unpack("<f", struct.pack("<I",
+                                 parsed["frames"][-1]["time_word"]))[0]
+            self.assertLess(abs((last - first) - summary["duration"]), 0.05)
+        self.assertGreaterEqual(exact, 7)
+
     def test_replay_post_object_summary(self):
         """A 13-byte summary follows the participant records in most replays."""
         import math

@@ -304,6 +304,52 @@ def parse_replay_summary(data: bytes) -> dict | None:
             "count_b": second, "duration": duration}
 
 
+def vcr_subrecord_size(header: int) -> int:
+    """Payload size packed into a replay sub-record's u32 header.
+
+    From `GTR2.exe` `fcn.00527890`: bits 8..17 hold ``size - 1`` in the normal
+    case; when bits 30..28 are 0x2 and bits 23..18 are zero, one extra byte is
+    read. The low byte is a type tag.
+    """
+    size = (header >> 8) & 0x3FF
+    if (header & 0xE0000000) == 0x20000000 and ((header >> 16) & 0xFC) == 0:
+        size += 1
+    return size
+
+
+def parse_vcr_frames(data: bytes) -> list[dict] | None:
+    """Parse the frame/sub-record stream of a `.Vcr` replay payload.
+
+    Layout from `fcn.0052be30` / `fcn.00526730` / `fcn.00527890`: the summary
+    count is the frame count; each frame is u32 + u16 sub-record count, and
+    each sub-record is a u32 header plus ``vcr_subrecord_size`` payload bytes.
+    Returns ``None`` when the stream cannot be parsed cleanly.
+    """
+    summary = parse_replay_summary(data)
+    if summary is None or summary["marker"] != 0:
+        return None
+    offset = summary["offset"] + 13
+    frames = []
+    for _ in range(summary["count_a"]):
+        if offset + 6 > len(data):
+            return None
+        time_word, subcount = struct.unpack_from("<IH", data, offset)
+        offset += 6
+        records = []
+        for _ in range(subcount):
+            if offset + 4 > len(data):
+                return None
+            header = struct.unpack_from("<I", data, offset)[0]
+            offset += 4
+            size = vcr_subrecord_size(header)
+            if offset + size > len(data):
+                return None
+            records.append({"header": header, "data": data[offset:offset + size]})
+            offset += size
+        frames.append({"time_word": time_word, "records": records})
+    return {"frames": frames, "end_offset": offset, "summary": summary}
+
+
 def parse_payload(data: bytes) -> EventFile:
     kind = next((m.decode() for m in MAGICS if m in data[:64]), None)
     if kind is None:
