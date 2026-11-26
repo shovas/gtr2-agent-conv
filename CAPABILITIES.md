@@ -164,8 +164,8 @@ Lower-level, technical capability inventory. Status reflects evidence in code/te
 - **Two-stream cross-check**: `gmt_format.stream_cross_agreement()` measures per-vertex UV-pair agreement between GTR2 stream2 and stream3 (96% of meshes at 1.0 vs 0.023 shuffled). Full-tier test.
 - **Driver-state decoder**: `simbin_events_tool.vcr_driver_state()` reads the 53-byte replay body (u16 fields at +8, f32 position block at +29); full-tier smoothness test.
 - **Replay CLI**: `simbin_events_tool.py FILE --replay` reports participants, summary and frame-stream statistics (full-tier CLI test).
-- **Replay frame decoder**: `simbin_events_tool.parse_vcr_frames()` consumes all 9 GTR2 replay payloads exactly (declared/total frames, sub-records, time spans cross-validated; handles Latin-1 names and multi-segment streams). Full-tier test.
-- **Replay summary parser**: `simbin_events_tool.parse_replay_summary()` reads the marker/count/duration block following participant records (full-tier test on 9 GTR2 replays).
+- **Replay frame decoder**: `simbin_events_tool.parse_vcr_frames()` consumes all 13 local replay payloads exactly (9 GTR2 v1.05 + 4 GTL v1.01; declared/total frames, sub-records, time spans cross-validated; handles Latin-1 names and multi-segment streams). Full-tier test.
+- **Replay summary parser**: `simbin_events_tool.parse_replay_summary()` reads v1.05 marker/u32/u32/f32 and v1.01 sentinel/u24/u24/f32 summaries (full-tier tests on 13 replays).
 - **Replay object parser**: `simbin_events_tool.parse_object_records()` walks the EXE-derived variable-length record layout to recover replay participants (full-tier test on 9 GTR2 replays).
 - **GTTF frame-time editor**: `simbin_events_tool.shift_frame_times()` shifts every frame's +20 time word in place, preserving positions/controls/tail (full-tier test).
 - **GTTF session-field editor**: `simbin_events_tool.set_session_seconds()` mutates the header f32 in place (≤4 bytes change) with a verified full-tier test on 29 ghosts.
