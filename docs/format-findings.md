@@ -105,8 +105,10 @@ regression tests or an explicitly documented negative.
   correctness remains unverified. A finiteness/bounds guard test is included.
  meshes whose record has
   `rec[6] < rec[7] < rec[8]` carry two extra 32-byte-per-vertex streams. In
-  46.7% of 1,605 sampled meshes every 8-float stream record follows
-  `[U, S, V, S, V, S, V, S]` — only three distinct values per vertex. A flat
+  20.4% of 1,600 sampled meshes every 8-float stream record follows
+  `[U, S, V, S, V, S, V, S]` — only three distinct values per vertex. The
+  earlier 46.7% figure used the narrower pre-29d6090 stream selection; the
+  enlarged population still sits far above the 0% shuffled baseline. A flat
   road mesh shows column 2 as a planar world-x projection (r=1.0) with columns
   4/6 as ×10/×15 copies, but this is not general (only 39/447 meshes), so UV
   *semantics* remain unassigned. `gmt_format.decode_stream_records()` exposes

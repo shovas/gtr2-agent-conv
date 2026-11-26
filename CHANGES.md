@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 12:00:00 -0500 - Fix stale full-tier expectations
+- Updated two full-tier tests whose expectations predated legitimate parser improvements: GTR2 extra-stream three-value rate is 20.4% (not 46.7%) after commit 29d6090 broadened stream extraction, still far above the 0% shuffled baseline; all 9 GTR2 replay summaries are well-formed after the v1.05 validation added in feb3fd4 (previously 8/9). Documentation figures synced.
+
 ## 2026-11-28 11:30:00 -0500 - Replay u16 sum is not speed
 - Ruled out the sum/mean of the four replay u16 wheel-like values as a speed channel (correlations -0.21..+0.17, positive in 2/8 replays); full-tier guard added.
 
