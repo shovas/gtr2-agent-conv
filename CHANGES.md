@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-27 18:20:00 -0500 - HAT node framing gap
+- Tried parsing real HAT tails with the code-derived 34-byte node layout: no raw phase yields valid record indices and no zlib framing exists, so an additional stream transform remains unresolved. Full-tier guard added.
+
 ## 2026-11-27 17:50:00 -0500 - HAT 34-byte node records decoded
 - Traced GTL.exe node parser 0x4503c0: 34-byte on-disk nodes with 21-bit and packed 10/11-bit fields plus three references into the 16-byte record table, explaining the measured 34-byte tail periodicity. Code-evidence test extended.
 

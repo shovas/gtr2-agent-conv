@@ -68,6 +68,16 @@ for shuffled controls; Monza 0.021% versus 0.015–0.026%. At chance — the tai
 is not a flat height cache. Consolidated into
 `test_hat_trailing_stream_is_not_plain_float_records`.
 
+## HAT node layout vs raw tail (2026-11-27) — framing gap
+
+Attempted to parse real HAT trailing streams using the code-derived 34-byte
+node layout. Across Brno/Monza/Enna, no byte phase 0..33 yields a run of u32
+words that are plausible record indices (< declared record count; best rate
+<0.1%), and no zlib-like header appears in the first 10 KB of the tail. So the
+reader's virtual stream applies an additional framing/transform not present
+in the raw decompressed file. The 34-byte node layout remains a verified code
+artifact, not a directly parseable on-disk structure. Full-tier guard added.
+
 ## HAT 34-byte node records (2026-11-27)
 
 Traced `0x4503c0` in GTL.exe: each node reads **0x22 = 34 bytes** from the

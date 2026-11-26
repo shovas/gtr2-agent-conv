@@ -478,7 +478,11 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
   **34-byte (0x22) on-disk record** containing a 21-bit field (`&0x1fffff`),
   a 10-bit field (`&0x3ff`, shifted 11) packed with an 11-bit field (`>>21`),
   and three u32 references into the 16-byte record table (`index << 4`) —
-  matching the independently observed 34-byte tail periodicity. Full-tier tests: `test_hat_producer_strings_in_dedicated_exe`,
+  matching the independently observed 34-byte tail periodicity. On real
+  files, however, the raw tail bytes do not form such a node array: no 34-byte
+  phase yields u32 words that are valid record indices, and no embedded zlib
+  framing was found, so an additional stream framing layer remains unresolved.
+  Full-tier guard in `test_hat_trailing_stream_is_not_plain_float_records`. Full-tier tests: `test_hat_producer_strings_in_dedicated_exe`,
   `test_hat_trailing_stream_is_not_plain_float_records`. Although 18 signatures are shared
   across games, the matching bodies are **not reusable**: GTR2 Brno has 40,189
   records vs Race07's 41,530 (3/40,189 records identical at the same index),

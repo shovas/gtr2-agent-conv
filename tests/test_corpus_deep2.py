@@ -6117,6 +6117,17 @@ class CorpusDeep2Test(unittest.TestCase):
         control_hits = sum(word in heights for word in shuffled_words) / len(words)
         self.assertLess(abs(observed_hits - control_hits), 0.0005)
 
+        # The code-level 34-byte node layout is not a raw-tail array: no phase
+        # yields a run of u32s that are all valid record indices, and there is
+        # no embedded zlib stream to account for the framing.
+        record_count = mt.hat_record_count(payload)
+        valid_rates = []
+        for phase in range(34):
+            words = struct.unpack_from("<%dI" % (min(len(tail) - phase, 4000) // 4),
+                                       tail, phase)
+            valid_rates.append(sum(word < record_count for word in words) / len(words))
+        self.assertLess(max(valid_rates), 0.05)
+
     def test_hat_trailing_stream_has_eight_byte_periodicity(self):
         """The .hat stream after the record table is not byte-random."""
         import collections
