@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-27 01:50:00 -0500 - HAT trailing stream writer evidence
+- Traced the post-record writer path (0x459610 / 0x45c3d0): 32-byte structures with 8-byte prefixes and variable linked-list metadata explain the trailing stream's lack of a fixed stride. Documented; no field-level decoder claimed.
+
 ## 2026-11-27 01:20:00 -0500 - Decode both HAT auxiliary counts
 - Fully decoded the HAT header counts: body[36] is the input polygon count and body[40] is T(n), the recursive bisection-tree size from GTR2.exe function 0x45b1d0; verified 178/178 files with no saturation. Added `media_tool.hat_bisection_count()` and a full-tier test.
 

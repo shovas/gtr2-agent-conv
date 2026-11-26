@@ -22,6 +22,18 @@ or value carries the rF1 track properties. The fields are semantically
 different, so no class-mapping rule exists — this is a corpus negative, not a
 missing implementation. Full-tier test added.
 
+## HAT trailing stream writer code (2026-11-27)
+
+Continuing past the record loop: `0x459610` reads a count and an array base
+from the HAT object and writes internal pointers at 32-byte intervals, then
+returns the array; `0x45c3d0` writes 8-byte prefixes (two u32s) of those
+32-byte elements and walks linked lists through `+0x1c` for up to three hops
+to emit variable-length metadata. Combined with the 0x60 (= 3 x 0x20) bytes
+allocated per polygon earlier in the writer, this explains why the trailing
+stream has no fixed record stride and why its periodicity is driven by float
+exponent bytes rather than a repeating template. No field-level decoder is
+claimed.
+
 ## HAT aux counts fully decoded (2026-11-27)
 
 Traced the two count-computing functions called by the HAT writer:
