@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-30 11:45:00 -0500 - Replay frame layout from reader code
+- Disassembled the ghost reader: summary count_a frames, each a 6-byte header (u32 + u16 subcount) followed by u32-headed sub-records with a packed 10-bit size. Recorded as code-level layout; payload alignment remains unresolved. Test extended.
+
 ## 2026-11-30 11:15:00 -0500 - ISI cipher performance optimization
 - Optimized `isi_crypt.isi_crypt()` with per-block precomputed stream values, removing tens of millions of redundant Python calls. Byte-exact equivalence verified on random vectors and real GSC members; GSC UV test 69s -> 24.6s. Full-tier reference test added.
 

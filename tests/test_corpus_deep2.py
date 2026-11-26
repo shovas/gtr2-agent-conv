@@ -4089,6 +4089,8 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertEqual(data.count(bytes.fromhex("6a408d4f41518bce")), 1)
         # Per-object reader splits a flags byte's top bit into +0xcc.
         self.assertEqual(data.count(bytes.fromhex("80e17fc0e807880f8887cc000000")), 1)
+        # Sub-record reader fcn.00527890: u32 header with packed 10-bit size.
+        self.assertEqual(data.count(bytes.fromhex("8b4424048bc881e1000000e081f9000000207524")), 1)
 
     def test_no_debug_symbols_in_game_binaries(self):
         """Game EXEs reference PDBs but ship no usable debug symbols."""

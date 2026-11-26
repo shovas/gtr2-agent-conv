@@ -168,6 +168,21 @@ session variation is carried solely by `session_seconds`
 `c=8` only in Magny-Cours, but with nine samples no semantics are claimed.
 Full-tier regression test added.
 
+## Replay frame/sub-record layout from reader disassembly (2026-11-30)
+
+`fcn.0052be30` (ghost reader) loops `count_a` times (summary field stored at
+`0x2c2420`): each iteration calls `fcn.00526730`, which reads a **u32** into
+the frame object and a **u16** at `+8` (the sub-record count), then calls
+`fcn.00527890` that many times. The sub-record reader reads a u32 header and
+derives a payload size of `((header >> 8) & 0x3ff) + 1`, with `+1` when bits
+30–28 are `0x2` and bits 18–23 are zero; the low 10 bits look like a type tag.
+These layouts are code-verified. However, applying them from the end of the
+summary does not align with the sampled payload bytes (no size formula parsed
+more than a handful of frames), so either an additional structure intervenes
+for IRSR files or the virtual read method interprets that value differently.
+Recorded as code-level layout knowledge plus a parser negative; byte-pattern
+test extended.
+
 ## Per-frame replay records not located (2026-11-30)
 
 Attempted to extend the participant/summary decoders into the bulk payload by
