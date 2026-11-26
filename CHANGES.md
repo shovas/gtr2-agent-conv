@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 01:50:00 -0500 - Correct SCN to TRK MASFile conventions
+- Fixed `text_convert.scn_to_trk()` to emit bare (unquoted) `.gtr` MASFile references and the corpus-universal `Misc.gtr` entry; all 16 GTR2 map archives use `.gtr`. End-to-end Joesville conversion validator problems dropped from 22 to 17 (remaining ones need template data or shared archives). Full-tier regression test added.
+
 ## 2026-11-26 01:20:00 -0500 - Fix CRLF handling in TRK/SCN rewrites
 - Fixed the same CRLF normalization bug in `text_convert.scn_to_trk()` and `trk_extensions_to_gtr2()`: rewritten lines now keep CRLF endings and trailing comments. Verified on all 25 GTL TRK files (zero mixed-ending outputs); regression tests added.
 

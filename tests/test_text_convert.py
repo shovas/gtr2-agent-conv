@@ -23,8 +23,8 @@ class TextConvertTest(unittest.TestCase):
         out = tc.scn_to_trk(SCN, "JOESVILLE_SPEEDWAY")
         self.assertIn("SearchPath=GameData\\Locations\\Shared", out)
         self.assertIn("SearchPath=GameData\\Locations\\JOESVILLE_SPEEDWAY", out)
-        self.assertIn('MASFile="COMMONMAPS.gtr"', out)
-        self.assertIn('MASFile="JOESVILLE_SPEEDWAY_MAP.gtl"', out)
+        self.assertIn("MASFile=COMMONMAPS.gtr", out)
+        self.assertIn("MASFile=JOESVILLE_SPEEDWAY_MAP.gtr", out)
         self.assertNotIn("SearchPath=.", out)
 
     def test_gtl_trk_extensions(self):
@@ -35,14 +35,23 @@ class TextConvertTest(unittest.TestCase):
         self.assertNotIn(".gtl", out)
         self.assertIn("SearchPath=GameData\\Locations", out)
 
+    def test_scn_masfile_unquoted_matches_corpus(self):
+        """Converted MASFile lines are bare, as in all 293 GTR2/GTL TRKs."""
+        import gtl_to_gtr2 as g2g
+        out = tc.scn_to_trk(SCN, "JOESVILLE_SPEEDWAY")
+        values = g2g.masfile_values(out.encode("latin-1"))
+        self.assertTrue(values)
+        self.assertTrue(all(not value.startswith('"') for value in values))
+        self.assertTrue(all(value.lower().endswith(".gtr") for value in values))
+
     def test_crlf_preserved_by_rewrites(self):
         """Rewritten lines keep CRLF endings and inline comments."""
         scn = ("CUBEASF\r\n"
                "SearchPath=.\r\n"
                "MASFile=COMMONMAPS.MAS\r\n")
         out = tc.scn_to_trk(scn, "JOESVILLE")
-        self.assertEqual(out.count("\n"), 4)
-        self.assertEqual(out.count("\r\n"), 4)
+        self.assertEqual(out.count("\n"), 5)
+        self.assertEqual(out.count("\r\n"), 5)
         self.assertEqual(out.count("\n") - out.count("\r\n"), 0)
         trk = ("  MASFile=Anderstorp.gtl // track map\r\n"
                "SearchPath=GameData\\Locations\r\n")
@@ -72,6 +81,29 @@ class TextConvertTest(unittest.TestCase):
         self.assertGreater(report["scn"], 0)
         self.assertGreater(report["copy"], 0)
 
+
+    def test_tree_conversion_trk_conventions(self):
+        """An end-to-end converted tree has corpus-conforming TRK references."""
+        import tempfile
+        import gtl_to_gtr2 as g2g
+        source = ROOT.parent / "RF1Vanilla/GameData/Locations/Joesville"
+        if not source.is_dir():
+            self.skipTest("RF1Vanilla sample track not present")
+        with tempfile.TemporaryDirectory() as td:
+            target = Path(td) / "tree"
+            tc.convert_tree(source, target)
+            tracks = list(target.rglob("*.trk"))
+            self.assertTrue(tracks)
+            for path in tracks:
+                data = path.read_bytes()
+                self.assertEqual(data.count(b"\n"), data.count(b"\r\n"), path)
+                values = g2g.masfile_values(data)
+                self.assertTrue(values)
+                self.assertTrue(all(v.lower().endswith(".gtr") for v in values), path)
+                self.assertTrue(any(v.lower() == "misc.gtr" for v in values), path)
+            problems = g2g.validate_gtr2_tree(target)
+            self.assertFalse([p for p in problems if "non-.gtr MASFile" in p])
+            self.assertFalse([p for p in problems if "missing Misc.gtr" in p])
 
     def test_jca_encrypted_scn_decryption(self):
         """Race07/Volvo .scn files are JCA-wrapped; tree conversion must decrypt."""

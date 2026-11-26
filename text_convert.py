@@ -47,10 +47,20 @@ def scn_to_trk(data: str, track_name: str = "") -> str:
         if key_l == "masfile":
             name = value.replace("/", "\\").strip('"')
             base = Path(name).stem
-            ext = ".gtl" if base.upper().endswith("MAP") else ".gtr"
-            out.append(f'{indent}MASFile="{base}{ext}"{newline}')
+            ext = ".gtr"  # GTR2 ships 16/16 map archives with this extension
+            out.append(f"{indent}MASFile={base}{ext}{newline}")
             continue
         out.append(line)
+    # All 34 local GTR2 TRKs reference Misc.gtr; insert it after the last
+    # MASFile line when the source SCN has no equivalent.
+    if not any(re.match(r"^\s*MASFile\s*=\s*Misc\.gtr\s*$", line, re.I)
+               for line in out):
+        for index in range(len(out) - 1, -1, -1):
+            if out[index].lstrip().lower().startswith("masfile="):
+                ending = out[index][-2:] if out[index].endswith("\r\n") else (
+                    "\n" if out[index].endswith("\n") else "")
+                out.insert(index + 1, f"MASFile=Misc.gtr{ending}")
+                break
     return "".join(out)
 
 
