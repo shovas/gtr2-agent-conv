@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 00:45:00 -0500 - Fix CRLF handling in AIW conversion
+- Fixed a corpus-discovered bug in `aiw_for_simbin()`: CRLF line endings previously corrupted keys into `wpwp_galpha` and left commented `wp_galpha` values unscaled. Indentation, comments and line endings are preserved; already-SimBin inputs are left unchanged. Full-tier tests verify all 39 rF1 AIWs convert to galpha <= 0.45.
+
 ## 2026-11-26 00:10:00 -0500 - Hat CLI reports record count
 - `media_tool.py hat-layout` now reports the verified 16-byte record-table count, distinguishing layouts that share a 32-byte signature (e.g. four Dubai variants). Full-tier test added.
 

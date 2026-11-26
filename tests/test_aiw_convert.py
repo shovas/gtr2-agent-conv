@@ -33,6 +33,20 @@ class AiwConvertTest(unittest.TestCase):
         self.assertIn("wp_pos=(-1.5474,3.7705,419.8781)", out)
         self.assertIn("WP_PTRS=(10,12,-1,0)", out)
 
+    def test_crlf_galpha_preserves_prefix_and_comment(self):
+        """CRLF indentation must not corrupt keys or prevent scaling."""
+        sample = ("[Waypoint]\r\n"
+                  "wp_pos=(1,2,3)\r\n"
+                  "  wp_galpha=(0.9600) // alpha for groove\r\n"
+                  "wp_normal=(0,1,0)\r\n"
+                  "WP_PTRS=(1,-1,-1,0)\r\n")
+        out = stt.aiw_for_simbin(sample)
+        self.assertIn("wp_galpha=(0.4320) // alpha for groove\r\n", out)
+        self.assertNotIn("wpwp_", out)
+        self.assertEqual(out.count("\r\n"), 4)
+        aiw = stt.parse_aiw(out)
+        self.assertEqual([wp.galpha for wp in aiw.waypoints], [0.432])
+
     def test_preserves_other_lines(self):
         out = stt.aiw_for_simbin(SAMPLE)
         self.assertIn("//[[gMa1.000f", out)
@@ -43,6 +57,36 @@ class AiwConvertTest(unittest.TestCase):
         once = stt.aiw_for_simbin(SAMPLE)
         self.assertEqual(stt.aiw_for_simbin(once), once)
 
+
+    def test_galpha_cap_matches_target_corpus(self):
+        """The 0.45 conversion cap matches GTR2/GTL and bounds converted rF1."""
+        import glob
+        source = 0
+        for path in glob.glob(str(ROOT.parent / "RF1Vanilla" / "**" / "*.AIW"),
+                              recursive=True):
+            if not Path(path).is_file():
+                continue
+            converted = stt.aiw_for_simbin(stt.read_text(path))
+            aiw = stt.parse_aiw(converted)
+            values = [wp.galpha for wp in aiw.waypoints if wp.galpha is not None]
+            self.assertTrue(values, path)
+            self.assertLessEqual(max(values), 0.4501, path)
+            source += 1
+        self.assertGreaterEqual(source, 30)
+
+        totals = 0
+        above = 0
+        for corpus in ("GTR2Steam", "GTLSteam"):
+            for path in glob.glob(str(ROOT.parent / corpus / "**" / "*.AIW"),
+                                  recursive=True):
+                aiw = stt.parse_aiw(stt.read_text(path))
+                for wp in aiw.waypoints:
+                    if wp.galpha is None:
+                        continue
+                    totals += 1
+                    above += wp.galpha > 0.45
+        self.assertGreater(totals, 40000)
+        self.assertLess(above / totals, 0.001)
 
     def test_waypoint_ptrs_class_corpus(self):
         """WP_PTRS[3] buckets and branchID equality hold corpus-wide."""

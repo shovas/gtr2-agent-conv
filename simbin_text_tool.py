@@ -3182,29 +3182,38 @@ _VEC1_RE = re.compile(r"^\s*\(\s*(-?[\d.]+)\s*\)\s*$")
 
 
 def aiw_for_simbin(data: str) -> str:
-    """Convert an rFactor-style AIW to SimBin conventions (text-level rules)."""
+    """Convert an rFactor-style AIW to SimBin conventions (text-level rules).
+
+    Line endings and indentation are preserved byte-for-byte. Inline comments
+    after a key/value pair are retained after the rewritten value.
+    """
+    # Corpus-verified discriminator: all 39 local rF1 AIWs carry at least one
+    # rF1-only tag, while 0/31 GTR2 AIWs do. Its absence means the input is
+    # already SimBin-style, so converting again would double-scale wp_galpha.
+    if not any(re.search(r"^\s*" + re.escape(tag) + r"\s*=", data, re.M | re.I)
+               for tag in RFACTOR_ONLY_AIW_TAGS):
+        return data
     out = []
     for line in data.splitlines(keepends=True):
-        stripped = line.strip()
-        m = KEYVALUE_RE.match(stripped)
+        body = line.rstrip("\r\n")
+        newline = line[len(body):]
+        indent = body[:len(body) - len(body.lstrip())]
+        m = KEYVALUE_RE.match(body.strip())
         if not m:
             out.append(line)
             continue
         key, value = m.group(1).strip().lower(), m.group(2).strip()
         if key in AIW_TAG_REPLACEMENTS:
-            indent = line[:len(line) - len(line.lstrip())]
-            out.append(f"{indent}{AIW_TAG_REPLACEMENTS[key]}\n" if line.endswith("\n")
-                       else f"{indent}{AIW_TAG_REPLACEMENTS[key]}")
+            out.append(f"{indent}{AIW_TAG_REPLACEMENTS[key]}{newline}")
             continue
         if key in RFACTOR_ONLY_AIW_TAGS:
             continue
         if key == "wp_galpha":
-            scalar = _VEC1_RE.match(value)
+            scalar = re.match(r"^\(\s*(-?[\d.]+)\s*\)(.*)$", value)
             if scalar:
                 scaled = float(scalar.group(1)) * GALPHA_SCALE
-                prefix = line[:len(line) - len(stripped)]
-                newline = "\n" if line.endswith("\n") else ""
-                out.append(f"{prefix}wp_galpha=({scaled:.4f}){newline}")
+                out.append(f"{indent}wp_galpha=({scaled:.4f})"
+                           f"{scalar.group(2)}{newline}")
                 continue
         out.append(line)
     return "".join(out)
