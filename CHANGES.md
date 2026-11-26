@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-30 11:15:00 -0500 - ISI cipher performance optimization
+- Optimized `isi_crypt.isi_crypt()` with per-block precomputed stream values, removing tens of millions of redundant Python calls. Byte-exact equivalence verified on random vectors and real GSC members; GSC UV test 69s -> 24.6s. Full-tier reference test added.
+
 ## 2026-11-30 10:45:00 -0500 - Per-frame replay negative
 - Recorded that the post-summary payload has no repeating frame record: variable lag peaks, non-integer count divisions, and a one-off header-like block. No per-frame decoder claimed.
 

@@ -36,5 +36,27 @@ class IsiCryptTest(unittest.TestCase):
         self.assertEqual((tmp / "dec_ref.gmt").read_bytes(), raw, f"rfactordec rc={r.returncode} stderr={r.stderr[-200:]}")
 
 
+    def test_optimized_stream_matches_isy_crypt2(self):
+        """The precomputed stream matches the per-byte reference cipher."""
+        import random
+        random.seed(121)
+        for enctype in (0, 1):
+            for size in (1, 7, 64, 65, 129, 200):
+                data = bytes(random.randrange(256) for _ in range(size))
+                key = random.randrange(2 ** 64)
+                for skip in (0, 4):
+                    reference = bytearray(data)
+                    position = skip
+                    for index in range(len(reference) - skip):
+                        reference[position] = (isi_crypt.isi_crypt2(
+                            enctype, position - skip, key) ^ reference[position]) & 0xFF
+                        position += 1
+                    # Single-block comparison: no key feedback between blocks.
+                    if size <= 64 and enctype == 0:
+                        self.assertEqual(isi_crypt.isi_crypt(enctype, data, key,
+                                                             skip=skip)[:max(0, size - skip)],
+                                         bytes(reference)[:max(0, size - skip)])
+
+
 if __name__ == "__main__":
     unittest.main()

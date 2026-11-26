@@ -108,6 +108,23 @@ def isi_crypt2(enctype: int, pos: int, key: int) -> int:
     return _u64(((_u64(0x000000ff000000ff) << t) & _u64(key)) >> t)
 
 
+def _isi_stream_values(enctype: int, key: int) -> tuple[int, ...]:
+    """Precompute the cipher's 8 possible output bytes for one key/block.
+
+    For enctype 0 the shift depends only on `position & 7`; for enctype 1 it
+    depends only on `key & 7`, which is constant within a block. Avoids
+    ~50 million redundant Python calls on a large GMT member.
+    """
+    if enctype == 0:
+        shifts = _TABLE0
+    elif enctype == 1:
+        shifts = (_TABLE1[key & 7],) * 8
+    else:
+        raise ValueError(f"unsupported enctype {enctype}")
+    return tuple((((0x000000ff000000ff << shift) & key) >> shift) & 0xFF
+                 for shift in shifts)
+
+
 def isi_crypt(enctype: int, data: bytes | bytearray, key: int, encrypt: bool = False, skip: int = 0) -> bytes:
     if enctype == 0:
         blocksz = 0x40
@@ -124,12 +141,11 @@ def isi_crypt(enctype: int, data: bytes | bytearray, key: int, encrypt: bool = F
     x = start
     mask = 1
     n = length % blocksz
+    stream = _isi_stream_values(enctype, key)
     for i in range(n):
         c = buf[x]
-        outb = isi_crypt2(enctype, x - start, key) ^ c  # pos relative? C uses x (absolute in data+skip?)
-        # wait - in C: isi_crypt2(enctype, x, key) where x is index in output/data buffer passed
-        outb &= 0xFF
-        buf[x] = outb
+        outb = stream[(x - start) & 7] ^ c
+        buf[x] = outb & 0xFF
         if encrypt:
             c = outb
         t |= ((c & mask) << (i & 0x3f))
@@ -140,11 +156,11 @@ def isi_crypt(enctype: int, data: bytes | bytearray, key: int, encrypt: bool = F
         t = 0
         nblocks += 1
         mask = 1 << (nblocks & 7)
+        stream = _isi_stream_values(enctype, key)
         for i in range(blocksz):
             c = buf[x]
-            outb = isi_crypt2(enctype, x - start, key) ^ c
-            outb &= 0xFF
-            buf[x] = outb
+            outb = stream[(x - start) & 7] ^ c
+            buf[x] = outb & 0xFF
             if encrypt:
                 c = outb
             t = _u64(t | ((c & mask) << (i & 63)))
