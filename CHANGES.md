@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 04:50:00 -0500 - HAT body[0] negative
+- Characterized the HAT u32 after the version string: per-layout stable but no tested hash of signature/name and no meaningful float reading; remains opaque.
+
 ## 2026-11-28 04:20:00 -0500 - Validator CLI regression
 - Added a full-tier test that `gtl_to_gtr2.py --validate` exits 0 with zero problems on the real GTR2 GameData tree.
 

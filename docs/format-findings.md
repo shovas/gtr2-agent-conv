@@ -499,7 +499,10 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
   The body header declares **three u32 counts at offsets 36/40/44**
   (`media_tool.hat_declared_counts()`); the third is the authoritative record
   count, verified on **178/178** `.hat` files in 9 corpora (all three header
-  variants). The first is the input polygon count `n`; the second is exactly
+  variants). A further u32 immediately after the version string (`body[0]`)
+  is per-layout stable (identical across Brno variants) but matches no tested
+  CRC32/adler32/MD5 of the signature or layout name, and is not a meaningful
+  float — it remains opaque. The first count is the input polygon count `n`; the second is exactly
   `T(n)` from GTR2.exe's recursive bisection function `0x45b1d0`
   (`T(0)=0, T(1)=T(2)=1, T(n)=1+T(n//2)+T(n-n//2)` for `n>=3`), exposed as
   `media_tool.hat_bisection_count()` and verified on **178/178** files — no
