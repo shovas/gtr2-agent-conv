@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-30 06:30:00 -0500 - Normal-tier performance optimizations
+- Optimized three test-suite bottlenecks without weakening assertions: `gmt_semantic.find_submeshes()` now searches the six magic byte patterns (15.7x faster, exact equivalence on 698 samples); `find_frame_grid()` uses the GTTF marker fast path (42s -> 17s module time, equivalent on all 42 event files); `test_gmt_layout` caches its fixture scan. Normal tier now 263.5s / 250 tests / 0 failures, back inside the 300s budget.
+
 ## 2026-11-30 06:00:00 -0500 - Tiling ratios in material records
 - Found a modest material-record enrichment for UV tiling ratios (0.314 vs 0.160 distribution-preserving baseline) but no fixed material field. Full-tier test added; no decoder claimed.
 

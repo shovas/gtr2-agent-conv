@@ -55,7 +55,23 @@ def find_submeshes(data: bytes) -> list[dict]:
     """Scan for valid per-submesh headers in either layout."""
     out = []
     size = len(data)
-    for pos in range(0, max(0, size - 0x30), 4):
+    # Only six u32 magic values can start a submesh header. Searching for
+    # their byte patterns with bytes.find() is equivalent to testing every
+    # 4-aligned offset but runs at C speed (the old loop dominated the
+    # rf1_pipeline test at ~42 s of 72 s).
+    patterns = [struct.pack("<I", (hi << 16) | lo)
+                for hi in MAGIC_HI for lo in MAGIC_LO]
+    positions = set()
+    for pattern in patterns:
+        start = 0
+        while True:
+            index = data.find(pattern, start)
+            if index < 0:
+                break
+            if index % 4 == 0 and index < max(0, size - 0x30):
+                positions.add(index)
+            start = index + 1
+    for pos in sorted(positions):
         magic = struct.unpack_from("<I", data, pos)[0]
         hi, lo = magic >> 16, magic & 0xFFFF
         if hi not in MAGIC_HI or lo not in MAGIC_LO:

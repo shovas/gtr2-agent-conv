@@ -1,4 +1,5 @@
 """Tests for the prototype old->new GMT layout bridge (structural only)."""
+import functools
 import glob
 import os
 import struct
@@ -16,7 +17,9 @@ import isi_crypt  # noqa: E402
 import mas_tool  # noqa: E402
 
 
-def _old_gmts(limit=6):
+@functools.lru_cache(maxsize=1)
+def _all_old_gmts():
+    """One cached scan of the encrypted rF1 sample set (fixture caching)."""
     out = []
     for a in glob.glob(str(ROOT.parent / "RF1Vanilla" / "**" / "*"), recursive=True):
         if not os.path.isfile(a) or not a.lower().endswith(".mas"):
@@ -28,10 +31,13 @@ def _old_gmts(limit=6):
             if (sign ^ key) & 0xFFFFFFFFFFFFFFFF not in isi_crypt.GAMES:
                 continue
             out.append((a, e.name, isi_crypt.decrypt_bytes(e.data, skip=4)))
-            if len(out) >= limit:
-                return out
-    return out
+            if len(out) >= 30:
+                return tuple(out)
+    return tuple(out)
 
+
+def _old_gmts(limit=6):
+    return _all_old_gmts()[:limit]
 
 class GmtLayoutTest(unittest.TestCase):
     def test_semantic_bridge_preserves_geometry(self):

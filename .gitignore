@@ -8,3 +8,6 @@ modding-tools-and-tutorials/
 *~
 # Incremental survey caches (derived metadata, not game data)
 .cache/
+
+# Agent session transcript dumps (tool-generated, not project data)
+session-*.md

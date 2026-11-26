@@ -332,6 +332,38 @@ def find_frame_grid(data: bytes) -> dict | None:
     ~0.01..0.2 per frame and the first three floats are car positions.  The
     grid start varies with metadata length, so each phase (mod 63) is tried.
     """
+    # GTTF frames carry a verified 7-byte marker at +24. Finding those bytes
+    # with bytes.find() avoids scanning all 63 phases over the whole payload
+    # (the old loop cost ~42 s across the simbin_events_tool tests).
+    marker = bytes.fromhex("01000034002000")
+    candidates = []
+    if b"GTTF" in data[:64]:
+        index = data.find(marker)
+        while index >= 0:
+            if index >= 24:
+                candidates.append(index - 24)
+            index = data.find(marker, index + 1)
+
+    def run_length(start: int) -> int:
+        run = 0
+        offset = start
+        while offset + FRAME_STRIDE + FRAME_TIME_OFF + 4 <= len(data):
+            t0 = struct.unpack_from("<f", data, offset + FRAME_TIME_OFF)[0]
+            t1 = struct.unpack_from("<f", data, offset + FRAME_STRIDE + FRAME_TIME_OFF)[0]
+            if math.isfinite(t0) and math.isfinite(t1) and 0.001 < t1 - t0 < 1.0:
+                run += 1
+                offset += FRAME_STRIDE
+            else:
+                break
+        return run
+
+    # The first marker in a GTTF payload is the grid start; later markers
+    # belong to individual frames. Cap the attempts to avoid O(n^2) walks.
+    for candidate in candidates[:8]:
+        run = run_length(candidate)
+        if run >= 8:
+            return {"offset": candidate, "stride": FRAME_STRIDE, "count": run + 1}
+
     best_run, best_start = 0, None
     for phase in range(0, FRAME_STRIDE):
         run, start = 0, None
