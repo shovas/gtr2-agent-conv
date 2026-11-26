@@ -90,10 +90,14 @@ def main(argv=None) -> int:
     ap.add_argument("source")
     ap.add_argument("target", nargs="?")
     ap.add_argument("--check", action="store_true", help="run conversions and validation without writing")
-    ap.add_argument("--relayout", action="store_true",
-                    help="rebuild GMT offsets (needed if mesh data sizes change)")
+    ap.add_argument("--structural", action="store_true",
+                    help="use the legacy structural bridge (single submesh only)")
     args = ap.parse_args(argv)
-    report = convert_archive(args.source, args.target, args.check, args.relayout)
+    # The semantic bridge is required to preserve multi-submesh GMTs; the
+    # library default stays structural for backward compatibility with callers
+    # that pass explicit relayout, but the CLI must produce validated output.
+    report = convert_archive(args.source, args.target, args.check,
+                             not args.structural)
     print(f"source_type={report['source_type']} members={report['members']} actions={report['actions']}")
     return 0
 

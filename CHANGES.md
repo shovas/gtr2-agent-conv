@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-27 05:50:00 -0500 - User-facing conversion paths use semantic bridge
+- `rf1_to_gtr2.py` CLI now defaults to the semantic bridge (`--structural` opts out) and `text_convert.convert_tree()` passes `relayout=True`, so user-facing conversions preserve all submeshes. Full-tier CLI regression test added; docs updated.
+
 ## 2026-11-27 05:20:00 -0500 - Prefer semantic bridge for rF1 GMTs
 - Verified that rF1 GMT conversions must use the semantic bridge (`relayout=True`): 150/150 pass full validator checks vs 0/150 for the default structural bridge on multi-submesh sources. Full-tier regression test added.
 

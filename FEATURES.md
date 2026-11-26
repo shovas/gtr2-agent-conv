@@ -182,7 +182,8 @@ python3 gmt_layout.py <old.gmt> <new.gmt>
 python3 -c "import gmt_layout,pathlib; pathlib.Path('new.gmt').write_bytes(gmt_layout.old_to_new_semantic(pathlib.Path('old.gmt').read_bytes()))"  # semantic
 python3 rf1_to_gtr2.py <archive.mas> <out.gtr>
 python3 rf1_to_gtr2.py <archive.mas> --check
-python3 rf1_to_gtr2.py <archive.mas> <out.gtr> --relayout   # rebuild GMT offsets after mesh edits
+python3 rf1_to_gtr2.py <archive.mas> <out.gtr>   # semantic bridge preserves all submeshes (default)
+python3 rf1_to_gtr2.py <archive.mas> <out.gtr> --structural   # legacy single-submesh bridge
 ```
 **Limitations**: Geometry is preserved structurally and validated on 60 real GMTs, but no ground-truth pair exists and in-game behaviour is NOT validated.
 

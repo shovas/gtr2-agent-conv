@@ -1376,6 +1376,30 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertGreater(total, 10000)
         self.assertLess(non_unit / total, 0.001)
 
+    def test_rf1_cli_and_tree_use_semantic_bridge(self):
+        """User-facing conversion entry points must preserve all submeshes."""
+        import subprocess
+        import sys
+        import tempfile
+        import mas_tool
+
+        archive = (ROOT.parent / "RF1Vanilla" / "GameData" / "Locations"
+                   / "commonmaps.mas")
+        if not archive.is_file():
+            self.skipTest("RF1Vanilla commonmaps.mas not present")
+        with tempfile.TemporaryDirectory() as td:
+            target = Path(td) / "converted.gtr"
+            result = subprocess.run(
+                [sys.executable, str(ROOT / "rf1_to_gtr2.py"),
+                 str(archive), str(target)],
+                capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn("decrypt+semantic", result.stdout)
+            mtype, entries = mas_tool.read_archive(target)
+            self.assertEqual(mtype, 0)
+            self.assertTrue(any(entry.name.lower().endswith(".gmt")
+                                for entry in entries))
+
     def test_rf1_semantic_conversion_validates(self):
         """The semantic bridge preserves all submeshes where the structural one does not."""
         import random

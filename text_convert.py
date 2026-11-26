@@ -99,7 +99,9 @@ def convert_tree(source: str | Path, target: str | Path, check: bool = False) ->
             out = rel.with_suffix(".gtr")
             if not check:
                 (dst / out).parent.mkdir(parents=True, exist_ok=True)
-                convert_archive(path, dst / out)
+                # Semantic bridge preserves all submeshes; the structural default
+                # rebuilds only the first mesh record of multi-object GMTs.
+                convert_archive(path, dst / out, relayout=True)
             report["archives"] += 1
         elif ext == ".aiw":
             if not check:
