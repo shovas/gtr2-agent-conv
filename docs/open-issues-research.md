@@ -199,6 +199,15 @@ phantom empty frames from those zeros; `parse_vcr_frames()` now rejects
 zero-count summaries and zero-subcount frames, returning None for GTL replays
 while all nine GTR2 replays still parse exactly. Full-tier test added.
 
+## f0 vs material metadata lengths (2026-11-30) — negative
+
+Tested whether f0's byte components encode material name length, stage count,
+or parsed string count. Across 21,481 GTR2 mesh markers all correlations were
+below the 0.05 reporting threshold under seeded permutation baselines.
+Combined with earlier negatives (mesh ordinal, stage indices, geometry CRC,
+name hashes, shader registry), f0 remains an opaque per-mesh identifier whose
+decoding is unnecessary for conversion as long as it is preserved byte-for-byte.
+
 ## Remaining driver-state fields (2026-11-30) — negative
 
 Tested the four u16 fields at body +8 and the small f32s at bytes 41/49
