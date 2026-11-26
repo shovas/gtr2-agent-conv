@@ -363,6 +363,14 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
   However no 8-byte phase yields a convincing run of plausible f32 pairs
   (~48% at every phase, same as random), so the stream is not plain packed
   floats. Full-tier test: `test_hat_trailing_stream_has_eight_byte_periodicity`.
+- The table field B has only a **weak track-scale trend**, not a decoder:
+  using all 32 GTR2 layout files (including duplicate byte-identical bodies)
+  gives r=0.66 against AIW waypoint count, but deduplicating to 14 independent
+  layouts gives r=0.495 (seeded permutation p~0.07), and 43 independent
+  Race07 layouts give r=0.326 (p~0.04). Duplicates must be collapsed before
+  significance testing. B's sign does not encode track direction (18/32
+  agreement with AIW signed area, chance 0.56). Full-tier test:
+  `test_hat_record_b_weak_track_scale_association`.
 
 ## 5. Vertex `f0` (per-mesh marker on vertex 0)
 

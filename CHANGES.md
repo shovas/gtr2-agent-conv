@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 03:20:00 -0500 - Hat field B weak trend caveat
+- Corrected an apparent r=0.66 correlation between .hat field B and AIW waypoint count: duplicate layouts were pseudo-replication. Independent layouts give r=0.495 (p~0.07, GTR2) and r=0.326 (p~0.04, Race07); no decoder claimed. Full-tier test added.
+
 ## 2026-11-26 02:50:00 -0500 - f0 material-family association
 - Quantified the reverse f0/material association on 16,547 markers: equal f0 values share a material-name 3-char prefix 18.8% vs 3.5% permuted, but exact names only 6.7% — family-level, not an ID. Full-tier test added.
 

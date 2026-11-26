@@ -4986,6 +4986,76 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertGreaterEqual(checked, 3)
 
+    def test_hat_record_b_weak_track_scale_association(self):
+        """Field B has only a weak track-scale trend; duplicates inflate it.
+
+        Using all 32 GTR2 layout files (with duplicate byte-identical bodies)
+        gives r=0.66; deduplicating to 14 independent layouts gives r=0.495
+        (permutation p~0.07), and 43 independent Race07 layouts give r=0.326
+        (p~0.04). No decoder or waypoint-count rule is claimed.
+        """
+        import random
+        import statistics
+        import struct
+        import gzip_simbin_tool as gz
+        import simbin_text_tool as stt
+
+        tracks = ("ANDERSTORP", "Barcelona", "Brno", "Donington", "Enna",
+                  "Estoril", "Magny", "Monza", "Oschersleben", "Spa", "Dubai",
+                  "Valencia", "Imol", "Zhuhai", "Hockenheim")
+
+        def magnitude(path):
+            payload = gz.decompress(str(path))
+            marker = payload.find(b"generated\x00")
+            body = payload[marker + 10:]
+            values = []
+            for offset in range(48, len(body) - 16, 16):
+                first, _unknown, second, third = struct.unpack_from("<fIff", body, offset)
+                if not (-1e6 < first < 1e6 and first == first
+                        and second == second and 0.01 < abs(second) < 20
+                        and -1e6 < third < 1e6 and third == third):
+                    break
+                values.append(second)
+            return abs(statistics.median(values)) if values else None
+
+        def correlate(x, y):
+            mx, my = statistics.mean(x), statistics.mean(y)
+            numerator = sum((a - mx) * (b - my) for a, b in zip(x, y))
+            denominator = (sum((a - mx) ** 2 for a in x)
+                           * sum((b - my) ** 2 for b in y)) ** 0.5
+            return numerator / denominator if denominator else 0.0
+
+        gtr2 = {}
+        for path in sorted((ROOT.parent / "GTR2Steam" / "GameData" / "Locations"
+                            / "HAT_Dedicated").glob("*.hat")):
+            name = path.stem
+            track = next((t for t in tracks if t.lower() in name.lower()), None)
+            if track is None or track in gtr2:
+                continue
+            parents = [p for p in (ROOT.parent / "GTR2Steam" / "GameData"
+                                   / "Locations").iterdir()
+                       if p.is_dir() and track.lower() in p.name.lower()]
+            aiws = sorted(parents[0].glob("*.AIW")) if parents else []
+            if not aiws:
+                continue
+            value = magnitude(path)
+            if value:
+                gtr2[track] = (value, len(stt.parse_aiw(
+                    stt.read_text(aiws[0])).waypoints))
+        self.assertGreaterEqual(len(gtr2), 12)
+        observed = correlate([v[0] for v in gtr2.values()],
+                             [v[1] for v in gtr2.values()])
+        self.assertGreater(observed, 0.2)
+        self.assertLess(observed, 0.8)  # not a waypoint-count proxy
+
+        random.seed(2026)
+        values = [v[0] for v in gtr2.values()]
+        counts = [v[1] for v in gtr2.values()]
+        permuted = [correlate(values, random.sample(counts, len(counts)))
+                    for _ in range(2000)]
+        p_value = sum(abs(v) >= abs(observed) for v in permuted) / len(permuted)
+        self.assertGreater(p_value, 0.01)  # weak, not significant at 1%
+
     def test_hat_records_are_not_aiw_or_cam_positions(self):
         """The .hat f32 triples do not reproduce AIW waypoints or CAM points."""
         import random

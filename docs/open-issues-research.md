@@ -1,5 +1,15 @@
 # Open issues — offline research record (2026-11-23)
 
+## `.hat` field B vs track scale (2026-11-26) — weak / pseudo-replication caveat
+
+A pooled correlation of the table's near-constant B against AIW waypoint count
+looked strong (r=0.66, n=32), but 32 rows included duplicate byte-identical
+layouts. Deduplicating to 14 independent GTR2 layouts reduces it to r=0.495
+with seeded permutation p~0.07 (not significant at 1%); 43 independent Race07
+layouts give r=0.326, p~0.04. So B has at most a weak association with track
+scale and is not a waypoint-count proxy. Its sign also fails to track AIW
+signed area (18/32 agreement, chance 0.56). Full-tier test records the caveat.
+
 ## f0 reverse association with material families (2026-11-26)
 
 Using 16,547 nonzero f0 markers from 40 GTR2 `.gtr` archives, tested the
