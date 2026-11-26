@@ -168,6 +168,20 @@ session variation is carried solely by `session_seconds`
 `c=8` only in Magny-Cours, but with nine samples no semantics are claimed.
 Full-tier regression test added.
 
+## GTR2.exe ghost writer located statically (2026-11-30)
+
+radare2 disassembly identified `fcn.0052a540` as the GTTF/IRSR writer: it
+selects the `GTTF` magic from pointer `0x6ead90` when a game flag equals 1 and
+`IRSR` from `0x6ead7c` otherwise, then writes the TRK/AIW strings with u32
+lengths. At `0x52a6ca` it loops over **105** sixteen-byte object slots starting
+at `edi+0x40`, serializing each object's linked list through `fcn.005267f0`.
+A second list at `edi+0x75c` is counted and summarized (count, first-record
+word, and last−first time span) before the frame payload is written via
+`fcn.00526a30`. This is the first concrete code evidence for object-oriented,
+variable-length replay serialization and explains why fixed-stride frame
+searches failed. It is a structural finding only — no field layout is claimed
+yet. Full-tier byte-pattern test added.
+
 ## VCR 20-byte stride: no frame fields found (2026-11-30)
 
 Followed the 20-byte lag excess: at stride 20, every 4-byte-aligned f32 field

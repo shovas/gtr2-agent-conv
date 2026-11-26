@@ -4075,6 +4075,17 @@ class CorpusDeep2Test(unittest.TestCase):
                 break
         self.assertGreater(checked, 1500)
 
+    def test_gtr2_exe_ghost_writer_selection_code(self):
+        """GTR2.exe contains the GTTF/IRSR magic-selection branch in its writer."""
+        exe = ROOT.parent / "GTR2Steam" / "GTR2.exe"
+        if not exe.is_file():
+            self.skipTest("GTR2.exe not present")
+        data = exe.read_bytes()
+        # fcn.0052a540: mov ecx,[0x6ead90] / push ecx / mov ecx,esi
+        # for GTTF, and the same with [0x6ead7c] for IRSR.
+        self.assertEqual(data.count(bytes.fromhex("8b0d90ad6e00518bce")), 1)
+        self.assertEqual(data.count(bytes.fromhex("8b0d7cad6e00518bce")), 1)
+
     def test_no_debug_symbols_in_game_binaries(self):
         """Game EXEs reference PDBs but ship no usable debug symbols."""
         root = ROOT.parent
