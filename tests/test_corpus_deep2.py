@@ -4341,7 +4341,7 @@ class CorpusDeep2Test(unittest.TestCase):
         import struct
         import gzip_simbin_tool as gz
         import simbin_events_tool as st
-        sentinel = struct.unpack("<I", struct.pack("<f", -1e32))[0]
+        sentinel = st.UNBOUNDED_TIME
         roots = (ROOT.parent / "GTR2Steam" / "ReplayData",
                  ROOT.parent / "GTLSteam" / "ReplayData")
         records = []
@@ -4354,6 +4354,12 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertGreater(sentinel_or_zero / len(records), 0.9)
         self.assertTrue(all(math.isfinite(record["value"])
                             and record["value"] >= 0 for record in records))
+        finite_windows = [record for record in records if record["window_end"] is not None]
+        self.assertGreater(len(finite_windows), 0)
+        self.assertTrue(all(record["window_start"] <= record["window_end"]
+                            for record in finite_windows))
+        self.assertTrue(all(record["window_end"] is None
+                            for record in records if record["trailing_u32"] == sentinel))
 
     def test_replay_object_record_chains(self):
         """The EXE-derived object layout parses real replay participants."""

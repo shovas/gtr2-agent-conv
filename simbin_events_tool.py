@@ -216,6 +216,9 @@ def shift_frame_times(data: bytes, delta: float) -> bytes:
     return bytes(output)
 
 
+UNBOUNDED_TIME = 0xF49DC5AE  # f32 -1e32: the game's "no bound" sentinel
+
+
 def parse_object_records(data: bytes, search_limit: int = 4096) -> list[dict]:
     """Parse the variable-length object records in a replay payload.
 
@@ -254,6 +257,10 @@ def parse_object_records(data: bytes, search_limit: int = 4096) -> list[dict]:
             "skin": fixed_string(end_of_strings + 64),
             "value": struct.unpack_from("<f", data, end_of_strings + 128)[0],
             "trailing_u32": struct.unpack_from("<I", data, end_of_strings + 132)[0],
+            "window_start": struct.unpack_from("<f", data, end_of_strings + 128)[0],
+            "window_end": (None if struct.unpack_from("<I", data, end_of_strings + 132)[0]
+                           == UNBOUNDED_TIME
+                           else struct.unpack_from("<f", data, end_of_strings + 132)[0]),
             "next_offset": end_of_strings + 136,
         }
 
