@@ -297,7 +297,11 @@ regression tests or an explicitly documented negative.
   a weaker companion (7/8 negative, mean -0.108, p=0.028), so heading rate is
   the primary association. A fixed bicycle-model calibration (wheelbase 2.5 m)
   gives median raw/radian ratios spanning 10^3..10^5 with inconsistent signs,
-  so no universal scale conversion is claimed. Per-car calibration is also
+  so no universal scale conversion is claimed. A further negative: neither the
+  **sum** nor the **mean** of the four u16s tracks position-derived speed
+  (correlations -0.21..+0.17, positive in only 2/8 replays), so the wheel-like
+  values do not encode a shared speed magnitude. Full-tier guard:
+  `test_driver_u16_sum_not_speed`. Per-car calibration is also
   unavailable: replay `car` labels are 5-digit menu IDs absent from all shipped
   `.hdc` configs (0 matches). Full-tier guard:
   `test_replay_car_labels_do_not_resolve_to_hdc`. Cross-correlation over lags

@@ -5808,6 +5808,52 @@ class CorpusDeep2Test(unittest.TestCase):
             self.assertLess(max(best), 0.5, modulus)
             self.assertLess(sum(value > 0.2 for value in best), len(best) // 2)
 
+    def test_driver_u16_sum_not_speed(self):
+        """Neither the sum nor mean of the four u16s tracks vehicle speed."""
+        import math
+        import statistics
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+
+        def correlation(first, second):
+            mean_a, mean_b = statistics.mean(first), statistics.mean(second)
+            numerator = sum((a - mean_a) * (b - mean_b)
+                            for a, b in zip(first, second))
+            denominator = (sum((a - mean_a) ** 2 for a in first)
+                           * sum((b - mean_b) ** 2 for b in second)) ** 0.5
+            return numerator / denominator if denominator else 0.0
+
+        roots = (ROOT.parent / "GTR2Steam/ReplayData",
+                 ROOT.parent / "GTLSteam/ReplayData")
+        checked = positive = 0
+        for root in roots:
+            if not root.is_dir():
+                continue
+            for path in sorted(root.glob("*.Vcr")):
+                frames = st.parse_vcr_frames(gz.decompress(str(path)))
+                if not frames:
+                    continue
+                states = []
+                for frame in frames["frames"]:
+                    for record in frame["records"]:
+                        if st.vcr_record_tag(record["header"]) == 0:
+                            state = st.vcr_driver_state(record["data"])
+                            if state:
+                                states.append(state)
+                            break
+                if len(states) < 300:
+                    continue
+                positions = [s["position"] for s in states]
+                speed = [math.dist(a, b) for a, b in zip(positions, positions[1:])]
+                totals = [sum(s["shorts"]) for s in states][:len(speed)]
+                averages = [statistics.mean(s["shorts"]) for s in states][:len(speed)]
+                self.assertLess(abs(correlation(totals, speed)), 0.5, path.name)
+                self.assertLess(abs(correlation(averages, speed)), 0.5, path.name)
+                positive += correlation(totals, speed) > 0
+                checked += 1
+        self.assertGreaterEqual(checked, 6)
+        self.assertLessEqual(positive, checked // 2)
+
     def test_driver_u16_deltas_not_wheel_speed(self):
         """Apparent u16-delta/speed correlations are shared slow trends."""
         import math

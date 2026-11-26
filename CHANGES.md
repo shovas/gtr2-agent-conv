@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 11:30:00 -0500 - Replay u16 sum is not speed
+- Ruled out the sum/mean of the four replay u16 wheel-like values as a speed channel (correlations -0.21..+0.17, positive in 2/8 replays); full-tier guard added.
+
 ## 2026-11-28 11:00:00 -0500 - GTL validator JSON output
 - `gtl_to_gtr2.py --validate --json` emits problems as a JSON array for batch pipelines; full-tier test added.
 
