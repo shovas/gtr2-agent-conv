@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-12-01 11:20:00 -0500 - Hat trailing stream periodicity
+- Measured the .hat trailing stream: byte-lag 8 agreement 7.5-10.7% vs 1.3-1.7% shuffled, with float-exponent bytes dominating; plain 8-byte f32 records excluded. Full-tier test added.
+
 ## 2026-12-01 10:50:00 -0500 - Hat records not waypoints
 - Ruled out .hat record triples as AIW waypoint or CAM camera positions (zero near matches in Brno/Monza, shuffled control equal); full-tier test added.
 

@@ -4883,6 +4883,55 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertGreater(observed, statistics.mean(permuted))
         self.assertGreater(observed, max(permuted))
 
+    def test_hat_trailing_stream_has_eight_byte_periodicity(self):
+        """The .hat stream after the record table is not byte-random."""
+        import collections
+        import random
+        import struct
+        import gzip_simbin_tool as gz
+
+        def split(payload):
+            marker = payload.find(b"generated\x00")
+            body = payload[marker + 10:]
+            count = 0
+            for offset in range(48, len(body) - 16, 16):
+                first, _unknown, second, third = struct.unpack_from("<fIff", body, offset)
+                if not (-1e6 < first < 1e6 and first == first
+                        and second == second and 0.01 < abs(second) < 20
+                        and -1e6 < third < 1e6 and third == third):
+                    break
+                count += 1
+            return body[48 + 16 * count + 8:]
+
+        def match_rate(data, lag):
+            sample = data[:200000]
+            return sum(a == b for a, b in zip(sample[:-lag], sample[lag:])) / (
+                len(sample) - lag)
+
+        random.seed(2026)
+        checked = 0
+        for name in ("3Brno.hat", "3Monza.hat", "3Spa.hat"):
+            path = (ROOT.parent / "GTR2Steam" / "GameData" / "Locations"
+                    / "HAT_Dedicated" / name)
+            if not path.is_file():
+                continue
+            tail = split(gz.decompress(str(path)))
+            self.assertGreater(len(tail), 100000)
+            observed = match_rate(tail, 8)
+            shuffled = list(tail[:200000])
+            random.shuffle(shuffled)
+            baseline = match_rate(bytes(shuffled), 8)
+            self.assertGreater(observed, 0.05, (name, observed))
+            self.assertLess(baseline, 0.02, (name, baseline))
+            matches = collections.Counter(a for a, b in zip(tail[:-8], tail[8:])
+                                          if a == b)
+            top_values = [value for value, _count in matches.most_common(3)]
+            self.assertTrue(all(value in (0,) or 48 <= value <= 80
+                                or 192 <= value <= 208 for value in top_values),
+                            (name, top_values))
+            checked += 1
+        self.assertGreaterEqual(checked, 3)
+
     def test_hat_records_are_not_aiw_or_cam_positions(self):
         """The .hat f32 triples do not reproduce AIW waypoints or CAM points."""
         import random

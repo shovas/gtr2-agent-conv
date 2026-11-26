@@ -1,5 +1,20 @@
 # Open issues — offline research record (2026-11-23)
 
+## `.hat` trailing stream periodicity (2026-12-01)
+
+After the record table and its 8 zero bytes, byte-lag autocorrelation was
+scanned over lags 4..512 in Brno/Monza/Spa:
+- lag-8 agreement is 0.089 (Brno), 0.107 (Monza), 0.074 (Spa) versus 0.013–0.017
+  for a seeded shuffle; the rate is uniform across 64 KB blocks;
+- other strong lags (140, 164, 280, 304, 348, 420, 468) are multiples of 4;
+- the most-matching byte values are float exponents (0x40, 0xC0, 0x3C–0x39),
+  suggesting repeated exponent bytes rather than arbitrary bytes.
+
+But interpreting the tail as 8-byte `[f32, f32]` records fails at every phase:
+only ~48% of pairs are plausible floats, the same as random bytes. So the
+periodicity is a real structural constraint, not a decoded record layout.
+Full-tier test added.
+
 ## `.hat` records vs AIW/CAM positions (2026-12-01) — negative
 
 Tested whether the 16-byte record table's f32 triples are track waypoints:
