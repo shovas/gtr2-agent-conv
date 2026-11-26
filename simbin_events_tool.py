@@ -284,6 +284,26 @@ def parse_object_records(data: bytes, search_limit: int = 4096) -> list[dict]:
     return best
 
 
+def parse_replay_summary(data: bytes) -> dict | None:
+    """Parse the 13-byte summary immediately after the participant records.
+
+    Layout observed in the local corpus: u8 marker (0 in 8/9 GTR2 replays),
+    two u32 counts (first < second in all 8 well-formed files), and an f32
+    duration in seconds (8.97–284 s). Exact count semantics are unclaimed.
+    """
+    records = parse_object_records(data)
+    if not records:
+        return None
+    offset = records[-1]["next_offset"]
+    if offset + 13 > len(data):
+        return None
+    marker = data[offset]
+    first, second = struct.unpack_from("<II", data, offset + 1)
+    duration = struct.unpack_from("<f", data, offset + 9)[0]
+    return {"offset": offset, "marker": marker, "count_a": first,
+            "count_b": second, "duration": duration}
+
+
 def parse_payload(data: bytes) -> EventFile:
     kind = next((m.decode() for m in MAGICS if m in data[:64]), None)
     if kind is None:

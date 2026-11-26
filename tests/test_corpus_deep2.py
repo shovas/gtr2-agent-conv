@@ -4335,6 +4335,25 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertEqual(checked, 4)
 
+    def test_replay_post_object_summary(self):
+        """A 13-byte summary follows the participant records in most replays."""
+        import math
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        summaries = []
+        for path in (ROOT.parent / "GTR2Steam" / "ReplayData").glob("*.Vcr"):
+            summary = st.parse_replay_summary(gz.decompress(str(path)))
+            if summary is not None:
+                summaries.append(summary)
+        self.assertEqual(len(summaries), 9)
+        well_formed = [summary for summary in summaries if summary["marker"] == 0]
+        self.assertEqual(len(well_formed), 8)
+        self.assertTrue(all(summary["count_a"] < summary["count_b"]
+                            for summary in well_formed))
+        self.assertTrue(all(math.isfinite(summary["duration"])
+                            and 0 < summary["duration"] < 3600
+                            for summary in well_formed))
+
     def test_replay_object_trailing_fields(self):
         """The object record's trailing u32 is mostly an f32 'unset' sentinel."""
         import math

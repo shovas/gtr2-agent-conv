@@ -168,6 +168,17 @@ session variation is carried solely by `session_seconds`
 `c=8` only in Magny-Cours, but with nine samples no semantics are claimed.
 Full-tier regression test added.
 
+## Post-object replay summary (2026-11-30)
+
+Immediately after the participant records, eight of nine GTR2 replays have a
+13-byte summary: u8 marker 0, two u32 counts with `count_a < count_b`, and an
+f32 duration in seconds (8.97 s for Brno.Vcr up to 284.17 s for Imola.Vcr).
+Dubai International.Vcr is the exception (marker 2, implausible counts).
+The duration for Anderstorp.Vcr (16.550 s) closely matches that replay's
+participant window end (16.594 s), supporting the duration reading. Count
+semantics remain unclaimed. Added `parse_replay_summary()` with a full-tier
+test.
+
 ## Object-record trailing fields (2026-11-30)
 
 The EXE reader `fcn.005268e0` copies the record's u32 fields at `+0xc4` and

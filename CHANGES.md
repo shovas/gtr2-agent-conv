@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-30 10:15:00 -0500 - Replay post-object summary parser
+- Added `parse_replay_summary()` for the 13-byte structure after participant records (marker, two counts, duration); validated on 9 GTR2 replays with a full-tier test. Count semantics remain unclaimed.
+
 ## 2026-11-30 09:45:00 -0500 - Replay activity window decoded
 - Decoded the object record's trailing f32 pair as an activity window with -1e32 (0xF49DC5AE) as "unbounded", confirmed by EXE comparison code at 0x5269c0 and by all finite windows being ordered. `parse_object_records()` exposes window_start/window_end. Full-tier test updated.
 
