@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-30 09:45:00 -0500 - Replay activity window decoded
+- Decoded the object record's trailing f32 pair as an activity window with -1e32 (0xF49DC5AE) as "unbounded", confirmed by EXE comparison code at 0x5269c0 and by all finite windows being ordered. `parse_object_records()` exposes window_start/window_end. Full-tier test updated.
+
 ## 2026-11-30 09:15:00 -0500 - Replay trailing-field characterization
 - Characterized object-record u32s: second field is the f32 unset sentinel (-1e32) or zero in 35/36 records; first is finite/non-negative but consumer and units remain unknown. Full-tier test added.
 

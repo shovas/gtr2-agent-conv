@@ -195,6 +195,8 @@ regression tests or an explicitly documented negative.
   (`simbin_events_tool.parse_object_records()`): across all nine GTR2 replays
   it finds chains of 2–6 records whose names are the participants (driver
   entries plus `Safety Marshal`); shuffled payloads yield ~1 chance record.
+  Fixed blocks hold `.CAR`/skin names; the trailing f32 pair is an activity
+  window `[start, end]` with `-1e32` (`0xF49DC5AE`) meaning unbounded.
   Bulk data shows a separate **20-byte lag excess** over neighbouring
   lags in 7/9 replays (median +0.16 matching bytes), consistent with a small
   repeating record, but no monotonic time field was found at that stride.

@@ -177,10 +177,14 @@ local replays: the second u32 is the classic f32 "unset" sentinel
 `0xF49DC5AE` (-1e32) in 31 records and zero in 4 (the GTL files), i.e.
 35/36 are sentinel-or-zero. The first u32, read as f32, is finite and
 non-negative, usually constant across a replay's participants (8/13 files)
-but sometimes differs (e.g. 2355.2 vs 2348.2 in Brno.Vcr). Its units and
-consumer remain unknown — values range 0 to 2355 s but correlate with neither
-payload size nor participant count. Recorded as a characterization, not a
-semantic decoder. Full-tier test added.
+but sometimes differs (e.g. 2355.2 vs 2348.2 in Brno.Vcr). Disassembling `fcn.005269c0` (called from replay update paths) resolved the
+semantics: it compares both fields against the global f32 at `0x69B810`,
+which is exactly `-1e32`, then compares each bound against a supplied time.
+The pair is therefore an **activity window** `[start, end]` for the object,
+with `-1e32` meaning unbounded. All five records with a finite end satisfy
+start <= end (e.g. Anderstorp.Vcr `[0.027, 16.594]` and Safety Marshal
+`[0, unbounded]`). `parse_object_records()` now exposes `window_start` and
+`window_end` (None for unbounded). Full-tier test updated.
 
 ## Object-record parser validated on real replays (2026-11-30)
 
