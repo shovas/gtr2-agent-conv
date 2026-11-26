@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 20:20:00 -0500 - Replay cumulative-wheel trend negative
+- Confirmed that cumulative replay u16 totals track cumulative distance only as a shared monotonic trend; the per-frame four-wheel sum is at chance. Consolidated into the existing wheel-speed negative test.
+
 ## 2026-11-26 19:50:00 -0500 - f0 preserved cross-game except mesh 0
 - Established that f0 markers for submeshes at index >=1 are identical across 2,261/2,589 (87.3%) same-named GTR2/GTL meshes (permutation mean ~5), with only the first marker differing in 1,311 cases. Strengthens byte-for-byte f0 preservation in conversion; the mesh-0 difference has no simple transform (287 distinct XORs). Full-tier test added.
 

@@ -255,7 +255,11 @@ regression tests or an explicitly documented negative.
   all four to |r| <= 0.109 — a shared slow trend, not a wheel-speed decoder.
   A search over wrap moduli 1024..65536 also found no consistent speed channel
   (best per-replay |r| never exceeds 0.5 in any modulus; full-tier test
-  `test_driver_u16_wrap_moduli_not_wheel_speed`).
+  `test_driver_u16_wrap_moduli_not_wheel_speed`). Cumulating four wrapped u16
+  totals gives r = 0.90–1.00 with cumulative distance, but that is a shared
+  monotonic-trend artifact: the per-frame four-wheel sum has mean |r| < 0.1
+  against step distance, at permutation chance. Full-tier test:
+  `test_driver_u16_deltas_not_wheel_speed`.
 - Every ghost ends with a **20-byte tail** (5 f32s). Its first two floats are
   a per-track fixed point (median distance 0.6 between ghosts of the same
   track vs 178 for random pairs) near that track's final frame position —

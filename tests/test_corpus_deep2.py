@@ -5258,6 +5258,7 @@ class CorpusDeep2Test(unittest.TestCase):
 
         checked = 0
         apparent = 0
+        summed_correlations = []
         for path in sorted((ROOT.parent / "GTR2Steam" / "ReplayData").glob("*.Vcr")):
             parsed = st.parse_vcr_frames(gz.decompress(str(path)))
             if not parsed:
@@ -5286,9 +5287,23 @@ class CorpusDeep2Test(unittest.TestCase):
                 apparent += 1
                 cleaned = correlate(detrend(series), detrend(speed_series))
                 self.assertLess(abs(cleaned), 0.15, (path.name, slot, raw, cleaned))
+            # A cumulative u16 total tracks cumulative distance trivially
+            # (both grow), but the per-frame four-wheel sum has no speed link.
+            summed = []
+            for before, after in zip(states, states[1:]):
+                total = 0
+                for slot in range(4):
+                    wrapped = ((after["shorts"][slot] - before["shorts"][slot])
+                               % 65536)
+                    total += wrapped - 65536 if wrapped > 32768 else wrapped
+                summed.append(total)
+            summed_correlations.append(correlate(
+                summed, speeds[:len(summed)]))
             checked += 1
         self.assertGreaterEqual(checked, 5)
         self.assertGreaterEqual(apparent, 2)
+        self.assertLess(statistics.mean(abs(value)
+                                        for value in summed_correlations), 0.15)
 
     def test_driver_u16s_not_universal_tyre_units(self):
         """Live per-wheel units do not decode the u16s across all cars."""
