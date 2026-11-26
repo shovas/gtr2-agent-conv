@@ -112,6 +112,21 @@ deterministic (61/123 pairs byte-identical after byte 4), with 8 long-prefix
 pairs showing layout revisions. The `media_tool.py hat-layout` CLI therefore
 works unchanged across all three games. Full-tier test added.
 
+## Driver short-pair difference vs heading rate (2026-11-26)
+
+A fresh kinematic probe found the first useful driver-state signal:
+- across 8 replays with >=300 records (both games), `shorts[0] - shorts[1]`
+  correlates with position-derived heading rate in **all 8**, with r from
+  -0.087 to -0.365 (mean -0.171);
+- individual slots correlate weakly and with inconsistent signs, and raw
+  deltas vs speed were previously shown to be trend artefacts;
+- seeded corpus-level permutation (500 rounds, shuffling each difference
+  series within its replay) gives p = 0.004 for 8/8 same-sign results.
+
+So the first two u16s behave like a wheel pair whose difference is a
+steering-like channel. Exact units and which wheel is which remain unknown;
+no decoder beyond the association is claimed. Full-tier test added.
+
 ## Driver u16 deltas vs speed (2026-12-01) — trend artefact
 
 Tested wrapped frame-to-frame deltas of the four driver-state u16s against

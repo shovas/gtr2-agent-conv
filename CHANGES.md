@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 06:20:00 -0500 - Driver short pair tracks heading
+- Found a consistent steering-like signal in replay driver state: shorts[0]-shorts[1] correlates with heading rate in 8/8 replays (mean r=-0.171, seeded permutation p=0.004). Full-tier test added.
+
 ## 2026-11-26 05:50:00 -0500 - Hat field B width negative
 - Ruled out .hat field B as AIW track width or groove width (r=0.11/0.24 across 14 layouts, below permutation baselines). Full-tier test added.
 
