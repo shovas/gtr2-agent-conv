@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 07:30:00 -0500 - CLI smoke guard
+- Added a full-tier smoke test that all 28 documented CLI entrypoints import and respond to `--help`.
+
 ## 2026-11-28 07:00:00 -0500 - Full-corpus JCA and GTL-tree audits
 - Verified all 1,895 JCA-wrapped text configs across five corpora decrypt successfully; added a deterministic stratified full-tier regression test.
 - Audited a whole GTL GameData tree conversion: 944 files / 493 archives converted with zero structural errors; all 2,188 validator complaints are the documented template-dependent key additions (no archive/TRK problems).
