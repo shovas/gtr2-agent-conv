@@ -429,7 +429,12 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
   (0/93 duplicate pairs in Brno agree). Full-tier test:
   `test_hat_record_u32_is_not_a_counter_or_position_hash`. Reinterpreting it
   as a float in LE/BE, byte-swapped or sign-flipped form gives plausibility
-  rates within 0.03 of random bytes. Its value divided by 2^32 lies in [0,1]
+  rates within 0.03 of random bytes. Information-theoretic check on 20,095
+  Brno records: MI(u32, grid bucket) = 7.765 bits vs 7.740 for a shuffled
+  control (spatially independent), while MI(height B, bucket) = 4.86 bits —
+  a clean separation between an external identifier and a spatial field.
+  Full-tier test: `test_hat_record_u32_is_spatially_independent`.
+  Its value divided by 2^32 lies in [0,1]
   and its most frequent values match simple fractions (0.2/0.8 at Brno,
   0.75/0.25/0.5/0.125 at Monza), but there is no universal fixed-point step
   (<=5.4% land on 1/1024) and no correlation with normalized arc length or

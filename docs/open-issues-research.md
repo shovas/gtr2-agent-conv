@@ -22,6 +22,15 @@ or value carries the rF1 track properties. The fields are semantically
 different, so no class-mapping rule exists — this is a corpus negative, not a
 missing implementation. Full-tier test added.
 
+## HAT record fields: information-theoretic characterization (2026-11-26)
+
+On 20,095 sampled Brno records (entropy U 14.13 bits, B@0.01 6.73 bits,
+ix 4.64, iz 4.71): MI(U, grid bucket) = 7.765 bits, identical within 0.025 to
+a shuffled-U control (7.740) — the u32 carries no spatial-position
+information. MI(B, bucket) = 4.86 bits, far above chance — B is a spatial
+height field, consistent with the elevation correlation. This cleanly
+separates the two fields without claiming a u32 decoder. Full-tier test added.
+
 ## HAT u32 as fixed-point fraction (2026-11-26) — partial negative
 
 The top u32 values are recognizable fractions of 2^32: Brno 0x33333334~0.2,

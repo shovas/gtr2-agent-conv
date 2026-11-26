@@ -5782,6 +5782,50 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertGreaterEqual(checked, 2)
 
+    def test_hat_record_u32_is_spatially_independent(self):
+        """Mutual information: u32 carries no grid-position information."""
+        import collections
+        import math
+        import random
+        import struct
+        import gzip_simbin_tool as gz
+        import media_tool as mt
+
+        def mutual_information(first, second):
+            counts_a = collections.Counter(first)
+            counts_b = collections.Counter(second)
+            joint = collections.Counter(zip(first, second))
+            total = len(first)
+            return sum(value / total * math.log2(
+                (value / total) / ((counts_a[a] / total) * (counts_b[b] / total)))
+                for (a, b), value in joint.items())
+
+        path = (ROOT.parent / "GTR2Steam" / "GameData" / "Locations"
+                / "HAT_Dedicated" / "3Brno.hat")
+        if not path.is_file():
+            self.skipTest("GTR2 hat sample not present")
+        payload = gz.decompress(str(path))
+        body = payload[payload.find(b"generated\x00") + 10:]
+        origin_x, scale_x, origin_z, scale_z = mt.hat_grid_params(payload)
+        count = mt.hat_record_count(payload)
+        rows = [struct.unpack_from("<fIff", body, 48 + 16 * k)
+                for k in range(0, count, max(1, count // 20000))]
+        if len(rows) < 5000:
+            self.skipTest("sample too small")
+        buckets = [(int((row[0] - origin_x) * scale_x) << 5)
+                   + int((row[3] - origin_z) * scale_z) for row in rows]
+        unknown = [row[1] for row in rows]
+        observed = mutual_information(unknown, buckets)
+        random.seed(2026)
+        controls = []
+        for _ in range(3):
+            shuffled = unknown[:]
+            random.shuffle(shuffled)
+            controls.append(mutual_information(shuffled, buckets))
+        self.assertLess(abs(observed - max(controls)), 0.1)
+        heights = [round(row[2], 2) for row in rows]
+        self.assertGreater(mutual_information(heights, buckets), 1.0)
+
     def test_hat_record_u32_is_not_a_counter_or_position_hash(self):
         """The record's u32 is neither sequential nor derived from its point."""
         import collections

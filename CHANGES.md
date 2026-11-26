@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 21:20:00 -0500 - HAT fields separated by mutual information
+- Showed the HAT u32 carries no grid-position information (MI 7.765 bits vs 7.740 shuffled) while height B carries 4.86 bits; consolidates the u32 negatives with a permutation-controlled test.
+
 ## 2026-11-26 20:50:00 -0500 - Guard validator against GTR2 false positives
 - Added a corpus regression asserting `validate_gtr2_tree()` reports zero problems on the real GTR2 GameData tree (previously only checked on converted outputs). Full-tier test added.
 
