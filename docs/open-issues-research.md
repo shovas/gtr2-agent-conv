@@ -1,5 +1,16 @@
 # Open issues — offline research record (2026-11-23)
 
+## HAT u32 as fixed-point fraction (2026-11-26) — partial negative
+
+The top u32 values are recognizable fractions of 2^32: Brno 0x33333334~0.2,
+0xcccccccc~0.8, 0x73333334~0.45; Monza 0xc0000000=0.75, 0x40000000=0.25,
+0x80000000=0.5, 0x20000000=0.125. So the field behaves like a normalized
+fraction in [0,1] rather than a float or a counter. However it is not strictly
+quantized (only 1.2%/5.4%/3.0% of Brno/Monza/Enna values land on 1/1024),
+and it does not correlate with normalized arc length, elevation, or AIW y
+(|r| < 0.05, at permutation chance). No semantic decoder is claimed.
+Full-tier test added.
+
 ## HAT 32-byte signature decoded as spatial-grid parameters (2026-11-26)
 
 The "track-stable 32-byte signature" is not opaque: disassembling GTR2.exe's

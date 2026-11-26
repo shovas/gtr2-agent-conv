@@ -5544,6 +5544,58 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertGreaterEqual(checked, 3)
 
+    def test_hat_record_u32_not_a_track_parameter(self):
+        """The u32 is not arc length, elevation, or a fixed-point quantum."""
+        import random
+        import statistics
+        import struct
+        import gzip_simbin_tool as gz
+        import media_tool as mt
+        import simbin_text_tool as stt
+
+        def correlate(x, y):
+            mx, my = statistics.mean(x), statistics.mean(y)
+            numerator = sum((a - mx) * (b - my) for a, b in zip(x, y))
+            denominator = (sum((a - mx) ** 2 for a in x)
+                           * sum((b - my) ** 2 for b in y)) ** 0.5
+            return numerator / denominator if denominator else 0.0
+
+        random.seed(2026)
+        checked = 0
+        for name, aiw_name in (("3Brno", "3Brno"), ("3Monza", "3Monza"),
+                               ("4Dubai", "4Dubai")):
+            hat = (ROOT.parent / "GTR2Steam" / "GameData" / "Locations"
+                   / "HAT_Dedicated" / (name + ".hat"))
+            aiws = list((ROOT.parent / "GTR2Steam" / "GameData"
+                         / "Locations").rglob(aiw_name + ".AIW"))
+            if not hat.is_file() or not aiws:
+                continue
+            payload = gz.decompress(str(hat))
+            body = payload[payload.find(b"generated\x00") + 10:]
+            count = mt.hat_declared_counts(payload)[2]
+            waypoints = [wp.pos for wp in stt.parse_aiw(
+                stt.read_text(aiws[0])).waypoints if wp.pos]
+            fractions = []
+            arc_lengths = []
+            for index in range(0, count, max(1, count // 2000)):
+                first, unknown, height, third = struct.unpack_from(
+                    "<fIff", body, 48 + 16 * index)
+                fractions.append(unknown / 2 ** 32)
+                nearest = min(range(len(waypoints)),
+                              key=lambda k: (waypoints[k][0] - first) ** 2
+                              + (waypoints[k][2] - third) ** 2)
+                arc_lengths.append(nearest / len(waypoints))
+            self.assertTrue(all(0 <= value <= 1 for value in fractions))
+            # No universal fixed-point step: only a small minority land on a
+            # coarse grid, far from a strict quantized representation.
+            quantized = sum(abs(value * 1024 - round(value * 1024)) < 1e-6
+                            for value in fractions) / len(fractions)
+            self.assertLess(quantized, 0.1, name)
+            # Nor does it encode normalized track position.
+            self.assertLess(abs(correlate(fractions, arc_lengths)), 0.1, name)
+            checked += 1
+        self.assertGreaterEqual(checked, 2)
+
     def test_hat_record_u32_is_not_a_counter_or_position_hash(self):
         """The record's u32 is neither sequential nor derived from its point."""
         import collections
