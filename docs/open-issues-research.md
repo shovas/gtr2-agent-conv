@@ -207,7 +207,9 @@ while all nine GTR2 replays still parse exactly. Full-tier test added.
 returned zero submeshes from the semantic reader even though the structural
 parser found them. Expanded `MAGIC_LO` to all eight variants; verified zero
 mesh/submesh count mismatches across 3,199 archived GMTs. Full-tier test and
-`tests.test_gmt_semantic` pass.
+`tests.test_gmt_semantic` pass. A follow-up guard found 11 chance matches
+across 923 raw encrypted GSC members (the pipeline decrypts before parsing, so
+these are harmless); a full-tier test caps such matches below 20.
 
 ## f0 vs material metadata lengths (2026-11-30) — negative
 

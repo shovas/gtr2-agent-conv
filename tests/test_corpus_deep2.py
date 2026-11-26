@@ -4192,6 +4192,20 @@ class CorpusDeep2Test(unittest.TestCase):
                 break
         self.assertGreater(checked, 1000)
 
+        # Expanded magic set must not produce false matches in old-layout GSC.
+        false_positives = 0
+        for archive in glob.glob(str(ROOT.parent / "CopaPetrobrasdeMarcas" / "**" / "*.mas"),
+                                 recursive=True)[:20]:
+            try:
+                _, entries = mas_tool.read_archive(archive)
+            except Exception:
+                continue
+            for entry in entries:
+                if not entry.name.lower().endswith(".gmt") or not entry.data:
+                    continue
+                false_positives += len(gmt_semantic.find_submeshes(entry.data))
+        self.assertLess(false_positives, 20)
+
     def test_phs_members_have_no_recognizable_cipher_header(self):
         """The five GTL PHS members expose no ISI/JCA/gMb header."""
         import isi_crypt
