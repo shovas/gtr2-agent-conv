@@ -4168,6 +4168,7 @@ class CorpusDeep2Test(unittest.TestCase):
     def test_converted_gmts_agree_with_independent_parser(self):
         """Converted meshes parse in gtr2-agent-tools' independent reader."""
         import importlib.util
+        import struct
         import gmt_format
         import gmt_layout
         import gmt_semantic
@@ -4199,7 +4200,11 @@ class CorpusDeep2Test(unittest.TestCase):
                 self.assertEqual(len(ours.meshes), len(theirs))
                 for mesh, other in zip(ours.meshes, theirs):
                     self.assertEqual(len(mesh.base_vertices), len(other["vertices"]))
-                    self.assertEqual(len(mesh.record.raw[11:12]), 1)
+                    indices = struct.unpack("<%dH" % ((len(mesh.index_data) - 4) // 2),
+                                            mesh.index_data[4:])
+                    triangles = [tuple(indices[k:k + 3])
+                                 for k in range(0, len(indices) - 2, 3)]
+                    self.assertEqual(triangles, other["triangles"])
                 checked += 1
                 if checked >= 10:
                     break

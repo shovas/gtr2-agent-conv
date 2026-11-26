@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-12-01 00:45:00 -0500 - Triangle-level independent validation
+- Strengthened the independent parser test to compare exact triangle lists: 20/20 converted meshes agree across 17,588 faces.
+
 ## 2026-12-01 00:15:00 -0500 - Independent parser validation extended
 - Extended the independent gtr2-agent-tools validation to GTR1 conversions as well as GSC; full-tier test passes on both families.
 
