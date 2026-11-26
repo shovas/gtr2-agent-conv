@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-12-01 07:45:00 -0500 - f0 material-string hash negative
+- Ruled out f0's two bytes as material/stage string hashes or indices under distribution-preserving controls; full-tier regression test added.
+
 ## 2026-12-01 07:10:00 -0500 - Independent cross-check covers all submeshes
 - Strengthened `validate_conversion.py`: its schema-only reader now reads every submesh (100/100 agree with gmt_semantic) and the validator compares positions, UVs and exact triangles for all of them; a metamorphic test proves second-submesh corruption is caught.
 

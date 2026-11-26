@@ -1240,6 +1240,75 @@ class CorpusDeep2Test(unittest.TestCase):
                           for half in (lo, hi) if half in values[name])
             self.assertLess(matches, 20)  # chance level for 2 x 12k halfwords
 
+    def test_f0_bytes_not_material_string_hash(self):
+        """f0's two bytes are not 8-bit slices of material-name hashes."""
+        import hashlib
+        import random
+        import struct
+        import zlib
+        import gmt_layout
+        import gmt_format
+        import gmt_semantic
+        import mas_tool
+
+        marker = bytes.fromhex("c8cfd2d8ced8e6c3d6ded8bebba8bf90")
+        rows = []
+        for archive in sorted((ROOT.parent / "RF1Vanilla").rglob("*.mas")):
+            try:
+                _mtype, entries = mas_tool.read_archive(archive)
+            except Exception:
+                continue
+            for entry in entries:
+                data = entry.data or b""
+                if data[0x1D4:0x1E4] != marker:
+                    continue
+                try:
+                    converted = gmt_layout.old_to_new_semantic(data)
+                    parsed = gmt_format.parse_gmt(entry.name, converted)
+                except Exception:
+                    continue
+                subs = gmt_semantic.find_submeshes(data)
+                for sub, mesh in zip(subs, parsed.meshes):
+                    index = mesh.record.material_index
+                    if index >= len(parsed.materials):
+                        continue
+                    value = struct.unpack_from("<I", data, sub["v_off"] + 4)[0]
+                    rows.append((value & 0xFF, (value >> 16) & 0xFF,
+                                 parsed.materials[index].name))
+                if len(rows) >= 3000:
+                    break
+            if len(rows) >= 3000:
+                break
+        if not rows:
+            self.skipTest("rF1 old-layout GMTs not present")
+
+        def hash8(name, algorithm):
+            raw = name.encode("latin-1")
+            if algorithm == "sum":
+                return sum(raw) & 0xFF
+            if algorithm == "crc32":
+                return zlib.crc32(raw) & 0xFF
+            digest = hashlib.md5(raw).digest()
+            return digest[0]
+
+        random.seed(2026)
+        for index, label in ((0, "low"), (1, "high")):
+            observed = [row[index] for row in rows]
+            for algorithm in ("sum", "crc32", "md5"):
+                hashed = [hash8(row[2], algorithm) for row in rows]
+                hits = sum(a == b for a, b in zip(observed, hashed))
+                expected = (sum(collections.Counter(observed)[v]
+                                * collections.Counter(hashed)[v]
+                                for v in set(observed) & set(hashed))
+                            / len(rows))
+                shuffled = hashed[:]
+                random.shuffle(shuffled)
+                permuted = sum(a == b for a, b in zip(observed, shuffled))
+                self.assertLess(hits, expected * 1.5 + 20,
+                                (label, algorithm, hits, expected))
+                self.assertLess(hits, permuted * 1.5 + 20,
+                                (label, algorithm, hits, permuted))
+
     def test_f0_not_order_independent_name_hash(self):
         """f0 halfwords are not set hashes of normalized material/stage names."""
         import functools

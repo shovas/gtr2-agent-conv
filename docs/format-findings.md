@@ -369,7 +369,9 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
   type enums, material name/stage/string lengths, object-list-offset and file
   bytes, MOS 8-bit element counts, CRC32/sum of the GMT member filename,
   exact f0 u32 reuse in material records (matches were trivial sentinel/ASCII
-  values), and printable-ASCII reinterpretation of the u32 (1.2% of markers). The cross-family scope is also
+  values), printable-ASCII reinterpretation of the u32 (1.2% of markers), and
+  8-bit slices of hashes of material names / stage strings (`sum`, CRC32, MD5 —
+  all at the distribution-preserving expectation, e.g. 47 vs 46.7 expected). The cross-family scope is also
   constrained: f0 byte semantics differ in JCA-encrypted Volvo/Race07 GMTs.
   See `docs/open-issues-research.md` for each experiment.
 - Tooling: `gmt_format.split_f0()`, `gmt_format.f0_byte_pair()`, `gmt_tool.py info --meshes` and

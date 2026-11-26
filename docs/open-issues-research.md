@@ -1,5 +1,19 @@
 # Open issues — offline research record (2026-11-23)
 
+## f0 bytes vs material strings (2026-12-01) — negative
+
+Because f0 is strongly associated with material identity, its two meaningful
+bytes were tested as 8-bit slices of hashes of the material name and stage
+strings (12,002 sampled markers):
+- `lo`/`hi` are not material indices or counts (only 2.6%/3.9% fall below the
+  file's material count; exact index matches <1%);
+- `sum`, CRC32 and MD5 of material-name bytes at every byte position give hit
+  rates at the distribution-preserving expectation (e.g. `sum/lo` 47 vs 46.7
+  expected, 51 shuffled) — no signal.
+
+The byte-pair origin remains unknown; preserve byte-for-byte. Full-tier test
+added.
+
 ## `.hat` signature is cross-game stable, body is not (2026-12-01)
 
 The two shipped GTL `.hat` logs share the same 32-byte `body[4:36]` signature
