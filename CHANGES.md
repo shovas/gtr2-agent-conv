@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-27 13:20:00 -0500 - Regression recheck and u32 enum negative
+- Normal-tier regression after the recent CLI/format changes: 266 tests, 0 failures (283 s). Ruled out a top-byte enum in the HAT u32 (all 256 values, exponent-style peaks); consolidated with existing u32 negatives.
+
 ## 2026-11-27 12:50:00 -0500 - CAM header convention by generation
 - Documented that rF1/GTL CAMs carry a `gMa1` header while GTR2/Race07 CAMs start directly at StaticCam, whereas GTR2 AIWs retain the header; converters preserve source bytes until runtime evidence justifies stripping. Full-tier test added.
 

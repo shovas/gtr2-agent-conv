@@ -500,7 +500,9 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
   rates within 0.03 of random bytes. Information-theoretic check on 20,095
   Brno records: MI(u32, grid bucket) = 7.765 bits vs 7.740 for a shuffled
   control (spatially independent), while MI(height B, bucket) = 4.86 bits —
-  a clean separation between an external identifier and a spatial field.
+  a clean separation between an external identifier and a spatial field. Its
+  top byte uses all 256 values with only float-exponent-style peaks, so it is
+  not a small enum either.
   Full-tier test: `test_hat_record_u32_is_spatially_independent`.
   Its value divided by 2^32 lies in [0,1]
   and its most frequent values match simple fractions (0.2/0.8 at Brno,
@@ -674,7 +676,7 @@ a superficial string mapping would be wrong. Full-tier test:
   independent read, and a metamorphic test verifies that flipping a triangle
   index in the second submesh fails the cross-check. Full-tier tests.
 - Tests: `python3 run_tests.py --mode quick|normal|full`; quick tier is kept
-  under its budget (20 modules / ~30 s). Normal tier 270 s / 266 tests /
+  under its budget (20 modules / ~30 s). Normal tier 283 s / 266 tests /
   0 failures, below its 300 s budget; two corpus-wide tests were moved from
   quick-tier modules to full tier to restore the budget.
 - Safety: `python3 pre_push_check.py` before any push; no push without explicit
