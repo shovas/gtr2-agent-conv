@@ -242,11 +242,18 @@ def parse_object_records(data: bytes, search_limit: int = 4096) -> list[dict]:
         second = data[position + 3 + first_length:end_of_strings]
         if second_length and not all(32 <= byte < 127 for byte in second):
             return None
+        def fixed_string(start: int) -> str:
+            return data[start:start + 64].split(b"\0", 1)[0].decode("latin-1", "replace")
+
         return {
             "offset": position,
             "flags": data[position],
             "name": first.decode("latin-1"),
             "label": second.decode("latin-1"),
+            "car": fixed_string(end_of_strings),
+            "skin": fixed_string(end_of_strings + 64),
+            "value": struct.unpack_from("<f", data, end_of_strings + 128)[0],
+            "trailing_u32": struct.unpack_from("<I", data, end_of_strings + 132)[0],
             "next_offset": end_of_strings + 136,
         }
 

@@ -179,7 +179,12 @@ recovers coherent participant lists in all 13 local replays: GTR2 files yield
 seven or more contain `Safety Marshal`; shuffling each payload drops chains to
 ~1 chance record. This is the first code-grounded parser for replay payload
 structure, though the 64-byte blocks and trailing u32s remain undecoded.
-Full-tier permutation-controlled test added.
+The two 64-byte blocks were decoded as fixed-size NUL-terminated strings:
+block 1 is always the participant's `.CAR` filename (36/36 records across all
+13 replays) and block 2 is usually a `.BMP` skin name (often empty). The first
+u32 decodes to f32 ~1.531 in every GTR2 participant record; the second is
+sentinel-like. `parse_object_records()` now exposes `car`, `skin`, `value` and
+`trailing_u32`. Full-tier permutation-controlled test extended.
 
 ## Replay object record format from code (2026-11-30)
 

@@ -4346,6 +4346,11 @@ class CorpusDeep2Test(unittest.TestCase):
         random.seed(110)
         chains = [st.parse_object_records(payload) for payload in payloads]
         self.assertTrue(all(len(chain) >= 2 for chain in chains))
+        cars = [record["car"] for chain in chains for record in chain]
+        self.assertTrue(cars)
+        self.assertTrue(all(name.lower().endswith(".car") for name in cars))
+        skins = [record["skin"] for chain in chains for record in chain]
+        self.assertTrue(any(skin.lower().endswith(".bmp") for skin in skins))
         marshals = sum(any("Marshal" in record["name"] for record in chain)
                        for chain in chains)
         self.assertGreaterEqual(marshals, 7)

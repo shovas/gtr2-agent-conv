@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-30 08:45:00 -0500 - Replay participant car/skin decoded
+- Decoded the object record's 64-byte blocks as .CAR filename (36/36 records) and .BMP skin name; exposed value/trailing fields in `parse_object_records()`. Test extended.
+
 ## 2026-11-30 08:15:00 -0500 - Replay object-record parser
 - Implemented `simbin_events_tool.parse_object_records()` from the EXE-derived layout; it recovers participant chains (2-6 records) in all nine GTR2 replays vs ~1 for shuffled payloads. Full-tier permutation-controlled test added.
 
