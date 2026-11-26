@@ -208,7 +208,11 @@ regression tests or an explicitly documented negative.
   convention holds in rF1 (594/684 cameras, median 15.3 vs 304.6) and GTL
   (246/274, 10.1 vs 113.9), so it is a gMotor-wide storage convention, **not**
   a GTR2-specific conversion step; the rF1→GTR2 pipeline leaves CAM files
-  byte-identical (50/50 sampled). Separately, the `//[[gMa1.` header itself is
+  Semantic validation of converted rF1 AIWs shows **zero conversion-introduced
+  waypoint problems** across 39 files; the single issue (`Lienz_24H` waypoint
+  1437, `wp_perp` norm 0.9461) is present in the source. Full-tier test:
+  `test_converted_rf1_aiws_are_semantically_valid`. Separately, the
+  `//[[gMa1.` header itself is
   generation-specific: 34/34 sampled rF1 and 25/25 GTL CAMs carry it, while
   34/34 sampled GTR2 and 40/40 Race07 CAMs start directly at `StaticCam=`.
   GTR2 AIWs, unlike CAMs, still carry the header (31/31), so header stripping

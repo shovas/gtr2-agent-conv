@@ -6379,6 +6379,26 @@ class CorpusDeep2Test(unittest.TestCase):
                 checked += 1
             self.assertGreaterEqual(checked, 5, root)
 
+    def test_converted_rf1_aiws_are_semantically_valid(self):
+        """AIW conversion introduces no new waypoint semantic problems."""
+        import glob
+        import simbin_text_tool as stt
+        import text_convert as tc
+
+        source_issues = converted_issues = count = 0
+        for name in glob.glob(str(ROOT.parent / "RF1Vanilla" / "**" / "*.AIW"),
+                              recursive=True):
+            text = stt.read_text(name)
+            before = stt.validate_aiw_waypoints(stt.parse_aiw(text))
+            after = stt.validate_aiw_waypoints(stt.parse_aiw(tc.aiw_for_simbin(text)))
+            self.assertEqual(before, after, name)
+            source_issues += len(before)
+            converted_issues += len(after)
+            count += 1
+        self.assertGreaterEqual(count, 35)
+        self.assertEqual(converted_issues, source_issues)
+        self.assertLessEqual(converted_issues, 1)  # known Lienz source anomaly
+
     def test_gtl_tree_conversion_preserves_cam_and_trk_conventions(self):
         """GTL CAM files pass through; TRK references become GTR2-style."""
         import tempfile

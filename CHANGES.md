@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-27 14:50:00 -0500 - Converted AIW semantic regression
+- Verified all 39 converted rF1 AIWs introduce no waypoint semantic problems; the only issue (Lienz_24H wp_perp norm) is source-side. Full-tier test added.
+
 ## 2026-11-27 14:20:00 -0500 - PHS equivalent-data avenue closed
 - Verified no other local game generation ships a PHS-like physics container (text `.ini`/`.hed` instead); GTL's `Physics2.gtl` remains unique. Full-tier guard added.
 
