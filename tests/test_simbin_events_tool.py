@@ -553,6 +553,34 @@ class SimbinEventsToolTest(unittest.TestCase):
             checked += 1
         self.assertGreaterEqual(checked, 13)
 
+    def test_replay_exposes_pair_difference(self):
+        """The steering-like short pair difference is available in API and CLI."""
+        import subprocess
+        import sys
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+        path = ROOT.parent / "GTR2Steam" / "ReplayData" / "Brno.Vcr"
+        if not path.is_file():
+            self.skipTest("Brno.Vcr not present")
+        parsed = st.parse_vcr_frames(gz.decompress(str(path)))
+        states = []
+        for frame in parsed["frames"]:
+            for record in frame["records"]:
+                if st.vcr_record_tag(record["header"]) == 0:
+                    state = st.vcr_driver_state(record["data"])
+                    if state:
+                        states.append(state)
+                    break
+        self.assertTrue(states)
+        for state in states:
+            self.assertEqual(state["short_pair_difference"],
+                             state["shorts"][0] - state["shorts"][1])
+        result = subprocess.run(
+            [sys.executable, str(ROOT / "simbin_events_tool.py"), str(path),
+             "--replay", "--strings", "0"], capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("first_driver_pair_diff=", result.stdout)
+
     def test_replay_shift_cli(self):
         """--shift writes a valid container with consistently shifted times."""
         import subprocess

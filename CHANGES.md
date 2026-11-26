@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 06:50:00 -0500 - Expose steering-like replay channel
+- `vcr_driver_state()` now exposes the verified `short_pair_difference` channel (shorts[0]-shorts[1]) and the replay CLI reports `first_driver_pair_diff`. Full-tier test added.
+
 ## 2026-11-26 06:20:00 -0500 - Driver short pair tracks heading
 - Found a consistent steering-like signal in replay driver state: shorts[0]-shorts[1] correlates with heading rate in 8/8 replays (mean r=-0.171, seeded permutation p=0.004). Full-tier test added.
 
