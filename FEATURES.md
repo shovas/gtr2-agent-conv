@@ -96,7 +96,7 @@ python3 gmt_tool.py relayout <input.gmt> <output.gmt>   # rebuild offsets after 
 
 ## 4. Inspect/round-trip DSI/HAT/GTT/VCR gzip containers
 
-**What it does**: Reads gzip-wrapped SimBin `.dsi`/`.hat`/`.gtt`/`.vcr` files, reports metadata, and round-trips content byte-for-byte (verified on all 197 shipped GTR2 containers). `.hat` payload bodies are partly decoded: the header holds a spatial-grid origin/scale (the former "signature"), the declared record counts, and a table of track-space height samples; `media_tool.py hat-layout FILE CORPUS_DIR` reports all of these and matches layouts across GTL/GTR2/Race07. The opaque per-record identifier and trailing stream remain undecoded.
+**What it does**: Reads gzip-wrapped SimBin `.dsi`/`.hat`/`.gtt`/`.vcr` files, reports metadata, and round-trips content byte-for-byte (verified on all 197 shipped GTR2 containers). `.hat` payload bodies are partly decoded: the header holds a spatial-grid origin/scale (the former "signature"), the declared polygon count, its bisection-tree size and the record count, and a table of track-space height samples; `media_tool.py hat-layout FILE CORPUS_DIR` reports all of these and matches layouts across GTL/GTR2/Race07. The opaque per-record identifier and trailing stream remain undecoded.
 
 **How to ask**:
 - "Inspect this HAT/DSI file."
@@ -194,7 +194,7 @@ python3 rf1_to_gtr2.py <archive.mas> <out.gtr> --relayout   # rebuild GMT offset
 ```bash
 python3 simbin_events_tool.py <file.gtt|file.vcr>
 ```
-**Decoded**: GTTF metadata, GTL-IRSR, GTR2-IRSR and rF1-IRSR framing; the 63-byte GTTF frame grid (`--frames`); and the full replay frame stream for both GTR2 v1.05 and GTL v1.01 (participant names, car/skin files, activity windows, frame counts, sub-records and absolute session times). `--replay` reports all of this, including the decoded first-driver world position and heading-like value. All 9 GTR2 and 4 GTL replays, plus 142 Driving School `.dsi` files, parse to exact EOF; `.dsi` ghost polylines are the decoded frame positions. `shift_replay_times()` can shift replay timestamps consistently. Decoded driver-state channels include a steering-like pair difference (`shorts[0]-shorts[1]`, 8/8 replays) and a vertical-motion channel (`small_a`, 8/8 replays); `--channels` exports both as CSV for cross-recording analysis. **Limitations**: `small_b`, the u16 units/wheel assignment and the `.hat` payload body remain uninterpreted; game acceptance of edited replays is untested.
+**Decoded**: GTTF metadata, GTL-IRSR, GTR2-IRSR and rF1-IRSR framing; the 63-byte GTTF frame grid (`--frames`); and the full replay frame stream for both GTR2 v1.05 and GTL v1.01 (participant names, car/skin files, activity windows, frame counts, sub-records and absolute session times). `--replay` reports all of this, including the decoded first-driver world position and heading-like value. All 9 GTR2 and 4 GTL replays, plus 142 Driving School `.dsi` files, parse to exact EOF; `.dsi` ghost polylines are the decoded frame positions. `shift_replay_times()` can shift replay timestamps consistently. Decoded driver-state channels include a steering-like pair difference (`shorts[0]-shorts[1]`, 8/8 replays) and a vertical-motion channel (`small_a`, 8/8 replays); `--channels` exports both as CSV for cross-recording analysis. **Limitations**: `small_b` and the u16 units/wheel assignment remain uninterpreted, as do the HAT per-record identifier and trailing stream; game acceptance of edited replays is untested.
 
 ## 11. Inspect setups, descriptors and legacy audio/config containers
 
