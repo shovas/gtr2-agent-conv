@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 18:20:00 -0500 - Flag misplaced HAT files in conversion
+- `validate_gtr2_tree()` now flags `.hat` files outside `GameData/Locations/HAT_Dedicated`, since GTL/Race07 use different paths and cross-game HAT bodies are not compatible. Full-tier test added.
+
 ## 2026-11-26 17:50:00 -0500 - Batch GSC covers four corpora
 - Extended `batch_convert.py`'s GSC family from Copa Petrobras to GameStockCar, Stock Car Extreme and Automobilista. Sampled conversions pass 20/20 per corpus with full-tier tests over all four roots.
 

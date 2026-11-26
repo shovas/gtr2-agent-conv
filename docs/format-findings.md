@@ -443,8 +443,10 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
   versus ~1.4% for a seeded byte shuffle, with agreement spread fairly evenly
   across all phases of the period (not a single constant field). 43 and 87
   bytes are weaker companions (77 = 34 + 43). No fixed record layout has been
-  derived from this yet. Full-tier test:
-  `test_hat_trailing_stream_has_34_and_77_byte_periodicity`.
+  derived from this yet: the per-phase consensus bytes are 0xC0/0x32 (float
+  exponent bytes) and no exact 34- or 77-byte record template occurs, so the
+  periodicity reflects repeated exponent values rather than a fixed record.
+  Full-tier tests: `test_hat_trailing_stream_has_34_and_77_byte_periodicity`.
   The ~49% of 8-byte windows that decode as two plausible IEEE floats is fully
   explained by the tail's byte histogram (byte-shuffled control 48.5%), so no
   float-record layout is present.
@@ -466,7 +468,14 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
   sample. The scale is track-specific, so no unit mapping is claimed. Full-tier
   test: `test_hat_field_b_tracks_local_elevation`.
 
-## 5. GDB class filters are not cross-era mappable
+## 5. HAT placement in converted trees
+
+GTR2 ships every HAT asset under `GameData/Locations/HAT_Dedicated`; GTL uses
+`UserData/LOG/HAT` and Race07 keeps them per-track. Since cross-game HAT bodies
+are not byte-compatible, `validate_gtr2_tree()` flags any `.hat` outside
+HAT_Dedicated as misplaced. Full-tier test: `test_hat_placement_validator`.
+
+## 6. GDB class filters are not cross-era mappable
 
 rF1-era GDBs carry `Filter Properties =` tokens describing **track/season
 properties** (`srgrandprix`, `roadcourse`, `2005`, `lienz`, `nscrs`, ...);

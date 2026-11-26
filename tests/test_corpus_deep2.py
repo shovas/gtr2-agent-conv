@@ -5814,6 +5814,23 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertGreaterEqual(checked, 2)
 
+    def test_hat_placement_validator(self):
+        """GTR2 expects HAT files only under HAT_Dedicated."""
+        import tempfile
+        import gtl_to_gtr2 as g2g
+
+        real = ROOT.parent / "GTR2Steam" / "GameData"
+        if real.is_dir():
+            problems = g2g.validate_gtr2_tree(real)
+            self.assertEqual([p for p in problems if "misplaced .hat" in p], [])
+
+        with tempfile.TemporaryDirectory() as td:
+            misplaced = Path(td) / "UserData" / "LOG" / "HAT"
+            misplaced.mkdir(parents=True)
+            (misplaced / "FAKE.hat").write_bytes(b"not a real hat")
+            problems = g2g.validate_gtr2_tree(Path(td))
+            self.assertEqual(len([p for p in problems if "misplaced .hat" in p]), 1)
+
     def test_hat_record_tables_not_cross_game_reusable(self):
         """Matching signatures do not make HAT bodies transferable between games."""
         import gzip_simbin_tool as gz
