@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-27 00:20:00 -0500 - HAT writer found in dedicated EXE
+- Located the HAT writer in GTR2Dedicated.exe (RVA ~0x45e430): it emits the decoded 46-byte version string, u32 and four grid doubles, then the aux counts. Producer strings confirm HAT polynomials are fitted from track polygons via Gaussian elimination. Full-tier code-evidence test added.
+
 ## 2026-11-26 23:50:00 -0500 - GSC conversion normal quality check
 - Verified converted GSC normals are unit vectors for 130,853/130,855 sampled vertices; the two zero-length exceptions occur in one mesh at symmetric positions. Full-tier regression test added.
 

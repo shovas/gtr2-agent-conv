@@ -412,7 +412,14 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
   (appends `HAT\`, track stem, `.hat`) and a spatial query using `QWORD`
   (double) transforms and a 3-element loop at RVA ~0x45b700 in `htree.cpp`.
   The name "height tree" and the query code support a spatial/terrain-index
-  interpretation, but no full decoder is claimed. Although 18 signatures are shared
+  interpretation, but no full decoder is claimed. The dedicated server EXE
+  retains the producer diagnostics ``Gaussian elimination for HAT poly failed
+  once/twice`` and ``Build HAT database everytime tracks are loaded (for
+  development purposes)``; its HAT writer at RVA ~0x45e430 emits the 46-byte
+  version string, the u32 at object +0x1028, the four grid doubles, then the
+  header counts (first from an external structure, second from function
+  0x45b1d0), allocating 0x60- and 0x10-byte element arrays. Full-tier test:
+  `test_hat_producer_strings_in_dedicated_exe`. Although 18 signatures are shared
   across games, the matching bodies are **not reusable**: GTR2 Brno has 40,189
   records vs Race07's 41,530 (3/40,189 records identical at the same index),
   and GTR2 Anderstorp 27,357 vs GTL's 27,185 (24/27,185). Full-tier test:

@@ -22,6 +22,25 @@ or value carries the rF1 track properties. The fields are semantically
 different, so no class-mapping rule exists — this is a corpus negative, not a
 missing implementation. Full-tier test added.
 
+## HAT writer located in GTR2Dedicated.exe (2026-11-26)
+
+New evidence source: the dedicated server binary keeps producer strings that
+the game EXE strips. `GTR2Dedicated.exe` contains "Gaussian elimination for HAT
+poly failed once/twice" and "Build HAT database everytime tracks are loaded
+(for development purposes)" — the HAT database is fitted from track polygons
+with polynomials and can be rebuilt at load time, explaining why bodies differ
+between games for the same signature.
+
+Immediate-address scanning (correct `.rdata` base file 0x267e00 -> RVA
+0x669000) found two references to the `Ver 0.08 ...` string's RVA in `.text`,
+one at ~0x45e430. Disassembly of that writer shows it emits exactly the
+verified header: 46 bytes (0x2e) of version string, a 4-byte word from object
++0x1028, four f64 grid parameters from +0x8/+0x10/+0x18/+0x20, then a count
+from an external structure (allocated at 0x60 bytes/element) and a count from
+function 0x45b1d0 (0x10 bytes/element). This is consistent with the decoded
+`body[36]/[40]` aux counts but does not resolve their semantic units.
+Full-tier code-evidence test added.
+
 ## RaceGMT payload probing (2026-11-26)
 
 After adding the container splitter, probed the payload of several `RaceGMT\0`
