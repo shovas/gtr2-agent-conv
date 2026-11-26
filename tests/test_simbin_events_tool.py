@@ -501,6 +501,8 @@ class SimbinEventsToolTest(unittest.TestCase):
         self.assertIn("frames_declared=121", result.stdout)
         self.assertIn("frames_total=203", result.stdout)
         self.assertIn("exact_end=True", result.stdout)
+        self.assertIn("first_driver_position=", result.stdout)
+        self.assertIn("first_driver_angle=", result.stdout)
 
 
 if __name__ == "__main__":

@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-30 15:15:00 -0500 - Replay remaining fields negative
+- Tested u16 and small-f32 driver fields: no consistent semantics across files (fixed-point temperature hypothesis fails on Imola). Recorded as negative; replay CLI now prints first-driver position/angle and raw shorts.
+
 ## 2026-11-30 14:45:00 -0500 - Replay driver angle field
 - Corrected the angle field label (byte 45, not 41) and validated its association with derived heading (|r| ~0.52 vs 0.05 shuffled). Full-tier test added.
 

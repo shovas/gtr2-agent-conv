@@ -168,6 +168,17 @@ session variation is carried solely by `session_seconds`
 `c=8` only in Magny-Cours, but with nine samples no semantics are claimed.
 Full-tier regression test added.
 
+## Remaining driver-state fields (2026-11-30) — negative
+
+Tested the four u16 fields at body +8 and the small f32s at bytes 41/49
+against derived speed, frame index and half-float/fixed-point interpretations.
+In Monza.Vcr the u16s divided by 256 cluster near 70 (median 72, 86% in
+30..130), suggesting fixed-point temperatures, but Imola.Vcr has a median of
+2.0 under the same transform — so the interpretation does not generalize.
+The small f32s have no speed correlation (|r| < 0.03). These fields remain
+undecoded. The replay CLI now prints the decoded first-driver position/angle
+and raw u16s for inspection.
+
 ## Driver-state angle field (2026-11-30)
 
 Corrected a labeling error in `vcr_driver_state()`: the angle-like f32 is at

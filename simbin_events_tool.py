@@ -809,6 +809,19 @@ def main(argv=None) -> int:
         if frames:
             times = [struct.unpack("<f", struct.pack("<I", frame["time_word"]))[0]
                      for frame in frames["frames"]]
+            first_state = None
+            for frame in frames["frames"]:
+                for record in frame["records"]:
+                    if vcr_record_tag(record["header"]) == 0:
+                        first_state = vcr_driver_state(record["data"])
+                        if first_state:
+                            break
+                if first_state:
+                    break
+            if first_state:
+                print(f"first_driver_position={tuple(round(v, 3) for v in first_state['position'])} "
+                      f"first_driver_angle={first_state['angle_like']:.3f} "
+                      f"first_driver_shorts={first_state['shorts']}")
             print(f"frames_declared={frames['declared_frames']} "
                   f"frames_total={len(frames['frames'])} "
                   f"subrecords={sum(len(f['records']) for f in frames['frames'])} "
