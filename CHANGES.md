@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-12-01 07:10:00 -0500 - Independent cross-check covers all submeshes
+- Strengthened `validate_conversion.py`: its schema-only reader now reads every submesh (100/100 agree with gmt_semantic) and the validator compares positions, UVs and exact triangles for all of them; a metamorphic test proves second-submesh corruption is caught.
+
 ## 2026-12-01 06:35:00 -0500 - Validator guards f0 preservation
 - `validate_conversion.py` now checks exact per-mesh f0 marker preservation in addition to geometry, UVs and material tail; verified on 30 sampled conversions, with a metamorphic test proving f0 corruption is rejected.
 

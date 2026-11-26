@@ -406,6 +406,12 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
   20/20 real and converted samples agree on mesh/vertex counts and exact
   triangle lists (17,588 converted faces); GTR1 conversions validated likewise. A full-tier test uses that parser when the
   reference tree is present.
+- `validate_conversion.independent_read()` uses only the published field-offset
+  schema; with its early `break` removed it finds exactly the same submeshes as
+  `gmt_semantic` on 100/100 sampled conversions. `validate()` now cross-checks
+  **all** submeshes' positions, UVs and exact triangle lists against that
+  independent read, and a metamorphic test verifies that flipping a triangle
+  index in the second submesh fails the cross-check. Full-tier tests.
 - Tests: `python3 run_tests.py --mode quick|normal|full`; quick tier is kept
   under its budget (currently 20 modules / ~27 s). Normal tier 252 s / 252
   tests / 0 failures, below its 300 s budget.

@@ -99,6 +99,30 @@ class ValidateConversionTest(unittest.TestCase):
         self.assertEqual(indep["uvs"], ref["uvs"])
 
 
+    def test_independent_cross_check_covers_all_submeshes(self):
+        """The schema-only reader compares every submesh, including triangles."""
+        import struct
+        import gmt_semantic
+        import gmt_layout
+        for data in _old_gmts(60):
+            converted = gmt_layout.old_to_new_semantic(data)
+            subs = gmt_semantic.find_submeshes(converted)
+            if len(subs) < 2:
+                continue
+            read = vc.independent_read(converted, "gtr2")["submeshes"]
+            self.assertEqual(len(read), len(subs))
+            self.assertTrue(vc.validate(data, converted)["independent_cross_check"])
+            # Corrupt one triangle index in the *second* submesh only.
+            corrupted = bytearray(converted)
+            off = subs[1]["i_off"] + 4
+            value = struct.unpack_from("<H", corrupted, off)[0]
+            struct.pack_into("<H", corrupted, off, value + 1)
+            report = vc.validate(data, bytes(corrupted))
+            self.assertFalse(report["independent_cross_check"], report)
+            self.assertFalse(report["pass"], report)
+            return
+        self.skipTest("multi-submesh old-layout GMTs not present")
+
     def test_nan_aware_float_comparison(self):
         self.assertTrue(vc._float_lists_equal([(float("nan"), 1.0)],
                                               [(float("nan"), 1.0)]))

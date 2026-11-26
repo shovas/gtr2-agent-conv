@@ -51,7 +51,6 @@ def independent_read(data: bytes, schema_name: str) -> dict:
                 for i in range(vc)])
         idx = struct.unpack_from("<%dH" % ic, data, io + 4)
         out.append({"positions": verts, "uvs": uvs, "indices": idx})
-        break  # one submesh is enough for an independent cross-check
     return {"submeshes": out}
 
 
@@ -95,12 +94,19 @@ def validate(old_data: bytes, new_data: bytes) -> dict:
     uvs_equal = _float_lists_equal(old_uv, new_uv)
     faces_equal = old_faces == new_faces
 
-    # Independent cross-check of the converted file's first submesh.
+    # Independent cross-check of every converted submesh: positions, UVs and
+    # the exact triangle list, read with field offsets from the published
+    # schema rather than from gmt_semantic.
     indep = independent_read(new_data, "gtr2")
-    cross = False
-    if indep["submeshes"] and new["submeshes"]:
-        ref = new["submeshes"][0]
-        cross = (indep["submeshes"][0]["positions"] == ref["positions"])
+    cross = bool(indep["submeshes"]) and len(indep["submeshes"]) == len(new["submeshes"])
+    if cross:
+        for read, ref in zip(indep["submeshes"], new["submeshes"]):
+            flat_faces = tuple(index for face in ref["faces"] for index in face)
+            cross = (_float_lists_equal(read["positions"], ref["positions"])
+                     and _float_lists_equal(read["uvs"], ref["uvs"])
+                     and read["indices"] == flat_faces)
+            if not cross:
+                break
 
     # Material tail preserved: locate u32 obj_list_offset at 0 and compare tail bytes.
     old_obj = struct.unpack_from("<I", old_data, 0)[0]
