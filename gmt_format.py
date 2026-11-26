@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import List, Optional
 
 GMT_MAGIC = bytes.fromhex("c8cfd2d8ced8e6c3d6ded8bebba7bf90")
+RACEGMT_MAGIC = b"RaceGMT\x00"
 
 
 @dataclass
@@ -402,6 +403,30 @@ def build_stage_type_map(materials: List[GmtMaterial]) -> dict:
             counts.setdefault(stage.name, Counter())[stage.tail_u32_64] += 1
     return {name: (c.most_common(1)[0][0], c.most_common(1)[0][1], sum(c.values()))
             for name, c in counts.items()}
+
+
+def parse_racegmt(data: bytes) -> dict | None:
+    """Parse the ``RaceGMT\\0`` container used by 643 Race07Complete meshes.
+
+    Layout (verified on all 643 files): 8-byte magic, u32 printable-name
+    length, that many name bytes, a constant u32 ``0x04000020`` flag word,
+    then a payload of mixed f32/u16 records. This is **not** the standard
+    GMT layout, so :func:`parse_gmt` returns zero meshes for it. The payload
+    geometry is not decoded here; the container split is exposed so callers
+    can detect and handle the variant explicitly.
+    """
+    if not data.startswith(RACEGMT_MAGIC) or len(data) < 16:
+        return None
+    name_length = struct.unpack_from("<I", data, 8)[0]
+    start = 12 + name_length + 4
+    if not (1 <= name_length <= 64 and start <= len(data)):
+        return None
+    name = data[12:12 + name_length]
+    if not all(32 <= byte < 127 for byte in name):
+        return None
+    flags = struct.unpack_from("<I", data, 12 + name_length)[0]
+    return {"name": name.decode("ascii"), "flags": flags,
+            "payload_offset": start, "payload": data[start:]}
 
 
 def parse_gmt(path: str | Path, data: bytes | None = None) -> GmtFile:

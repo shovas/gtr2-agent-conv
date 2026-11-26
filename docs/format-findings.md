@@ -12,6 +12,12 @@ regression tests or an explicitly documented negative.
   `a8` in GSC/rF1, `a7` in GTR2/GTL), **new layout** (magic at offset `0x08`,
   108-byte mesh records at `0x16C`), and **GTR1 third magic** (handled by
   `gmt_semantic.read_gtr1_geometry()`).
+- A fourth variant, **`RaceGMT\0`**, occurs in 643 Race07Complete meshes. It is
+  not a standard GMT: `gmt_format.parse_racegmt()` verifies an 8-byte magic,
+  u32 printable-name length, the name, a constant flag word `0x04000020`, then
+  a payload of mixed f32/u16 records. All 643 files parse cleanly; the payload
+  geometry is **not** decoded and `parse_gmt()` returns zero meshes for them.
+  Full-tier test: `test_racegmt_container_parser`.
 - `gmt_layout.is_old()/is_new()` detect layouts; `old_to_new_semantic()` rebuilds
   a new-layout mesh from decoded old-layout geometry. The semantic reader now
   recognizes all eight observed mesh-record magic low words (`0x4001/11/13/15/35`

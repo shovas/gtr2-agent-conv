@@ -1472,6 +1472,34 @@ class CorpusDeep2Test(unittest.TestCase):
                        if gtr2[name][0] != gtl[name][0] and tail_match(name, gtl[name])}
         self.assertGreater(len(differences), 50)
 
+    def test_racegmt_container_parser(self):
+        """The RaceGMT\\0 variant is a distinct, consistently structured container."""
+        import glob
+        import gmt_format as gf
+
+        found = 0
+        for name in glob.glob(
+                str(ROOT.parent / "Race07Complete" / "**" / "*.gmt"),
+                recursive=True):
+            data = Path(name).read_bytes()
+            if not data.startswith(gf.RACEGMT_MAGIC):
+                continue
+            parsed = gf.parse_racegmt(data)
+            self.assertIsNotNone(parsed, name)
+            self.assertTrue(parsed["name"])
+            self.assertEqual(parsed["flags"], 0x04000020, name)
+            self.assertEqual(parsed["payload_offset"],
+                             12 + len(parsed["name"]) + 4, name)
+            self.assertEqual(len(parsed["payload"]),
+                             len(data) - parsed["payload_offset"], name)
+            found += 1
+        self.assertGreater(found, 600)
+        sample = (ROOT.parent / "Race07Complete" / "GameData" / "Locations"
+                  / "Marrakech" / "Models" / "PEOPLE_STAND_01.gmt")
+        if sample.is_file():
+            # Standard GMT parsing must not silently misinterpret this variant.
+            self.assertEqual(len(gf.parse_gmt(sample).meshes), 0)
+
     def test_f0_bytes_not_stage_indices(self):
         """f0 bytes do not index the material's stage strings."""
         import glob
