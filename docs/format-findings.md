@@ -17,6 +17,9 @@ regression tests or an explicitly documented negative.
   u32 printable-name length, the name, a constant flag word `0x04000020`, then
   a payload of mixed f32/u16 records. All 643 files parse cleanly; the payload
   geometry is **not** decoded and `parse_gmt()` returns zero meshes for them.
+  Payload probing found f32 triples and u16 index triples at 36-/72-byte
+  strides in several models (e.g. `PEOPLE_STAND_01`, `SEATS29_LODA`), but the
+  stride is not universal across the 643 files, so no record layout is claimed.
   Full-tier test: `test_racegmt_container_parser`.
 - `gmt_layout.is_old()/is_new()` detect layouts; `old_to_new_semantic()` rebuilds
   a new-layout mesh from decoded old-layout geometry. The semantic reader now

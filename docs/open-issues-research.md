@@ -22,6 +22,16 @@ or value carries the rF1 track properties. The fields are semantically
 different, so no class-mapping rule exists — this is a corpus negative, not a
 missing implementation. Full-tier test added.
 
+## RaceGMT payload probing (2026-11-26)
+
+After adding the container splitter, probed the payload of several `RaceGMT\0`
+meshes: f32 triples (plausible positions) and u16 index triples recur at 36-
+and 72-byte strides (`PEOPLE_STAND_01`: 172 index-triple hits, dominant delta
+36; `SEATS29_LODA`: 5,518 hits, dominant 36; `TREE_HD_1_11`: dominant 72),
+but other files show 10-/24-byte deltas and no universal record size. The
+payload therefore has model-dependent sub-structures; no geometry decoder is
+claimed beyond the verified container fields.
+
 ## HAT record fields: information-theoretic characterization (2026-11-26)
 
 On 20,095 sampled Brno records (entropy U 14.13 bits, B@0.01 6.73 bits,
