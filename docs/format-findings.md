@@ -452,7 +452,8 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
   family-level association, not a material ID. Full-tier test:
   `test_f0_predicts_material_family_weakly`. CRC16-CCITT and CRC16-IBM of
   material names and stage strings hit f0 bytes at ~0.6% (chance 0.78%), so
-  those hash families are also ruled out. The cross-family scope is also
+  those hash families are also ruled out, as is indexing the material's stage
+  strings (hit rate 0.77%, at chance). The cross-family scope is also
   constrained: f0 byte semantics differ in JCA-encrypted Volvo/Race07 GMTs.
   See `docs/open-issues-research.md` for each experiment.
 - Tooling: `gmt_format.split_f0()`, `gmt_format.f0_byte_pair()`, `gmt_tool.py info --meshes` and

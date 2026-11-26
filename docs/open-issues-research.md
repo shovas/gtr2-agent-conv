@@ -250,6 +250,14 @@ markers. Hit rates were 0.0061/0.0059 (names) and 0.0059/0.0062 (stages),
 all **below** the 0.0078 chance rate. No CRC16 variant explains f0.
 Full-tier test added.
 
+## f0 vs stage-string indices (2026-11-26) — negative
+
+Checked f0's two meaningful bytes against the count of stage strings and the
+number of non-empty stages in the corresponding material across 6,705 GTR2
+markers: hit rates 0.77% (chance ~0.78%). Only 742/6,705 (11%) even have both
+bytes fall inside the stage-index range. No indexing relationship.
+Full-tier test added.
+
 ## `.hat` body is deterministic per layout (2026-12-01)
 
 Following the header finding, all 34 bodies were compared after byte 4:

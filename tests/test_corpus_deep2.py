@@ -1294,6 +1294,44 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertGreater(observed, max(permuted))
         self.assertLess(observed, 0.4)  # weak association, not a material ID
 
+    def test_f0_bytes_not_stage_indices(self):
+        """f0 bytes do not index the material's stage strings."""
+        import glob
+        import gmt_format as gf
+        import mas_tool
+
+        rows = []
+        for archive in sorted(glob.glob(
+                str(ROOT.parent / "GTR2Steam" / "**" / "*.gtr"),
+                recursive=True))[:10]:
+            try:
+                _mtype, entries = mas_tool.read_archive(archive)
+            except Exception:
+                continue
+            for entry in entries:
+                if not entry.name.lower().endswith(".gmt") or not entry.data:
+                    continue
+                try:
+                    parsed = gf.parse_gmt(entry.name, entry.data)
+                except Exception:
+                    continue
+                for mesh in parsed.meshes:
+                    marker = gf.mesh_marker(mesh)
+                    index = mesh.record.material_index
+                    if marker and index < len(parsed.materials):
+                        rows.append((gf.f0_byte_pair(marker), parsed.materials[index]))
+            if len(rows) >= 2000:
+                break
+        if not rows:
+            self.skipTest("GTR2 mesh corpus not present")
+
+        hits = 0
+        for pair, material in rows[:2000]:
+            count = len(material.strings)
+            hits += pair[0] == count
+            hits += pair[1] == count
+        self.assertLess(hits / (2 * min(len(rows), 2000)), 0.02)
+
     def test_f0_bytes_not_crc16_of_material_strings(self):
         """CRC16 variants of material/stage names do not reproduce f0 bytes."""
         import glob
