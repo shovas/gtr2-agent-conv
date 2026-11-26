@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 05:50:00 -0500 - JSON validation report
+- `validate_conversion.py --json` now emits the offline validation report as machine-readable JSON for batch pipelines; full-tier test confirms it matches `validate()`.
+
 ## 2026-11-28 05:20:00 -0500 - Packed replay u16 floats ruled out
 - Ruled out replay u16 pairs as packed floats (28.7%/36.8% small-f32 rate vs 50.8% random-u32 baseline); recorded that shuffle controls cannot test distributional specialness.
 

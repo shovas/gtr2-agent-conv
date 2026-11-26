@@ -151,10 +151,16 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("old")
     ap.add_argument("new")
+    ap.add_argument("--json", action="store_true",
+                    help="emit the report as JSON for batch pipelines")
     args = ap.parse_args(argv)
     report = validate(Path(args.old).read_bytes(), Path(args.new).read_bytes())
-    for key, value in report.items():
-        print(f"{key}={value}")
+    if args.json:
+        import json
+        print(json.dumps(report, indent=2))
+    else:
+        for key, value in report.items():
+            print(f"{key}={value}")
     return 0 if report["pass"] else 1
 
 

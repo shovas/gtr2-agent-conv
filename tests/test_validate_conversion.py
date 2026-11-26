@@ -32,6 +32,31 @@ def _old_gmts(limit=10):
 
 
 class ValidateConversionTest(unittest.TestCase):
+    def test_json_cli_matches_validate(self):
+        """The --json CLI flag emits a machine-readable report matching validate()."""
+        import json
+        import subprocess
+        import tempfile
+
+        data = next(_old_gmts(1), None)
+        if data is None:
+            self.skipTest("old-layout GMTs not present")
+        converted = gmt_layout.old_to_new_semantic(data)
+        expected = vc.validate(data, converted)
+        with tempfile.TemporaryDirectory() as tmp:
+            old = Path(tmp) / "old.gmt"
+            new = Path(tmp) / "new.gmt"
+            old.write_bytes(data)
+            new.write_bytes(converted)
+            result = subprocess.run(
+                [sys.executable, str(ROOT / "validate_conversion.py"),
+                 str(old), str(new), "--json"],
+                capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        # JSON round-trip normalises tuples to lists.
+        normalised = json.loads(json.dumps(expected))
+        self.assertEqual(json.loads(result.stdout), normalised)
+
     def test_semantic_conversion_passes_offline_validation(self):
         checked = 0
         for data in _old_gmts(10):
