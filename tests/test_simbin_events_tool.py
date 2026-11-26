@@ -253,6 +253,23 @@ class SimbinEventsToolTest(unittest.TestCase):
             checked += 1
         self.assertGreaterEqual(checked, 1)
 
+    def test_ghost_line_cli(self):
+        """The --ghost-line CLI reports the decoded polyline endpoints."""
+        import subprocess
+        import sys
+
+        sample = next((Path(p) for p in glob.glob(
+            str(ROOT.parent / "GTR2Steam" / "**" / "*.dsi"), recursive=True)
+            if Path(p).is_file()), None)
+        if sample is None:
+            self.skipTest("GTR2 DSI files not present")
+        result = subprocess.run(
+            [sys.executable, str(ROOT / "simbin_events_tool.py"),
+             str(sample), "--ghost-line"], capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("ghost_points=", result.stdout)
+        self.assertGreater(int(result.stdout.split("ghost_points=")[1].split()[0]), 10)
+
     def test_dsi_ghost_line(self):
         """Read every local Driving School instructor polyline."""
         import math
