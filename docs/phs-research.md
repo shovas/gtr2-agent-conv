@@ -31,6 +31,15 @@ Searched `../aluigi-mirror-261124/mirror.aluigi.org/` in full: `patches/` (192 f
 
 A full-byte scan of the 13,064-byte `PHYSICS.PHS` member found **zero** ZIP local/central/EOCD/Zip64 signatures (`PK\x03\x04`, `PK\x01\x02`, `PK\x05\x06`, `PK\x06\x06`, `PK\x06\x07`), no 7z header magic (`37 7a bc af 27 1c`), and no RAR4/RAR5/MSCF signatures. The final 256 bytes contain no u32 value that points into the file (0/64 inward offsets), ruling out a trailing central-directory/index structure. Combined with the earlier PAR2, ISI-crypt, compression, XOR and entropy negatives, the blob has no identifiable container structure; no decoder is promoted.
 
+## Equivalent-data search in other generations (2026-11-27)
+
+Checked GTR2Steam, Race07Complete, RF1Vanilla, Automobilista, StockCarExtreme,
+F1C, F12002 and NT2004 for `.phs`/`.PHS` files or other physics containers:
+zero matches. Those generations express head/physics data as text
+(`HeadPhysics.ini`, `.hed`), not a PHS-like archive. GTL's `Physics2.gtl`
+remains the only such container locally, so the "equivalent payload in another
+generation" bypass is closed. Full-tier guard added.
+
 ## Evidence table
 
 | Evidence | Class | Source |

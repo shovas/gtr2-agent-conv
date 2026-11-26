@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-27 14:20:00 -0500 - PHS equivalent-data avenue closed
+- Verified no other local game generation ships a PHS-like physics container (text `.ini`/`.hed` instead); GTL's `Physics2.gtl` remains unique. Full-tier guard added.
+
 ## 2026-11-27 13:50:00 -0500 - f0 mesh-0 filename-hash negative
 - Ruled out CRC32/adler32/MD5 of GMT member filenames as GTR2 mesh-0 f0 markers (0 exact matches in 3,157 sampled markers). Full-tier test added.
 

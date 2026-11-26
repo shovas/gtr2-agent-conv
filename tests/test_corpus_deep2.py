@@ -6341,6 +6341,26 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertGreaterEqual(checked, 10)
 
+    def test_phs_container_only_in_gtl(self):
+        """No other local generation ships a PHS-like physics container."""
+        import glob
+
+        roots = ("GTR2Steam", "Race07Complete", "RF1Vanilla", "Automobilista",
+                 "StockCarExtreme", "F1C", "F12002", "NT2004")
+        found = []
+        for root in roots:
+            base = ROOT.parent / root
+            if not base.is_dir():
+                continue
+            found.extend(glob.glob(str(base / "**" / "*.phs"), recursive=True))
+            found.extend(glob.glob(str(base / "**" / "*.PHS"), recursive=True))
+        self.assertEqual(found, [])
+        gtl = ROOT.parent / "GTLSteam"
+        if gtl.is_dir():
+            local = glob.glob(str(gtl / "**" / "*.phs"), recursive=True)
+            local += glob.glob(str(gtl / "**" / "*.gtl"), recursive=True)
+            self.assertTrue(any("Physics" in name for name in local))
+
     def test_cam_header_convention_by_game_generation(self):
         """rF1/GTL CAMs carry a gMa header; GTR2/Race07 CAMs do not."""
         import media_tool as mt
