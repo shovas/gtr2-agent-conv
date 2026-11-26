@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 17:50:00 -0500 - Batch GSC covers four corpora
+- Extended `batch_convert.py`'s GSC family from Copa Petrobras to GameStockCar, Stock Car Extreme and Automobilista. Sampled conversions pass 20/20 per corpus with full-tier tests over all four roots.
+
 ## 2026-11-26 17:20:00 -0500 - HAT tail 34/77-byte periodicity
 - Found strong, cross-track byte-lag periodicity in the HAT trailing stream at strides 34 and 77 (11-16% agreement vs ~1.4% shuffled); no fixed record layout claimed yet. Full-tier test added.
 

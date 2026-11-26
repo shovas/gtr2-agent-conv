@@ -28,7 +28,14 @@ ROOT = Path(__file__).resolve().parent
 DEFAULT_ROOTS = {
     "vrl": ROOT.parent / "SportsCarGtUsa",
     "gtr1": ROOT.parent / "GTR1Vanilla",
-    "gsc": ROOT.parent / "CopaPetrobrasdeMarcas",
+    # All four ISI-encrypted GSC-family corpora use the same member decoder;
+    # sampled conversions from each pass geometry/UV validation 20/20.
+    "gsc": (
+        ROOT.parent / "CopaPetrobrasdeMarcas",
+        ROOT.parent / "GameStockCar",
+        ROOT.parent / "StockCarExtreme",
+        ROOT.parent / "Automobilista",
+    ),
 }
 
 
@@ -131,13 +138,19 @@ def batch_convert(template: bytes, out_dir: Path, limit: int = 0,
         target = out_dir / kind
         target.mkdir(exist_ok=True)
         scanned = written = 0
-        for arc, entry in archive_members(Path(roots[kind]), ext, kind):
-            data = convert_member(kind, entry.data, template, entry.name, reasons)
-            scanned += 1
-            if data is not None:
-                safe = arc.stem + "_" + Path(entry.name).stem + ".gmt"
-                (target / safe).write_bytes(data)
-                written += 1
+        selected = roots[kind]
+        if not isinstance(selected, (list, tuple)):
+            selected = (selected,)
+        for root in selected:
+            for arc, entry in archive_members(Path(root), ext, kind):
+                data = convert_member(kind, entry.data, template, entry.name, reasons)
+                scanned += 1
+                if data is not None:
+                    safe = arc.stem + "_" + Path(entry.name).stem + ".gmt"
+                    (target / safe).write_bytes(data)
+                    written += 1
+                if limit and scanned >= limit:
+                    break
             if limit and scanned >= limit:
                 break
         report[f"{kind}_scanned"] = scanned

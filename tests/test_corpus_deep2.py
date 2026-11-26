@@ -1294,6 +1294,46 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertGreater(observed, max(permuted))
         self.assertLess(observed, 0.4)  # weak association, not a material ID
 
+    def test_batch_convert_covers_four_gsc_corpora(self):
+        """AMS, SCE and GSC2013 join Copa in the batch GSC family."""
+        import glob
+        import tempfile
+        import batch_convert
+        import gmt_format
+        import validate_materials
+
+        names = {path.name for path in batch_convert.DEFAULT_ROOTS["gsc"]}
+        self.assertEqual(names, {"CopaPetrobrasdeMarcas", "GameStockCar",
+                                 "StockCarExtreme", "Automobilista"})
+
+        template = None
+        for name in sorted(glob.glob(
+                str(ROOT.parent / "GTR2Steam" / "**" / "*.gmt"),
+                recursive=True))[:300]:
+            try:
+                if gmt_format.parse_gmt(name).meshes:
+                    template = Path(name)
+                    break
+            except Exception:
+                continue
+        self.assertIsNotNone(template)
+        for root in batch_convert.DEFAULT_ROOTS["gsc"]:
+            if not root.is_dir():
+                continue
+            with tempfile.TemporaryDirectory() as td:
+                report = batch_convert.batch_convert(
+                    template.read_bytes(), Path(td), limit=5,
+                    roots={"vrl": batch_convert.DEFAULT_ROOTS["vrl"],
+                           "gtr1": batch_convert.DEFAULT_ROOTS["gtr1"],
+                           "gsc": root})
+                self.assertGreater(report["gsc_written"], 0, str(root))
+                outputs = list((Path(td) / "gsc").glob("*.gmt"))
+                self.assertEqual(len(outputs), report["gsc_written"])
+                for path in outputs:
+                    self.assertTrue(gmt_format.parse_gmt(path).meshes, path)
+                    self.assertEqual(validate_materials.check_gmt(
+                        path.read_bytes(), path.name), [], path)
+
     def test_gsc_validator_corpus_sample(self):
         """The GSC-aware validator passes across a deterministic sample."""
         import glob
