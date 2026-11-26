@@ -368,6 +368,17 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
   mostly deterministic per signature too (61/123 same-signature pairs fully
   byte-identical after byte 4). Full-tier test:
   `test_hat_signature_across_three_games`.
+- **Decoded:** the 32-byte `body[4:36]` "signature" is four little-endian f64
+  **spatial-grid parameters** ``(origin_x, inv_cell_x, origin_z, inv_cell_z)``,
+  exposed as `media_tool.hat_grid_params()`. GTR2.exe's height-tree query at
+  RVA `0x45de40` computes `ix = int((x-origin_x)*inv_cell_x)`,
+  `iz = int((z-origin_z)*inv_cell_z)` and `bucket = ((ix<<5)+iz) & 0x3ff`
+  (a 32x32 = 1024-bucket hash) before evaluating a quadratic height surface.
+  For GTR2/GTL/Race07 all table records map into `ix,iz ∈ 0..31`; rF1/SCE
+  layouts use 64x64 grids with correspondingly larger inverse cell sizes.
+  Verified on all 178 local HAT files; 97.9% of sampled records fall inside
+  the nominal grid extent (the rest are boundary samples). Full-tier test:
+  `test_hat_signature_decodes_to_spatial_grid_params`.
 - The body begins at offset 48 with a **fixed-stride 16-byte record table**:
   each record is `[f32 x, u32 unknown, f32 height, f32 z]` (B is a local
   elevation value — see below), with B roughly constant

@@ -1,5 +1,26 @@
 # Open issues — offline research record (2026-11-23)
 
+## HAT 32-byte signature decoded as spatial-grid parameters (2026-11-26)
+
+The "track-stable 32-byte signature" is not opaque: disassembling GTR2.exe's
+height-tree query at RVA `0x45de40` shows it is four f64 values used directly:
+
+```
+ix = int((x - [edi+0x08]) * [edi+0x10])
+iz = int((z - [edi+0x18]) * [edi+0x20])
+bucket = ((ix << 5) + iz) & 0x3ff
+```
+
+`body[4:36]` decodes as exactly `(origin_x, inv_cell_x, origin_z, inv_cell_z)`
+under `<4d`. Brno: `(-1537.2717, 0.0151066, -1059.1428, 0.0260321)`; sampled
+record x/z then map to `ix,iz ∈ 0..31`, i.e. a 32x32 = 1024-bucket grid, with
+`&0x3ff` matching the code. Across all 178 HAT files the inverse cell sizes
+are positive and 97.9% of 371,442 sampled records map in range; six rF1/SCE
+files use a 64x64 grid and wider mask. `hat_grid_params()` and
+`hat_grid_bucket()` expose this, and the `hat-layout` CLI reports `grid_params`.
+The u32 record field is still not the bucket index (agreement with any 10-bit
+slice of it is at the 0.1% chance level). Full-tier test added.
+
 ## HAT bodies are not cross-game reusable (2026-11-26)
 
 Among 18 signatures shared across games (GTR2/GTL/Race07), no body is

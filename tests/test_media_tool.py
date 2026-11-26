@@ -1077,6 +1077,52 @@ class MediaToolTest(unittest.TestCase):
         self.assertEqual(len(signatures), 1)
         self.assertEqual(len(counts), 4)
 
+    def test_hat_signature_decodes_to_spatial_grid_params(self):
+        """The 32-byte 'signature' is the height-tree grid origin and scales."""
+        import struct
+        base = (ROOT.parent / "GTR2Steam" / "GameData" / "Locations"
+                / "HAT_Dedicated" / "3Brno.hat")
+        if not base.is_file():
+            self.skipTest("GTR2 HAT_Dedicated not present")
+        params = media_tool.hat_grid_params(media_tool.hat_decompress(base)[0])
+        self.assertIsNotNone(params)
+        origin_x, inv_x, origin_z, inv_z = params
+        self.assertAlmostEqual(origin_x, -1537.2717, delta=0.01)
+        self.assertAlmostEqual(inv_x, 0.01510657, delta=1e-6)
+        self.assertAlmostEqual(origin_z, -1059.1428, delta=0.01)
+        self.assertAlmostEqual(inv_z, 0.02603205, delta=1e-6)
+
+        # GTR2/GTL/Race07 use a 32x32 grid: all table records map into 0..31.
+        checked = in_range = 0
+        for path in sorted(base.parent.glob("*.hat")):
+            payload = media_tool.hat_decompress(path)[0]
+            grid = media_tool.hat_grid_params(payload)
+            if grid is None:
+                continue
+            body = payload[payload.find(b"generated\x00") + 10:]
+            count = media_tool.hat_record_count(payload)
+            for index in range(0, count, max(1, count // 500)):
+                first, _unknown, _height, third = struct.unpack_from(
+                    "<fIff", body, 48 + 16 * index)
+                ix = int((first - grid[0]) * grid[1])
+                iz = int((third - grid[2]) * grid[3])
+                in_range += 0 <= ix < 32 and 0 <= iz < 32
+                checked += 1
+            self.assertIsNotNone(media_tool.hat_grid_bucket(payload, first, third))
+        self.assertGreater(checked, 1000)
+        self.assertGreater(in_range / checked, 0.95)
+
+        # rF1/SCE layouts use a wider 64x64 grid (larger inverse cell sizes).
+        sce = ROOT.parent / "StockCarExtreme"
+        if sce.is_dir():
+            wide = [p for p in sce.rglob("*.hat")
+                    if p.name == "BUENOSAIRES15.hat"]
+            if wide:
+                grid = media_tool.hat_grid_params(
+                    media_tool.hat_decompress(wide[0])[0])
+                self.assertGreater(grid[1], 0.03)
+                self.assertGreater(grid[3], 0.03)
+
     def test_hat_record_count_uses_declared_header_count(self):
         """The header's declared count includes valid zero-valued records."""
         import struct

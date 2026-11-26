@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 15:50:00 -0500 - Decode HAT signature as spatial grid
+- Decoded the 32-byte HAT layout "signature" as four f64 spatial-grid parameters (origin_x, inv_cell_x, origin_z, inv_cell_z), matching GTR2.exe's 32x32 height-tree hash at RVA 0x45de40. Added `media_tool.hat_grid_params()` / `hat_grid_bucket()` and CLI `grid_params`; verified on 178 files (rF1/SCE use 64x64 grids). Full-tier test added.
+
 ## 2026-11-26 15:20:00 -0500 - Guard against cross-game HAT reuse
 - Documented and regression-tested that matching HAT layout signatures do not make bodies reusable across games (Brno 40,189 vs 41,530 records; only 3 identical). Conversion must keep HAT files game-specific.
 

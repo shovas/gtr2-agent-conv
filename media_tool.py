@@ -623,7 +623,8 @@ def hat_decompress(path: str | Path) -> tuple[bytes, dict] | None:
 def hat_layout_signature(payload: bytes) -> bytes | None:
     """Return the 32-byte per-layout identifier from a decompressed `.hat`.
 
-    Verified on all 34 GTR2 `.hat` files: after the ``generated\\x00`` marker,
+    This is the byte image of ``hat_grid_params()`` (four f64 grid parameters),
+    not an opaque hash. Verified on all 34 GTR2 `.hat` files: after the ``generated\\x00`` marker,
     ``body[4:36]`` is constant for every variant of a physical layout and
     identical between GTL and GTR2 for the same layout. Returns ``None`` for
     header variants that do not carry the marker.
@@ -632,6 +633,48 @@ def hat_layout_signature(payload: bytes) -> bytes | None:
     if marker < 0 or len(payload) < marker + 50:
         return None
     return payload[marker + 14:marker + 46]
+
+
+def hat_grid_params(payload: bytes) -> tuple[float, float, float, float] | None:
+    """Return the four f64 parameters of a `.hat` spatial hash grid.
+
+    ``GTR2.exe``'s height-tree query (RVA 0x45de40) computes
+    ``ix = int((x - origin_x) * inv_cell_x)``,
+    ``iz = int((z - origin_z) * inv_cell_z)`` and
+    ``bucket = ((ix << 5) + iz) & 0x3ff`` -- a 32x32 = 1024-bucket hash -- then
+    evaluates a quadratic height surface from the bucket's cell. The 32-byte
+    "signature" at body offset 4 is exactly the four doubles
+    ``(origin_x, inv_cell_x, origin_z, inv_cell_z)`` used here. Generation
+    differences exist: rF1/StockCarExtreme layouts use 64x64 grids (larger
+    inverse cell sizes) and a correspondingly wider hash mask.
+
+    Verified on all 178 local `.hat` files: inverse cell sizes are positive,
+    and 97.9% of sampled table records map into the grid's integer range
+    (the remainder are boundary samples just outside the nominal extent).
+    """
+    signature = hat_layout_signature(payload)
+    if signature is None:
+        return None
+    values = struct.unpack("<4d", signature)
+    if not (0 < values[1] < 1 and 0 < values[3] < 1):
+        return None
+    return values
+
+
+def hat_grid_bucket(payload: bytes, x: float, z: float,
+                    mask: int = 0x3ff) -> int | None:
+    """Return the hash-bucket index for a track-space ``(x, z)`` point.
+
+    ``mask`` defaults to ``0x3ff`` (the GTR2/GTL/Race07 32x32 grid); pass
+    ``0xfff`` for rF1/StockCarExtreme 64x64 grids.
+    """
+    params = hat_grid_params(payload)
+    if params is None:
+        return None
+    origin_x, inv_x, origin_z, inv_z = params
+    ix = int((x - origin_x) * inv_x)
+    iz = int((z - origin_z) * inv_z)
+    return ((ix << 5) + iz) & mask
 
 
 def hat_declared_counts(payload: bytes) -> tuple[int, int, int] | None:
@@ -713,7 +756,8 @@ def identify_hat_layout(path: str | Path, corpus: str | Path) -> dict:
             "body_size": len(payload) - payload.find(b"generated\x00") - 10,
             "signature": signature.hex(),
             "record_count": hat_record_count(payload),
-            "declared_counts": hat_declared_counts(payload), "matches": matches}
+            "declared_counts": hat_declared_counts(payload),
+            "grid_params": hat_grid_params(payload), "matches": matches}
 
 
 def hdr_dat_mp3(hdr_path: str | Path) -> tuple[bytes, dict] | None:
