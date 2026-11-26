@@ -1632,6 +1632,35 @@ class CorpusDeep2Test(unittest.TestCase):
                        if gtr2[name][0] != gtl[name][0] and tail_match(name, gtl[name])}
         self.assertGreater(len(differences), 50)
 
+    def test_racegmt_payload_has_indexed_36_byte_records(self):
+        """RaceGMT payloads open with sequential u16 index triples at stride 36."""
+        import glob
+        import struct
+        import race_gmt
+
+        checked = 0
+        for name in ("PEOPLE_STAND_01.gmt", "PEOPLE_STAND_02.gmt",
+                     "SEATS29_LODA.gmt"):
+            matches = glob.glob(str(ROOT.parent / "Race07Complete" / "**" / name),
+                                recursive=True)
+            if not matches:
+                continue
+            data = Path(matches[0]).read_bytes()
+            header = race_gmt.parse_header(data)
+            payload = data[16 + len(header.name) + 48:]
+            start = next((i for i in range(0, min(len(payload), 2000) - 6, 2)
+                          if struct.unpack_from("<3H", payload, i) == (0, 1, 2)),
+                         None)
+            self.assertIsNotNone(start, name)
+            records = [struct.unpack_from("<3H", payload, start + 36 * k)
+                       for k in range(8)]
+            for ordinal, record in enumerate(records):
+                base = 3 * ordinal
+                self.assertEqual(record, (base, base + 1, base + 2),
+                                 (name, ordinal))
+            checked += 1
+        self.assertGreaterEqual(checked, 2)
+
     def test_racegmt_container_parser(self):
         """The RaceGMT\\0 variant is a distinct, consistently structured container."""
         import glob

@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-27 11:20:00 -0500 - RaceGMT payload indexed-record start
+- Found a bounded RaceGMT payload structure: 36-byte records whose first eight u16 index triples are sequential (0,1,2)...(21,22,23) in four sampled models; later resets are model-dependent, so no full decoder claimed. Full-tier test added.
+
 ## 2026-11-27 10:50:00 -0500 - rF1 SearchPath corpus regression
 - Verified all 15 rF1 track directories convert their SCNs to the exact GTR2 two-line SearchPath pair (`Shared` plus track folder); full-tier regression test added.
 

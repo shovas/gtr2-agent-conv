@@ -21,7 +21,13 @@ regression tests or an explicitly documented negative.
   Payload probing found f32 triples and u16 index triples at 36-/72-byte
   strides in several models (e.g. `PEOPLE_STAND_01`, `SEATS29_LODA`), but the
   stride is not universal across the 643 files, so no record layout is claimed.
-  Full-tier test: `test_racegmt_container_parser`.
+  Full-tier test: `test_racegmt_container_parser`. Payload probing found a
+  bounded structure in several models: after the header and a prefix, a run of
+  36-byte records begins with u16 index triples `(0,1,2), (3,4,5), ...` for at
+  least the first eight records (verified in `PEOPLE_STAND_01/02`, `STAND_25`,
+  `SEATS29_LODA`). The index sequence later resets with a model-dependent
+  period, so only the opening run is asserted. Full-tier test:
+  `test_racegmt_payload_has_indexed_36_byte_records`.
 - `gmt_layout.is_old()/is_new()` detect layouts; `old_to_new_semantic()` rebuilds
   a new-layout mesh from decoded old-layout geometry. The semantic reader now
   recognizes all eight observed mesh-record magic low words (`0x4001/11/13/15/35`

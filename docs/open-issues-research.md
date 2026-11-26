@@ -138,6 +138,16 @@ function 0x45b1d0 (0x10 bytes/element). This is consistent with the decoded
 `body[36]/[40]` aux counts but does not resolve their semantic units.
 Full-tier code-evidence test added.
 
+## RaceGMT payload indexed records (2026-11-27)
+
+Located the first `(0,1,2)` u16 triple in several RaceGMT payloads (offset 292
+in the four sampled models) and parsed 36-byte records from there. The first
+eight records carry sequential index triples `(0,1,2) .. (21,22,23)` in
+`PEOPLE_STAND_01/02`, `STAND_25` and `SEATS29_LODA`; later records reset with a
+model-dependent period (8 in PEOPLE_STAND, longer elsewhere), so no full
+record layout is claimed. This matches the writer's variable 32-byte
+structures only partially. Full-tier test added.
+
 ## RaceGMT payload probing (2026-11-26)
 
 After adding the container splitter, probed the payload of several `RaceGMT\0`
