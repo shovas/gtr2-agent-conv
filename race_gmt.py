@@ -184,6 +184,8 @@ def main(argv=None) -> int:
     ap.add_argument("files", nargs="+")
     ap.add_argument("--materials", action="store_true",
                     help="print decoded material groups with stage types/channels")
+    ap.add_argument("--triangles", action="store_true",
+                    help="print decoded 36-byte triangle records (offset-292 tables)")
     args = ap.parse_args(argv)
     for f in args.files:
         try:
@@ -195,6 +197,13 @@ def main(argv=None) -> int:
                     stages = ", ".join(f"{s['name']}(type={s['type']},ch={s['channel']})"
                                        for s in group["stages"])
                     print(f"  material@{group['offset']:#x}: {stages}")
+            if args.triangles:
+                records = read_triangle_records(data)
+                print(f"  triangles={len(records)} "
+                      f"groups={sorted(set(r['group'] for r in records))}")
+                for record in records[:5]:
+                    print(f"    ord={record['ordinal']} group={record['group']} "
+                          f"idx={record['indices']} f32={record['floats']}")
         except ValueError as e:
             print(f, "ERROR", e)
     return 0

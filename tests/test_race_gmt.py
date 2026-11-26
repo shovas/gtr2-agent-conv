@@ -158,6 +158,14 @@ class RaceGmtTest(unittest.TestCase):
             for offset, triple in enumerate(indices):
                 self.assertEqual(triple, (3 * offset, 3 * offset + 1, 3 * offset + 2))
         self.assertTrue(all(len(rec["floats"]) == 5 for rec in recs))
+        import subprocess
+        import sys
+        result = subprocess.run(
+            [sys.executable, str(ROOT / "race_gmt.py"), "--triangles", str(p)],
+            capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("triangles=48", result.stdout)
+        self.assertIn("groups=[0, 1, 2, 3, 4]", result.stdout)
 
     def test_triangles_share_vertices(self):
         p = ROOT.parent / "Race07Complete/GameData/Locations/Marrakech/Models/PEOPLE_STAND_01.gmt"

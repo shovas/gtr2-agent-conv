@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 10:30:00 -0500 - RaceGMT triangle CLI
+- `race_gmt.py --triangles FILE` reports the decoded 36-byte record framing (count, groups, first records).
+
 ## 2026-11-28 10:00:00 -0500 - RaceGMT triangle-record framing
 - Added `race_gmt.read_triangle_records()`: the 36-byte payload records decode as `3 u16 indices, u16 pad, u32 group, u32 ordinal, 5 f32` (refining the earlier "6 zero bytes" reading). Verified on 48 records in five groups for `PEOPLE_STAND_01..05`; f32 semantics remain unknown and no universal layout is claimed.
 

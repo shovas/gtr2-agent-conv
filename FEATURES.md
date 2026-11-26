@@ -286,6 +286,7 @@ python3 mts_format.py --detail <file.mts>
 
 ```bash
 python3 race_gmt.py --materials <file.gmt>
+python3 race_gmt.py --triangles <file.gmt>
 ```
 
 **Decoded**: stage-type enum at +256 and per-material texture-channel index at +260. **Limitations**: the 36-byte position grid is experimental and is not a validated triangle decoder.
