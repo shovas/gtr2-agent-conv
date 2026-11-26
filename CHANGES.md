@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 03:50:00 -0500 - Replay shift corpus validation
+- Verified the replay time editor on all 13 shipped replays for +64 s and -64 s: exact EOF, correct frame-time deltas, unchanged summary duration and valid containers. Full-tier test added.
+
 ## 2026-11-26 03:20:00 -0500 - Hat field B weak trend caveat
 - Corrected an apparent r=0.66 correlation between .hat field B and AIW waypoint count: duplicate layouts were pseudo-replication. Independent layouts give r=0.495 (p~0.07, GTR2) and r=0.326 (p~0.04, Race07); no decoder claimed. Full-tier test added.
 

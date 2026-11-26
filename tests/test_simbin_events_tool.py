@@ -514,6 +514,45 @@ class SimbinEventsToolTest(unittest.TestCase):
             self.assertIn("exact_end=True", result.stdout)
 
 
+    def test_replay_shift_corpus_round_trip(self):
+        """Shifting every shipped replay preserves structure and EOF."""
+        import math
+        import struct
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+
+        paths = sorted((ROOT.parent / "GTR2Steam" / "ReplayData").glob("*.Vcr"))
+        paths += sorted((ROOT.parent / "GTLSteam" / "ReplayData").glob("*.Vcr"))
+        self.assertGreaterEqual(len(paths), 13)
+        checked = 0
+        for path in paths:
+            original = gz.decompress(str(path))
+            parsed = st.parse_vcr_frames(original)
+            if not parsed:
+                continue
+            self.assertEqual(parsed["end_offset"], len(original))
+            offsets = [frame["offset"] for frame in parsed["frames"]]
+
+            def times(payload):
+                return [struct.unpack_from("<f", payload, offset)[0]
+                        for offset in offsets]
+
+            before = times(original)
+            for delta in (64.0, -64.0):
+                shifted = st.shift_replay_times(original, delta)
+                after_parsed = st.parse_vcr_frames(shifted)
+                self.assertEqual(after_parsed["end_offset"], len(shifted))
+                self.assertEqual(len(after_parsed["frames"]), len(offsets))
+                after = times(shifted)
+                for first, second in zip(before, after):
+                    self.assertTrue(math.isfinite(second))
+                    self.assertAlmostEqual(second, first + delta, delta=0.02)
+                self.assertEqual(after_parsed["summary"]["duration"],
+                                 parsed["summary"]["duration"])
+                self.assertEqual(gz.compress_simbin(shifted)[:2], b"\x1f\x8b")
+            checked += 1
+        self.assertGreaterEqual(checked, 13)
+
     def test_replay_shift_cli(self):
         """--shift writes a valid container with consistently shifted times."""
         import subprocess
