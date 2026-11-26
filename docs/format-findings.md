@@ -344,6 +344,14 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
   mostly deterministic per signature too (61/123 same-signature pairs fully
   byte-identical after byte 4). Full-tier test:
   `test_hat_signature_across_three_games`.
+- The body begins at offset 48 with a **fixed-stride 16-byte record table**:
+  each record is `[f32 A, u32 unknown, f32 B, f32 C]`, with B roughly constant
+  per layout (|B| 0.75–2.9) and A/C varying. Record counts span 7–61,412 and
+  are identical across byte-identical bodies (5 multi-member classes, 11
+  files); shuffling counts among files breaks that agreement (observed 5 vs
+  permutation mean 0.125 / max 3, seed 2026). An 8-byte zero pair follows the
+  table before a second stream. Field semantics remain undecoded. Full-tier
+  test: `test_hat_body_starts_with_16_byte_record_table`.
 
 ## 5. Vertex `f0` (per-mesh marker on vertex 0)
 

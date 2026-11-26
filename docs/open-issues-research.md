@@ -1,5 +1,17 @@
 # Open issues — offline research record (2026-11-23)
 
+## `.hat` body has a 16-byte record table (2026-12-01)
+
+Hexdump of `body[36:]` showed a repeating pattern: from offset 48, 16-byte
+records `[f32 A, u32 unknown, f32 B, f32 C]` where B is roughly constant per
+layout (e.g. Brno +2.79, Monza -2.87, Dubai +2.92) and A/C vary over the
+track's coordinate range. The table ends with an 8-byte zero pair followed by
+a different stream. Record counts span 7 (`4Zhuhai`) to 61,412 (`3Estoril`)
+and are identical across byte-identical bodies; a seeded count permutation
+gives 5 observed within-class agreements vs mean 0.125 / max 3 (p < 0.001).
+This is structural evidence only — the fields' units and the trailing stream
+remain undecoded. Full-tier test added.
+
 ## `.hat` signature generalizes to Race07 (2026-12-01)
 
 The `Ver 0.08` Race07 `.hat` variant carries the same 32-byte `body[4:36]`

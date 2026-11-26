@@ -4834,6 +4834,55 @@ class CorpusDeep2Test(unittest.TestCase):
                     self.assertNotIn(value, targets)
         self.assertGreater(total, 300)
 
+    def test_hat_body_starts_with_16_byte_record_table(self):
+        """Every .hat body begins with a fixed-stride f32/u32 record table."""
+        import random
+        import struct
+        import statistics
+        import gzip_simbin_tool as gz
+
+        rows = []
+        for path in sorted((ROOT.parent / "GTR2Steam").rglob("*.hat")):
+            payload = gz.decompress(str(path))
+            marker = payload.find(b"generated\x00")
+            if marker < 0:
+                continue
+            body = payload[marker + 10:]
+            count = 0
+            for offset in range(48, len(body) - 16, 16):
+                first, _unknown, second, third = struct.unpack_from("<fIff", body, offset)
+                if not (-1e6 < first < 1e6 and first == first
+                        and second == second and 0.01 < abs(second) < 20
+                        and -1e6 < third < 1e6 and third == third):
+                    break
+                count += 1
+            self.assertGreater(count, 0, path.name)
+            rows.append((path.stem, body[4:], count))
+        self.assertGreaterEqual(len(rows), 30)
+
+        classes = {}
+        for name, body, count in rows:
+            classes.setdefault(body, []).append((name, count))
+        multi = [values for values in classes.values() if len(values) > 1]
+        self.assertGreaterEqual(len(multi), 5)
+        self.assertTrue(all(len({count for _name, count in values}) == 1
+                            for values in multi))
+        # Distribution-preserving control: permuting counts among files breaks
+        # the within-class agreement.
+        counts = [count for _name, _body, count in rows]
+        random.seed(2026)
+        observed = sum(len({c for _n, c in values}) == 1 for values in multi)
+        permuted = []
+        for _ in range(1000):
+            random.shuffle(counts)
+            shuffled = {}
+            for (name, body, _count), count in zip(rows, counts):
+                shuffled.setdefault(body, []).append(count)
+            permuted.append(sum(len(set(values)) == 1 for values in shuffled.values()
+                                if len(values) > 1))
+        self.assertGreater(observed, statistics.mean(permuted))
+        self.assertGreater(observed, max(permuted))
+
     def test_hat_body_is_deterministic_per_layout(self):
         """Same-layout .hat bodies are byte-identical after the 4-byte prefix."""
         import random
