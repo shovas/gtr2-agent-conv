@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-30 07:15:00 -0500 - Ghost writer located in GTR2.exe
+- Statically identified the GTTF/IRSR writer at RVA 0x52a540 with a 105-object serialization loop, supporting variable-length replay records. Byte-pattern regression test added; no frame layout claimed.
+
 ## 2026-11-30 06:45:00 -0500 - Stream parser regression fix
 - Scoped the vc*32 single-block stream check to the rec6-only fallback so two-stream meshes with declared blob sizes are preserved verbatim. Caught by `tests.test_gmt_relayout`; 40 module tests and the normal tier pass.
 

@@ -186,7 +186,10 @@ regression tests or an explicitly documented negative.
   an **86-byte period confined to the header region** (first ~0x2000 bytes;
   byte-match 0.78 at lag 86 vs chance, harmonics at 172/258/344). The bulk
   frame data has no 86-byte structure (0.04–0.06 match), so this is a header
-  table rather than the frame grid. Earlier 4-byte-aligned stride scans also
+  table rather than the frame grid. Static analysis located the ghost writer
+  at `GTR2.exe` RVA `0x52a540` (GTTF/IRSR magic branch, 105 sixteen-byte object
+  slots at `0x52a6ca`, per-object linked-list serialization) — evidence for
+  variable-length object records. Earlier 4-byte-aligned stride scans also
   missed 86 because it is not a multiple of 4. Frame semantics remain
   unknown. Bulk data shows a separate **20-byte lag excess** over neighbouring
   lags in 7/9 replays (median +0.16 matching bytes), consistent with a small
