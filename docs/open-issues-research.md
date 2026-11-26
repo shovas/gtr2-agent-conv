@@ -22,6 +22,18 @@ or value carries the rF1 track properties. The fields are semantically
 different, so no class-mapping rule exists — this is a corpus negative, not a
 missing implementation. Full-tier test added.
 
+## HAT writer record loop (2026-11-27)
+
+Continuing at 0x45e606: the record count (`body[44]`) is computed by
+`0x459480` from `[ebx+0xc]`; the writer allocates a 4-byte pointer array of
+that length, then loops (0x45e680-0x45e6bf) over the pointers and writes, per
+record, 4 bytes from `ptr+0`, 8 bytes from `ptr+0x18`, and 4 bytes from
+`ptr+0x10`. That exactly matches the on-disk 16-byte record
+`[x, (opaque u32, height f32), z]` and confirms the opaque word and height are
+adjacent runtime fields. Records are emitted in runtime-list order, which
+explains the weak correlation between record index and AIW waypoint index.
+No new semantic decoder follows from this yet.
+
 ## HAT writer located in GTR2Dedicated.exe (2026-11-26)
 
 New evidence source: the dedicated server binary keeps producer strings that

@@ -418,8 +418,13 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
   development purposes)``; its HAT writer at RVA ~0x45e430 emits the 46-byte
   version string, the u32 at object +0x1028, the four grid doubles, then the
   header counts (first from an external structure, second from function
-  0x45b1d0), allocating 0x60- and 0x10-byte element arrays. Full-tier test:
-  `test_hat_producer_strings_in_dedicated_exe`. Although 18 signatures are shared
+  0x45b1d0), allocating 0x60- and 0x10-byte element arrays; the record count
+  is computed by `0x459480`. The record loop (0x45e680) writes each 16-byte
+  record from an array of pointers as `[4 bytes at ptr+0][8 bytes at ptr+0x18]
+  [4 bytes at ptr+0x10]` — so the opaque u32 and the height float are adjacent
+  fields of the runtime object, and records follow runtime list order rather
+  than spatial order (consistent with the weak record-index/waypoint-index
+  correlation). Full-tier test: `test_hat_producer_strings_in_dedicated_exe`. Although 18 signatures are shared
   across games, the matching bodies are **not reusable**: GTR2 Brno has 40,189
   records vs Race07's 41,530 (3/40,189 records identical at the same index),
   and GTR2 Anderstorp 27,357 vs GTL's 27,185 (24/27,185). Full-tier test:
