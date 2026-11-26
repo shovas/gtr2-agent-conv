@@ -5891,6 +5891,15 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertGreaterEqual(checked, 2)
 
+    def test_validator_clean_on_real_gtr2_tree(self):
+        """validate_gtr2_tree reports no false positives on the real game."""
+        import gtl_to_gtr2 as g2g
+        root = ROOT.parent / "GTR2Steam" / "GameData"
+        if not root.is_dir():
+            self.skipTest("GTR2 GameData not present")
+        problems = g2g.validate_gtr2_tree(root)
+        self.assertEqual(problems, [], problems[:10])
+
     def test_hat_placement_validator(self):
         """GTR2 expects HAT files only under HAT_Dedicated."""
         import tempfile

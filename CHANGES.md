@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 20:50:00 -0500 - Guard validator against GTR2 false positives
+- Added a corpus regression asserting `validate_gtr2_tree()` reports zero problems on the real GTR2 GameData tree (previously only checked on converted outputs). Full-tier test added.
+
 ## 2026-11-26 20:20:00 -0500 - Replay cumulative-wheel trend negative
 - Confirmed that cumulative replay u16 totals track cumulative distance only as a shared monotonic trend; the per-frame four-wheel sum is at chance. Consolidated into the existing wheel-speed negative test.
 
