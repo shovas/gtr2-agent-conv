@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-27 16:50:00 -0500 - HAT u32 has no runtime decoder
+- Confirmed GTL.exe's HAT record loop copies 4+8+4 bytes at stride 16 verbatim into runtime structures without interpreting the opaque u32; neither shipped executable decodes that field. Code-evidence guard extended.
+
 ## 2026-11-27 16:20:00 -0500 - Cross-EXE HAT reader confirmation
 - Confirmed the decoded HAT header roles in a second executable: GTL.exe's reader at RVA ~0x452a10 reads the same version string/u32/four doubles and allocates 92 bytes per record. Code-evidence test extended.
 

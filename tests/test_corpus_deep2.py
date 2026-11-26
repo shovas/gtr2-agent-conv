@@ -6552,6 +6552,8 @@ class CorpusDeep2Test(unittest.TestCase):
                           raw_gtl)
             self.assertIn(bytes.fromhex("6bc05c"), raw_gtl)
             self.assertIn(b"\x83\xc0\x04", raw_gtl)  # add eax, 4 header word
+            # Record loop copies 4 + 8 + 4 bytes at stride 16 without decoding.
+            self.assertIn(bytes.fromhex("83c710"), raw_gtl)
 
     def test_hat_record_tables_not_cross_game_reusable(self):
         """Matching signatures do not make HAT bodies transferable between games."""
