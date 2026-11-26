@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 02:50:00 -0500 - AIW plaintext coverage guard
+- Confirmed all 357 local AIW files across seven corpora are plain text (none JCA-wrapped); full-tier guard added.
+
 ## 2026-11-28 02:20:00 -0500 - Fix JCA text decryption of section-only configs
 - Fixed `decrypt_jca_text()`: configs with sections but no key/value `=` (e.g. Volvo's `DefTweak.gdb`) now decrypt correctly; added a four-corpus regression test.
 

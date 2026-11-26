@@ -6612,6 +6612,22 @@ class CorpusDeep2Test(unittest.TestCase):
                 checked += 1
             self.assertGreaterEqual(checked, 5, root)
 
+    def test_aiw_configs_are_plain_text_everywhere(self):
+        """No local AIW is JCA-wrapped; the text CLI can read them directly."""
+        import glob
+
+        total = 0
+        for root in ("GTR2Steam", "GTLSteam", "RF1Vanilla", "Race07Complete",
+                     "RaceRoomTheGame", "RaceRoomTheGame2", "Automobilista"):
+            base = ROOT.parent / root
+            if not base.is_dir():
+                continue
+            for name in glob.glob(str(base / "**" / "*.AIW"), recursive=True):
+                self.assertNotEqual(Path(name).read_bytes()[:4],
+                                    b"\x0f\xb1\xff\xff", name)
+                total += 1
+        self.assertGreater(total, 300)
+
     def test_converted_rf1_aiws_are_semantically_valid(self):
         """AIW conversion introduces no new waypoint semantic problems."""
         import glob
