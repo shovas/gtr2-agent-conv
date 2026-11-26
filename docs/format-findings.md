@@ -464,7 +464,11 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
   with the lack of a fixed stride. The apparent 32-byte alignment of tail u32s
   (16.3% vs 3.2% for random bytes) disappears under a byte-shuffled control
   (16.6%), so it is a zero-byte-histogram artifact, not pointer evidence.
-  Full-tier tests: `test_hat_producer_strings_in_dedicated_exe`,
+  An independent reader in `GTL.exe` (source path
+  `C:\DEV\SRC\Cobra\App\Source\htree.cpp`) reads the same 46-byte version
+  string, u32 and four grid doubles at RVA ~0x452a10, then allocates 92 bytes
+  (`0x5c`) per on-disk record — cross-validating the header roles in a second
+  executable. Full-tier tests: `test_hat_producer_strings_in_dedicated_exe`,
   `test_hat_trailing_stream_is_not_plain_float_records`. Although 18 signatures are shared
   across games, the matching bodies are **not reusable**: GTR2 Brno has 40,189
   records vs Race07's 41,530 (3/40,189 records identical at the same index),

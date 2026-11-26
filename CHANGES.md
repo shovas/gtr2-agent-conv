@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-27 16:20:00 -0500 - Cross-EXE HAT reader confirmation
+- Confirmed the decoded HAT header roles in a second executable: GTL.exe's reader at RVA ~0x452a10 reads the same version string/u32/four doubles and allocates 92 bytes per record. Code-evidence test extended.
+
 ## 2026-11-27 15:50:00 -0500 - f0 simple packing negative
 - Ruled out simple 16-bit packings of mesh/material counts, vertex/index counts and file size as GTR2 mesh-0 f0 markers (0 exact matches in 3,157 samples); consolidated with existing f0 negatives.
 
