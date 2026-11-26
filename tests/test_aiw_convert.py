@@ -88,6 +88,26 @@ class AiwConvertTest(unittest.TestCase):
         self.assertGreater(totals, 40000)
         self.assertLess(above / totals, 0.001)
 
+    def test_galpha_cap_extended_rf1_corpora(self):
+        """rF1-lineage AIWs from four more corpora convert without corruption."""
+        expected = {"Automobilista": 140, "StockCarExtreme": 65,
+                    "BMWM3Challenge": 2, "SuperleagueFormula2009": 5}
+        for label, minimum in expected.items():
+            root = ROOT.parent / label
+            if not root.is_dir():
+                continue
+            paths = [p for p in root.rglob("*")
+                     if p.is_file() and p.suffix.lower() == ".aiw"]
+            self.assertGreaterEqual(len(paths), minimum, label)
+            for path in paths:
+                out = stt.aiw_for_simbin(stt.read_text(path))
+                self.assertNotIn("wpwp_", out, str(path))
+                aiw = stt.parse_aiw(out)
+                values = [wp.galpha for wp in aiw.waypoints
+                          if wp.galpha is not None]
+                if values:
+                    self.assertLessEqual(max(values), 0.4501, str(path))
+
     def test_waypoint_ptrs_class_corpus(self):
         """WP_PTRS[3] buckets and branchID equality hold corpus-wide."""
         import glob

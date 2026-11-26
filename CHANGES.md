@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-26 02:20:00 -0500 - Extended AIW corpus validation
+- Verified the CRLF-fixed converter on 223 additional rF1-lineage AIWs (Automobilista, Stock Car Extreme, BMW M3 Challenge, Superleague 2009): no key corruption and all galpha values <= 0.45. Full-tier regression test added.
+
 ## 2026-11-26 01:50:00 -0500 - Correct SCN to TRK MASFile conventions
 - Fixed `text_convert.scn_to_trk()` to emit bare (unquoted) `.gtr` MASFile references and the corpus-universal `Misc.gtr` entry; all 16 GTR2 map archives use `.gtr`. End-to-end Joesville conversion validator problems dropped from 22 to 17 (remaining ones need template data or shared archives). Full-tier regression test added.
 
