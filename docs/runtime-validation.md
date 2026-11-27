@@ -379,3 +379,16 @@ fixable instruction. Original game binaries were not modified.
 
 **Unblock:** a renderer supporting the D3D capabilities GTR2 expects (or a
 native Windows run). Do not continue binary-patching on llvmpipe.
+
+## Client crash call-site detail (2026-11-27)
+
+`0x59D450` dereferences the result of `0x5FD1B0(this, index)` without a
+null check. Static call sites show the index comes from the global at
+`0x6FCD44` (`0x59EB8E` -> push eax -> `0x59D450`, and the getter at
+`0x59D4D0`), against a lookup object at `0xF3A468`. Under llvmpipe that
+lookup returns NULL, so the game crashes during graphics setup. No write to
+`0x6FCD44` appears in static code, so the value is set through an imported
+/path imported table; identifying which capability it represents would need
+dynamic tracing in a working renderer. Binary patching is not a productive
+route here.
+

@@ -89,7 +89,8 @@ def main(argv=None) -> int:
     if args.json:
         print(json.dumps(report, indent=2))
     else:
-        print("ISIMotor -> GTR2 conversion status (offline validation only)\n")
+        print("ISIMotor -> GTR2 conversion status (offline validation + "
+              "partial runtime)\n")
         for family in FAMILIES:
             print(f"{family['source']:24s} {family['format']:26s} "
                   f"{family['status']:9s} {family['coverage']}")
@@ -98,7 +99,9 @@ def main(argv=None) -> int:
         print("\nOpen blockers:")
         for blocker in BLOCKERS:
             print(f"  [{blocker['state']:7s}] {blocker['issue']}: {blocker['detail']}")
-        print("\nNo path currently reaches in-game acceptance.")
+        print("\nPartial runtime acceptance only: converted TRK/AIW ran in a "
+              "completed dedicated-server session; no converted track geometry "
+              "has been loaded, so there is no game-accepted end-to-end conversion.")
     return 0
 
 
