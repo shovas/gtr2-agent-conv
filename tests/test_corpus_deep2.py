@@ -7407,6 +7407,33 @@ class CorpusDeep2Test(unittest.TestCase):
             matched = [s for s in source if s in gtr2]
             self.assertGreaterEqual(len(matched), minimum, corpus)
 
+    def test_racegmt_variant_plots_record_framing(self):
+        """The two undecoded RaceGMT plots use a distinct 36-byte quad table."""
+        import race_gmt as rg
+
+        base = (ROOT.parent / "Race07Complete/GameData/Locations/Zolder09"
+                / "MODELS")
+        for name, expected in (("plots01.gmt", 17), ("plots02.gmt", 12)):
+            path = base / name
+            if not path.is_file():
+                self.skipTest("Race07Complete plots corpus not present")
+            data = path.read_bytes()
+            self.assertEqual(data[:8], rg.MAGIC)
+            # Table header at 351 carries the record count at +8.
+            self.assertEqual(struct.unpack_from("<I", data, 351 + 8)[0],
+                             expected, name)
+            offset = 351
+            for ordinal in range(expected):
+                indices = struct.unpack_from("<3H", data, offset + 12)
+                flag = struct.unpack_from("<H", data, offset + 18)[0]
+                zero = struct.unpack_from("<I", data, offset + 20)[0]
+                rendered_ordinal = struct.unpack_from("<I", data, offset + 24)[0]
+                self.assertEqual(flag, 2, (name, ordinal))
+                self.assertEqual(zero, 0, (name, ordinal))
+                self.assertEqual(rendered_ordinal, ordinal, (name, ordinal))
+                self.assertEqual(len(set(indices)), 3, (name, ordinal))
+                offset += 36
+
     def test_hat_tail_has_code_derived_control_framing(self):
         """HAT tails contain u32/u32/i8 headers followed by indexed 34-byte nodes."""
         import random

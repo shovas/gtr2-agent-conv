@@ -66,14 +66,25 @@ geometry to isolate the transform.
 ## Two remaining RaceGMT meshes use a distinct submesh type (2026-11-29)
 
 `plots01.gmt`/`plots02.gmt` in Zolder09 are the only 2 of 643 RaceGMT files
-without a `0x20004051` submesh table. Both contain a single `0x2000403d`
-section header (`[magic, group=0, count=37 or 32]`) followed by 64-byte
-records, but their post-vertex data does not follow the `u32 count + u16
-indices` layout (the count word at that offset is garbage / 0xFFFFFFFF), and
-their first records contain zero/degenerate axis vectors. Three larger files
-also contain the 0x2000403d byte pattern but only inside float data, not as a
-header. Decoding this variant needs a separate layout investigation; it does
-not affect the 641/643 already convertible meshes.
+without a `0x20004051` submesh table. **Correction (2026-11-27):** the earlier
+claim that they contain a `0x2000403d` section header was wrong — a full byte
+search finds **zero** `0x2000403d` dwords in either file. The actual distinct
+structure is:
+
+- A 36-byte table header at **offset 351** with the record count at `+8`
+  (17 for `plots01`, 12 for `plots02`), followed by exactly that many 36-byte
+  triangle records. Every record is `[3 f32, 3 u16 indices, u16 flag=2,
+  u32 zero, u32 ordinal, 2 f32]`; the flag/zero/ordinal framing holds on
+  **17/17 and 12/12** records respectively. Full-tier regression test:
+  `test_racegmt_variant_plots_record_framing`.
+- Six 12-byte `[y, z, x]` position triples at offset 75 forming a flat ground
+  quad, but triangle indices reach 15, so those six are not the whole vertex
+  table. A 12-byte position + `u32 count=17` + 16-byte `[normal xyz, pad]`
+  table begins at offset 963; its positions do not align with the six at 75.
+
+**Unblock:** the vertex-position table that the 3-u16 indices address is not
+yet identified; once found, these two flat "plot" meshes can be routed
+through `vrl_to_gmt.build_gmt()` like the other 641 files.
 
 ## HAT tail per-phase byte structure (2026-11-29)
 
@@ -92,6 +103,18 @@ seeded shuffle control. The node-tree index data is therefore not shared
 across games, consistent with cross-game HAT bodies being non-transferable and
 with `hat_transfer_heights()` needing to preserve the target's node tree and
 only replace height samples. Do not attempt to copy a node stream between games.
+
+## RaceGMT column 4: collinearity trap (2026-11-27)
+
+A re-test on `PEOPLE_STAND_01` found **r=+1.000** between column 4 and triangle
+area, edge12, edge20 and y-span simultaneously. This is a **statistical
+artifact**, not four independent discoveries: those features are mutually
+collinear on this mesh (each triangle has one short near-vertical edge and two
+long similar edges). Exact-error checks settle it — no feature matches column 4:
+y-span max error 3.41, max edge 2.38, mean edge 0.32, area 1.47. Across 1,223
+records from 120 RaceGMT files, column 4 also has weak/no correlation with the
+other four record columns (|r| ≤ 0.52). Do not pursue area/edge proxies further
+without a new structural hypothesis.
 
 ## RaceGMT column 4 feature search (2026-11-29)
 
