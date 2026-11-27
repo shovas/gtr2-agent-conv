@@ -419,11 +419,22 @@ def identify(path: str | Path) -> MediaInfo:
     # rFactor .gen vehicle-graphics descriptor (same key family as .scn)
     if ext == ".gen" and (b"MeshFile=" in b[:8192] or b"MASFile=" in b[:8192]):
         return MediaInfo(str(p), size, "rfactor-gen", {"extension": ext})
+    # ISI animation containers: `FXM `/`LMA ` magics (fxm_tool.py decodes them).
+    if head[:4] in (b"FXM ", b"LMA "):
+        version, flags = struct.unpack_from("<HH", b, 4) if size >= 8 else (0, 0)
+        return MediaInfo(str(p), size, "fxm" if head[:3] == b"FXM" else "lma",
+                         {"version": version, "flags": flags})
+    # Driving School scripts are plain text with a gMa1.000f marker, not an
+    # encrypted gMb config; the marker was previously only recognised on .svm.
+    if b.startswith(b"DrivingSchool"):
+        return MediaInfo(str(p), size, "driving-school", {"plain_text": True})
     # .svm car setups: rF1 uses a gMa header, GTR2 plain [GENERAL]/[CONTROLS]
     # sections, and a few shipped files have an encrypted gMb payload.
+    if b.startswith(b"//[[gMa1.000f"):
+        return MediaInfo(str(p), size,
+                         "svm-rf1" if ext == ".svm" else "rf1-config",
+                         {"plain_text": True})
     if ext == ".svm":
-        if b.startswith(b"//[[gMa1.000f"):
-            return MediaInfo(str(p), size, "svm-rf1", {"plain_text": True})
         if b.startswith(b"//[[gMb1.000f") or b.startswith(b"//[[gMb1.002f"):
             payload = b[b.find(b"\n") + 1:]
             return MediaInfo(str(p), size, "svm-encrypted",

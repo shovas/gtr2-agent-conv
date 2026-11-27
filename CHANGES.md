@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 09:30:00 -0500 - Identify FXM/LMA and Driving School files
+- `media_tool.identify()` now classifies `FXM `/`LMA ` animation containers, plain `//[[gMa1.000f` configs on any extension (previously only `.svm`, so `.ds` scripts were unknown), and `DrivingSchool{` `.dst` files. Full-tier test added.
+
 ## 2026-11-29 09:00:00 -0500 - HAT index-bound comparison
 - Compared b36/b40/b44 as bounds for HAT node index windows: all show strong shuffled-control enrichment (34.6x/32.1x/76.7x) but none yields a contiguous 34-byte-aligned node array. Choosing a different bound does not unblock the serializer.
 

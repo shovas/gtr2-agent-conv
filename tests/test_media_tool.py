@@ -955,6 +955,22 @@ class MediaToolTest(unittest.TestCase):
             self.assertEqual(a.rgba[3], 255)
 
 
+    def test_identify_fxm_ds_and_dst(self):
+        """FXM magics, gMa-marked .ds and DrivingSchool .dst are identified."""
+        import glob
+
+        root = ROOT.parent / "GTR2Steam"
+        checks = ((".fxm", "fxm"), (".lma", "fxm"), (".ds", "rf1-config"),
+                  (".dst", "driving-school"))
+        for ext, expected in checks:
+            sample = next((Path(p) for p in glob.glob(
+                str(root / "**" / f"*{ext}"), recursive=True)
+                if Path(p).is_file()), None)
+            if sample is None:
+                continue
+            with self.subTest(path=sample.name):
+                self.assertEqual(media_tool.identify(sample).format, expected)
+
     def test_config_text_identification(self):
         """Plain SimBin/ISI config text formats are identified by content."""
         import glob
