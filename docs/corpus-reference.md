@@ -110,6 +110,22 @@ are **read-only format references**, and several directly support ongoing work.
 | `rf2-modding-resources/` | 79M / 445 | Archived studio-397.com modding resources, re-processed 2026-11-29. **11 PDFs** (`rF2_AIW_Creation_Tutorial`, `rF2_Track_CheatSheet`, `rF2_Track_Technologyv3`, `rF2_Terrain_Shader`, `rF2_car_modding_*`, `rF2_Packaging_Tutorial`, `rFactorInternalsPlugin`, `rF2_TGM_TyreTool_*`), **2 HTML articles** ("Guidelines for artists", "Introduction to Physics Tool / flexible chassis"), 3 ODS tire-tool spreadsheets, and sample plugins/ZIPs (helmet, AIW trackmap, driver sample). Also re-processed the 45 relevant HTML pages in `rf2-developers-guide/` and the ISI FAQ/vehicle-conversion pages in `rF2_onlineTools/`: GMT Converter (65535-vertex list limit, HAT/Collide/Deform instance flags), GMT UVW export (4 UV sets A-D, vertex colour/alpha but no vertex illumination), DDS export formats (BC7 for colour, BC5 for normals/data, sRGB for albedo), track/art guidelines and AIW creation tutorial. Directly useful facts extracted below; most physics/chassis detail is rF2-only. |
 | `mojo66/` | 604K / 28 | Archived mojo66.de site (HTML/JS/images), including "How to Mod GTR Evolution" cited for cross-game HAT compatibility. Reference only. |
 
+## Content-based text-format survey (2026-11-29)
+
+A content-first pass (printable ratio + no NULs, **not** file extension) sampled
+261,308 files from all `../` folders and found 301 folder/extension groups with
+format-relevant text. Most are already known config families (`.scn`, `.trk`,
+`.gdb`, `.veh`, `.gen`, `.aiw`, `.tdf`, `.cas`, `.hdc`, `.tyr`, `.ani`, `.cam`,
+`.tec`). Previously unidentified text formats now labelled by
+`media_tool.identify()`: `.plr` (gMa plain player config, incl.
+`Always Rebuild HAT`), `.dic` (language dictionary), `.sci`/`.prt` (scene
+fragments with `Instance=` blocks), `.tod` (time-of-day scene config), `.tec`
+(specialfx terrain/effects config), plus `.dsi`/`.gtt`/`.vcr` gzip containers,
+`.fxm`/`.lma` animations, `.ds`/`.dst` Driving School files, and
+`.hdv`/`.eng`/`.aud`/`.ani` physics/audio configs (see above sections).
+Third-party text (tool docs, README/FAQ/tutorial HTML/PDF, `.bms` scripts) is
+catalogued in `docs/tools-reference.md`; game content is never copied here.
+
 ## Practical rules
 
 - These folders are **always available** for reference, lookup, and cross-checking during any task.

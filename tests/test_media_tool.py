@@ -955,6 +955,24 @@ class MediaToolTest(unittest.TestCase):
             self.assertEqual(a.rgba[3], 255)
 
 
+    def test_identify_more_content_detected_text_formats(self):
+        """Content-based scan formats: plr/dic/sci/prt/tod/tec."""
+        root = ROOT.parent
+        samples = (
+            ("RF1Vanilla/UserData/Shovas/Shovas.PLR", "rf1-config"),
+            ("RF1Vanilla/Support/Languages/Czech.dic", "language-dic"),
+            ("NascarSimRacing/GameData/Tracks/pitbox.sci", "scene-fragment"),
+            ("F12000/SEASON00/VEHICLES/GENVEH00.PRT", "scene-fragment"),
+            ("GTR1Vanilla/GameData/Locations/Spa/24Spa_Dawn.tod", "time-of-day"),
+            ("GTR2Steam/GameData/Locations/specialfx.tec", "specialfx"),
+        )
+        for relative, expected in samples:
+            path = root / relative
+            if not path.is_file():
+                continue
+            with self.subTest(path=relative):
+                self.assertEqual(media_tool.identify(path).format, expected)
+
     def test_identify_simbin_gzip_containers(self):
         """.dsi/.gtt/.vcr gzip containers are classified with payload details."""
         import glob

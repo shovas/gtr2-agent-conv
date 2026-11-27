@@ -411,6 +411,17 @@ def identify(path: str | Path) -> MediaInfo:
     # rFactor .veh vehicle descriptor (key=value with Graphics=/HDVehicle=)
     if ext == ".veh" and (b"Graphics=" in b[:8192] or b"HDVehicle=" in b[:8192]):
         return MediaInfo(str(p), size, "rfactor-veh", {"extension": ext})
+    # Further ISIMotor text formats found by content-based corpus scans.
+    prefix16 = b[:16384]
+    if ext == ".tec" and (b"RoadDryGrip" in prefix16 or b"Materials=" in prefix16):
+        return MediaInfo(str(p), size, "specialfx", {"extension": ext})
+    if ext == ".dic" and prefix16.count(b'"') >= 6:
+        return MediaInfo(str(p), size, "language-dic", {"extension": ext})
+    if ext in (".sci", ".prt") and b"Instance=" in prefix16 \
+            and (b"MeshFile=" in prefix16 or b"ObjFile=" in prefix16):
+        return MediaInfo(str(p), size, "scene-fragment", {"extension": ext})
+    if ext == ".tod" and b"SearchPath=" in prefix16:
+        return MediaInfo(str(p), size, "time-of-day", {"extension": ext})
     # ISI physics/audio/animation text configs with distinctive key signatures.
     # These were previously "unknown" even though simbin_text_tool parses them.
     prefix = b[:16384]
@@ -441,10 +452,11 @@ def identify(path: str | Path) -> MediaInfo:
         return MediaInfo(str(p), size, "driving-school", {"plain_text": True})
     # .svm car setups: rF1 uses a gMa header, GTR2 plain [GENERAL]/[CONTROLS]
     # sections, and a few shipped files have an encrypted gMb payload.
-    if b.startswith(b"//[[gMa1.000f"):
+    if b.startswith(b"//[[gMa1."):
         return MediaInfo(str(p), size,
                          "svm-rf1" if ext == ".svm" else "rf1-config",
-                         {"plain_text": True})
+                         {"plain_text": True,
+                          "header": b[:14].decode("latin1", "replace")})
     if ext == ".svm":
         if b.startswith(b"//[[gMb1.000f") or b.startswith(b"//[[gMb1.002f"):
             payload = b[b.find(b"\n") + 1:]

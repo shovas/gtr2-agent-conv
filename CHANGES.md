@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 11:30:00 -0500 - Content-based text-format survey
+- Scanned 261,308 files across all `../` folders by content (printable/no-NUL, not extension) and indexed 301 text groups. Added identification for `.plr`, `.dic`, `.sci`/`.prt`, `.tod` and `.tec`; survey and coverage recorded in `docs/corpus-reference.md`. Full-tier test added.
+
 ## 2026-11-29 11:00:00 -0500 - Identify SimBin gzip containers
 - `media_tool.identify()` now classifies `.dsi`/`.gtt`/`.vcr` gzip containers as `simbin-gzip` with compressed/decompressed sizes and gMb variant, instead of "unknown". Full-tier test added.
 
