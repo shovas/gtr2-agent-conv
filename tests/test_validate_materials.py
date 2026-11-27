@@ -42,6 +42,31 @@ class MaterialValidatorTest(unittest.TestCase):
         expected = [[f"{archive}::{name}", msg] for name, msg in warnings]
         self.assertEqual(json.loads(result.stdout), expected)
 
+    def test_validator_flags_some_native_gtr2_materials(self):
+        """Warnings are advisory: the target corpus itself triggers them."""
+        import glob
+        import mas_tool
+
+        warnings = 0
+        checked = 0
+        for archive in glob.glob(str(ROOT.parent / "GTR2Steam/GameData/**/*.gtr"),
+                                 recursive=True)[:100]:
+            try:
+                _mtype, entries = mas_tool.read_archive(archive)
+            except Exception:
+                continue
+            for entry in entries:
+                if not entry.name.lower().endswith(".gmt") or not entry.data:
+                    continue
+                warnings += len(vm.check_gmt(entry.data, entry.name))
+                checked += 1
+                if checked >= 1500:
+                    break
+            if checked >= 1500:
+                break
+        self.assertGreater(checked, 500)
+        self.assertGreater(warnings, 0)
+
     def test_prefix_constants(self):
         self.assertEqual(vm.SURFACE_PREFIXES, ("GRAS", "GRVL", "GRAV", "ROAD"))
 

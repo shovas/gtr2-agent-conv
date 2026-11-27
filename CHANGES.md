@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 19:00:00 -0500 - Material validator caveat
+- Recorded that `validate_materials` also flags native GTR2 meshes (69/3,000 sampled), so warnings are advisory. Only 10 distinct rF1-only material names are flagged; no automatic rewrite is claimed because stage strings reference original names. Full-tier test added.
+
 ## 2026-11-28 18:30:00 -0500 - SimBin sibling carry-over matrix
 - Measured same-name `.gmt` identity against GTR2: BMW M3 Challenge 26/26, GTL 25/26, Race07Vanilla 0/26, Race07Complete 2/26, Volvo 0/6. BMW also shares identical `.cam`/`.hed`. Full-tier test added.
 

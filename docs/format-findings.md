@@ -648,6 +648,13 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
   Race07Vanilla 0/26, Race07Complete 2/26 and Volvo 0/6 are not (JCA-wrapped
   or genuinely different assets). BMW also shares an identical `.cam` and
   `.hed`. Full-tier test: `test_sibling_corpus_mesh_carryover_rates`.
+  **Validator caveat:** `validate_materials` flags a small fraction of native
+  GTR2 meshes too (69/3,000 sampled), so a warning is not proof of a
+  conversion defect. Only 10 distinct rF1-only names are flagged (e.g.
+  `PDRT_DIRT`, `RDCP_RUMCAP2GRASS`), all with a surface word in the suffix;
+  no safe automatic rewrite is claimed because stage strings can reference
+  the original name. Full-tier test:
+  `test_validator_flags_some_native_gtr2_materials`.
 
 
 GTR2 ships every HAT asset under `GameData/Locations/HAT_Dedicated`; GTL uses
