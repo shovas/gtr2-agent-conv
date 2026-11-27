@@ -207,6 +207,13 @@ def convert_tree(source_root: str | Path, target_root: str | Path | None = None,
             if p.name.lower() == "teammaps.gtl":
                 out_name = rel.with_name("teammaps2.gtr")
             report["archives"] += 1
+        elif suffix == ".hat":
+            # GTL HATs are engine-generated caches with game-specific bodies;
+            # copying them into GTR2 would ship an incompatible cache in the
+            # wrong folder. GTR2 regenerates HAT on first track load, so omit
+            # them from converted trees.
+            report["hat_skipped"] = report.get("hat_skipped", 0) + 1
+            continue
         elif suffix in (".trk", ".aud", ".hdc", ".tyr", ".dmg", ".gdb", ".car",
                         ".aiw", ".rcd", ".ani"):
             data = p.read_bytes()

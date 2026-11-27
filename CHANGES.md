@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 23:59:00 -0500 - Omit HAT caches from GTL conversions
+- `gtl_to_gtr2.convert_tree()` now skips engine-generated `.hat` caches (reported as `hat_skipped`) instead of copying incompatible bodies into a GTR2 tree. Fixed the resulting undefined-variable bug in the `include_others` path; full-tier test added.
+
 ## 2026-11-29 23:50:00 -0500 - Indexed three new reference folders
 - Surveyed the three newly appeared `../` folders: `open-rFactor/` (educational rF1 distribution), `Plugins-rFactorSharedMemoryMap.dll/` (rfSharedStruct.hpp byte-identical to the existing index) and `Plugins-deltabest.dll/` (MIT plugin; InternalsPlugin.hpp differs only in whitespace). No new format semantics; documented in AGENTS.md and docs/corpus-reference.md.
 

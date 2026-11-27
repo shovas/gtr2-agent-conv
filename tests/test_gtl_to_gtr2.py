@@ -456,6 +456,17 @@ class GtlToGtr2Test(unittest.TestCase):
                                               for k in g.GTR2_SESSION_KEYS)]
                 self.assertEqual(strip(src), strip(out))
 
+    def test_hat_files_are_omitted_from_converted_tree(self):
+        """Engine-generated GTL HAT caches are not copied into GTR2 trees."""
+        src = ROOT.parent / "GTLSteam/UserData/LOG"
+        if not src.is_dir() or not list(src.rglob("*.hat")):
+            self.skipTest("GTL HAT corpus not present")
+        with tempfile.TemporaryDirectory(dir="/tmp/opencode") as td:
+            out = Path(td) / "out"
+            report = g.convert_tree(src, out, include_others=True)
+            self.assertGreaterEqual(report.get("hat_skipped", 0), 1)
+            self.assertEqual(list(out.rglob("*.hat")), [])
+
     def test_full_subtree_gap_inventory(self):
         """Converting a single track folder leaves only documented shared/GDB gaps."""
         src = ROOT.parent / "GTLSteam/GameData/Locations/Anderstorp"

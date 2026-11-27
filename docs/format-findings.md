@@ -771,6 +771,14 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
   with 30 grid spots for older tracks (15 teams x 2), corroborating our AIW
   waypoint/pit semantics. No file-format binary spec is present in these docs.
 
+- **HAT caches are regenerated, not converted**: GTL stores engine-generated
+  HAT caches in `UserData/LOG/HAT`; GTR2 requires them under
+  `GameData/Locations/HAT_Dedicated`, and their bodies are game-specific.
+  `gtl_to_gtr2.convert_tree()` now omits `.hat` files from converted trees
+  (counted in `hat_skipped`), relying on GTR2's first-load HAT generation
+  (`Always Rebuild HAT` in the PLR). Full-tier test:
+  `test_hat_files_are_omitted_from_converted_tree`.
+
 - **Producer-side HAT evidence (archived ISI "Creating Tracks" guide,
   `../rF2_onlineTools/`):** tracks declare `HATTarget=True` on their MTS
   instance definitions; the HAT is generated on first load from the track
