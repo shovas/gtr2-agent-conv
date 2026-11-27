@@ -195,3 +195,45 @@ the dedicated-server configuration schema (`DedicatedServer.ini`, `TrackName`,
 `SessionRace`, ...) is not yet established. **Precise unblock:** determine the
 dedicated-server session configuration needed to actually load and race a
 converted track, then observe whether it accepts the converted files.
+
+## Dedicated-server configuration and UI automation (2026-11-27)
+
+Extracted from `GTR2Dedicated.exe` strings and verified against the running
+process:
+
+- The config file is **`UserData\DedicatedServer.ini`** (not the game root).
+  Its schema is `[SETTINGS]` with keys `GameDatabase`, `RaceName`,
+  `MaxPlayers`, `LobbyBroadcast`, `UniqueLobbyUsername/Password`,
+  `SessionRace{,Laps,Mins}`, `SessionWarmup{,Mins}`,
+  `SessionQualify1/2{,Mins}`, `SessionPractice1/2{,Mins}`,
+  `EnableCollisions`, `DifficultyMode`, `SkipFormation`, `RaceStart`,
+  `StartHour`, `DamageMultiplier`, allow/assist flags, `Weather`,
+  `RainAmount`, `FlagRules`, `ConnectionType`, `UploadSpeed`, `DSFM`, plus a
+  `[TRACKS]` section header. A sandbox with symlinked game files confirmed
+  the engine opens this exact path (`CreateFileW L"UserData\\DedicatedServer.ini"`).
+- Changing `GameDatabase` to a nonexistent file, and adding plausible
+  `[TRACKS]` entries (`0=`, `1=`, `Track0=`), produced **identical** startup
+  file traces (same 34 `.trk` / 83 `.gdb` opens, 0 SEH errors). The ini is
+  read but does not by itself select a track at startup; the bundled
+  `Support/GTR2_dedicated_server.txt` says track/session changes come from
+  the server's **Next Event / Next Session** buttons or client votes.
+- The native UI is fully reachable from Wine. `EnumWindows`/`EnumChildWindows`
+  finds the `#32770` "GTR2 Dedicated Server" wizard with pages for
+  mode/class, **"Available Events:" / "Selected Events:"** (ListBox id 1003
+  has 34 items), server options, and race assists. `SendMessage(h, BM_CLICK)`
+  works: clicking `+`, `Next`, `Next`, `Start` advanced the wizard and a
+  `Afx:...:0 "Socket Notification Sink"` window appeared (network up).
+- **Still not a race session:** after `Start`, file tracing shows the same
+  34 `.trk` opens and **zero `.mas`/`.gtr`** archive opens, so no converted
+  track's geometry was loaded.
+
+**Unblock:** the event ListBox is owner-drawn (`LB_GETTEXT` returns only one
+character, `LB_GETITEMDATA` = 0), so its entries must be decoded or driven by
+UI selection messages before a specific event can be chosen; alternatively,
+connect a game client and use its Chat vote buttons. Once an event actually
+starts, check whether GTR2 opens the converted `.mas`/`.gtr` members and
+accepts them.
+
+Sandbox recipe (keeps the read-only install untouched): create a directory of
+symlinks to the GTR2 files, add `UserData/DedicatedServer.ini`, and run
+`wine GTR2Dedicated.exe` from there under the persistent Xvfb setup.
