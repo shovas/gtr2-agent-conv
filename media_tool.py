@@ -869,10 +869,10 @@ def hat_leaf_record_indices(result: dict) -> list[tuple[int, int, int]]:
     """Return the three 16-byte-record indices held by each 34-byte HAT leaf.
 
     Corpus-verified semantics: the triples address **spatially adjacent**
-    height samples (medians 2.7-8.5 m perimeter on six GTR2 HATs vs 378-1737
-    m for seeded random triples; >99% of real triples span <100 m vs 1-5%
-    random). The leaves therefore form a local triangulation of the height
-    field, not arbitrary bookkeeping references.
+    height samples in true (x,z) space (record words 0 and 3; medians 8.9-12.7
+    m perimeter on two GTR2 HATs vs 1364-2091 m for seeded random triples;
+    97.7-98.5% of real triples span <100 m vs 0-0.1% random). The leaves
+    therefore form a local triangulation of the height field.
     """
     out = []
     for node in result["nodes"]:

@@ -392,3 +392,12 @@ lookup returns NULL, so the game crashes during graphics setup. No write to
 dynamic tracing in a working renderer. Binary patching is not a productive
 route here.
 
+
+## Config sweep for the client crash — negative (2026-11-27)
+
+Tried `SHADERLEVEL` 0/1/2 and `VIDEODRIVER` 0/1 in a real sandbox copy of
+`Config.ini` (with the VRAM gate already bypassed). Every combination still
+crashed after `OK`; `VIDEODRIVER=1` merely left the crash dialog on screen.
+So the null lookup at `0x59D46C` is not selected by those user settings.
+This closes the simple config route; a working renderer remains the unblock.
+

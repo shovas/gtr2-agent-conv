@@ -1416,7 +1416,9 @@ class MediaToolTest(unittest.TestCase):
             parsed = mt.parse_hat_node_stream(payload)
             self.assertIsNotNone(parsed)
             body = payload[payload.find(b"generated\x00") + 10:]
-            positions = [struct.unpack_from("<ff", body, 48 + 16 * i + 8)
+            # 16-byte record is [x, unknown, height, z]: use words 0 and 3.
+            positions = [(struct.unpack_from("<f", body, 48 + 16 * i)[0],
+                          struct.unpack_from("<f", body, 48 + 16 * i + 12)[0])
                          for i in range(parsed["counts"][2])]
             triples = mt.hat_leaf_record_indices(parsed)
             rng = random.Random(2026)

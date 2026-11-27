@@ -716,8 +716,10 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
   `test_hat_node_stream_parses_all_corpus_files`. The leaf nodes have verified semantics: each 34-byte leaf's three index
   fields address **spatially adjacent** 16-byte height-sample records, i.e.
   a local triangulation. On six GTR2 HATs (1,500 seeded leaves each) the
-  median index-triangle perimeter is 2.7-8.5 m vs 378-1737 m for random
-  triples, and >99% of real triples span <100 m vs 1-5% random.
+  median index-triangle perimeter in true (x,z) is 8.9-12.7 m vs 1364-2091
+  m for random triples, and 97.7-98.5% of real triples span <100 m vs
+  0-0.1% random (an earlier draft used the height field instead of x and
+  reported weaker numbers; corrected).
   `media_tool.hat_leaf_record_indices()` exposes the triples; full-tier
   permutation-controlled test: `test_hat_leaf_indices_address_adjacent_records`.
 
