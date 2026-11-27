@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 23:59:59 -0500 - HAT validator checks leaf triangulation
+- `validate_hat()` now rejects HATs whose decodable leaf triples are not spatially adjacent (median perimeter vs seeded random control), while skipping the 10 HATs with an alternate node layout. All 198 local HATs remain clean; a scrambled-leaf HAT is detected. Full-tier test added.
+
 ## 2026-11-29 23:59:59 -0500 - RaceGMT column 4 projection proxy disproved
 - The perpendicular texture-axis projection correlates with column 4 (r=-0.938) and has a stable slope across files, but linear/quadratic fits leave errors of 0.265/0.242 on a ~1.07-wide signal. Recorded as a proxy, not a decoder.
 

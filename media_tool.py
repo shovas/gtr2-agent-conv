@@ -973,6 +973,38 @@ def validate_hat(payload: bytes) -> list[str]:
         problems.append("grid parameters missing or non-finite")
     elif grid[1] <= 0 or grid[3] <= 0:
         problems.append("grid inverse cell sizes must be positive")
+
+    # Where the node stream is decodable, also check the verified leaf
+    # semantics: index triples must address spatially adjacent records.
+    # Some families (e.g. StockCarExtreme LOG HATs) use a different node
+    # layout, so an undecodable stream is not itself treated as a problem.
+    parsed = parse_hat_node_stream(payload)
+    if parsed is not None:
+        body = payload[marker + 10:]
+        positions = [(struct.unpack_from("<f", body, 48 + 16 * i)[0],
+                      struct.unpack_from("<f", body, 48 + 16 * i + 12)[0])
+                     for i in range(parsed["counts"][2])]
+        triples = hat_leaf_record_indices(parsed)
+        if triples and positions:
+            import random
+            import statistics
+
+            rng = random.Random(2026)
+            sample = rng.sample(triples, min(200, len(triples)))
+
+            def perimeter(indices):
+                pts = [positions[i] for i in indices]
+                return sum(math.dist(pts[i], pts[(i + 1) % 3])
+                           for i in range(3))
+
+            real = statistics.median(perimeter(t) for t in sample)
+            control = statistics.median(
+                perimeter(tuple(rng.randrange(len(positions)) for _ in range(3)))
+                for _ in sample)
+            if not math.isfinite(real) or real * 5 >= max(control, 1.0):
+                problems.append(
+                    f"leaf triples not spatially adjacent: median {real:.2f} "
+                    f"vs random {control:.2f}")
     return problems
 
 

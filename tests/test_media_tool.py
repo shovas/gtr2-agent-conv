@@ -1398,6 +1398,40 @@ class MediaToolTest(unittest.TestCase):
         self.assertAlmostEqual(info.details["grid_inv_cell_z"], 0.02603,
                                delta=1e-4)
 
+    def test_validate_hat_detects_scrambled_leaf_triples(self):
+        """The HAT validator rejects leaf triples that are not adjacent."""
+        import gzip_simbin_tool as gz
+        import media_tool as mt
+        import random
+        import struct
+
+        path = (ROOT.parent / "GTR2Steam/GameData/Locations/HAT_Dedicated"
+                / "3ANDERSTORP.hat")
+        if not path.is_file():
+            self.skipTest("GTR2 HAT corpus not present")
+        payload = gz.decompress(str(path))
+        self.assertEqual(mt.validate_hat(payload), [])
+
+        parsed = mt.parse_hat_node_stream(payload)
+        self.assertIsNotNone(parsed)
+        patched = bytearray(payload)
+        search = parsed["offset"]
+        rng = random.Random(7)
+        limit = parsed["counts"][2]
+        for node in parsed["nodes"]:
+            off = patched.find(node, search)
+            self.assertGreaterEqual(off, 0)
+            search = off + 34
+            a, b, c = (rng.randrange(limit) for _ in range(3))
+            struct.pack_into("<I", patched, off + 24,
+                             (a & 0x1FFFFF) | ((b & 0x7FF) << 21))
+            struct.pack_into("<I", patched, off + 28,
+                             ((b >> 11) & 0x3FF) | (c << 10))
+        self.assertIsNotNone(mt.parse_hat_node_stream(bytes(patched)))
+        problems = mt.validate_hat(bytes(patched))
+        self.assertTrue(any("leaf triples not spatially adjacent" in p
+                            for p in problems), problems)
+
     def test_hat_leaf_indices_address_adjacent_records(self):
         """HAT leaf triples index nearby height samples (triangulation)."""
         import gzip_simbin_tool as gz

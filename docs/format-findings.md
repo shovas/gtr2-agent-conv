@@ -721,7 +721,8 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
   0-0.1% random (an earlier draft used the height field instead of x and
   reported weaker numbers; corrected).
   `media_tool.hat_leaf_record_indices()` exposes the triples; full-tier
-  permutation-controlled test: `test_hat_leaf_indices_address_adjacent_records`.
+  permutation-controlled test: `test_hat_leaf_indices_address_adjacent_records`. `validate_hat()` uses this check when the stream decodes; full-tier test
+  `test_validate_hat_detects_scrambled_leaf_triples`.
 
 - **rF1 per-track `.tdf` → GTR2 `.gdb` track variables**: rF1 ships 12
   per-track `.tdf` files with a `[TRACKVARS]` section; GTR2 ships **0** `.tdf`
