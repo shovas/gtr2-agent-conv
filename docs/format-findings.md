@@ -328,7 +328,11 @@ regression tests or an explicitly documented negative.
   heading rate, lateral acceleration and longitudinal acceleration change
   sign between files and average |r| < 0.25; lags in [-10, +10] likewise give
   no consistent peak (full-tier test
-  `test_driver_small_b_unexplained_by_kinematics`).
+  `test_driver_small_b_unexplained_by_kinematics`).  A separate characterization: `small_b` is a **slow state channel**, with
+  lag-1 autocorrelation 0.81–0.999 across five 680–7,446-frame replays versus
+  |r| < 0.04 for seeded shuffles. It has no monotonic time trend (r −0.02..−0.22),
+  which explains why instantaneous kinematic correlations failed. Full-tier
+  test: `test_driver_small_b_is_slow_state_channel`.
   Full-tier test: `test_driver_small_a_tracks_elevation_change`. Calibration
   against AIW-derived road gradient is track-dependent (Brno HOT LAP r=0.98,
   Imola r=0.00), so no universal scale conversion is claimed; guarded by

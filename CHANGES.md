@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 03:30:00 -0500 - Replay small_b is a slow state channel
+- Characterized `small_b`: lag-1 autocorrelation 0.81-0.999 in five replays vs |r|<0.04 shuffled, with no monotonic time trend. Explains why instantaneous kinematic correlations failed. Full-tier permutation-controlled test added.
+
 ## 2026-11-29 03:00:00 -0500 - HAT framing search negative
 - Recorded that no plausible `[u32,u32,control-byte]` tree framing exists at the expected HAT stream start or in the first 200 KB of the tail; the on-disk node-tree serializer remains blocked without new code evidence.
 

@@ -5563,6 +5563,53 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertGreater(results["brno"], 0.5)
         self.assertLess(results["imola"], 0.3)
 
+    def test_driver_small_b_is_slow_state_channel(self):
+        """small_b has very high lag-1 autocorrelation, unlike shuffled data."""
+        import random
+        import statistics
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+
+        def correlation(first, second):
+            mean_a, mean_b = statistics.mean(first), statistics.mean(second)
+            numerator = sum((a - mean_a) * (b - mean_b)
+                            for a, b in zip(first, second))
+            denominator = (sum((a - mean_a) ** 2 for a in first)
+                           * sum((b - mean_b) ** 2 for b in second)) ** 0.5
+            return numerator / denominator if denominator else 0.0
+
+        roots = (ROOT.parent / "GTR2Steam/ReplayData",
+                 ROOT.parent / "GTLSteam/ReplayData")
+        checked = slow = 0
+        for root in roots:
+            if not root.is_dir():
+                continue
+            for path in sorted(root.glob("*.Vcr")):
+                frames = st.parse_vcr_frames(gz.decompress(str(path)))
+                if not frames:
+                    continue
+                values = []
+                for frame in frames["frames"]:
+                    for record in frame["records"]:
+                        if st.vcr_record_tag(record["header"]) == 0:
+                            state = st.vcr_driver_state(record["data"])
+                            if state:
+                                values.append(state["small_b"])
+                            break
+                if len(values) < 300:
+                    continue
+                observed = correlation(values[:-1], values[1:])
+                shuffled = values[:]
+                random.seed(2026)
+                random.shuffle(shuffled)
+                control = correlation(shuffled[:-1], shuffled[1:])
+                self.assertGreater(observed, 0.8, path.name)
+                self.assertLess(abs(control), 0.1, path.name)
+                slow += observed > 0.8
+                checked += 1
+        self.assertGreaterEqual(checked, 4)
+        self.assertEqual(slow, checked)
+
     def test_driver_small_b_unexplained_by_kinematics(self):
         """No tested kinematic channel explains small_b consistently."""
         import math
