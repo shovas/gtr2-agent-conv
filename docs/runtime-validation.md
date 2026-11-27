@@ -360,3 +360,22 @@ the full normal suite passes again. Byte-identity with the previous copies is
 not guaranteed, and no further experiments should mutate symlinked corpus
 paths.
 
+
+## Client crash diagnosis (2026-11-27)
+
+`WINEDEBUG=+seh` on the patched-client run shows the fatal exception:
+`EXCEPTION_ACCESS_VIOLATION` at `0x59D46C` (GTR2.exe RVA `0x19D46C`),
+reading address `0x8`, i.e. a null pointer returned by `call 0x5FD1B0`
+at `0x59D45F` and dereferenced unchecked by `mov edx,[eax+0x8]`
+(`0x5FD1B0` looks up an element in an array at `this+0x120` and returns
+NULL when out of range). The crash happens after the VRAM-gate patch and
+`OK`, before any session files are opened.
+
+A minimal patch of a **temporary sandbox copy** of `GTR2.exe` (file offset
+`0x19C86C`, `8b 50 08` -> `31 d2 90`, skipping only that dereference) made
+the process exit quietly with no session and no `.gtr` opens — so the crash
+is one symptom of a broader D3D/renderer capability mismatch, not a single
+fixable instruction. Original game binaries were not modified.
+
+**Unblock:** a renderer supporting the D3D capabilities GTR2 expects (or a
+native Windows run). Do not continue binary-patching on llvmpipe.
