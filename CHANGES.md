@@ -13,6 +13,10 @@ Newest-first change log. Timestamps use repository commit dates (ISO 8601, local
 - (Superseded by the entry above) An earlier scan concluded the two Zolder09 plots have no `0x2000403d` header. They use a 36-byte table at offset 351 with a record count (+8: 17/12) and that many `[3 f32, 3 u16 indices, u16=2, u32=0, u32 ordinal, 2 f32]` records, verified on 17/17 and 12/12 records. Full-tier test added; the remaining unblock is the addressed vertex-position table.
 - Recorded that the apparent perfect correlation of RaceGMT column 4 with triangle area/edges/y-span is a collinearity artifact disproved by exact-error checks.
 
+## 2026-11-29 23:59:59 -0500 - f0 two-byte offset signal refined
+- Found that **both** meaningful f0 bytes sit 1..4 below the previous mesh's vertex count modulo 256 in 84.6% of 4,826 seeded GTR2 meshes (vs ~0.04% shuffled), replicating at 82.6% on an independent 9,103-mesh holdout. Dominant offset pairs are (2,1) and (1,4); no simple discriminator found, so this remains a signal, not a decoder. Added `gmt_format.f0_vertex_offsets()` with quick and full-tier tests.
+- Recorded HAT reverse-engineering lessons in `docs/reverse-engineering-playbook.md`: read consumer functions to the `ret`, require exact EOF walks and byte-exact round-trips, use all header counts as cross-checks, check byte-pattern alignment/byte order, and keep framing distinct from semantics.
+
 ## 2026-11-29 23:59:59 -0500 - HAT node-tree grammar resolved
 - Fully decoded the HAT node stream from GTL.exe producer/consumer code: control -1/-2 reads 1/2 leaf records; control 0/1/2 consumes one nibble byte and recursively parses two children. `parse_hat_node_stream()` walks all 129 local HATs exactly to EOF, with leaf/group counts matching the header's polygon/bisection counts, and `serialize_hat_node_stream()` round-trips byte-for-byte on all 129. The HAT serializer blocker is removed from the status dashboard; quick and corpus-wide tests added.
 

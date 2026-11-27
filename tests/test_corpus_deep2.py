@@ -7405,6 +7405,40 @@ class CorpusDeep2Test(unittest.TestCase):
             matched = [s for s in source if s in gtr2]
             self.assertGreaterEqual(len(matched), minimum, corpus)
 
+    def test_f0_both_byte_signal_replicates_on_holdout(self):
+        """Independent GTR2 archives reproduce the two-byte f0 offset signal."""
+        import random
+
+        import gmt_format as gf
+        import mas_tool
+
+        archives = list((ROOT.parent / "GTR2Steam/GameData").rglob("*.gtr"))
+        if len(archives) < 60:
+            self.skipTest("GTR2 corpus not present")
+        random.seed(2026)
+        random.shuffle(archives)
+        offsets = []
+        for archive in archives[40:80]:
+            try:
+                entries = mas_tool.read_archive(str(archive))[1]
+            except Exception:
+                continue
+            for entry in entries:
+                try:
+                    gmt = gf.parse_gmt(entry.name, data=entry.data or b"")
+                except Exception:
+                    continue
+                for index in range(1, len(gmt.meshes)):
+                    marker = gf.mesh_marker(gmt.meshes[index])
+                    if not marker:
+                        continue
+                    vc = gmt.meshes[index - 1].record.vertex_count
+                    offsets.append(gf.f0_vertex_offsets(marker, vc))
+        self.assertGreater(len(offsets), 1000)
+        rate = sum(1 for a, b in offsets if a in (1, 2, 3, 4)
+                   and b in (1, 2, 3, 4)) / len(offsets)
+        self.assertGreater(rate, 0.75)
+
     def test_hat_node_stream_parses_all_corpus_files(self):
         """Every local HAT node stream walks exactly to EOF with counted nodes."""
         import gzip_simbin_tool as gz

@@ -933,6 +933,19 @@ a superficial string mapping would be wrong. Full-tier test:
   99.97% of meshes; all "material index" findings are really mesh position.
 - f0 is strongly associated with material identity (raw-material-equal groups
   show P(f0 equal) 0.347 vs 0.036) but no tested name/record hash reproduces it.
+- **Both meaningful bytes track the previous mesh's vertex count (refined
+  signal, still not a decoder):** on 4,826 seeded GTR2 mesh pairs, the two
+  offsets `(previous_mesh.vertex_count - byte) % 256` are **both in 1..4** for
+  **84.6%** of meshes, vs ~0.04% for a distribution-preserving byte shuffle;
+  an independent 9,103-mesh archive holdout replicates at **82.6%**. The
+  dominant offset pairs are `(2, 1)` (~49%) and `(1, 4)` (~20%), with no
+  tested simple mesh property (parity, mod-4, mesh ordinal, index count,
+  flags, stream presence) separating them. The reference quantity is the
+  previous mesh's **vertex count**, not its index count or file offsets
+  (87.8% for the low byte alone; 27.7% for index count, ~1% for offsets).
+  `gmt_format.f0_vertex_offsets()` exposes the pair. Quick + full-tier tests:
+  `test_f0_both_bytes_track_previous_vertex_count` and
+  `test_f0_both_byte_signal_replicates_on_holdout`.
   Information-theoretically, MI(material name, f0 low half) is 5.475 bits vs
   4.249 for shuffled controls — a real ~1.2-bit excess, far short of the
   marker's entropy. Independent train/holdout archives replicate the excess

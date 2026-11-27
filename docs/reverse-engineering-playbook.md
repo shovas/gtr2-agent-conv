@@ -107,6 +107,48 @@ identical. A cheap hash comparison can eliminate most conversion work.
 The RaceGMT decode is not the only case where a small structural insight
 unlocked a whole family. These are worth applying deliberately elsewhere.
 
+### HAT node stream — exact EOF beats statistical enrichment
+
+The HAT framing took several sessions to close. The lessons generalise well.
+
+1. **Read the whole consumer function, past the validation branch.** The reader
+   at GTL.exe `0x451080` checks `[-2, 2]` early, and an initial partial
+   disassembly stopped there, producing the plausible-but-wrong conclusion
+   "the control byte is the child-node count." The decisive logic is **after**
+   the check at `0x451183`: controls `0/1/2` read one extra byte and then
+   **recurse twice**, while only `-1/-2` read 34-byte leaf records. Always
+   disassemble to the `ret`, not just to the first recognisable constant.
+2. **A strong statistical hit is a licence to continue, not a result.** A
+   permutation-controlled scan found 1,217 framed headers vs 1 shuffled — a
+   1,217x enrichment that proved the *framing* real but said nothing about the
+   *grammar*. A sequential walk then died at group 10. Both facts were true;
+   the enrichment could not distinguish "right frame, wrong tree shape."
+3. **Demand an exact structural oracle.** The breakthrough criterion was not a
+   better correlation but a walk that consumed the body **exactly to the last
+   byte**, with no leftover and no skipped bytes. For any variable-length /
+   recursive format, "parsed N bytes out of N" is far stronger evidence than
+   any hit rate. Add the inverse check: a seeded byte-shuffle must fail.
+4. **Use every independent count in the header as a cross-check.** Once the
+   walk worked, leaf count matched declared `count[0]` and group count matched
+   `count[1]` on 129/129 files. Two orthogonal header fields confirmed the
+   grammar *and* revealed their semantics, at zero extra experimental cost.
+   If your parse yields counts, compare them to every count the format stores.
+5. **Require byte-exact re-serialization.** Recording the tree (`leaf` vs
+   `branch` with the header u32s and nibble byte) and emitting identical bytes
+   on 129/129 files proves nothing was silently discarded. A parser that
+   skips unexplained bytes can "succeed" on a wrong grammar; a serializer
+   cannot.
+6. **Do not promote framing to semantics.** Byte-exact round-trips say we can
+   *carry* a HAT, not that we can *author* one. The leaf index fields, the
+   nibble byte's meaning, and the point-query algorithm remain unassigned, and
+   no game has accepted a regenerated HAT. State that boundary explicitly.
+7. **Byte-pattern searches need alignment and byte order checked.** A nearby
+   investigation concluded a submesh magic was absent because it searched
+   4-byte-aligned offsets for `3d 00 40 20` instead of unaligned
+   `3d 40 00 20`. Two independent mistakes masked a real header. When a
+   negative result "proves" a structure is missing, repeat the scan at byte
+   granularity and in both byte orders before recording it.
+
 ### F1 2000 type-2.5 BMPs — undercounted member sizes
 315 "undecoded" BMPs stored a zlib stream at offset 30 whose final **14 bytes
 were written past the declared `zsize`**, in the gap before the next member.
@@ -173,7 +215,10 @@ which families actually need a converter.
 6. Relax exactly one over-strict assumption; re-measure.
 7. Run a distribution-preserving control on any correlation.
 8. Feed the decoded data into an existing verified writer.
-9. Add a full-corpus regression test and document the verified facts plus the
+9. For variable-length formats, require an exact end-of-buffer walk and a
+   byte-exact round-trip; check any counts the parser produces against every
+   count the header declares.
+10. Add a full-corpus regression test and document the verified facts plus the
    remaining unknowns.
 
 ## Worked example of steps 5/7 (f0 vs previous mesh size)

@@ -129,6 +129,22 @@ def f0_byte_pair(value: int) -> tuple[int, int]:
     return value & 0xFF, (value >> 16) & 0xFF
 
 
+def f0_vertex_offsets(value: int, previous_vertex_count: int) -> tuple[int, int]:
+    """Return how far each meaningful f0 byte sits below the previous mesh's
+    vertex count, modulo 256.
+
+    Corpus signal (not a decoder): on 4,826 seeded GTR2 meshes, **84.6%** have
+    both offsets in ``1..4`` versus ~0.04% for shuffled bytes; an independent
+    9,103-mesh holdout replicates at 82.6%. The dominant pairs are (2, 1)
+    (~49%) and (1, 4) (~20%), with no simple mesh property separating them.
+    The previous mesh's vertex count — not its index count or file offsets —
+    is the reference quantity (87.8% for the low byte alone).
+    """
+    low, upper = f0_byte_pair(value)
+    return ((previous_vertex_count - low) % 256,
+            (previous_vertex_count - upper) % 256)
+
+
 def decode_stream_records(data: bytes, vertex_count: int) -> Optional[List[tuple[float, float, float]]]:
     """Decode a 32-byte-per-vertex extra stream into (u, v, scale) triples.
 

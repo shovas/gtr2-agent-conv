@@ -819,5 +819,58 @@ class GmtFormatTest(unittest.TestCase):
         self.assertGreater(checked, 0)
 
 
+    def test_f0_both_bytes_track_previous_vertex_count(self):
+        """Both meaningful f0 bytes sit 1..4 below the previous mesh's VC."""
+        import collections
+        import random
+
+        import mas_tool
+
+        archives = list((ROOT.parent / "GTR2Steam/GameData").rglob("*.gtr"))
+        if not archives:
+            self.skipTest("GTR2 corpus not present")
+        random.seed(2026)
+        random.shuffle(archives)
+        rows = []
+        for archive in archives[:40]:
+            try:
+                entries = mas_tool.read_archive(str(archive))[1]
+            except Exception:
+                continue
+            for entry in entries:
+                try:
+                    gmt = gmt_format.parse_gmt(entry.name, data=entry.data or b"")
+                except Exception:
+                    continue
+                meshes = gmt.meshes
+                for index in range(1, len(meshes)):
+                    marker = gmt_format.mesh_marker(meshes[index])
+                    if not marker:
+                        continue
+                    previous_vc = meshes[index - 1].record.vertex_count
+                    low, upper = gmt_format.f0_byte_pair(marker)
+                    rows.append((low, upper, previous_vc))
+        self.assertGreater(len(rows), 1000)
+        offsets = [gmt_format.f0_vertex_offsets(
+            (u << 16) | low, vc) for low, u, vc in rows]
+        rate = sum(1 for a, b in offsets if a in (1, 2, 3, 4)
+                   and b in (1, 2, 3, 4)) / len(offsets)
+        self.assertGreater(rate, 0.75)
+        pairs = collections.Counter(offsets)
+        self.assertGreater(pairs[(2, 1)] + pairs[(1, 4)], len(offsets) // 2)
+
+        # Distribution-preserving control: shuffle the two byte columns.
+        rng = random.Random(2027)
+        lows = [row[0] for row in rows]
+        uppers = [row[1] for row in rows]
+        rng.shuffle(lows)
+        rng.shuffle(uppers)
+        control = sum(1 for low, upper, vc in zip(lows, uppers,
+                                                  (r[2] for r in rows))
+                      if (vc - low) % 256 in (1, 2, 3, 4)
+                      and (vc - upper) % 256 in (1, 2, 3, 4)) / len(rows)
+        self.assertLess(control, 0.05)
+
+
 if __name__ == "__main__":
     unittest.main()
