@@ -283,3 +283,24 @@ meshes for rendering.
 archives (a client-rendered session may be required), and whether `MASFile`
 resolution in converted TRKs needs stock archive names. Then check whether a
 client accepts the converted geometry.
+
+## Full game client: D3D works, VRAM gate blocks session (2026-11-27)
+
+`wine GTR2.exe` under the same persistent-Xvfb / x11 / llvmpipe setup starts
+and creates a D3D device (`wined3d_device_set_software_vertex_processing device
+014653A0`, 0 SEH errors), but stops at a `#32770 "GTR2 Configuration"` dialog
+containing `Insufficient video memory detected. A minimum of 32 MB of free
+video memory required.` Clicking `OK` leaves the dialog up; no session starts.
+
+Tried without success:
+
+- setting `VIDEORAM=256` in a local copy of `Config.ini` (the stock file has
+  `VIDEORAM=-52`; the game recomputes it from D3D-reported VRAM);
+- Wine registry `HKCU\Software\Wine\Direct3D\VideoMemorySize = 512`;
+- `LIBGL_ALWAYS_SOFTWARE=1` with llvmpipe (already required for any GL context).
+
+**Unblock:** a renderer that reports >=32 MB of video memory to D3D
+(`IDirect3DDevice9::GetDeviceCaps` / `D3DCAPS9`, likely from wined3d's GL
+renderer), or a code-level bypass of this configuration gate. Until then the
+client path cannot load any track — converted or stock — so the dedicated
+server remains the only runtime harness that reaches a session.
