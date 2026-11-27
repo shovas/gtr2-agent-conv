@@ -67,7 +67,9 @@ class GtlToGtr2Test(unittest.TestCase):
     def test_teammaps2_rewrite(self):
         src = (b"SearchPath=GAMEDATA\\TRACKS\r\n"
                b"MASFile=teammaps.gtl\r\n"
-               b"MASFile=skies_north.gtl\r\n\r\nView=mainview\r\n")
+               b"MASFile=skies_north.gtl\r\n\r\nView=mainview\r\n"
+               b"Instance=TRACK01\r\n{\r\n"
+               b"  MeshFile=track01.gmt CollTarget=True HATTarget=True\r\n}\r\n")
         out, changes = g.convert_trk_bytes(src)
         self.assertIn(b"MASFile=teammaps2.gtr\r\n", out)
         self.assertIn(b"MASFile=skies_north.gtr\r\n", out)

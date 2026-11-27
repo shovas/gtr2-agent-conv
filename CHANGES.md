@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 12:00:00 -0500 - Fix synthetic TRK fixture
+- Updated the synthetic TRK fixture in the GTL converter tests to include a track instance with `HATTarget=True`, matching the new validator rule and real corpus TRKs.
+
 ## 2026-11-29 11:30:00 -0500 - Content-based text-format survey
 - Scanned 261,308 files across all `../` folders by content (printable/no-NUL, not extension) and indexed 301 text groups. Added identification for `.plr`, `.dic`, `.sci`/`.prt`, `.tod` and `.tec`; survey and coverage recorded in `docs/corpus-reference.md`. Full-tier test added.
 
