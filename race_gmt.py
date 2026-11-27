@@ -110,6 +110,31 @@ def read_triangle_records(data: bytes) -> list[dict]:
     return out
 
 
+def read_texture_axes(data: bytes) -> list[tuple[float, float]]:
+    """Return one ``(cos, sin)`` texture axis per 36-byte triangle record.
+
+    Verified on `PEOPLE_STAND_01..05`: immediately after the 48 triangle
+    records there is a count word then one **16-byte** entry per record, laid
+    out as ``[cos, 0, sin, 0]``. The record's column-0 value (its texture U)
+    is ``sin * x + cos * y`` using columns 3 and 1 as world x/y, matching all
+    240 records to <8e-6. Returns an empty list for other RaceGMT layouts.
+    """
+    header = parse_header(data)
+    base = 16 + len(header.name.encode("latin-1")) + 48 + 292
+    records = read_triangle_records(data)
+    if not records:
+        return []
+    off = base + 36 * len(records)
+    if off + 4 + 16 * len(records) > len(data):
+        return []
+    count = struct.unpack_from("<I", data, off)[0]
+    if count != len(records):
+        return []
+    return [(struct.unpack_from("<f", data, off + 4 + 16 * k)[0],
+             struct.unpack_from("<f", data, off + 12 + 16 * k)[0])
+            for k in range(count)]
+
+
 def read_material_strings(data: bytes) -> list[str]:
     """Extract NUL-terminated ASCII material/stage strings from the payload."""
     import re

@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 19:30:00 -0500 - RaceGMT texture U decoded exactly
+- Found the on-disk texture-axis table in `RaceGMT\0` meshes: a count word followed by one 16-byte `[cos,0,sin,0]` entry per triangle. `race_gmt.read_texture_axes()` plus `f0 = sin*x + cos*y` reproduces all 240 sampled records to <8e-6, upgrading the earlier fitted projection to an exact decoder. Full-tier test added.
+
 ## 2026-11-28 19:00:00 -0500 - Material validator caveat
 - Recorded that `validate_materials` also flags native GTR2 meshes (69/3,000 sampled), so warnings are advisory. Only 10 distinct rF1-only material names are flagged; no automatic rewrite is claimed because stage strings reference original names. Full-tier test added.
 

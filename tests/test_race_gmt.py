@@ -167,6 +167,23 @@ class RaceGmtTest(unittest.TestCase):
         self.assertIn("triangles=48", result.stdout)
         self.assertIn("groups=[0, 1, 2, 3, 4]", result.stdout)
 
+    def test_texture_axes_decode_f0(self):
+        """Each triangle's texture axis (cos,sin) reproduces its column 0."""
+        base = ROOT.parent / "Race07Complete/GameData/Locations/Marrakech/Models"
+        files = [base / f"PEOPLE_STAND_0{i}.gmt" for i in range(1, 6)]
+        if not all(p.is_file() for p in files):
+            self.skipTest("PEOPLE_STAND variants not present")
+        for path in files:
+            data = path.read_bytes()
+            axes = race_gmt.read_texture_axes(data)
+            records = race_gmt.read_triangle_records(data)
+            self.assertEqual(len(axes), len(records), path.name)
+            self.assertEqual(len(axes), 48, path.name)
+            for rec, (cos, sin) in zip(records, axes):
+                x, y = rec["floats"][3], rec["floats"][1]
+                self.assertAlmostEqual(rec["floats"][0], sin * x + cos * y,
+                                       delta=0.00001, msg=f"{path.name} {rec['ordinal']}")
+
     def test_f0_is_fixed_horizontal_projection(self):
         """Column 0 is a unit-length projection of (x, y) at a constant angle."""
         import math

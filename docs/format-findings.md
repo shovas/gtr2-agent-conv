@@ -48,7 +48,12 @@ regression tests or an explicitly documented negative.
   horizontal projection** of that position,
   `f0 = 0.180519*x + 0.983573*y + 0.00025` (coefficient norm 1.0000015,
   10.4 deg from +y), holding to <0.00045 on all 240 records across the five
-  variants. Full-tier test: `test_f0_is_fixed_horizontal_projection`.
+  variants. Full-tier test: `test_f0_is_fixed_horizontal_projection`. This
+  is now an exact on-disk decoder: immediately after the triangle records a
+  count word (48) is followed by one **16-byte** texture-axis entry per record,
+  `[cos, 0, sin, 0]`; `race_gmt.read_texture_axes()` returns those pairs and
+  `f0 = sin*x + cos*y` reproduces all 240 records to <8e-6. Full-tier test:
+  `test_texture_axes_decode_f0`.
   Column 4 keeps the same spatial coefficients across variants but has a
   residual of 0.22 under a linear fit; a transform search over x, -x, |x|,
   log|x|, sqrt|x|, 1/x, x^2, the perpendicular horizontal projection and
