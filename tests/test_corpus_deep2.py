@@ -7144,6 +7144,35 @@ class CorpusDeep2Test(unittest.TestCase):
                 self.assertEqual(raw[offset:offset + len(pattern) // 2].hex(),
                                  pattern)
 
+    def test_hat_transfer_reference_coverage(self):
+        """Measure which source layouts have a same-layout GTR2 HAT reference."""
+        import collections
+        import gzip_simbin_tool as gz
+        import media_tool as mt
+
+        def signatures(root):
+            out = collections.defaultdict(list)
+            for path in root.rglob("*.hat"):
+                try:
+                    data = gz.decompress(str(path))
+                except Exception:
+                    continue
+                signature = mt.hat_layout_signature(data)
+                if signature:
+                    out[signature].append(str(path.relative_to(root)))
+            return out
+
+        gtr2 = signatures(ROOT.parent / "GTR2Steam")
+        if not gtr2:
+            self.skipTest("GTR2 HAT corpus not present")
+        self.assertGreaterEqual(len(gtr2), 15)
+        for corpus, minimum in (("GTLSteam", 1), ("Race07Vanilla", 4)):
+            source = signatures(ROOT.parent / corpus)
+            if not source:
+                continue
+            matched = [s for s in source if s in gtr2]
+            self.assertGreaterEqual(len(matched), minimum, corpus)
+
     def test_hat_heights_match_by_position_cross_game(self):
         """Same-layout HATs share (x,z) samples and heights despite reordering."""
         import collections
