@@ -565,7 +565,10 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
   loops over nodes at a **92-byte runtime stride** (`add ebx,0x5c`), with a
   signed control byte at `0x4510e9` dispatching: -1/-2 select one/two nodes,
   non-negative tags take the 16-byte-record branch at `0x451183`. Full-tier
-  test: `test_hat_34byte_node_field_framing_code_evidence`. A direct on-disk
+  test: `test_hat_34byte_node_field_framing_code_evidence`.  A related invariant strengthens validation: the trailing stream is always at
+  least `b40 * 34` bytes (ratio 1.029..1.278 over 197 local HATs), i.e. one
+  34-byte node per bisection node plus overhead. `validate_hat()` now rejects a
+  HAT whose tail is shorter, so a header-and-table-only file cannot pass. A direct on-disk
   search for the node frame was run with the **correct bound** (indices are
   compared against the b40 16-byte-table count, not b44): windows whose three
   index fields are valid are strongly enriched in the tail (3.1% of offsets in

@@ -790,6 +790,15 @@ def validate_hat(payload: bytes) -> list[str]:
             problems.append(f"bisection count {bisection} != T({polygons})={m_bisection}")
     if 48 + 16 * records > len(body):
         problems.append(f"record table {records}*16 exceeds body {len(body)}")
+    else:
+        # Every shipped HAT has at least one 34-byte node per bisection node:
+        # tail / (bisection * 34) is 1.029..1.278 over 197 local files. A HAT
+        # with only a header and sample table would pass the weaker checks but
+        # be unusable, so require the node stream to be present.
+        tail = len(body) - (48 + 16 * records)
+        minimum = bisection * 34
+        if tail < minimum:
+            problems.append(f"tail {tail} < bisection {bisection} * 34 = {minimum}")
     grid = hat_grid_params(payload)
     if grid is None or not all(math.isfinite(value) for value in grid):
         problems.append("grid parameters missing or non-finite")

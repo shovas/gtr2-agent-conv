@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 05:30:00 -0500 - HAT validator checks node stream
+- Strengthened `validate_hat()`: the trailing node stream must be at least `bisection_count * 34` bytes (verified 1.029-1.278x over 197 local HATs), rejecting header-and-table-only files. Metamorphic truncation test added.
+
 ## 2026-11-29 05:00:00 -0500 - GTL tree conversion JSON report
 - `gtl_to_gtr2.py --tree --json` emits the conversion report as JSON for batch pipelines; full-tier CLI test updated.
 

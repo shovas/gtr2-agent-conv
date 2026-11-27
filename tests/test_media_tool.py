@@ -1197,6 +1197,12 @@ class MediaToolTest(unittest.TestCase):
             data[offset] ^= 1
             problems = media_tool.validate_hat(bytes(data))
             self.assertTrue(any("bisection count" in p for p in problems))
+            # The validator also requires the trailing node stream: every
+            # shipped HAT has tail >= bisection * 34.
+            payload = media_tool.hat_decompress(sample)[0]
+            truncated = payload[:len(payload) // 2]
+            problems = media_tool.validate_hat(truncated)
+            self.assertTrue(any("tail" in p for p in problems), problems)
             result = subprocess.run(
                 [sys.executable, str(ROOT / "media_tool.py"),
                  "hat-validate", str(sample)], capture_output=True, text=True)
