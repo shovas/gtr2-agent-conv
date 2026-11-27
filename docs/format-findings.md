@@ -636,6 +636,15 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
 
 ## 5. HAT placement in converted trees
 
+- **GTL→GTR2 copy-vs-convert rule** (same basenames under `GameData`): 25/26
+  shared `.gmt` meshes are **byte-identical** and safe to copy; the one
+  exception (`Teams/M-FPDriver.gmt`) is a genuinely different mesh, not a
+  format difference. Every shared text config (`.aiw`, `.cam`, `.gdb`, `.trk`,
+  `.aud`, `.car`, `.hdc`, `.tyr`, `.dmg`, `.rcd`) **differs** and must go through
+  the conversion rules. Full-tier test:
+  `test_gtl_gtr2_same_name_copy_convert_split`.
+
+
 GTR2 ships every HAT asset under `GameData/Locations/HAT_Dedicated`; GTL uses
 `UserData/LOG/HAT` and Race07 keeps them per-track. Since cross-game HAT bodies
 are not byte-compatible, `validate_gtr2_tree()` flags any `.hat` outside

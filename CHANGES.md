@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 18:00:00 -0500 - GTL copy-vs-convert corpus rule
+- Established a corpus-backed copy rule for GTL→GTR2: 25/26 shared `.gmt` meshes are byte-identical (safe to copy), while every shared text config (`.aiw`, `.cam`, `.gdb`, `.trk`, `.aud`, `.car`, `.hdc`, `.tyr`, `.dmg`, `.rcd`) differs and must be converted. Full-tier test added.
+
 ## 2026-11-28 17:30:00 -0500 - Tree validator checks HAT structure
 - `gtl_to_gtr2.py --validate` now runs the HAT structural validator on files under `HAT_Dedicated` (real GTR2 tree still reports 0 problems). Full-tier metamorphic test adds a corrupted HAT and confirms detection.
 

@@ -6803,6 +6803,30 @@ class CorpusDeep2Test(unittest.TestCase):
                 self.assertIn("teammaps2.gtr", values)
                 self.assertIn("misc.gtr", values)
 
+    def test_gtl_gtr2_same_name_copy_convert_split(self):
+        """Shared GMTs are byte-identical; shared text configs always differ."""
+        configs = (".aiw", ".cam", ".gdb", ".trk", ".aud", ".car",
+                   ".hdc", ".tyr", ".dmg", ".rcd")
+
+        def by_name(root):
+            return {p.name.lower(): p for p in root.rglob("*")
+                    if p.is_file() and p.suffix.lower() in configs + (".gmt",)}
+
+        gtl = by_name(ROOT.parent / "GTLSteam/GameData")
+        gtr2 = by_name(ROOT.parent / "GTR2Steam/GameData")
+        shared = set(gtl) & set(gtr2)
+        self.assertGreater(len(shared), 30)
+        gmt_names = [name for name in shared if name.endswith(".gmt")]
+        config_names = [name for name in shared if not name.endswith(".gmt")]
+        self.assertGreater(len(gmt_names), 20)
+        self.assertGreater(len(config_names), 10)
+        identical_gmt = sum(gtl[n].read_bytes() == gtr2[n].read_bytes()
+                            for n in gmt_names)
+        differing_configs = sum(gtl[n].read_bytes() != gtr2[n].read_bytes()
+                                for n in config_names)
+        self.assertGreaterEqual(identical_gmt / len(gmt_names), 0.9)
+        self.assertEqual(differing_configs, len(config_names))
+
     def test_gtl_tree_cli_matches_api(self):
         """`gtl_to_gtr2.py --tree` writes exactly what convert_tree() does."""
         import subprocess
