@@ -785,6 +785,111 @@ def hat_declared_counts(payload: bytes) -> tuple[int, int, int] | None:
     return struct.unpack_from("<3I", body, 36)
 
 
+def parse_hat_node_stream(payload: bytes,
+                          max_depth: int = 256) -> dict | None:
+    """Parse the variable-length HAT node stream into its 34-byte leaf records.
+
+    The producer/consumer grammar was recovered from GTL.exe ``0x451080`` and
+    ``0x4503c0``. Each group starts with ``[u32, u32, i8 control]``:
+
+    * control ``-1`` / ``-2`` — a leaf holding one / two 34-byte node records
+      (written into 92-byte destination slots);
+    * control ``0`` / ``1`` / ``2`` — one extra byte (split into two nibbles),
+      then **two recursively encoded child groups**.
+
+    The control is rejected outside ``[-2, 2]``, and each leaf's three u32
+    index fields must be below the declared 16-byte record count. Verified on
+    **129/129** local HAT files: the walk consumes the body *exactly* to EOF,
+    and the leaf count equals the declared polygon count (34/34 GTR2 files).
+    A seeded byte-shuffled control fails immediately.
+
+    Returns a dict with ``counts``, ``nodes`` (list of 34-byte records),
+    ``groups``, ``offset`` (first stream byte) and ``end``; ``None`` when the
+    framing breaks.
+    """
+    counts = hat_declared_counts(payload)
+    if counts is None:
+        return None
+    marker = payload.find(b"generated\x00")
+    body = payload[marker + 10:]
+    offset = 48 + 16 * counts[2]
+    if offset + 10 > len(body):
+        return None
+    nodes: list[bytes] = []
+    groups = 0
+
+    def walk(pos: int, depth: int) -> tuple[int, tuple] | None:
+        nonlocal groups
+        if depth > max_depth or pos + 10 > len(body):
+            return None
+        first, second, control = struct.unpack_from("<IIb", body, pos)
+        if not -2 <= control <= 2:
+            return None
+        pos += 9
+        groups += 1
+        if control < 0:
+            count = 1 if control == -1 else 2
+            if pos + 34 * count > len(body):
+                return None
+            leaves = []
+            for j in range(count):
+                node = body[pos + 34 * j:pos + 34 * (j + 1)]
+                u24, u28 = struct.unpack_from("<II", node, 24)
+                if max(u24 & 0x1FFFFF,
+                       ((u28 & 0x3FF) << 11) | (u24 >> 21),
+                       u28 >> 10) >= counts[2]:
+                    return None
+                nodes.append(node)
+                leaves.append(node)
+            return pos + 34 * count, ("leaf", first, second, control,
+                                      tuple(leaves))
+        extra = body[pos]
+        pos += 1  # two nibble fields consumed by the 0/1/2 branch
+        children = []
+        for _ in range(2):
+            child = walk(pos, depth + 1)
+            if child is None:
+                return None
+            pos, node = child
+            children.append(node)
+        return pos, ("branch", first, second, control, extra,
+                     tuple(children))
+
+    parsed = walk(offset, 0)
+    if parsed is None:
+        return None
+    end, tree = parsed
+    if end != len(body) or len(nodes) != counts[0]:
+        return None
+    return {"counts": counts, "nodes": nodes, "groups": groups,
+            "offset": offset, "end": end, "tree": tree}
+
+
+def serialize_hat_node_stream(result: dict) -> bytes:
+    """Re-emit the byte-exact node stream produced by `parse_hat_node_stream`.
+
+    Returns only the stream bytes starting at the parsed ``offset``; the
+    caller can splice them back into the body to reconstruct the original HAT.
+    """
+    out = bytearray()
+
+    def emit(node: tuple) -> None:
+        if node[0] == "leaf":
+            _kind, first, second, control, leaves = node
+            out.extend(struct.pack("<IIb", first, second, control))
+            for leaf in leaves:
+                out.extend(leaf)
+        else:
+            _kind, first, second, control, extra, children = node
+            out.extend(struct.pack("<IIb", first, second, control))
+            out.append(extra)
+            for child in children:
+                emit(child)
+
+    emit(result["tree"])
+    return bytes(out)
+
+
 def hat_bisection_count(polygons: int) -> int:
     """Return ``T(n)``, the node count of GTR2.exe's HAT bisection tree.
 

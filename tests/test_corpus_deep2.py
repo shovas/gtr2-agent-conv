@@ -7405,6 +7405,36 @@ class CorpusDeep2Test(unittest.TestCase):
             matched = [s for s in source if s in gtr2]
             self.assertGreaterEqual(len(matched), minimum, corpus)
 
+    def test_hat_node_stream_parses_all_corpus_files(self):
+        """Every local HAT node stream walks exactly to EOF with counted nodes."""
+        import gzip_simbin_tool as gz
+        import media_tool as mt
+
+        checked = 0
+        for root in ("GTR2Steam", "GTLSteam", "Race07Complete"):
+            base = ROOT.parent / root
+            if not base.is_dir():
+                continue
+            for path in base.rglob("*.hat"):
+                try:
+                    payload = gz.decompress(str(path))
+                except Exception:
+                    continue
+                result = mt.parse_hat_node_stream(payload)
+                self.assertIsNotNone(result, str(path))
+                self.assertEqual(len(result["nodes"]), result["counts"][0],
+                                 str(path))
+                self.assertEqual(result["groups"], result["counts"][1],
+                                 str(path))
+                marker = payload.find(b"generated\x00")
+                self.assertEqual(result["end"],
+                                 len(payload) - marker - 10, str(path))
+                self.assertEqual(mt.serialize_hat_node_stream(result),
+                                 payload[marker + 10 + result["offset"]:],
+                                 str(path))
+                checked += 1
+        self.assertGreaterEqual(checked, 129)
+
     def test_racegmt_variant_plots_record_framing(self):
         """The variant plots also carry a separate 36-byte triangle table."""
         import race_gmt as rg

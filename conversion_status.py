@@ -64,8 +64,6 @@ FAMILIES = (
 BLOCKERS = (
     {"issue": "in-game acceptance", "state": "blocked",
      "detail": "Wine starts GTR2Dedicated and loads GameData/HAT names, but D3D window creation fails"},
-    {"issue": "HAT node-tree serializer", "state": "blocked",
-     "detail": "34-byte frame pinned from code; variable/interleaved on-disk framing still undecoded"},
     {"issue": "GMT f0 exact encoding", "state": "open",
      "detail": "mod-256 low-byte signal and family-level material association only"},
     {"issue": "RaceGMT column 4", "state": "open",

@@ -1,3 +1,34 @@
+## HAT node-tree grammar — RESOLVED (2026-11-27)
+
+The earlier blocker is closed. Reading GTL.exe `0x451080` past the control-byte
+check reveals the missing branch: for control **0/1/2** the reader consumes
+**one more byte** (split into two nibbles at `[edi+0xa]`/`[edi+0xb]`) and then
+**recursively calls itself twice**, writing children into a 16-byte-stride
+table. Only control **-1/-2** reads 1/2 leaf records of 34 bytes (stored into
+92-byte slots via `0x4503c0`). Valid controls are exactly `[-2, 2]`.
+
+The full recursive walk from `48 + 16 * count[2]`:
+
+```
+group := u32, u32, i8 control
+  control < 0  -> 1 (or 2) x 34-byte leaf records
+  control >= 0 -> u8 nibble byte, then group, group
+```
+
+Results:
+
+- **129/129** local HAT files (GTR2, GTL, Race07) walk *exactly* to EOF.
+- Leaf count equals declared `count[0]` (polygons) and group count equals
+  declared `count[1]` (bisection nodes) on **129/129** files.
+- `serialize_hat_node_stream()` reproduces the stream **byte-for-byte** on
+  **129/129** files; a seeded byte-shuffled control fails immediately.
+- This explains the earlier 9-group dead end: control=1 was misread as a leaf
+  instead of a two-child branch.
+
+Implemented in `media_tool.parse_hat_node_stream()` /
+`serialize_hat_node_stream()`, with quick and corpus-wide tests. The remaining
+HAT question is semantic (what the leaf index fields select), not framing.
+
 ## HAT control framing — sequential parse status (2026-11-27)
 
 Following the statistically confirmed `[u32,u32,i8]` framing, a sequential

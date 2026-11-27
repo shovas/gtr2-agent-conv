@@ -1398,6 +1398,35 @@ class MediaToolTest(unittest.TestCase):
         self.assertAlmostEqual(info.details["grid_inv_cell_z"], 0.02603,
                                delta=1e-4)
 
+    def test_hat_node_stream_parses_to_exact_eof(self):
+        """The recursive control grammar consumes the HAT body exactly."""
+        import gzip_simbin_tool as gz
+
+        path = (ROOT.parent / "GTR2Steam/GameData/Locations/HAT_Dedicated"
+                / "3Brno.hat")
+        if not path.is_file():
+            self.skipTest("GTR2 HAT corpus not present")
+        payload = gz.decompress(str(path))
+        result = media_tool.parse_hat_node_stream(payload)
+        self.assertIsNotNone(result)
+        counts = result["counts"]
+        self.assertEqual(len(result["nodes"]), counts[0])
+        self.assertEqual(result["groups"], counts[1])
+        self.assertEqual(result["end"], len(payload) -
+                         payload.find(b"generated\x00") - 10)
+        self.assertEqual(len(result["nodes"][0]), 34)
+        body_start = payload.find(b"generated\x00") + 10
+        self.assertEqual(media_tool.serialize_hat_node_stream(result),
+                         payload[body_start + result["offset"]:])
+
+        import random
+        shuffled = bytearray(payload)
+        body = bytearray(payload[body_start:])
+        random.seed(2026)
+        random.shuffle(body)
+        shuffled[body_start:] = body
+        self.assertIsNone(media_tool.parse_hat_node_stream(bytes(shuffled)))
+
     def test_all_hat_header_variants_decode(self):
         """gMb1.000f, gMb1.002f and ver008 all expose the decoded header."""
         samples = (

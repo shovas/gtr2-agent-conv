@@ -705,6 +705,16 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
 
 ## 5. HAT placement in converted trees
 
+- **HAT node stream fully decoded**: from GTL.exe `0x451080`, each group is
+  `u32,u32,i8 control`; control -1/-2 reads 1/2 34-byte leaf records, while
+  control 0/1/2 consumes one extra byte and recursively parses two children.
+  `media_tool.parse_hat_node_stream()` walks **129/129** local HATs exactly to
+  EOF; leaf count equals the declared polygon count and group count equals the
+  declared bisection-node count on all 129. `serialize_hat_node_stream()`
+  round-trips the stream byte-for-byte on 129/129; a shuffled control fails.
+  Quick + full-tier tests: `test_hat_node_stream_parses_to_exact_eof` and
+  `test_hat_node_stream_parses_all_corpus_files`.
+
 - **rF1 per-track `.tdf` → GTR2 `.gdb` track variables**: rF1 ships 12
   per-track `.tdf` files with a `[TRACKVARS]` section; GTR2 ships **0** `.tdf`
   files and reads the same variable names (e.g. `RoadDryGrip`,

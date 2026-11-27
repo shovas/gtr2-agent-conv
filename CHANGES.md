@@ -13,6 +13,9 @@ Newest-first change log. Timestamps use repository commit dates (ISO 8601, local
 - (Superseded by the entry above) An earlier scan concluded the two Zolder09 plots have no `0x2000403d` header. They use a 36-byte table at offset 351 with a record count (+8: 17/12) and that many `[3 f32, 3 u16 indices, u16=2, u32=0, u32 ordinal, 2 f32]` records, verified on 17/17 and 12/12 records. Full-tier test added; the remaining unblock is the addressed vertex-position table.
 - Recorded that the apparent perfect correlation of RaceGMT column 4 with triangle area/edges/y-span is a collinearity artifact disproved by exact-error checks.
 
+## 2026-11-29 23:59:59 -0500 - HAT node-tree grammar resolved
+- Fully decoded the HAT node stream from GTL.exe producer/consumer code: control -1/-2 reads 1/2 leaf records; control 0/1/2 consumes one nibble byte and recursively parses two children. `parse_hat_node_stream()` walks all 129 local HATs exactly to EOF, with leaf/group counts matching the header's polygon/bisection counts, and `serialize_hat_node_stream()` round-trips byte-for-byte on all 129. The HAT serializer blocker is removed from the status dashboard; quick and corpus-wide tests added.
+
 ## 2026-11-29 23:59:59 -0500 - HAT grammar still incomplete
 - Sequential parse of the confirmed HAT control framing walks 9 groups then breaks at control=1; header u32s are not consistently coordinates. Recorded the exact unblock: producer-level grammar for control values 0/1/2.
 
