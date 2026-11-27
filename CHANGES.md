@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 00:30:00 -0500 - Negative follow-ups recorded
+- Recorded two negatives in `docs/open-issues-research.md`: the f0 mod-256 offset 1-vs-2 choice is not predictable from mesh properties, and HAT node-index windows under the strict b44 bound show 34 as the most common gap but no contiguous array. Both avenues remain blocked without new evidence.
+
 ## 2026-11-29 00:00:00 -0500 - f0 low byte mod-256 signal
 - Found a controlled association for GMT f0: for meshes after mesh 0, `(prev_mesh.vertex_count - low_byte) % 256` is 1 or 2 in 81.4% of 4,005 samples vs 1.6% shuffled (51.7x). Recorded as a signal, not a decoder. Full-tier test added.
 

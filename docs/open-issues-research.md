@@ -1,3 +1,23 @@
+## f0 mod-256 offset 1-vs-2 is not predictable (2026-11-29)
+
+Follow-up to the controlled `(prev_vc - f0_low) % 256 in (1,2)` signal (81.4%
+vs 1.6% shuffled). Tested whether the choice of 1 vs 2 is determined by the
+previous mesh's vertex-count parity, presence of stream2/stream3, material
+index 0, or index-count parity, on 6,002 qualifying meshes. All splits were
+nearly even (e.g. previous mesh has stream2: 99.8% for offset 1 vs 98.8% for
+offset 2; material index 0: 23.7% vs 43.7%). No discriminator found, so the
+signal stays a correlation, not a decoder.
+
+## HAT strict-bound window gaps (2026-11-29)
+
+Applied the same node-frame search with the stricter b44 index bound: 85,882
+windows qualify in Brno's tail. The most common gap between consecutive
+windows is 34 bytes (28,244), but 43, 3, 53 and 63 bytes are also frequent and
+the 34-phase distribution is uniform; the longest contiguous stride-34 run is
+5. This is consistent with variable-length interleaving of node records and
+control fields, and still gives no on-disk framing transform. Do not retry a
+fixed-stride node array without new code evidence.
+
 # Open issues — offline research record (2026-11-23)
 
 ## HAT tail periodicity at 34 and 77 bytes (2026-11-26)
