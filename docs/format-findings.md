@@ -684,6 +684,31 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
 
 ## 5. HAT placement in converted trees
 
+- **rF2 GMT UVW exporter corroboration** (`rf2-developers-guide/
+  docs.studio-397.com/display/DG/3ds+Max+GMT+file+UVW+Export.html`): GMT exports
+  up to four UV sets (A/B/C/D) from the first four gTexture slots, two floats
+  each; 3ds Max channels -2/-1/0 are vertex alpha/illumination/colour, and
+  vertex illumination is not exported. This exactly matches the eight floats
+  at offset +32 of each 64-byte RaceGMT vertex — its four repeated `(u,v)`
+  pairs are the A/B/C/D sets. `read_racegmt_vertices()` and
+  `read_racegmt_submeshes()` now expose all four as `uv_sets`. The exporter
+  also notes UV unwraps that create extra vertices increase GMT size, matching
+  our vertex-expansion UV work. Full-tier test updated.
+
+- **rF2 track cheat-sheet corroboration** (`rf2-modding-resources/
+  rF2_Track_CheatSheet.pdf`): the race-surface SCN instance is named with a
+  `RaceSurface` prefix and carries `Deformable`, `HATTarget=True` and
+  `CollTarget=True` — consistent with the GTR2/GTL TRK invariant we enforce.
+  Its material names use TDF prefixes (`road`, `asph`, `rdcp`, `gras`, `grvl`)
+  with a `_WET` suffix, matching the tokens we extracted from GTR2's own
+  `specialfx.tec`. SCN `VisGroups` flags are numeric and summed (A=1, B=2,
+  C=4, F=32, G=64, H=128, I=256). Terrain vertex-colour channels in this rF2
+  shader are black=T1, green=mix-T2, red=mix-T3, blue=blend-T4.A,
+  alpha=greyscale — rF2-specific, not a GTR2 f7 rule. The AIW tutorial marks
+  "Special Slowdown" (pit speed), "Teleport Spot" and two safety-car locations,
+  with 30 grid spots for older tracks (15 teams x 2), corroborating our AIW
+  waypoint/pit semantics. No file-format binary spec is present in these docs.
+
 - **Producer-side HAT evidence (archived ISI "Creating Tracks" guide,
   `../rF2_onlineTools/`):** tracks declare `HATTarget=True` on their MTS
   instance definitions; the HAT is generated on first load from the track

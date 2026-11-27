@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 10:30:00 -0500 - Processed rF2 HTML documentation
+- Re-processed HTML files across `../` reference folders: rF2 GMT Converter/UVW exporter/DDS formats, track cheat-sheet, AIW tutorial and ISI FAQs. The exporter documents four exported UV sets A-D, exactly matching the eight floats at +32 in each RaceGMT vertex; decoders now expose all four. Corpus index and findings updated.
+
 ## 2026-11-29 10:00:00 -0500 - Identify HDV/ENG/AUD/ANI configs
 - `media_tool.identify()` now labels plain `.hdv`, `.eng`, `.aud` and `.ani` text configs by key signatures; previously all four were "unknown" despite having parsers. Corpus check: 60/60 `.hdv`, 60/60 `.ani`, 57/60 `.eng`, 59/60 `.aud`. Full-tier test added.
 

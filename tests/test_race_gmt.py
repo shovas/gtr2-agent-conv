@@ -237,6 +237,8 @@ class RaceGmtTest(unittest.TestCase):
                 self.assertTrue(all(isfinite(v) for v in vertex["position"]))
                 self.assertGreater(abs(vertex["axis"][0]), 0.05)
                 self.assertLess(abs(vertex["axis"][1]), 1.0)
+                self.assertEqual(len(vertex["uv_sets"]), 4)
+                self.assertEqual(vertex["uv"], vertex["uv_sets"][0])
             self.assertAlmostEqual(vertices[0]["uv"][0], 0.73711, places=4)
             self.assertAlmostEqual(vertices[0]["uv"][1], -0.00631, places=4)
             self.assertAlmostEqual(vertices[1]["uv"][1], -0.99574, places=4)

@@ -165,7 +165,9 @@ def read_racegmt_vertices(data: bytes) -> list[dict]:
         if uvs[0:2] != uvs[2:4] or uvs[4:6] != uvs[6:8]:
             break
         out.append({"position": (x, y, z), "axis": (cos, sin),
-                    "uv": (uvs[0], uvs[1])})
+                    "uv": (uvs[0], uvs[1]),
+                    "uv_sets": tuple((uvs[2 * k], uvs[2 * k + 1])
+                                     for k in range(4))})
         row += 64
     return out
 
@@ -229,7 +231,12 @@ def read_racegmt_submeshes(data: bytes) -> list[dict]:
             uvs = struct.unpack_from("<8f", data, row + 32)
             if uvs[0:2] != uvs[2:4] or uvs[4:6] != uvs[6:8]:
                 break
-            vertices.append({"position": (x, y, z), "uv": (uvs[0], uvs[1])})
+            # The final 32 bytes are four exported UV sets (A/B/C/D), each a
+            # (u,v) pair — the rF2 GMT UVW exporter's documented layout. They
+            # are usually identical in DLC props, but all four are preserved.
+            vertices.append({"position": (x, y, z), "uv": (uvs[0], uvs[1]),
+                             "uv_sets": tuple((uvs[2 * k], uvs[2 * k + 1])
+                                              for k in range(4))})
         if len(vertices) != count:
             continue
         index_count = struct.unpack_from("<I", data, index_at)[0]
