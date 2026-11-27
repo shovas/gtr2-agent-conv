@@ -6919,6 +6919,37 @@ class CorpusDeep2Test(unittest.TestCase):
             self.assertGreaterEqual(identical, minimum, corpus)
             self.assertLessEqual(identical, total, corpus)
 
+    def test_rf1_flagged_materials_map_to_gtr2_specialfx_tokens(self):
+        """Flagged rF1 terrain names contain GTR2's own specialfx material tokens."""
+        import random
+        import re
+
+        tec = (ROOT.parent / "GTR2Steam/GameData/Locations/specialfx.tec")
+        if not tec.is_file():
+            self.skipTest("GTR2 specialfx.tec not present")
+        tokens = set()
+        for match in re.finditer(r"(?mi)^\s*Materials\s*=\s*(.+)$",
+                                 tec.read_text(errors="replace")):
+            tokens.update(name.strip().lower()
+                          for name in match.group(1).split(","))
+        self.assertGreater(len(tokens), 20)
+        flagged = ("DSTRD_TARMAC", "PDRT_DIRT", "PDRT_TRAP2GRASS",
+                   "RDCP_RUMCAP2GRASS", "RGED_OVAL2GRASS",
+                   "RGED_TRACK2GRASS", "RGED_TRK2GRASS", "RMBL2GRASS_WET",
+                   "RMBL_RUMBLE2GRASS", "SANDO")
+        matched = [n for n in flagged
+                   if any(token in n.lower() for token in tokens)]
+        self.assertGreaterEqual(len(matched), 9)
+        rng = random.Random(2026)
+        alternatives = []
+        for name in flagged:
+            letters = list(name.lower())
+            rng.shuffle(letters)
+            alternatives.append("".join(letters))
+        control = [n for n in alternatives
+                   if any(token in n for token in tokens)]
+        self.assertLess(len(control), len(matched))
+
     def test_racegmt_corpus_converts_to_gtr2(self):
         """Most Race07 DLC meshes decode and rebuild as parseable GTR2 GMTs."""
         import glob

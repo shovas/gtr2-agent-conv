@@ -705,6 +705,17 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
   Race07Vanilla 0/26, Race07Complete 2/26 and Volvo 0/6 are not (JCA-wrapped
   or genuinely different assets). BMW also shares an identical `.cam` and
   `.hed`. Full-tier test: `test_sibling_corpus_mesh_carryover_rates`.
+- **Canonical material tokens from the target corpus:** GTR2's own
+  `GameData/Locations/specialfx.tec` declares 29 material tokens through
+  `Materials=` lines (`road`, `conc`, `dirt`, `gras`, `grav`, `sand`, `rmbl`,
+  `lgroad`, `rdgrass`, ...). The archived `race07-info/` research pack lists a
+  wider 173-token set with surface categories. Of the 10 distinct rF1-only
+  names flagged by `validate_materials`, **9 contain at least one GTR2 token**
+  (e.g. `PDRT_DIRT`->`dirt`, `RDCP_RUMCAP2GRASS`->`gras`, `SANDO`->`sand`);
+  `DSTRD_TARMAC` has none. This gives a data-driven candidate mapping, but no
+  automatic rename is performed because stage strings reference the original
+  name. Full-tier test: `test_rf1_flagged_materials_map_to_gtr2_specialfx_tokens`.
+
   **Validator caveat:** `validate_materials` flags a small fraction of native
   GTR2 meshes too (69/3,000 sampled), so a warning is not proof of a
   conversion defect. Only 10 distinct rF1-only names are flagged (e.g.

@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 07:00:00 -0500 - Canonical GTR2 material tokens found
+- Extracted 29 authoritative material tokens from GTR2's own `specialfx.tec`; 9/10 rF1-only names flagged by `validate_materials` contain one (e.g. PDRT_DIRT->dirt, SANDO->sand). Recorded as a candidate mapping, not an auto-rename, since stage strings reference originals. Full-tier controlled test added.
+
 ## 2026-11-29 06:30:00 -0500 - Indexed seven new reference folders
 - Documented seven previously unindexed `../` folders in `docs/corpus-reference.md` and `AGENTS.md`: `hat-files/` and `rF2_onlineTools/` (HAT purpose, `HATTarget=True` generation), `race07-info/` (specialfx material mapping), `ISI-Documentation-Archive/` (HDV/ENG/SFX docs), plus three rF2/modding web archives. Added the externally verified HAT generation facts to `docs/format-findings.md`.
 
