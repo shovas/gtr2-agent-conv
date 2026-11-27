@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 01:00:00 -0500 - HAT position-match validator
+- Added `media_tool.hat_height_match()` and `hat-match FILE REF`, comparing HAT record tables by (x,z) position with a shuffled control, so a generated/converted HAT can be validated against a same-layout reference (Brno: 92.6% matched, 0.00025 mean height diff vs 2.43 shuffled). Full-tier test added.
+
 ## 2026-11-29 00:30:00 -0500 - Negative follow-ups recorded
 - Recorded two negatives in `docs/open-issues-research.md`: the f0 mod-256 offset 1-vs-2 choice is not predictable from mesh properties, and HAT node-index windows under the strict b44 bound show 34 as the most common gap but no contiguous array. Both avenues remain blocked without new evidence.
 

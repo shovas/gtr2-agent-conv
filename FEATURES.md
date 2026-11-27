@@ -107,6 +107,7 @@ python3 gmt_tool.py relayout <input.gmt> <output.gmt>   # rebuild offsets after 
 ```bash
 python3 gzip_simbin_tool.py info <file.hat|file.dsi>
 python3 media_tool.py hat-validate <file.hat>   # structural invariants
+python3 media_tool.py hat-match <file.hat> <reference.hat>   # height agreement by (x,z)
 ```
 
 ## 5. Inspect/round-trip FXM/FXA/LMA files (partial)

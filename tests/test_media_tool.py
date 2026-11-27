@@ -1125,6 +1125,26 @@ class MediaToolTest(unittest.TestCase):
         self.assertIn("gMb1.000f", variants)
         self.assertIn("ver008", variants)
 
+    def test_hat_height_match_api_and_cli(self):
+        """The position-based HAT matcher reproduces the cross-game result."""
+        import json
+        import subprocess
+
+        a = ROOT.parent / "GTR2Steam/GameData/Locations/HAT_Dedicated/3Brno.hat"
+        b = ROOT.parent / "Race07Vanilla/GameData/Locations/Brno_2007/2007_Brno.hat"
+        if not (a.is_file() and b.is_file()):
+            self.skipTest("matched cross-game HAT corpus not present")
+        result = media_tool.hat_height_match(
+            media_tool.hat_decompress(a)[0], media_tool.hat_decompress(b)[0])
+        self.assertGreater(result["match_rate"], 0.85)
+        self.assertLess(result["mean_abs_height_diff"], 0.01)
+        self.assertGreater(result["enrichment"], 100)
+        cli = subprocess.run(
+            [sys.executable, str(ROOT / "media_tool.py"), "hat-match",
+             str(a), str(b)], capture_output=True, text=True)
+        self.assertEqual(cli.returncode, 0, cli.stderr)
+        self.assertEqual(json.loads(cli.stdout), result)
+
     def test_hat_validator_corpus_and_metamorphic(self):
         """Structural validator is clean on all HATs and catches a count flip."""
         import subprocess
