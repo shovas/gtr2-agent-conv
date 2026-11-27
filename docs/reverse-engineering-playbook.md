@@ -183,3 +183,10 @@ On 3,002 mesh pairs it matched 32.3% of the time versus 10.4% for a seeded
 shuffled control — a real but partial association, **not** a decoder. This is
 the form a result should take before anyone claims a rule: observed rate,
 control rate, sample count, and an explicit non-claim.
+
+Follow-ups that did **not** sharpen it, so do not repeat them: cumulative
+vertex count of all preceding meshes only reaches 31.6% (vs 1.1% shuffled),
+so the quantity is the immediately preceding mesh, not a running total;
+splitting by previous mesh's stream2/stream3 presence, vertex-count >255, or
+the 1-vs-2 offset by any tested mesh property gives nearly even splits. The
+signal is real but partial, with no known exact rule.
