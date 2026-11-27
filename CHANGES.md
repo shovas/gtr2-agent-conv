@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 05:00:00 -0500 - GTL tree conversion JSON report
+- `gtl_to_gtr2.py --tree --json` emits the conversion report as JSON for batch pipelines; full-tier CLI test updated.
+
 ## 2026-11-29 04:30:00 -0500 - Aligned textures in extract CLI
 - `mas_tool.py extract --as-bmp` now also uses `f12001_texture_to_bmp()`, so F12001 font archives export real BMPs from aligned-scanline members (font.MAS: 13 valid BMPs). Full-tier test added.
 

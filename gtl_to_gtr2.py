@@ -768,10 +768,14 @@ def main(argv=None) -> int:
             templates = {p.name: p for p in tdir.iterdir() if p.is_file()}
         report = convert_tree(args.source, args.target, args.check,
                               templates=templates)
-        print("files={files} trk={trk} config={config} archives={archives} "
-              "other={other}".format(**report))
-        print("changes=" + ",".join(f"{k}:{v}"
-                                    for k, v in sorted(report["changes"].items())))
+        if args.json:
+            import json
+            print(json.dumps(report, indent=2))
+        else:
+            print("files={files} trk={trk} config={config} archives={archives} "
+                  "other={other}".format(**report))
+            print("changes=" + ",".join(f"{k}:{v}"
+                                        for k, v in sorted(report["changes"].items())))
         return 0
     if args.templates:
         ap.error("--templates is only valid with --tree")

@@ -306,7 +306,7 @@ python3 race_gmt.py <file.gmt> --to-gtr2 <out.gmt> --template <gtr2-template.gmt
 ```bash
 python3 gtl_to_gtr2.py <source.gtl> <target.gtr>
 python3 gtl_to_gtr2.py <source.gtl> --check
-python3 gtl_to_gtr2.py <source-dir> <target-dir> --tree [--templates <GTR2-dir>] [--check]
+python3 gtl_to_gtr2.py <source-dir> <target-dir> --tree [--templates <GTR2-dir>] [--check] [--json]
 python3 gtl_to_gtr2.py --validate <GameData-dir> [--json]
 ```
 

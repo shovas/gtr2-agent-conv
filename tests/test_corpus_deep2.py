@@ -7010,6 +7010,15 @@ class CorpusDeep2Test(unittest.TestCase):
                          for p in api_out.rglob("*") if p.is_file()}
             self.assertTrue(cli_files)
             self.assertEqual(cli_files, api_files)
+            import json
+            json_result = subprocess.run(
+                [sys.executable, str(script), str(src), str(check_out),
+                 "--tree", "--check", "--json"],
+                capture_output=True, text=True)
+            self.assertEqual(json_result.returncode, 0, json_result.stderr)
+            self.assertEqual(json.loads(json_result.stdout),
+                             {"trk": 3, "config": 9, "archives": 6,
+                              "other": 18, "files": 36, "changes": {"trk": 3}})
             templates = ROOT.parent / "GTR2Steam/GameData/Locations/Anderstorp"
             if templates.is_dir():
                 result = subprocess.run(
