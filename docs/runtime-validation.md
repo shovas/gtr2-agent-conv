@@ -63,6 +63,43 @@ Tried: `xvfb-run` with 1024x768 and 1280x1024, `LIBGL_ALWAYS_SOFTWARE=1`,
 (disabling d3d9 breaks imports, so not viable). The environment's DRI3/EGL
 setup does not provide a GL context to Wine.
 
+## Decisive control: minimal D3D9 program fails identically (2026-11-27)
+
+To rule out a GTR2-specific problem, a standalone 12-line D3D9 program was
+compiled with `wineg++` against Wine's own headers and run under Xvfb:
+
+```cpp
+#include <windows.h>
+#include <d3d9.h>
+int main() {
+    LPDIRECT3D9 d = Direct3DCreate9(D3D_SDK_VERSION);
+    if (!d) return 1;
+    D3DPRESENT_PARAMETERS p = {};
+    p.Windowed = TRUE;
+    p.SwapEffect = D3DSWAPEFFECT_DISCARD;
+    IDirect3DDevice9* dev = 0;
+    HRESULT hr = IDirect3D9_CreateDevice(
+        d, D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, GetDesktopWindow(),
+        D3DCREATE_SOFTWARE_VERTEXPROCESSING, &p, &dev);
+    return hr == D3D_OK ? (dev ? 0 : 2) : 3;
+}
+```
+
+```
+wineg++ d3dtest.cpp -o d3dtest64.exe -ld3d9   # succeeds
+xvfb-run -a wine d3dtest64.exe                 # exit 3
+```
+
+It fails with the **same** errors as GTR2Dedicated.exe:
+`nodrv_CreateWindow L"The explorer process failed to start"` and
+`wined3d_caps_gl_ctx_create Failed to create a window`. A 32-bit build was
+not possible (`gnu/stubs-32.h` missing), but Wine is a WoW64 build with a
+single shared wined3d, so the 64-bit control exercises the same code path.
+
+**Conclusion:** the D3D failure is entirely environmental (Wine's window/GL
+driver in this container), not a property of GTR2 or of any converted file.
+No amount of conversion work can resolve it; see the unblock list below.
+
 ## What would unblock full runtime validation
 
 - A working X server with Mesa software rendering that Wine can bind to
