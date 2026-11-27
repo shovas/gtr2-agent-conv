@@ -422,3 +422,18 @@ the stock install is untouched, substituted bytes land in the sandbox, and
 siblings remain symlinks. CLI: `python3 runtime_sandbox.py GAME_DIR TARGET
 --substitute REL=FILE`. Unit tests: `tests/test_runtime_sandbox.py`.
 
+
+## Reproduced with the safe sandbox builder; Boot Client negative (2026-11-27)
+
+Using `runtime_sandbox.build_sandbox()` (all substituted files in real
+directories, `assert_no_mutable_symlinks()` empty), the converted Joesville
+TRK/AIW plus converted `.gtr` files were substituted into the Hockenheim
+event. A driven dedicated-server session again wrote a Practice1 result with
+`Scene=...NTHockenheim.TRK` and **`Track Length=656.6953`**, confirming the
+partial runtime acceptance is reproducible with the safe workflow.
+
+Clicking the server UI's `Boot Client` button produced no client track
+loaded: the only `.gtr` opens remained shared archives (`CREW`, `STEX`,
+`TEAMMAPS`, `SKIES_*`), with 0 SEH errors. So the built-in client-boot path
+does not provide geometry acceptance either.
+
