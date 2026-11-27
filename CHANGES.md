@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 23:50:00 -0500 - Indexed three new reference folders
+- Surveyed the three newly appeared `../` folders: `open-rFactor/` (educational rF1 distribution), `Plugins-rFactorSharedMemoryMap.dll/` (rfSharedStruct.hpp byte-identical to the existing index) and `Plugins-deltabest.dll/` (MIT plugin; InternalsPlugin.hpp differs only in whitespace). No new format semantics; documented in AGENTS.md and docs/corpus-reference.md.
+
 ## 2026-11-29 23:30:00 -0500 - Expand material validator vocabulary
 - Adopted the 29 canonical terrain/material tokens from GTR2's `specialfx.tec` as `validate_materials.SURFACE_PREFIXES`. Native GTR2 archive warnings drop 433→66 (40 archives); rF1 470→416. Converted RaceGMT outputs remain clean. Tests updated.
 
