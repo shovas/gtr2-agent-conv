@@ -1,3 +1,31 @@
+## Replay `small_b` quantization negative (2026-11-27)
+
+Tested 779 Brno replay samples for fixed-point quantization: scaling by
+100/1000/10000/100000 yields gcd=1 and exact-representation fractions of
+0.001/0/0/0. The channel is a continuous float, not a discrete or fixed-point
+state (e.g. gear or quantized control input). Combined with its slow
+autocorrelation and smoothed-steering association, it behaves like a filtered
+continuous vehicle state, but no unit/identity is established.
+
+## CUBE MTS 4.10/4.20 near-duplicate comparison (2026-11-27)
+
+Found 3,028 same-name MTS files present in both 4.10 and 4.20 corpora. The
+true near-duplicate `SKIDOUT01.MTS` (NT2004 4.10 vs NascarSimRacing 4.20,
+both 1,332 bytes, same internal name) shows:
+- `parse_mesh_table()` offset shifts by exactly **4 bytes** (492 → 496);
+- the global table header is otherwise identical
+  `(1, 328, 6, 392, 6, 608, 0, 704)`;
+- submesh `(marker=130, index=0, count_a=8, offset_a=704)` is identical,
+  but `count_b` differs **16 → 14** at the same `offset_b=1088`;
+- stream bytes at 704/1088 are not a simple byte shift: 4.10 interleaves
+  u16 pairs with zero padding while 4.20 uses a different packing, and the
+  f32 interpretations differ substantially.
+
+**Unblock:** identify the count_b element-size/packing rule from a producer
+trace or a larger set of exact-size near-duplicates. Raw file diff shows a
+4-byte insertion at offset 212 and 241-byte identical runs afterwards, so
+most payload bytes are shared but the stream encoding differs.
+
 ## CUBE MTS 4.20 submesh stream encoding (2026-11-29)
 
 Compared 4.10 and 4.20 submesh tables. 4.20 files parse geometry via the

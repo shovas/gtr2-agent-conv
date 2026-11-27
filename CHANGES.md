@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 22:30:00 -0500 - MTS 4.20 near-duplicate and small_b negatives
+- Compared the exact-size SKIDOUT01.MTS 4.10/4.20 pair: table offset shifts by 4, stream_b count changes 16→14, and payload packing differs. Recorded the precise unblock (producer trace or larger near-duplicate set). Also recorded that replay `small_b` is not fixed-point quantized at any tested scale.
+
 ## 2026-11-29 22:00:00 -0500 - Transfer rF1 TDF track variables to GDB
 - rF1 ships 12 per-track `.tdf` files that GTR2 does not read; GTR2 puts the same `[TRACKVARS]` names in the track GDB. `text_convert` now transfers them with canonical GTR2 spelling (10 keys for Joesville), skipping the two rF1-only grip keys. Full-tier test added; tree still validates with 0 problems.
 
