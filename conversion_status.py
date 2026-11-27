@@ -72,8 +72,8 @@ BLOCKERS = (
      "detail": "no relationship to decoded geometry, UVs, normals or axes"},
     {"issue": "replay small_b identity", "state": "open",
      "detail": "slow state channel correlated with smoothed steering, no unit mapping"},
-    {"issue": "FXM animation binding", "state": "open",
-     "detail": "TRS keyframes decode; mesh binding semantics unresolved"},
+    {"issue": "FXM animation binding", "state": "partial",
+     "detail": "TRS keyframes decode; .ani files give explicit GMT/LMA/Motions bindings (7,489 records), but in-game animation playback is untested"},
     {"issue": "CUBE MTS 4.20 / skinned geometry", "state": "open",
      "detail": "different record structure; external bone data required"},
 )

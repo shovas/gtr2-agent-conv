@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 21:30:00 -0500 - FXM/LMA mesh binding decoded from ANI files
+- `simbin_text_tool.parse_ani()` decodes 1,576 Motions blocks and 7,489 Object bindings across 240 `.ani` files, each linking a GMT mesh, LMA skeleton and named motion group. `validate_ani()` reports zero undeclared references; full-tier test added. Status dashboard updated.
+
 ## 2026-11-29 21:00:00 -0500 - Conversion status dashboard
 - Added `conversion_status.py [--json]`: a reproducible per-family report of conversion status, measured coverage, validation method and remaining gaps, plus an explicit blocker list. Provides a single lookup for project scope instead of scanning multiple docs. Full-tier test added.
 

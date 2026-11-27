@@ -710,6 +710,15 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
   skinned meshes with NaN/huge local coordinates require external bone data
   and are skipped. Full-tier test: `test_mts_converts_to_gtr2_gmt`.
 
+- **FXM/LMA→mesh binding resolved from `.ani` files**: 240 `.ani` files
+  declare 1,576 named `Motions=` blocks with `Files=` lists of LMA animations
+  (separated by `|||`) and 7,489 `Object=` blocks, each binding a `MeshFile`
+  (GMT), `ActorFile` (LMA skeleton), `Motions` group, `Pos` and `AutoRotate`.
+  `simbin_text_tool.parse_ani()` decodes the chain and `validate_ani()` finds
+  zero undeclared motion references across all files. This is the verified
+  animation→mesh binding that FXM node TRS keys alone could not provide.
+  Full-tier test: `test_ani_binding_corpus`.
+
 - **AIW validator consistency**: `validate_aiw_waypoints()` now accepts
   all-zero `WP_PERP` vectors (9,252 sampled records) and the single known
   0.946-norm vector in RF1Vanilla `Lienz_24H.AIW`, matching the documented

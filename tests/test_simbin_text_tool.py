@@ -262,6 +262,28 @@ class SimbinTextToolTest(unittest.TestCase):
         self.assertEqual(info.bars[0].pos, (1.0, 0.0, 0.0))
         self.assertEqual(info.bars[0].neg, (2.0, 0.0, 0.0))
 
+    def test_ani_binding_corpus(self):
+        """ANI files bind GMT meshes to LMA skeletons and motion groups."""
+        import glob
+
+        files = objects = motions = 0
+        for name in glob.glob(str(ROOT.parent / "**" / "*.ani"), recursive=True):
+            path = Path(name)
+            if not path.is_file():
+                continue
+            parsed = stt.parse_ani(path.read_bytes())
+            self.assertEqual(stt.validate_ani(parsed), [], path.name)
+            files += 1
+            objects += len(parsed["objects"])
+            motions += len(parsed["motions"])
+            for binding in parsed["objects"][:1]:
+                self.assertTrue(binding.get("meshfile", "").lower().endswith(".gmt"))
+                self.assertTrue(binding.get("actorfile", "").lower().endswith(".lma"))
+                self.assertTrue(binding.get("motions"))
+        self.assertGreaterEqual(files, 200)
+        self.assertGreaterEqual(objects, 7000)
+        self.assertGreaterEqual(motions, 1500)
+
     def test_set_parser_corpus(self):
         """.set files: 22 CUBEASF camera/scene descriptors parse fully."""
         import glob
