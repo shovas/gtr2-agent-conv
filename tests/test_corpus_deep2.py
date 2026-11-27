@@ -6832,6 +6832,40 @@ class CorpusDeep2Test(unittest.TestCase):
             self.assertGreaterEqual(identical, minimum, corpus)
             self.assertLessEqual(identical, total, corpus)
 
+    def test_racegmt_corpus_converts_to_gtr2(self):
+        """Most Race07 DLC meshes decode and rebuild as parseable GTR2 GMTs."""
+        import glob
+        import gmt_format as gf
+        import mas_tool
+        import race_gmt
+
+        archive = next((p for p in (ROOT.parent / "GTR2Steam/GameData").rglob("*.gtr")
+                        if p.is_file()), None)
+        if archive is None:
+            self.skipTest("GTR2 template corpus not present")
+        _mtype, entries = mas_tool.read_archive(archive)
+        template = next((e.data for e in entries
+                         if e.name.lower().endswith(".gmt") and e.data), None)
+        if template is None:
+            self.skipTest("no GTR2 GMT template")
+        decoded = converted = 0
+        for name in glob.glob(str(ROOT.parent / "Race07Complete/**/*.gmt"),
+                              recursive=True):
+            data = Path(name).read_bytes()
+            if data[:8] != race_gmt.MAGIC:
+                continue
+            if not race_gmt.read_racegmt_submeshes(data):
+                continue
+            decoded += 1
+            out = race_gmt.to_gtr2_gmt(data, template)
+            if out is None:
+                continue
+            parsed = gf.parse_gmt("converted.gmt", out)
+            if parsed.meshes and parsed.meshes[0].record.vertex_count > 0:
+                converted += 1
+        self.assertGreaterEqual(decoded, 500)
+        self.assertEqual(converted, decoded)
+
     def test_gtl_gtr2_same_name_copy_convert_split(self):
         """Shared GMTs are byte-identical; shared text configs always differ."""
         configs = (".aiw", ".cam", ".gdb", ".trk", ".aud", ".car",

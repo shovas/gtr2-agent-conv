@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 22:30:00 -0500 - RaceGMT conversion scales to corpus
+- Relaxed RaceGMT submesh validation: the per-vertex 3-word field is a unit normal (upward faces `(0,1,0)`), and index buffers are triangle lists rather than vertex-count strips. 574/643 DLC meshes now decode (350k vertices, 149k triangles) and all 574 rebuild as parseable GTR2 GMTs. Corpus-wide full-tier test added.
+
 ## 2026-11-28 22:00:00 -0500 - RaceGMT to GTR2 mesh conversion
 - Added `race_gmt.py <file> --to-gtr2 <out> --template <gtr2.gmt>` and `to_gtr2_gmt()`: decoded submesh vertices/UVs/indices are rebuilt as a one-submesh GTR2 GMT via `vrl_to_gmt.build_gmt()` (PEOPLE_STAND_01 → 144 vertices/144 indices, re-parsed). In-game correctness untested. Full-tier test added.
 

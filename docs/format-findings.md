@@ -70,8 +70,14 @@ regression tests or an explicitly documented negative.
   record indices (0,1,2), (3,4,5), ... address the matching group's vertices.
   `race_gmt.read_racegmt_submeshes()` decodes all five, so both triangle
   indices and UVs are resolved. Full-tier test:
-  `test_submeshes_resolve_triangle_indices`. Column 4 of the triangle record
-  remains unassigned.
+  `test_submeshes_resolve_triangle_indices`. Validation must treat the
+  three 64-byte words as a **unit normal**, not a horizontal axis: upward
+  faces carry `(0,1,0)`. Index buffers are triangle lists (often 1.5x the
+  vertex count), not vertex-count strips. With those relaxations
+  `read_racegmt_submeshes()` decodes **574/643** Race07 DLC meshes (350,389
+  vertices, 148,773 triangles), and all 574 rebuild via `to_gtr2_gmt()` into
+  parseable GTR2 GMTs. Full-tier test: `test_racegmt_corpus_converts_to_gtr2`.
+  Column 4 of the triangle record remains unassigned.
   Column 4 keeps the same spatial coefficients across variants but has a
   residual of 0.22 under a linear fit; a transform search over x, -x, |x|,
   log|x|, sqrt|x|, 1/x, x^2, the perpendicular horizontal projection and

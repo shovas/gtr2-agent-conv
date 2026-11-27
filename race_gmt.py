@@ -208,9 +208,6 @@ def read_racegmt_submeshes(data: bytes) -> list[dict]:
     exactly 3x the 8/12/8/14/6 triangle records of the opening table, whose
     sequential indices address the matching group's vertex array.
     """
-    records = read_triangle_records(data)
-    if not records:
-        return []
     out = []
     for position in range(len(data) - 12):
         magic, group, count = struct.unpack_from("<III", data, position)
@@ -225,7 +222,9 @@ def read_racegmt_submeshes(data: bytes) -> list[dict]:
             row = verts_at + 64 * k
             y, z, x = struct.unpack_from("<3f", data, row)
             cos, zero, sin = struct.unpack_from("<3f", data, row + 12)
-            if not (abs(zero) < 1e-5 and abs(cos) > 0.05 and abs(sin) > 0.05):
+            # The three words are a unit normal/facing vector; horizontal
+            # faces carry (0,1,0), so no single component is guaranteed.
+            if not 0.99 < cos * cos + zero * zero + sin * sin < 1.01:
                 break
             uvs = struct.unpack_from("<8f", data, row + 32)
             if uvs[0:2] != uvs[2:4] or uvs[4:6] != uvs[6:8]:
@@ -234,10 +233,10 @@ def read_racegmt_submeshes(data: bytes) -> list[dict]:
         if len(vertices) != count:
             continue
         index_count = struct.unpack_from("<I", data, index_at)[0]
-        if index_count != count:
+        if not 0 < index_count <= 8 * count or index_at + 4 + 2 * index_count > len(data):
             continue
-        indices = struct.unpack_from(f"<{count}H", data, index_at + 4)
-        if indices != tuple(range(count)):
+        indices = struct.unpack_from(f"<{index_count}H", data, index_at + 4)
+        if any(index >= count for index in indices):
             continue
         out.append({"group": group, "vertices": vertices, "indices": indices})
     return out
