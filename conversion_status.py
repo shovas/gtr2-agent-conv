@@ -63,7 +63,7 @@ FAMILIES = (
 
 BLOCKERS = (
     {"issue": "in-game acceptance", "state": "blocked",
-     "detail": "Wine starts GTR2Dedicated and loads GameData/HAT names, but D3D window creation fails"},
+     "detail": "with persistent Xvfb + Wine x11 driver + llvmpipe, GTR2Dedicated initialises D3D and opens 83 GDB / 34 TRK files with 0 SEH errors; no converted track has been loaded into a session yet"},
     {"issue": "GMT f0 exact encoding", "state": "open",
      "detail": "mod-256 low-byte signal and family-level material association only"},
     {"issue": "RaceGMT column 4", "state": "open",

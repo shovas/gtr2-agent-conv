@@ -161,11 +161,37 @@ Verified results:
   messages from wined3d/WGL. With a real `CreateWindowA` window the control
   hangs instead. `GALLIUM_DRIVER=softpipe`, GL-version overrides and
   `MESA_LOADER_DRIVER_OVERRIDE=swrast` did not get past this.
-- **Precise current unblock:** a Wine/wined3d build compatible with this Mesa
-  llvmpipe version (the SEH frames suggest a Wine 11.21/WGL bug), or a native
-  D3D9 implementation. The earlier minimal-D3D control remains valid as a
-  demonstration that the failure is not GTR2-specific, but it was **not**
-  evidence that no GL context could ever be created.
+- **The SEH failure was specific to the minimal control program, not to
+  GTR2.** Running the real `GTR2Dedicated.exe -h` under the same setup (after
+  copying `mfc100.dll` into the fresh prefix) gives exit 124 from a 75-second
+  timeout — i.e. the process **stays alive** — with a working llvmpipe GL
+  context and **zero** `invalid frame` SEH errors. The minimal control's
+  `GetDesktopWindow()`/window path, not wined3d itself, triggered the crash.
 
-The converted track has therefore not advanced to in-game acceptance; the
-runtime gap is now narrower and better characterised.
+## GTR2Dedicated now reaches a D3D-initialised, GameData-loaded state (2026-11-27)
+
+```
+cd ../GTR2Steam
+export PATH="$HOME/wine/bin:$PATH"
+export WINEPREFIX=/tmp/opencode/winefresh          # fresh prefix, Graphics=x11, mfc100.dll
+DISPLAY=:77 LIBGL_ALWAYS_SOFTWARE=1 \
+  WINEDEBUG=+file timeout 75 wine GTR2Dedicated.exe -h > trace.txt 2>&1
+```
+
+Observed:
+
+- `wined3d_guess_card` with `GL_RENDERER "llvmpipe (LLVM 22.1.8, 256 bits)"`;
+  **no** `wined3d_caps_gl_ctx_create` failures and **0** SEH frame errors.
+- **958** distinct GameData paths opened, including **83 `.gdb`** and
+  **34 `.trk`** files across the stock tracks (e.g.
+  `GAMEDATA\LOCATIONS\Anderstorp\3ANDERSTORP.trk`).
+- `HAT_Dedicated` is enumerated via directory scans.
+
+This promotes the earlier file-trace check from a pre-D3D state to a
+**D3D-initialised runtime consumer check**: the engine opens exactly the
+`.gdb`/`.trk` files our converters emit, with graphics up. It is still **not**
+in-game acceptance — no converted track has been selected for a session, and
+the dedicated-server configuration schema (`DedicatedServer.ini`, `TrackName`,
+`SessionRace`, ...) is not yet established. **Precise unblock:** determine the
+dedicated-server session configuration needed to actually load and race a
+converted track, then observe whether it accepts the converted files.
