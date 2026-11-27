@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 20:30:00 -0500 - AIW validator consistency
+- Aligned `validate_aiw_waypoints()` with `validate_aiw_path_perp()` on zero-norm and the known Lienz 0.946-norm WP_PERP vectors. All 39 converted rF1 AIWs now pass waypoint/path/TELEPORT validation. Documented that 22 rF1-only AIW keys survive conversion without a verified GTR2 mapping (no speculative drop).
+
 ## 2026-11-29 20:00:00 -0500 - MTS family in batch converter and runtime findings
 - Added a fifth `mts` family to `batch_convert.py` (F12002/F1C/NascarSimRacing, 4.10 magic filter); CLI test updated. Documented that Xvfb provides working Mesa llvmpipe GLX but Wine still cannot create a D3D window at any depth, and that i686 Mesa GL libraries would need local RPM extraction (no passwordless sudo) — the runtime gap remains open.
 

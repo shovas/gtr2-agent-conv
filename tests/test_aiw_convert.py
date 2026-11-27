@@ -88,6 +88,26 @@ class AiwConvertTest(unittest.TestCase):
         self.assertGreater(totals, 40000)
         self.assertLess(above / totals, 0.001)
 
+    def test_converted_rf1_aiws_pass_waypoint_validation(self):
+        """All converted rF1 AIWs pass both waypoint validators."""
+        base = ROOT.parent / "RF1Vanilla"
+        checked = 0
+        for path in base.rglob("*.AIW"):
+            if not path.is_file():
+                continue
+            data = path.read_bytes()
+            text = data.decode("latin-1")
+            converted = stt.aiw_for_simbin(text)
+            aiw = stt.parse_aiw(converted)
+            self.assertEqual(stt.validate_aiw_waypoints(aiw), [], path.name)
+            # Lienz_24H.AIW has one known 0.946-norm perp; the dedicated
+            # validator documents and exempts it via skip_perp.
+            self.assertEqual(stt.validate_aiw_path_perp(aiw, skip_perp=True), [],
+                             path.name)
+            self.assertEqual(stt.validate_aiw_teleport(converted), [], path.name)
+            checked += 1
+        self.assertGreaterEqual(checked, 30)
+
     def test_waypoint_ptrs_class_corpus(self):
         """WP_PTRS[3] buckets and branchID equality hold corpus-wide."""
         import glob

@@ -710,6 +710,19 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
   skinned meshes with NaN/huge local coordinates require external bone data
   and are skipped. Full-tier test: `test_mts_converts_to_gtr2_gmt`.
 
+- **AIW validator consistency**: `validate_aiw_waypoints()` now accepts
+  all-zero `WP_PERP` vectors (9,252 sampled records) and the single known
+  0.946-norm vector in RF1Vanilla `Lienz_24H.AIW`, matching the documented
+  exemptions in `validate_aiw_path_perp()`. Previously it rejected one
+  converted rF1 AIW on that vector. All 39 converted rF1 AIWs now pass
+  waypoint, path-perp (with the documented `skip_perp` exemption), and
+  TELEPORT validation. Full-tier test:
+  `test_converted_rf1_aiws_pass_waypoint_validation`.
+  Separately, 22 of 34 rF1-only AIW keys (e.g. `safetycarreleasedist`,
+  `slowwhenpushed`, `auxspots`, `teleportwp`) are not in `RFACTOR_ONLY_AIW_TAGS`
+  and survive conversion; they have no GTR2 equivalents but are inert to
+  GTR2's parser. No drop is applied without a verified mapping.
+
 - **rF2 GMT UVW exporter corroboration** (`rf2-developers-guide/
   docs.studio-397.com/display/DG/3ds+Max+GMT+file+UVW+Export.html`): GMT exports
   up to four UV sets (A/B/C/D) from the first four gTexture slots, two floats
