@@ -684,6 +684,15 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
 
 ## 5. HAT placement in converted trees
 
+- **Producer-side HAT evidence (archived ISI "Creating Tracks" guide,
+  `../rF2_onlineTools/`):** tracks declare `HATTarget=True` on their MTS
+  instance definitions; the HAT is generated on first load from the track
+  geometry, AIW and GDB, and `Always Rebuild HAT` in the PLR forces refresh.
+  An independent forum note (`../hat-files/`) calls it a "Height Above
+  Terrain" cache synthesized from `AIW+TRK+GDB`. No binary spec is published,
+  and a report that GTR2-generated HATs work in Race07 while rF1-generated
+  ones do not matches our cross-game 0% record-order reuse. Reference only.
+
 - **GTL→GTR2 copy-vs-convert rule** (same basenames under `GameData`): 25/26
   shared `.gmt` meshes are **byte-identical** and safe to copy; the one
   exception (`Teams/M-FPDriver.gmt`) is a genuinely different mesh, not a

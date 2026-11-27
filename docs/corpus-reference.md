@@ -95,6 +95,21 @@ the quick-lookup index. Sizes/counts are approximate (surveyed 2026-11-23/24).
 
 `media_tool.identify()` is now content-based across the corpora: 21,180 plain GMTs (ISI magic @8), 45,359 JCA GMTs, 643 `RaceGMT\0` meshes, 1,090 `.mas` + all `.gtr`/`.gtl`/`.bmw` archives (6 variants), 1,640 PNG, 479 GIF87a/GIF89a (plus JPEG/PNG/HTML masquerading as `.gif`), 188 gzip `.hat` track files, 1,982 NASCAR `.hdr`/`.dat` MP3 pairs, 21,141 `.svm` setups, 2,763 `.veh` / 156 `.hdv` / 294 `.gen` descriptors, 123 `.scr` / 409 `.cin` scripts, 22 CUBEASF `.set` camera files, and plain `.rcd/.gdb/.car/.aiw/.cam/.hed/.dmg/.grb/.cas/.sp/.inccar` text configs. JCA-wrapped configs decrypt via `decrypt_jca_text()`. Parsers in `simbin_text_tool.py`: `parse_veh`, `parse_hdv`, `parse_hdc` (via `parse_hdv`), `parse_svm`, `parse_set`, `parse_sp`, `parse_skn`, `parse_hed`, `parse_rcd`, `parse_grb`, `parse_eng`, `parse_cin`, `parse_scr`, `parse_gdb`/`parse_car`, `parse_dmg`, `parse_aud`, `parse_cam`, `parse_scn`; plus `read_anm`, `hdr_dat_mp3`, `hat_decompress`, `fxm_tool`, `gmt_semantic`. Conversion helpers: `gtl_to_gtr2.validate_svm_setup()` / `rf1_svm_paths()`. Encrypted `//[[gM` configs are now decoded by `isi_gm_crypt.py` (10 `.svm` + 18 `gMb1.002f` files); see `docs/tools-reference.md` for the tool provenance. Remaining opaque: GTTF frame fields 7/9/40/44/48/52/56/60 (with +32 and +36 structurally characterized), `PHYSICS.PHS`, GSC-encrypted GMT bulk geometry is now decoded by `gmt_semantic.decode_gsc_member()` (correct ISI skip=4; 150/150 sampled members valid), `.hdr` index table, 4 E30 wiper FXM files (MSVC debug-fill garbage).
 
+## Documentation / research reference folders (reviewed 2026-11-29)
+
+None of these contain game data to copy; they are offline web/doc archives. All
+are **read-only format references**, and several directly support ongoing work.
+
+| Folder | Size / files | Key facts |
+|---|---|---|
+| `hat-files/` | 12K / 2 | Two text notes on HAT purpose. HAT = **Height Above Terrain** cache synthesized from `AIW + TRK + GDB`, generated on first track load, must be deleted after track edits; no public binary spec. Forum report: GTR2-generated HATs work in Race07, rF1-generated ones do not. Supports our `docs/format-findings.md` HAT section. |
+| `rF2_onlineTools/` | 6.7M / 40 | Archived meetme.bplaced.net ISI **"Creating Tracks"** guide. `HATTarget=True` on track MTS instance definitions is what feeds HAT generation; HAT is a collision model generated on first load, and `Always Rebuild HAT` in the PLR forces refresh. Directly relevant to HAT investigation. |
+| `race07-info/` | 213M / 959 | `race07-materials.txt` forum thread plus a `specialfx.tec` research pack (456 DDS, 310 GMT, 160 WAV, PSDs). Documents material-name→grip/bump mapping (`RoadDryGrip`, `RoadWetGrip`, `RoadBumpAmp`, …) and "undefined" material prefixes (MAT/TEX/OBJ/ELEM/digits). Directly relevant to material-prefix and RaceGMT work. |
+| `ISI-Documentation-Archive/` | 2.5M / 17 | Archived ISI/Automobilista docs: `HDV File.md`, `Engine File (INI, ENG).md`, `SFX File.md`, `Gen File.md`, Niels Heusinkveld tire/engine PDFs, sound docs. Cross-check for `simbin_text_tool` config semantics. |
+| `rf2-developers-guide/` | 163M / 730 | Archived docs.studio-397.com rF2 developer guide (HTML): `GMT Converter.html`, `3ds Max GMT file UVW Export.html`. Contains the "Max List Verts 65535" note already recorded in `docs/format-findings.md`. rF2 reference only. |
+| `rf2-modding-resources/` | 79M / 445 | Archived studio-397.com modding resources (HTML, 12 ZIPs, 11 PDFs). rF2 reference only. |
+| `mojo66/` | 604K / 28 | Archived mojo66.de site (HTML/JS/images), including "How to Mod GTR Evolution" cited for cross-game HAT compatibility. Reference only. |
+
 ## Practical rules
 
 - These folders are **always available** for reference, lookup, and cross-checking during any task.

@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 06:30:00 -0500 - Indexed seven new reference folders
+- Documented seven previously unindexed `../` folders in `docs/corpus-reference.md` and `AGENTS.md`: `hat-files/` and `rF2_onlineTools/` (HAT purpose, `HATTarget=True` generation), `race07-info/` (specialfx material mapping), `ISI-Documentation-Archive/` (HDV/ENG/SFX docs), plus three rF2/modding web archives. Added the externally verified HAT generation facts to `docs/format-findings.md`.
+
 ## 2026-11-29 06:00:00 -0500 - f0 high-byte follow-up negative
 - Recorded that within the f0 mod-256 matching subset, `high == low+1` holds only 46.8% (vs 40.2% overall), so the high byte is not a simple successor. Stopped the hours-long full batch verification (GSC family, ~28k files written) since it is verification-only and consuming a full CPU core.
 
