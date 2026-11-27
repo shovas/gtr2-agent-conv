@@ -304,3 +304,29 @@ Tried without success:
 renderer), or a code-level bypass of this configuration gate. Until then the
 client path cannot load any track — converted or stock — so the dedicated
 server remains the only runtime harness that reaches a session.
+
+## Converted track accepted in a completed dedicated-server session (2026-11-27)
+
+A controlled substitution proved the engine **parses converter output**, not
+just opens the file:
+
+- Sandbox `GameData/Locations/Hockenheim/NTHockenheim.trk` and
+  `NTHockenheim.AIW` were replaced with the converted rF1 Joesville TRK/AIW;
+  converted `.gtr` archives were placed beside them.
+- The dedicated server was driven to `Start` and **completed a Practice1
+  session**, writing `UserData/Log_Dedicated/Results/Probe_..._Practice1.txt`
+  with `Scene=GAMEDATA\LOCATIONS\Hockenheim\NTHockenheim.TRK`,
+  `AIDB=...NTHockenheim.AIW` and **`Track Length=656.6953`**.
+- The stock Hockenheim GDB declares `Length = 2.294 mi/3.692 km`, and an
+  earlier unmodified session wrote `Track Length=3685.7964`. The converted
+  Joesville GDB declares `Length = .656 KM / .41 Miles`. The change to
+  656.6953 m therefore comes from the **converted track files**, proving the
+  engine consumed and used them. Zero SEH errors.
+
+This is the first **game-accepted** consumption of converter output: a real
+GTR2 process ran a full session using converted rF1 TRK/AIW data. Limits:
+the dedicated server still did not open the converted `.gtr` mesh archives
+(only `CREW.GTR`/`STEX.GTR`/`TEAMMAPS.GTR` were loaded), so **geometry
+acceptance remains unverified**, and the client path is still blocked by the
+VRAM/crash issue above.
+
