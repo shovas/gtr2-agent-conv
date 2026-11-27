@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 15:00:00 -0500 - HAT on-disk node-array negative
+- Searched HAT tails with the corrected b40 index bound: valid node-index windows are 27-36x enriched over a shuffled control but uniformly distributed across all 34 byte phases (max/mean 1.05, longest stride-34 run 5). Rules out a contiguous on-disk 34-byte node array; the typed-tree framing transform remains undecoded. Permutation-controlled full-tier test added.
+
 ## 2026-11-28 14:30:00 -0500 - HAT 34-byte node frame pinned from code
 - Pinned the HAT node frame field offsets from GTL.exe code evidence: exact 34-byte read, 21-bit field at +24, packed pair at +28, u16 at +32, six u32 child fields at +0..+23, three indices into the 16-byte record table, and a signed control byte dispatching node-count vs 16-byte-record branches at a 92-byte runtime stride. Full-tier code-evidence test added; the on-disk framing transform remains undecoded.
 

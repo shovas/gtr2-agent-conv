@@ -6261,6 +6261,47 @@ class CorpusDeep2Test(unittest.TestCase):
             checked += 1
         self.assertGreaterEqual(checked, 2)
 
+    def test_hat_tail_node_index_windows_have_no_34byte_phase(self):
+        """Valid node-index windows are enriched but not 34-byte aligned."""
+        import random
+        import gzip_simbin_tool as gz
+        import media_tool as mt
+
+        def valid(body, offset, b40):
+            u24, u28 = struct.unpack_from("<II", body, offset + 24)
+            return ((u24 & 0x1FFFFF) < b40
+                    and (((u28 & 0x3FF) << 11) | (u24 >> 21)) < b40
+                    and (u28 >> 10) < b40)
+
+        checked = 0
+        for name in ("3Brno.hat", "3Monza.hat"):
+            path = ROOT.parent / "GTR2Steam/GameData/Locations/HAT_Dedicated" / name
+            if not path.is_file():
+                continue
+            payload = gz.decompress(str(path))
+            body = payload[payload.find(b"generated\x00") + 10:]
+            b40 = mt.hat_declared_counts(payload)[2]
+            b44 = mt.hat_declared_counts(payload)[1]
+            start = 48 + 16 * b44
+            end = len(body) - 34
+            hits = {off for off in range(start, end) if valid(body, off, b40)}
+            self.assertGreater(len(hits), 0)
+            shuffled = bytearray(body)
+            random.seed(2026)
+            random.shuffle(shuffled)
+            control = sum(valid(shuffled, off, b40)
+                          for off in range(start, end, 8)) * 8
+            self.assertGreater(len(hits) / (end - start),
+                               10 * control / (end - start))
+            phases = collections.Counter(off % 34 for off in hits)
+            totals = collections.Counter(off % 34 for off in range(start, end))
+            rates = {k: phases[k] / totals[k] for k in range(34)}
+            mean_rate = len(hits) / (end - start)
+            self.assertLess(max(rates.values()) / mean_rate, 1.5, name)
+            checked += 1
+        if not checked:
+            self.skipTest("GTR2 HAT corpus not present")
+
     def test_hat_trailing_stream_is_not_plain_float_records(self):
         """Float plausibility in the tail is explained by its byte histogram."""
         import random

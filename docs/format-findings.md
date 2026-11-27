@@ -511,7 +511,17 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
   loops over nodes at a **92-byte runtime stride** (`add ebx,0x5c`), with a
   signed control byte at `0x4510e9` dispatching: -1/-2 select one/two nodes,
   non-negative tags take the 16-byte-record branch at `0x451183`. Full-tier
-  test: `test_hat_34byte_node_field_framing_code_evidence`. On real
+  test: `test_hat_34byte_node_field_framing_code_evidence`. A direct on-disk
+  search for the node frame was run with the **correct bound** (indices are
+  compared against the b40 16-byte-table count, not b44): windows whose three
+  index fields are valid are strongly enriched in the tail (3.1% of offsets in
+  3Brno, 2.9% in 3Monza, versus 0.1% for a distribution-preserving byte shuffle
+  and 0.05–0.07% inside the record table), but their offsets are **uniform
+  across all 34 phases** (max/mean rate 1.05) and the longest run at stride 34
+  is 5. So the tail does contain node-like index fields, but not as a contiguous
+  34-byte-aligned array — consistent with an interleaved typed tree and with
+  the framing transform remaining undecoded. Full-tier test:
+  `test_hat_tail_node_index_windows_have_no_34byte_phase`. On real
   files, however, the raw tail bytes do not form such a node array: no 34-byte
   phase yields u32 words that are valid record indices, and no embedded zlib
   framing was found, so an additional stream framing layer remains unresolved.
