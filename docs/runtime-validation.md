@@ -131,3 +131,41 @@ functional in-game acceptance (driving). This setup reaches only the third.
   failed with `ShellExecuteEx failed: Module not found`.
 - **What would unblock:** a Wine build with working wined3d window creation,
   or a headless loader that consumes `.gdb`/`.trk`/`.hat` without D3D.
+
+## Runtime progress: GL context now works, device creation still fails (2026-11-27)
+
+A follow-up control refined the earlier "purely environmental" conclusion.
+The decisive difference is **how the X display is provided**: `xvfb-run -a
+wine ...` did not propagate `DISPLAY` into the Wine processes reliably, so
+`winex11.drv` never initialised and `nodrv_CreateWindow` fired. A persistent
+Xvfb plus an explicit x11 driver setting gets much further:
+
+```sh
+export PATH="$HOME/wine/bin:$PATH"
+export WINEPREFIX=/tmp/opencode/winefresh
+wineboot -i
+wine reg add 'HKCU\Software\Wine\Drivers' /v Graphics /t REG_SZ /d x11 /f
+Xvfb :77 -screen 0 1280x1024x24 &
+DISPLAY=:77 LIBGL_ALWAYS_SOFTWARE=1 wine d3dtest64.exe
+```
+
+Verified results:
+
+- `wined3d_guess_card` now reports
+  `GL_RENDERER "llvmpipe (LLVM 22.1.8, 256 bits)"` — a **real GL context is
+  created**, so the old `wined3d_caps_gl_ctx_create Failed to create a window`
+  blocker is a *configuration artifact*, not an intrinsic container limit.
+- `Direct3DCreate9` succeeds, but `IDirect3D9_CreateDevice(...D3DDEVTYPE_HAL,
+  D3DCREATE_SOFTWARE_VERTEXPROCESSING...)` still returns a failure HRESULT
+  (control exit 3) and emits repeated `err:seh:call_seh_handlers invalid frame`
+  messages from wined3d/WGL. With a real `CreateWindowA` window the control
+  hangs instead. `GALLIUM_DRIVER=softpipe`, GL-version overrides and
+  `MESA_LOADER_DRIVER_OVERRIDE=swrast` did not get past this.
+- **Precise current unblock:** a Wine/wined3d build compatible with this Mesa
+  llvmpipe version (the SEH frames suggest a Wine 11.21/WGL bug), or a native
+  D3D9 implementation. The earlier minimal-D3D control remains valid as a
+  demonstration that the failure is not GTR2-specific, but it was **not**
+  evidence that no GL context could ever be created.
+
+The converted track has therefore not advanced to in-game acceptance; the
+runtime gap is now narrower and better characterised.

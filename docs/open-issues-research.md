@@ -148,6 +148,16 @@ records from 120 RaceGMT files, column 4 also has weak/no correlation with the
 other four record columns (|r| ≤ 0.52). Do not pursue area/edge proxies further
 without a new structural hypothesis.
 
+## RaceGMT column 4: UV-area hypothesis — negative (2026-11-27)
+
+Tested UV-derived and mesh-center features on `PEOPLE_STAND_01` (48 records):
+UV triangle area r=+0.768 (max error 4.115), UV perimeter r=+0.766 (max error
+1.144), centroid-to-mesh-center distance r=-0.028, nearest-center distance
+r=-0.125. These are new features (not in the earlier x/y/z/U/axis/projection/
+hypot/ordinal/group/facing list), but none matches column 4 exactly, so the
+value remains unassigned. Do not pursue UV-area proxies without a new
+structural hypothesis.
+
 ## RaceGMT column 4 feature search (2026-11-29)
 
 Tried to derive triangle-record column 4 from the decoded quantities on
