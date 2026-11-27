@@ -227,12 +227,24 @@ process:
   34 `.trk` opens and **zero `.mas`/`.gtr`** archive opens, so no converted
   track's geometry was loaded.
 
-**Unblock:** the event ListBox is owner-drawn (`LB_GETTEXT` returns only one
-character, `LB_GETITEMDATA` = 0), so its entries must be decoded or driven by
-UI selection messages before a specific event can be chosen; alternatively,
-connect a game client and use its Chat vote buttons. Once an event actually
-starts, check whether GTR2 opens the converted `.mas`/`.gtr` members and
-accepts them.
+**Correction to the "owner-drawn" hypothesis (2026-11-27):** the event
+ListBox entries are ordinary **UTF-16LE strings**. `LB_GETTEXT` via
+`SendMessageA` truncates at the first NUL byte of the UTF-16 code unit, which
+produced the misleading single letters (`A`, `B`, `D`, ...). Dumping raw item
+bytes and decoding as UTF-16LE yields all 34 stock event names: Anderstorp,
+Barcelona, Brno GP, Donington, Enna Pergusa, Estoril, Hockenheim, Imola,
+Magny-Cours, Monza, Oschersleben, Spa-Francorchamps, Valencia, Dubai and
+Zhuhai variants. `LB_GETITEMDATA` is 0 because no per-item data is attached,
+not because the control is owner-drawn.
+
+**Unblock:** selecting an event is still unresolved. `LB_SETCURSEL`,
+`LB_SETSEL`, `WM_COMMAND/LBN_SELCHANGE`, `BM_CLICK` on `+`/`>>`, and real
+mouse clicks on both the item and the button all left the "Selected Events"
+ListBox (id 1000) empty. Either the commit message is different or those
+controls belong to a hidden wizard page. Once an event is committed and a
+session starts, check whether GTR2 opens the converted `.mas`/`.gtr` members
+and accepts them; alternatively connect a game client and use its Chat vote
+buttons.
 
 Sandbox recipe (keeps the read-only install untouched): create a directory of
 symlinks to the GTR2 files, add `UserData/DedicatedServer.ini`, and run
