@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 14:30:00 - HAT per-phase byte negative
+- Modal-byte fraction across all 34 phases of Brno's HAT tail matches a shuffled control (0.055 vs 0.0546), so no fixed 34-byte phase carries a constant field. Recorded with the other HAT framing negatives.
+
 ## 2026-11-29 14:00:00 -0500 - f0 simple-name negatives
 - Recorded that f0's low byte does not derive from material name length, first character, character-code sum or vowel count (all at shuffled-control chance level ~3-4%).
 

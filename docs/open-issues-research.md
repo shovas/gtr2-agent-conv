@@ -1,3 +1,11 @@
+## HAT tail per-phase byte structure (2026-11-29)
+
+Computed the modal-byte fraction for each of the 34 phases of Brno's HAT tail:
+all phases 0.055-0.056, identical to a seeded byte-shuffle control (mean 0.0546,
+max 0.056). No fixed 34-byte phase carries a constant field, confirming that
+the node stream is not a fixed-stride array and that interleaved/variable
+framing remains the only model consistent with the code evidence.
+
 ## HAT tail index triples are game-specific (2026-11-29)
 
 Compared all byte-offset windows whose three packed index fields are valid
