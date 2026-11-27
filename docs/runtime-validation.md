@@ -330,3 +330,19 @@ the dedicated server still did not open the converted `.gtr` mesh archives
 acceptance remains unverified**, and the client path is still blocked by the
 VRAM/crash issue above.
 
+
+## Dedicated server never loads track meshes — control (2026-11-27)
+
+Decisive control for the "converted `.gtr` files are only enumerated" result:
+with the **stock** `NTHockenheim.trk`/`.AIW` restored, a completed
+Practice1 session again opened only `CREW.GTR`, `STEX.GTR`,
+`TEAMMAPS.GTR`, `SKIES_*.GTR`. It never opened the stock `NTHockenheim.gtr`
+(16 directory-enumeration mentions, zero `CreateFileW`). Therefore the
+absence of converted `.gtr` opens is a property of the **dedicated server
+harness** (which needs no rendered track geometry), not a defect in the
+converted archives or their `MASFile` references.
+
+**Unblock:** geometry acceptance cannot be tested with `GTR2Dedicated.exe`
+at all; it requires a client-rendered session, which is currently blocked by
+the post-config crash after the VRAM-gate bypass. Do not spend further time
+adjusting converted `MASFile`/`SearchPath` lines for the dedicated server.
