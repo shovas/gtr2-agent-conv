@@ -798,6 +798,12 @@ a superficial string mapping would be wrong. Full-tier test:
 
 ## 9. Methodology rules learned the hard way
 
+The full technique list with worked examples is
+`docs/reverse-engineering-playbook.md` (near-duplicate diffs, count/ordinal
+anchors, hunting for fitted constants on disk, coverage-driven relaxation,
+distribution-preserving controls, reuse of validated writers). Start there when
+opening a new format; this section keeps the short rules.
+
 - A shuffle control preserves the multiset, so it cannot test whether a value
   distribution is special (e.g. "fraction of packed u16s decoding as small
   floats" is unchanged by shuffling). Use a fresh random-u32 baseline instead:
