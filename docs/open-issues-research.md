@@ -148,6 +148,17 @@ records from 120 RaceGMT files, column 4 also has weak/no correlation with the
 other four record columns (|r| ≤ 0.52). Do not pursue area/edge proxies further
 without a new structural hypothesis.
 
+## f0 index-count signal is explained by ic == vc (2026-11-27)
+
+Within the dominant `(2, 1)` byte-offset group (3,072 seeded GTR2 meshes),
+the previous mesh's **index count** also yields offsets (2, 1) for 2,007
+meshes (65.3%). This is **not an independent second signal**: for 2,006 of
+those 2,007 meshes `index_count == vertex_count` exactly (mean ratio 1.001).
+The (1, 4) group shows no index-count relationship (in 1..4 for b2 = 0.1%),
+and triangle-count offsets are chance-level in both groups. So the reference
+quantity remains the previous mesh's **vertex count**; do not claim f0 tracks
+index count as a separate property.
+
 ## RaceGMT column 4: UV-area hypothesis — negative (2026-11-27)
 
 Tested UV-derived and mesh-center features on `PEOPLE_STAND_01` (48 records):
