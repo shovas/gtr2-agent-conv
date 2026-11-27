@@ -3578,6 +3578,46 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertGreater(first[1] / first[0], 0.35)
         self.assertLess(later[1] / later[0], 0.05)
 
+    def test_f0_low_byte_tracks_previous_mesh_vertex_count_mod256(self):
+        """f0's low byte is usually the prior mesh's vertex count minus 1-2 (mod 256)."""
+        import glob
+        import random
+        import gmt_format as gf
+        import mas_tool
+
+        rows = []
+        for archive in glob.glob(str(ROOT.parent / "GTR2Steam" / "**" / "*.gtr"),
+                                 recursive=True):
+            try:
+                _mtype, entries = mas_tool.read_archive(archive)
+            except Exception:
+                continue
+            for entry in entries:
+                if not entry.name.lower().endswith(".gmt") or not entry.data:
+                    continue
+                try:
+                    parsed = gf.parse_gmt("x.gmt", entry.data)
+                except Exception:
+                    continue
+                for index, mesh in enumerate(parsed.meshes):
+                    marker = gf.mesh_marker(mesh)
+                    if marker and index > 0:
+                        rows.append((marker & 0xFF,
+                                     parsed.meshes[index - 1].record.vertex_count))
+                if len(rows) >= 4000:
+                    break
+            if len(rows) >= 4000:
+                break
+        self.assertGreater(len(rows), 3000)
+        observed = sum((count - low) % 256 in (1, 2) for low, count in rows) / len(rows)
+        lows = [low for low, _count in rows]
+        random.seed(2026)
+        random.shuffle(lows)
+        control = sum((count - low) % 256 in (1, 2)
+                      for low, (_original, count) in zip(lows, rows)) / len(rows)
+        self.assertGreater(observed, 0.7)
+        self.assertGreater(observed / control, 20)
+
     def test_f0_byte_pair_consecutive_even(self):
         """f0's two meaningful bytes are usually consecutive (n, n+1)."""
         import glob

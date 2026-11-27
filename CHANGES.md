@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 00:00:00 -0500 - f0 low byte mod-256 signal
+- Found a controlled association for GMT f0: for meshes after mesh 0, `(prev_mesh.vertex_count - low_byte) % 256` is 1 or 2 in 81.4% of 4,005 samples vs 1.6% shuffled (51.7x). Recorded as a signal, not a decoder. Full-tier test added.
+
 ## 2026-11-28 23:30:00 -0500 - HAT heights match by position cross-game
 - Found that same-layout GTR2/Race07 HAT record tables share sample positions and terrain heights despite different record order: 91.3% of Brno records match by (x,z), with mean height difference 0.00026 vs 2.41 for a shuffled control (9,417x). Enables position-based validation of generated HATs. Full-tier test added.
 

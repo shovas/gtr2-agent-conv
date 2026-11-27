@@ -721,6 +721,14 @@ a superficial string mapping would be wrong. Full-tier test:
 - f0 is **preserved from the GMT**, not assigned by GTR2.exe; the shader
   helpers use a small 1/2/3/99 stage-type enum, and there are only 94 shipped
   `.psh`/`.vsh` names — too few for f0's >1,000 values.
+- **New controlled signal (not a decoder):** for meshes after mesh 0, f0's
+  low byte satisfies `(previous_mesh.vertex_count - f0) % 256 in (1,2)` in
+  **81.4%** of 4,005 sampled meshes, versus **1.6%** for a seeded shuffle of
+  the low bytes (51.7x). The raw differences cluster at 1/2/257/258/513/514,
+  i.e. the same values modulo 256; the high byte is usually low+1. This
+  suggests f0 encodes a near-previous-mesh vertex index modulo 256, but no
+  exact rule or unit is claimed. Full-tier test:
+  `test_f0_low_byte_tracks_previous_mesh_vertex_count_mod256`.
 - Verified structure (all with distribution-preserving permutation baselines):
   - halves are near-equal: `|high-low| <= 1` in 49.2% vs 1.4% permuted;
   - each half is separately family-stable (16.3% / 17.3% vs 0.2% / 0.5%);
