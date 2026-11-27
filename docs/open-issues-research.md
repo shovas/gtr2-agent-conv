@@ -148,6 +148,15 @@ records from 120 RaceGMT files, column 4 also has weak/no correlation with the
 other four record columns (|r| ≤ 0.52). Do not pursue area/edge proxies further
 without a new structural hypothesis.
 
+## replay small_b: wheel-speed channels — negative (2026-11-27)
+
+Tested whether `small_b` derives from the four u16 channels at record offset 8
+(wheel-speed-like) on `Brno HOT LAP.Vcr` (779 frames): correlations
+short0 +0.144, short1 -0.176, short2 +0.091, short3 -0.164, spread -0.090,
+relative spread -0.039, sum -0.054, short0-short1 +0.238. A lag sweep
+(-40..+40 frames) against small_a, angle_like and short0-short1 also stays
+below r=0.25. No wheel-speed or delayed-channel relationship is supported.
+
 ## RaceGMT column 4: perpendicular texture projection — negative (2026-11-27)
 
 Tested whether column 4 is the V-coordinate complementary to the already
