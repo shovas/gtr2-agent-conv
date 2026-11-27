@@ -304,7 +304,7 @@ python3 race_gmt.py --triangles <file.gmt>
 python3 race_gmt.py <file.gmt> --to-gtr2 <out.gmt> --template <gtr2-template.gmt>
 ```
 
-**Decoded**: stage-type enum at +256, per-material texture-channel index at +260, and the 36-byte triangle records (indices/group/ordinal/world position/texture U via stored axes) plus five submeshes with UV arrays and index buffers that resolve every triangle. **Conversion**: `--to-gtr2` rebuilds a one-submesh GTR2 GMT with world positions, UVs, computed normals and the decoded triangles (PEOPLE_STAND_01 → 144 vertices/144 indices; 641/643 corpus meshes convert successfully). **Limitations**: triangle column 4 is unassigned; in-game correctness untested.
+**Decoded**: stage-type enum at +256, per-material texture-channel index at +260, and the 36-byte triangle records (indices/group/ordinal/world position/texture U via stored axes) plus five submeshes with UV arrays and index buffers that resolve every triangle. **Conversion**: `--to-gtr2` rebuilds a one-submesh GTR2 GMT with world positions, UVs, computed normals and the decoded triangles (PEOPLE_STAND_01 → 144 vertices/144 indices; 643/643 corpus meshes convert successfully). **Limitations**: triangle column 4 is unassigned; in-game correctness untested.
 
 ## GTL -> GTR2 conversion (building block)
 
