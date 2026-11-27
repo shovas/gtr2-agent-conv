@@ -75,6 +75,29 @@ class CliSmokeTest(unittest.TestCase):
             # family is wired but may not write with --limit 1.
             self.assertIn("mts_scanned=1", printed)
 
+    def test_conversion_status_dashboard(self):
+        """The status dashboard reports all conversion families and blockers."""
+        import contextlib
+        import io
+        import json
+
+        sys.path.insert(0, str(ROOT))
+        import conversion_status
+
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            self.assertEqual(conversion_status.main([]), 0)
+        out = buf.getvalue()
+        self.assertIn("RaceGMT meshes", out)
+        self.assertIn("CUBE MTS", out)
+        self.assertIn("No path currently reaches in-game acceptance", out)
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            self.assertEqual(conversion_status.main(["--json"]), 0)
+        report = json.loads(buf.getvalue())
+        self.assertGreaterEqual(len(report["families"]), 9)
+        self.assertGreaterEqual(len(report["blockers"]), 6)
+
     def test_all_tools_respond_to_help(self):
         for name in TOOLS:
             with self.subTest(tool=name):

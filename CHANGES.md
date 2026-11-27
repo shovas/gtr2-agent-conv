@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 21:00:00 -0500 - Conversion status dashboard
+- Added `conversion_status.py [--json]`: a reproducible per-family report of conversion status, measured coverage, validation method and remaining gaps, plus an explicit blocker list. Provides a single lookup for project scope instead of scanning multiple docs. Full-tier test added.
+
 ## 2026-11-29 20:30:00 -0500 - AIW validator consistency
 - Aligned `validate_aiw_waypoints()` with `validate_aiw_path_perp()` on zero-norm and the known Lienz 0.946-norm WP_PERP vectors. All 39 converted rF1 AIWs now pass waypoint/path/TELEPORT validation. Documented that 22 rF1-only AIW keys survive conversion without a verified GTR2 mapping (no speculative drop).
 

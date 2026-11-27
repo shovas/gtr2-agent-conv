@@ -248,7 +248,15 @@ python3 validate_materials.py <file.gmt>
 python3 validate_materials.py --archive <file.mas> [--json]
 ```
 
-## 13. Run pre-push safety/privacy checks
+## 13. Review conversion status
+
+`python3 conversion_status.py [--json]` prints a compact per-family report of
+what converts to GTR2, how each path is validated, its measured coverage, and
+the remaining gaps — plus an explicit list of open blockers. This is a status
+dashboard, not a converter; all numbers come from the project's full-tier
+regression evidence.
+
+## 14. Run pre-push safety/privacy checks
 
 **What it does**: Scans tracked files and commit metadata for secrets, personal home paths/emails, credentials in remote URLs, oversized/game-data files, untracked files, and commit identity mismatches.
 **How to ask**: "Check whether this repo is safe to push to GitHub."
@@ -258,7 +266,7 @@ python3 pre_push_check.py
 ```
 **Notes**: The username `shovas` and its GitHub noreply email are explicitly allowlisted. Editor swap files (`*.swp`) and `__pycache__` are ignored by `.gitignore`.
 
-## 14. Run tests
+## 15. Run tests
 
 **What it does**: Runs the unittest suite covering MAS, GMT, DSI/HAT/GTT/VCR, and FXM tools.
 
@@ -271,7 +279,7 @@ python3 pre_push_check.py
 python3 run_tests.py --mode quick|normal|full [--jobs N] [--nice N] [--ionice CLASS]
 ```
 
-## 15. Inspect CUBE MTS meshes (Nascar SimRacing / F1C lineage)
+## 16. Inspect CUBE MTS meshes (Nascar SimRacing / F1C lineage)
 
 **What it does**: Parses 4.10/4.20 mesh headers, geometry tables, submesh records, vertex/normal blocks and material records.
 
@@ -284,7 +292,7 @@ python3 mts_format.py --detail <file.mts>
 
 **Decoded**: 8-u32 geometry table, two submesh-record layouts, 36-byte vertices / 16-byte normals, 4.10 material records. **Limitations**: material IDs reference an external table not present locally; no triangle/index block in this layout.
 
-## 16. Inspect `RaceGMT` material/stage blocks (Race 07 DLC)
+## 17. Inspect `RaceGMT` material/stage blocks (Race 07 DLC)
 
 **What it does**: Decodes 264-byte stage blocks into material groups with stage types and texture channels.
 
