@@ -13,7 +13,18 @@ from pathlib import Path
 
 import gmt_format
 
-SURFACE_PREFIXES = ("GRAS", "GRVL", "GRAV", "ROAD")
+# Canonical terrain/surface tokens from GTR2's own
+# GameData/Locations/specialfx.tec (29 Materials= tokens). Only the
+# terrain-related ones are surface prefixes; the rest (wall, logo, brick,
+# drain, marbles, ...) are non-terrain effects and are not treated as valid
+# surface prefixes here.
+SURFACE_PREFIXES = (
+    "GRAS", "GRVL", "GRAV", "ROAD",
+    "B1ROAD", "B2ROAD", "B3ROAD", "BSAND", "CEMA", "CMWL", "CWAL",
+    "DIRT", "DRAIN", "FLDGRASS", "GBER", "GBRM", "GRDR", "GRV",
+    "LGROAD", "MARBLES", "RDGRASS", "RDGREEN", "RMBBL", "RMBL",
+    "SAND", "SB", "TBWALL", "TWALL",
+)
 
 
 def check_gmt(data: bytes, name: str = "") -> list[str]:

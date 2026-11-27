@@ -717,6 +717,13 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
   skinned meshes with NaN/huge local coordinates require external bone data
   and are skipped. Full-tier test: `test_mts_converts_to_gtr2_gmt`.
 
+- **Material validator uses canonical `specialfx.tec` tokens**: the 29
+  `Materials=` tokens in GTR2's own `specialfx.tec` were adopted as the valid
+  surface-prefix vocabulary (terrain-related ones only; `BRICK`, `LOGOS`, etc.
+  are non-terrain effects). On 40 sampled GTR2 archives, warnings fall from
+  433 to 66; on 40 rF1 archives from 470 to 416. Across 100 sampled converted
+  RaceGMT outputs, all remain clean. Full-tier tests updated.
+
 - **FXM/LMA→mesh binding resolved from `.ani` files**: 240 `.ani` files
   declare 1,576 named `Motions=` blocks with `Files=` lists of LMA animations
   (separated by `|||`) and 7,489 `Object=` blocks, each binding a `MeshFile`

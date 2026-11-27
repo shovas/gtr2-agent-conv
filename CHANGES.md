@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 23:30:00 -0500 - Expand material validator vocabulary
+- Adopted the 29 canonical terrain/material tokens from GTR2's `specialfx.tec` as `validate_materials.SURFACE_PREFIXES`. Native GTR2 archive warnings drop 433→66 (40 archives); rF1 470→416. Converted RaceGMT outputs remain clean. Tests updated.
+
 ## 2026-11-29 23:00:00 -0500 - Documentation consistency fixes
 - Corrected stale claims: `FEATURES.md` CUBE MTS section now documents decoded triangle records and the 389-mesh converter instead of "no triangle block"; `docs/format-findings.md` RaceGMT section no longer shows the superseded 574/643 figure; `docs/phs-research.md` notes that MFC42 is now obtainable and GTR2's mfc100 blocker is resolved.
 
