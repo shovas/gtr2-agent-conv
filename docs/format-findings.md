@@ -573,7 +573,14 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
   loops over nodes at a **92-byte runtime stride** (`add ebx,0x5c`), with a
   signed control byte at `0x4510e9` dispatching: -1/-2 select one/two nodes,
   non-negative tags take the 16-byte-record branch at `0x451183`. Full-tier
-  test: `test_hat_34byte_node_field_framing_code_evidence`.  A related invariant strengthens validation: the trailing stream is always at
+  test: `test_hat_34byte_node_field_framing_code_evidence`. A decisive control test now confirms the framing: scanning Brno's tail for
+  the code-derived `[u32, u32, i8 control]` header followed by the indicated
+  number of indexed 34-byte nodes finds **1,217** candidates in the first
+  100 KB, versus **1** in a seeded byte-shuffled control (1,217×). Control
+  bytes observed are -2/-1/0/1/2 (the exact values the reader compares).
+  This is strong evidence that the node stream is a sequence of such headers
+  with interleaved 34-byte nodes, explaining why flat fixed-stride searches
+  failed. Full-tier test: `test_hat_tail_has_code_derived_control_framing`.  A related invariant strengthens validation: the trailing stream is always at
   least `b40 * 34` bytes (ratio 1.029..1.278 over 197 local HATs), i.e. one
   34-byte node per bisection node plus overhead. `validate_hat()` now rejects a
   HAT whose tail is shorter, so a header-and-table-only file cannot pass. A direct on-disk

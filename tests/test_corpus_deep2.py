@@ -7407,6 +7407,53 @@ class CorpusDeep2Test(unittest.TestCase):
             matched = [s for s in source if s in gtr2]
             self.assertGreaterEqual(len(matched), minimum, corpus)
 
+    def test_hat_tail_has_code_derived_control_framing(self):
+        """HAT tails contain u32/u32/i8 headers followed by indexed 34-byte nodes."""
+        import random
+        import gzip_simbin_tool as gz
+        import media_tool as mt
+
+        path = (ROOT.parent / "GTR2Steam/GameData/Locations/HAT_Dedicated"
+                / "3Brno.hat")
+        if not path.is_file():
+            self.skipTest("GTR2 HAT corpus not present")
+        data = gz.decompress(str(path))
+        counts = mt.hat_declared_counts(data)
+        body = bytearray(data[data.find(b"generated\x00") + 10:])
+        start = 48 + 16 * counts[2]
+
+        def candidates(blob):
+            total = 0
+            for off in range(start, min(start + 100000, len(blob) - 100)):
+                ctrl = struct.unpack_from("<b", blob, off + 8)[0]
+                if ctrl not in (-3, -2, -1, 0, 1, 2, 3, 4):
+                    continue
+                count = ctrl if ctrl >= 0 else (1 if ctrl == -1 else 2)
+                if not count:
+                    continue
+                good = True
+                for child in range(min(count, 3)):
+                    point = off + 9 + 34 * child
+                    if point + 34 > len(blob):
+                        good = False
+                        break
+                    u24, u28 = struct.unpack_from("<II", blob, point + 24)
+                    if max(u24 & 0x1FFFFF,
+                           ((u28 & 0x3FF) << 11) | (u24 >> 21),
+                           u28 >> 10) >= counts[2]:
+                        good = False
+                        break
+                total += good
+            return total
+
+        observed = candidates(body)
+        shuffled = bytearray(body)
+        random.seed(2026)
+        random.shuffle(shuffled)
+        control = candidates(shuffled)
+        self.assertGreater(observed, 500)
+        self.assertGreater(observed, 100 * max(control, 1))
+
     def test_hat_heights_match_by_position_cross_game(self):
         """Same-layout HATs share (x,z) samples and heights despite reordering."""
         import collections

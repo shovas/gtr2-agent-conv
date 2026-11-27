@@ -5,6 +5,9 @@ Newest-first change log. Timestamps use repository commit dates (ISO 8601, local
 ## 2026-11-29 23:59:59 -0500 - D3D blocker isolated with minimal control
 - Compiled a standalone 12-line D3D9 program with wineg++ and ran it under Xvfb: it fails with the same `wined3d_caps_gl_ctx_create` error as GTR2Dedicated.exe. This proves the runtime blocker is environmental (Wine window/GL driver), not GTR2- or conversion-specific. Recorded with source and commands in docs/runtime-validation.md.
 
+## 2026-11-29 23:59:59 -0500 - HAT control framing confirmed
+- Confirmed from GTL.exe code and a permutation-controlled scan that HAT tails use `[u32,u32,i8 control]` headers followed by 1–2 indexed 34-byte nodes (1,217 candidates vs 1 shuffled). Full-tier test added; docs updated.
+
 ## 2026-11-29 23:59:59 -0500 - rF1 archive member preservation
 - Verified converted rF1 trees preserve every source archive member plus the shared `commonmaps` assets on six tracks (zero lost or gained). Full-tier test added.
 
