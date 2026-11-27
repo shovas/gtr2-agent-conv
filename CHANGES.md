@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 13:30:00 -0500 - F12001 raw textures decode
+- Verified all 279 `Entry.type == 2` members in `../F12001` are raw 16-byte-header 24-bit RGB textures and decode to valid BMPs via the shared `scgt_raw_texture_to_bmp()` helper; corpus-wide test added.
+
 ## 2026-11-28 13:00:00 -0500 - Full-tier suite green
 - Verified `tests.test_corpus_deep2`: 264 tests, 0 failures (2,363 s, full tier), confirming the corrected full-tier expectations and all accumulated findings pass together. Normal tier also green: 263 tests, 0 failures in 239 s (within the 300 s budget).
 

@@ -43,6 +43,35 @@ class F12001Test(unittest.TestCase):
         self.assertEqual(sigs, {mas_tool.MAS_TYPE401: 56, mas_tool.MAS_TYPE400: 24})
         self.assertEqual(total, 16720)
 
+    def test_type2_raw_textures_decode_to_bmp(self):
+        """All F12001 type-2 members are raw 16-byte-header RGB textures."""
+        import struct
+
+        if not F1.is_dir():
+            self.skipTest("F12001 corpus not present")
+        checked = 0
+        for path in F1.rglob("*"):
+            if not path.is_file() or path.suffix.lower() != ".mas":
+                continue
+            try:
+                _mtype, entries = mas_tool.read_archive(path)
+            except Exception:
+                continue
+            for entry in entries:
+                if entry.type != 2:
+                    continue
+                data = entry.data or b""
+                width, height, flags, zero = struct.unpack_from("<4I", data, 0)
+                self.assertEqual((flags, zero), (24, 0), entry.name)
+                self.assertEqual(16 + width * height * 3, len(data), entry.name)
+                bmp = mas_tool.scgt_raw_texture_to_bmp(data)
+                self.assertIsNotNone(bmp, entry.name)
+                self.assertEqual(bmp[:2], b"BM")
+                self.assertEqual(struct.unpack_from("<IiiHH", bmp, 14),
+                                 (40, width, height, 1, 24))
+                checked += 1
+        self.assertEqual(checked, 279)
+
     def test_type6_member_roundtrip_preserves_signature(self):
         arcs = _archives()
         if not arcs:
