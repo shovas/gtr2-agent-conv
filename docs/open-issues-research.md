@@ -148,6 +148,14 @@ records from 120 RaceGMT files, column 4 also has weak/no correlation with the
 other four record columns (|r| ≤ 0.52). Do not pursue area/edge proxies further
 without a new structural hypothesis.
 
+## f0 stream3 rule is not deterministic (2026-11-27)
+
+The stream3 association does not yield a usable decoder. On 5,836 seeded
+meshes, a rule "always offsets (2,1)" matches 52.6%; "stream3 -> (2,1),
+otherwise (1,4)" matches only 25.8%, and the inverse 42.3% — both worse than
+the constant. The stream3 effect is a modest probability shift, not a
+selector. Do not treat it as a decoding rule.
+
 ## replay small_b: linear/curvature models — negative (2026-11-27)
 
 On `Brno HOT LAP.Vcr` (779 frames), `small_b` spans only (-0.0421, 0.0485).

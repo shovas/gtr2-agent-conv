@@ -401,3 +401,12 @@ crashed after `OK`; `VIDEODRIVER=1` merely left the crash dialog on screen.
 So the null lookup at `0x59D46C` is not selected by those user settings.
 This closes the simple config route; a working renderer remains the unblock.
 
+
+## Alternate renderer zink — negative (2026-11-27)
+
+`GALLIUM_DRIVER=zink` with lavapipe
+(`VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/lvp_icd.x86_64.json`) gives
+`GL_RENDERER "zink Vulkan 1.4(llvmpipe ...)"` and a D3D device, but GTR2.exe
+still ends at `GTR2 1.1000 has crashed` before any session. No new capability
+path was found; Wine itself reports "built without Vulkan support" as before.
+
