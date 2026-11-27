@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 03:00:00 -0500 - HAT framing search negative
+- Recorded that no plausible `[u32,u32,control-byte]` tree framing exists at the expected HAT stream start or in the first 200 KB of the tail; the on-disk node-tree serializer remains blocked without new code evidence.
+
 ## 2026-11-29 02:30:00 -0500 - HAT transfer coverage measured
 - Measured where the HAT height-transfer primitive applies: 1/2 GTL and 5/18 Race07Vanilla layout signatures have a same-layout GTR2 reference (Anderstorp, Brno, Monza, Oschersleben, Valencia). Full-tier scope test added.
 

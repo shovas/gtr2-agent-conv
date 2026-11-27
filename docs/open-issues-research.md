@@ -1,3 +1,15 @@
+## HAT stream-start framing search (2026-11-29)
+
+The GTL.exe reader at `0x451080` reads two u32 words (8 bytes) followed by a
+signed control byte. Tested whether the HAT tail begins immediately after the
+16-byte record table plus its 8-byte zero pair with small u32 counts and a
+control byte in `{0,1,254,255}`; no plausible framing was found at that offset
+or in the first 200 KB of Brno's tail. The reader's 8-byte read is therefore
+probably record payload rather than child counts, or the stream starts at an
+unrelated offset. Combined with the uniform 34-phase distribution and the
+<5-record contiguous runs, this leaves the on-disk framing unresolved. Do not
+retry a fixed-offset tree parse without new code evidence.
+
 ## f0 mod-256 offset 1-vs-2 is not predictable (2026-11-29)
 
 Follow-up to the controlled `(prev_vc - f0_low) % 256 in (1,2)` signal (81.4%
