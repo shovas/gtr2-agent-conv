@@ -5,6 +5,9 @@ Newest-first change log. Timestamps use repository commit dates (ISO 8601, local
 ## 2026-11-29 23:59:59 -0500 - D3D blocker isolated with minimal control
 - Compiled a standalone 12-line D3D9 program with wineg++ and ran it under Xvfb: it fails with the same `wined3d_caps_gl_ctx_create` error as GTR2Dedicated.exe. This proves the runtime blocker is environmental (Wine window/GL driver), not GTR2- or conversion-specific. Recorded with source and commands in docs/runtime-validation.md.
 
+## 2026-11-29 23:59:59 -0500 - rF1 archive member preservation
+- Verified converted rF1 trees preserve every source archive member plus the shared `commonmaps` assets on six tracks (zero lost or gained). Full-tier test added.
+
 ## 2026-11-29 23:59:59 -0500 - rF1 conversion generalizes
 - Verified the unified rF1 track converter produces 0 GTR2 validator problems on 12 real tracks (not just Joesville). Full-tier test added; docs updated.
 

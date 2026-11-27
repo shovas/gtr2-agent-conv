@@ -7047,6 +7047,48 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertGreaterEqual(decoded, 640)
         self.assertEqual(converted, decoded)
 
+    def test_rf1_conversion_preserves_all_archive_members(self):
+        """Converted rF1 archives keep every source member plus shared assets."""
+        import tempfile
+        import collections
+        import text_convert as tc
+
+        base = ROOT.parent / "RF1Vanilla/GameData/Locations"
+        template_dir = ROOT.parent / "GTR2Steam/GameData/Locations/Anderstorp"
+        if not base.is_dir() or not template_dir.is_dir():
+            self.skipTest("rF1/GTR2 corpora not present")
+        templates = {p.name.lower(): p for p in template_dir.iterdir()
+                     if p.is_file() and p.suffix.lower() in (".gdb", ".aiw")}
+        shared_path = next(base.rglob("commonmaps.mas"), None)
+        if shared_path is None:
+            self.skipTest("commonmaps.mas not present")
+
+        def members(root):
+            counts = collections.Counter()
+            for path in root.rglob("*"):
+                if not path.is_file() or path.suffix.lower() not in (".mas", ".gtr"):
+                    continue
+                try:
+                    entries = mas_tool.read_archive(str(path))[1]
+                except Exception:
+                    continue
+                for entry in entries:
+                    counts[entry.name.lower()] += 1
+            return counts
+
+        shared_added = collections.Counter(
+            e.name.lower() for e in mas_tool.read_archive(str(shared_path))[1])
+        checked = 0
+        for track in sorted(p for p in base.iterdir() if p.is_dir())[:4]:
+            with tempfile.TemporaryDirectory(dir="/tmp/opencode") as td:
+                out = Path(td) / "out"
+                tc.convert_tree(track, out, templates=templates,
+                                shared_archives=(shared_path,))
+                expected = members(track) + shared_added
+                self.assertEqual(members(out), expected, track.name)
+                checked += 1
+        self.assertGreaterEqual(checked, 4)
+
     def test_unified_conversion_generalizes_across_tracks(self):
         """The unified rF1 converter validates across many real tracks."""
         import tempfile

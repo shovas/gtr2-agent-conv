@@ -810,7 +810,10 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
   `test_unified_conversion_generalizes_across_tracks` — 12 real rF1 tracks
   convert with **0 GTR2 validator problems** each (BamaSuperspeedway,
   Barcelona, Brianza, Essington, EuroRing, Jacksonville, Jiading, Joesville,
-  Lienz, Mills, Montreal, Northamptonshire).
+  Lienz, Mills, Montreal, Northamptonshire). Archive members are preserved
+  exactly on six sampled tracks (source members + the shared `commonmaps`
+  archive = converted members, zero lost or gained). Full-tier test:
+  `test_rf1_conversion_preserves_all_archive_members`.
 
 - **GTL→GTR2 copy-vs-convert rule** (same basenames under `GameData`): 25/26
   shared `.gmt` meshes are **byte-identical** and safe to copy; the one
