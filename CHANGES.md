@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 23:59:59 -0500 - rF1 conversion generalizes
+- Verified the unified rF1 track converter produces 0 GTR2 validator problems on 12 real tracks (not just Joesville). Full-tier test added; docs updated.
+
 ## 2026-11-29 23:59:59 -0500 - Status dashboard refinement
 - `conversion_status.py` now marks CUBE MTS 4.20 as blocked (no positions or bone data in the MTS) and records that replay `small_b` is not fixed-point and uncorrelated with yaw-rate derivatives.
 

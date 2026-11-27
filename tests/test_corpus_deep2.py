@@ -7047,6 +7047,35 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertGreaterEqual(decoded, 640)
         self.assertEqual(converted, decoded)
 
+    def test_unified_conversion_generalizes_across_tracks(self):
+        """The unified rF1 converter validates across many real tracks."""
+        import tempfile
+        import text_convert as tc
+        import gtl_to_gtr2 as gtl
+
+        base = ROOT.parent / "RF1Vanilla/GameData/Locations"
+        template_dir = ROOT.parent / "GTR2Steam/GameData/Locations/Anderstorp"
+        if not base.is_dir() or not template_dir.is_dir():
+            self.skipTest("rF1/GTR2 corpora not present")
+        templates = {p.name.lower(): p for p in template_dir.iterdir()
+                     if p.is_file() and p.suffix.lower() in (".gdb", ".aiw")}
+        shared = (next(base.rglob("commonmaps.mas")),)
+        shared_names = {p.name.lower() for p in
+                        (ROOT.parent / "GTR2Steam/GameData").rglob("*")
+                        if p.is_file() and p.suffix.lower() == ".gtr"}
+        checked = 0
+        for track in sorted(p for p in base.iterdir() if p.is_dir())[:6]:
+            with tempfile.TemporaryDirectory(dir="/tmp/opencode") as td:
+                out = Path(td) / "out"
+                tc.convert_tree(track, out, templates=templates,
+                                shared_archives=shared)
+                local = {p.name.lower() for p in out.rglob("*")
+                         if p.is_file() and p.suffix.lower() == ".gtr"}
+                self.assertEqual(gtl.validate_gtr2_tree(out, shared_names | local),
+                                 [], track.name)
+                checked += 1
+        self.assertGreaterEqual(checked, 6)
+
     def test_gtl_gtr2_same_name_copy_convert_split(self):
         """Shared GMTs are byte-identical; shared text configs always differ."""
         configs = (".aiw", ".cam", ".gdb", ".trk", ".aud", ".car",
