@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 18:00:00 -0500 - RaceGMT coverage raised to 641/643
+- Removed four unjustified decoder restrictions: vertex count capped at 4,096 (actual max 10,515), group indices forced to start at 0, four UV sets forced identical, and zero-normal vertices rejected. Coverage rose 574 → 641 of 643 DLC meshes, all converting to parseable GTR2 GMTs. The last two are a distinct simpler variant with no submesh table.
+
 ## 2026-11-29 17:00:00 -0500 - Runtime validation progress under Wine
 - Found an existing Wine 11.21 install and resolved the `mfc100.dll` import blocker for `GTR2Dedicated.exe` by extracting it from the VC2010 redistributable CAB. The executable now starts and, under `WINEDEBUG=+file`, reads all track `.gdb`/`.trk` files and enumerates `HAT_Dedicated` `.hat` names — matching our validator's file set. Direct3D window creation still fails under Xvfb, so this is runtime *loading* evidence, not in-game acceptance. Steps, evidence and the remaining blocker recorded in `docs/runtime-validation.md`.
 

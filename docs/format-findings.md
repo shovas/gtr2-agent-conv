@@ -76,7 +76,11 @@ regression tests or an explicitly documented negative.
   vertex count), not vertex-count strips. With those relaxations
   `read_racegmt_submeshes()` decodes **574/643** Race07 DLC meshes (350,389
   vertices, 148,773 triangles), and all 574 rebuild via `to_gtr2_gmt()` into
-  parseable GTR2 GMTs. Full-tier test: `test_racegmt_corpus_converts_to_gtr2`.
+  parseable GTR2 GMTs. Further assumption removals raised this to **641/643**
+  meshes: submesh vertex counts exceed 4,096 (up to 10,515), group indices may
+  start at 1, the four UV sets may differ, and degenerate zero-normal vertices
+  occur. The two remaining files (`plots01.gmt`/`plots02.gmt` in Zolder09) are a
+  distinct simpler RaceGMT variant with no `0x20004051` submesh table. Full-tier test: `test_racegmt_corpus_converts_to_gtr2`.
   Column 4 of the triangle record remains unassigned.
   Column 4 keeps the same spatial coefficients across variants but has a
   residual of 0.22 under a linear fit; a transform search over x, -x, |x|,

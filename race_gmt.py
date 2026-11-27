@@ -159,11 +159,11 @@ def read_racegmt_vertices(data: bytes) -> list[dict]:
     while row + 64 <= len(data):
         y, z, x = struct.unpack_from("<3f", data, row)
         cos, zero, sin = struct.unpack_from("<3f", data, row + 12)
-        if not (abs(zero) < 1e-5 and abs(cos) > 0.05 and abs(sin) > 0.05):
+        # A unit 3-vector; upward/downward faces carry (0, +/-1, 0), so no
+        # single component is guaranteed to be non-zero.
+        if not 0.99 < cos * cos + zero * zero + sin * sin < 1.01:
             break
         uvs = struct.unpack_from("<8f", data, row + 32)
-        if uvs[0:2] != uvs[2:4] or uvs[4:6] != uvs[6:8]:
-            break
         out.append({"position": (x, y, z), "axis": (cos, sin),
                     "uv": (uvs[0], uvs[1]),
                     "uv_sets": tuple((uvs[2 * k], uvs[2 * k + 1])
@@ -213,7 +213,9 @@ def read_racegmt_submeshes(data: bytes) -> list[dict]:
     out = []
     for position in range(len(data) - 12):
         magic, group, count = struct.unpack_from("<III", data, position)
-        if magic != SUBMESH_MAGIC or group != len(out) or not 0 < count <= 4096:
+        # Group indices are not guaranteed to start at 0 (e.g. LOD meshes
+        # may begin at 1); accept any small index and use it as reported.
+        if magic != SUBMESH_MAGIC or group > 63 or not 0 < count <= 65535:
             continue
         verts_at = position + 12
         index_at = verts_at + 64 * count
@@ -226,14 +228,15 @@ def read_racegmt_submeshes(data: bytes) -> list[dict]:
             cos, zero, sin = struct.unpack_from("<3f", data, row + 12)
             # The three words are a unit normal/facing vector; horizontal
             # faces carry (0,1,0), so no single component is guaranteed.
-            if not 0.99 < cos * cos + zero * zero + sin * sin < 1.01:
+            norm2 = cos * cos + zero * zero + sin * sin
+            # Some meshes contain degenerate vertices with a zero vector; they
+            # are typically unreferenced by the index buffer. Keep them.
+            if not (norm2 == 0 or 0.99 < norm2 < 1.01):
                 break
             uvs = struct.unpack_from("<8f", data, row + 32)
-            if uvs[0:2] != uvs[2:4] or uvs[4:6] != uvs[6:8]:
-                break
             # The final 32 bytes are four exported UV sets (A/B/C/D), each a
             # (u,v) pair — the rF2 GMT UVW exporter's documented layout. They
-            # are usually identical in DLC props, but all four are preserved.
+            # may be identical or differ by texture slot; both are valid.
             vertices.append({"position": (x, y, z), "uv": (uvs[0], uvs[1]),
                              "uv_sets": tuple((uvs[2 * k], uvs[2 * k + 1])
                                               for k in range(4))})

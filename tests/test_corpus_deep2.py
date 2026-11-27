@@ -7044,7 +7044,7 @@ class CorpusDeep2Test(unittest.TestCase):
             if (parsed.meshes and parsed.meshes[0].record.vertex_count > 0
                     and not validate_materials.check_gmt(out, "converted.gmt")):
                 converted += 1
-        self.assertGreaterEqual(decoded, 500)
+        self.assertGreaterEqual(decoded, 640)
         self.assertEqual(converted, decoded)
 
     def test_gtl_gtr2_same_name_copy_convert_split(self):
