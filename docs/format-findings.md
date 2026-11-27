@@ -945,7 +945,12 @@ a superficial string mapping would be wrong. Full-tier test:
   (87.8% for the low byte alone; 27.7% for index count, ~1% for offsets).
   `gmt_format.f0_vertex_offsets()` exposes the pair. Quick + full-tier tests:
   `test_f0_both_bytes_track_previous_vertex_count` and
-  `test_f0_both_byte_signal_replicates_on_holdout`.
+  `test_f0_both_byte_signal_replicates_on_holdout`. The **choice of offset pair** is partly structural: `(1,4)` occurs in
+  18.0% of meshes whose previous mesh has no stream3 vs 3.0% when it does
+  (train 4,852/984; holdout 19.1% vs 4.1%, 5,130/868). A seeded shuffle of
+  the stream3 flags gives 15.5%/16.7%, so the association is real but
+  modest, not a deterministic rule. Full-tier test:
+  `test_f0_offset_pair_depends_on_previous_stream3`.
   Information-theoretically, MI(material name, f0 low half) is 5.475 bits vs
   4.249 for shuffled controls — a real ~1.2-bit excess, far short of the
   marker's entropy. Independent train/holdout archives replicate the excess

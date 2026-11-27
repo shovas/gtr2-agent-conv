@@ -819,6 +819,44 @@ class GmtFormatTest(unittest.TestCase):
         self.assertGreater(checked, 0)
 
 
+    def test_f0_offset_pair_depends_on_previous_stream3(self):
+        """The (1,4) f0 offset pair is ~5x rarer when the previous mesh has stream3."""
+        import collections
+        import random
+
+        import mas_tool
+
+        archives = list((ROOT.parent / "GTR2Steam/GameData").rglob("*.gtr"))
+        if len(archives) < 40:
+            self.skipTest("GTR2 corpus not present")
+        random.seed(2026)
+        random.shuffle(archives)
+        counts = {False: collections.Counter(), True: collections.Counter()}
+        for archive in archives[:40]:
+            try:
+                entries = mas_tool.read_archive(str(archive))[1]
+            except Exception:
+                continue
+            for entry in entries:
+                try:
+                    gmt = gmt_format.parse_gmt(entry.name, data=entry.data or b"")
+                except Exception:
+                    continue
+                for index in range(1, len(gmt.meshes)):
+                    marker = gmt_format.mesh_marker(gmt.meshes[index])
+                    if not marker:
+                        continue
+                    vc = gmt.meshes[index - 1].record.vertex_count
+                    pair = gmt_format.f0_vertex_offsets(marker, vc)
+                    counts[bool(gmt.meshes[index - 1].stream3_data)][pair] += 1
+        without = sum(counts[False].values())
+        with_s3 = sum(counts[True].values())
+        self.assertGreater(without, 1000)
+        self.assertGreater(with_s3, 100)
+        rate_without = counts[False][(1, 4)] / without
+        rate_with = counts[True][(1, 4)] / with_s3
+        self.assertGreater(rate_without, 3 * max(rate_with, 0.001))
+
     def test_f0_both_bytes_track_previous_vertex_count(self):
         """Both meaningful f0 bytes sit 1..4 below the previous mesh's VC."""
         import collections

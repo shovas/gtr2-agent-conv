@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 23:59:59 -0500 - f0 offset pair linked to stream3
+- Found a modest but replicated structural association: the `(1,4)` f0 byte-offset pair occurs ~5-6x more often when the previous mesh lacks stream3 (18.0% vs 3.0% train; 19.1% vs 4.1% holdout; ~16% under shuffled flags). Full-tier regression test added; this refines the signal but is not a decoder.
+
 ## 2026-11-29 23:59:59 -0500 - f0 index-count signal explained
 - An apparent second f0 signal from the previous mesh's index count is explained by `index_count == vertex_count` on 2,006/2,007 affected meshes; the reference quantity remains vertex count. Recorded as a guard against a false discovery.
 
