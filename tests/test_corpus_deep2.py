@@ -6857,6 +6857,28 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
         self.assertIn("0 problem(s)", result.stdout)
 
+    def test_tree_validator_checks_hat_structure(self):
+        """A corrupted HAT in HAT_Dedicated is reported by validate_gtr2_tree()."""
+        import gzip_simbin_tool as gz
+        import tempfile
+        import gtl_to_gtr2 as gtl
+
+        sample = (ROOT.parent / "GTR2Steam/GameData/Locations/HAT_Dedicated"
+                  / "3Brno.hat")
+        if not sample.is_file():
+            self.skipTest("GTR2 HAT corpus not present")
+        with tempfile.TemporaryDirectory(dir="/tmp/opencode") as td:
+            root = Path(td) / "GameData" / "Locations" / "HAT_Dedicated"
+            root.mkdir(parents=True)
+            payload = bytearray(gz.decompress(str(sample)))
+            offset = payload.find(b"generated\x00") + 10 + 36
+            payload[offset] ^= 1
+            target = root / "3Brno.hat"
+            target.write_bytes(gz.compress_simbin(bytes(payload)))
+            problems = gtl.validate_gtr2_tree(Path(td) / "GameData")
+            self.assertTrue(any("bisection count" in msg for msg in problems),
+                            problems)
+
     def test_validate_json_cli(self):
         """`--validate --json` emits a JSON array of problem strings."""
         import json

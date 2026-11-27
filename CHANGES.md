@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 17:30:00 -0500 - Tree validator checks HAT structure
+- `gtl_to_gtr2.py --validate` now runs the HAT structural validator on files under `HAT_Dedicated` (real GTR2 tree still reports 0 problems). Full-tier metamorphic test adds a corrupted HAT and confirms detection.
+
 ## 2026-11-28 17:00:00 -0500 - HAT structural validator
 - Added `media_tool.validate_hat()` and `hat-validate FILE`, checking the version marker, bisection count, record-table extent and grid parameters. Verified clean on all 197 local HAT files; a flipped count byte is detected. Full-tier corpus + metamorphic test added.
 

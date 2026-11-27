@@ -243,12 +243,22 @@ def validate_gtr2_tree(root: str | Path,
         suffix = p.suffix.lower()
         if suffix == ".gtl":
             problems.append(f"stale .gtl archive: {p}")
-        if suffix == ".hat" and "hat_dedicated" not in str(p.relative_to(root)).lower():
-            # GTR2 ships every HAT file under GameData/Locations/HAT_Dedicated;
-            # GTL uses UserData/LOG/HAT and Race07 keeps them per-track.
-            # Cross-game bodies are not byte-compatible, so a copied-in HAT
-            # file must not be treated as a converted target asset.
-            problems.append(f"misplaced .hat file: {p}")
+        if suffix == ".hat":
+            relative = str(p.relative_to(root)).lower()
+            if "hat_dedicated" not in relative:
+                # GTR2 ships every HAT file under GameData/Locations/HAT_Dedicated;
+                # GTL uses UserData/LOG/HAT and Race07 keeps them per-track.
+                # Cross-game bodies are not byte-compatible, so a copied-in HAT
+                # file must not be treated as a converted target asset.
+                problems.append(f"misplaced .hat file: {p}")
+            else:
+                from media_tool import hat_decompress, validate_hat
+                payload = hat_decompress(p)
+                if payload is None:
+                    problems.append(f"{p}: not a gzip HAT container")
+                else:
+                    for message in validate_hat(payload[0]):
+                        problems.append(f"{p}: {message}")
         if suffix == ".gdb":
             data = aud_plain(p.read_bytes())
             for msg in validate_gdb(data):
