@@ -6878,6 +6878,7 @@ class CorpusDeep2Test(unittest.TestCase):
         import gmt_format as gf
         import mas_tool
         import race_gmt
+        import validate_materials
 
         archive = next((p for p in (ROOT.parent / "GTR2Steam/GameData").rglob("*.gtr")
                         if p.is_file()), None)
@@ -6901,7 +6902,8 @@ class CorpusDeep2Test(unittest.TestCase):
             if out is None:
                 continue
             parsed = gf.parse_gmt("converted.gmt", out)
-            if parsed.meshes and parsed.meshes[0].record.vertex_count > 0:
+            if (parsed.meshes and parsed.meshes[0].record.vertex_count > 0
+                    and not validate_materials.check_gmt(out, "converted.gmt")):
                 converted += 1
         self.assertGreaterEqual(decoded, 500)
         self.assertEqual(converted, decoded)

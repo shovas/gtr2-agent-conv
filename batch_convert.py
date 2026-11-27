@@ -96,6 +96,10 @@ def convert_member(kind: str, data: bytes, template: bytes, name: str,
         if not parsed.meshes or parsed.meshes[0].record.vertex_count == 0:
             skip("empty_racegmt_output")
             return None
+        material_problems = validate_materials.check_gmt(output, name)
+        if material_problems:
+            skip("material:" + material_problems[0])
+            return None
         if reasons is not None:
             reasons["ok"] = reasons.get("ok", 0) + 1
         return output

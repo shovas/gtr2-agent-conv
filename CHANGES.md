@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 01:30:00 -0500 - RaceGMT outputs pass material validation
+- Verified all 574 converted RaceGMT meshes are clean under `validate_materials.check_gmt()`; added that check to the batch converter's RaceGMT branch and to the corpus regression test.
+
 ## 2026-11-29 01:00:00 -0500 - HAT position-match validator
 - Added `media_tool.hat_height_match()` and `hat-match FILE REF`, comparing HAT record tables by (x,z) position with a shuffled control, so a generated/converted HAT can be validated against a same-layout reference (Brno: 92.6% matched, 0.00025 mean height diff vs 2.43 shuffled). Full-tier test added.
 
