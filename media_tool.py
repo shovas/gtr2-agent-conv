@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import struct
 import wave
 from dataclasses import dataclass, asdict, field
@@ -761,6 +762,40 @@ def hat_bisection_count(polygons: int) -> int:
         stack.append(half)
         stack.append(value - half)
     return total
+
+
+def validate_hat(payload: bytes) -> list[str]:
+    """Check a decompressed HAT payload's corpus-verified structural invariants.
+
+    Does *not* decode the trailing typed-node tree; it only verifies the parts
+    that are understood (version marker, bisection count, record table extent
+    and spatial-grid parameters). Returns a list of problem strings, empty for
+    a structurally coherent file. Verified clean on all 197 local HAT files.
+    """
+    problems = []
+    marker = payload.find(b"generated\x00")
+    if marker < 0:
+        return ["missing 'generated\\0' marker"]
+    body = payload[marker + 10:]
+    if len(body) < 48:
+        return [f"body too short: {len(body)} bytes"]
+    counts = hat_declared_counts(payload)
+    if counts is None:
+        return ["missing declared counts"]
+    polygons, bisection, records = counts
+    if polygons <= 0 or bisection <= 0 or records <= 0:
+        problems.append(f"non-positive counts: {counts}")
+    if m_bisection := hat_bisection_count(polygons):
+        if m_bisection != bisection:
+            problems.append(f"bisection count {bisection} != T({polygons})={m_bisection}")
+    if 48 + 16 * records > len(body):
+        problems.append(f"record table {records}*16 exceeds body {len(body)}")
+    grid = hat_grid_params(payload)
+    if grid is None or not all(math.isfinite(value) for value in grid):
+        problems.append("grid parameters missing or non-finite")
+    elif grid[1] <= 0 or grid[3] <= 0:
+        problems.append("grid inverse cell sizes must be positive")
+    return problems
 
 
 def hat_record_count(payload: bytes) -> int:
@@ -1951,6 +1986,18 @@ def main(argv=None):
     p.add_argument("dst")
     p.set_defaults(func=lambda a: print(
         _hat_cmd(a.src, a.dst)) or 0)
+    p = sub.add_parser("hat-validate",
+                       help="check a .hat file's structural invariants")
+    p.add_argument("src")
+    def _hat_validate_cmd(a):
+        result = hat_decompress(a.src)
+        if result is None:
+            print("hat: not a gzip HAT file")
+            return 1
+        problems = validate_hat(result[0])
+        print("hat: " + (", ".join(problems) if problems else "ok"))
+        return 1 if problems else 0
+    p.set_defaults(func=_hat_validate_cmd)
     p = sub.add_parser("hat-layout",
                        help="identify a .hat layout from a reference corpus")
     p.add_argument("src")

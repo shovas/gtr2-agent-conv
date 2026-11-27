@@ -1125,6 +1125,33 @@ class MediaToolTest(unittest.TestCase):
         self.assertIn("gMb1.000f", variants)
         self.assertIn("ver008", variants)
 
+    def test_hat_validator_corpus_and_metamorphic(self):
+        """Structural validator is clean on all HATs and catches a count flip."""
+        import subprocess
+
+        checked = 0
+        for path in ROOT.parent.rglob("*.hat"):
+            result = media_tool.hat_decompress(path)
+            if result is None:
+                continue
+            self.assertEqual(media_tool.validate_hat(result[0]), [], str(path))
+            checked += 1
+        self.assertGreaterEqual(checked, 150)
+
+        sample = next((p for p in (ROOT.parent / "GTR2Steam/GameData/Locations"
+                                   / "HAT_Dedicated").glob("*.hat")), None)
+        if sample is not None:
+            data = bytearray(media_tool.hat_decompress(sample)[0])
+            offset = data.find(b"generated\x00") + 10 + 36
+            data[offset] ^= 1
+            problems = media_tool.validate_hat(bytes(data))
+            self.assertTrue(any("bisection count" in p for p in problems))
+            result = subprocess.run(
+                [sys.executable, str(ROOT / "media_tool.py"),
+                 "hat-validate", str(sample)], capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(result.stdout.strip(), "hat: ok")
+
     def test_hat_layout_identification(self):
         """The 32-byte .hat signature identifies layout across game prefixes."""
         import subprocess
