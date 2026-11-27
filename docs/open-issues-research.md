@@ -148,6 +148,17 @@ records from 120 RaceGMT files, column 4 also has weak/no correlation with the
 other four record columns (|r| ≤ 0.52). Do not pursue area/edge proxies further
 without a new structural hypothesis.
 
+## CUBE MTS 4.20 quantized int16 positions — negative (2026-11-27)
+
+Tested whether 4.20 meshes hide vertex positions as quantized int16 triples
+rather than f32. On `TLRC.MTS` (10,780 bytes), a stride-6 scan for runs of
+plausible int16 triples found only two runs (19 and 11 triples) at offsets
+4978 and 5114, both overlapping the already-decoded normal stream region.
+They are coincidental alignments, not a position table. Combined with the
+earlier f32 scan (zero large finite triples) and the stream analysis (unit
+normals/UVs), 4.20 geometry still requires external bone data not present in
+the MTS.
+
 ## HAT leaf extra fields are not plane coefficients (2026-11-27)
 
 Now that leaf triples are known to index three adjacent height samples,
