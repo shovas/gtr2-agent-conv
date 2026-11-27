@@ -501,7 +501,17 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
   **34-byte (0x22) on-disk record** containing a 21-bit field (`&0x1fffff`),
   a 10-bit field (`&0x3ff`, shifted 11) packed with an 11-bit field (`>>21`),
   and three u32 references into the 16-byte record table (`index << 4`) —
-  matching the independently observed 34-byte tail periodicity. On real
+  matching the independently observed 34-byte tail periodicity. The frame's
+  field offsets are now pinned by exact code evidence in GTL.exe (`.text` RVA
+  to file offset = RVA - 0x400000): `0x4503c0` reads exactly `0x22` bytes;
+  the 21-bit field sits at node offset 24 and the packed pair at 28 (low 10
+  bits `<<11`, high 11 bits from `>>21`); a u16 sits at offset 32; six u32s at
+  offsets 0..23 feed three child nodes' `+0x10/+0x14` fields; three indices
+  select 16-byte records via `[esi+0x78] + idx*16`. The caller at `0x451111`
+  loops over nodes at a **92-byte runtime stride** (`add ebx,0x5c`), with a
+  signed control byte at `0x4510e9` dispatching: -1/-2 select one/two nodes,
+  non-negative tags take the 16-byte-record branch at `0x451183`. Full-tier
+  test: `test_hat_34byte_node_field_framing_code_evidence`. On real
   files, however, the raw tail bytes do not form such a node array: no 34-byte
   phase yields u32 words that are valid record indices, and no embedded zlib
   framing was found, so an additional stream framing layer remains unresolved.

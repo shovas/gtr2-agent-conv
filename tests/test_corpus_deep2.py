@@ -6887,6 +6887,35 @@ class CorpusDeep2Test(unittest.TestCase):
             # stream records (shl eax,4; add eax,4).
             self.assertIn(bytes.fromhex("c1e00483c004"), raw_gtl)
 
+    def test_hat_34byte_node_field_framing_code_evidence(self):
+        """GTL.exe's node parser reads a fixed 34-byte frame with known field offsets."""
+        gtl = ROOT.parent / "GTLSteam" / "GTL.exe"
+        if not gtl.is_file():
+            self.skipTest("GTL.exe not present")
+        raw = gtl.read_bytes()
+        # GTL.exe .text: RVA 0x401000 -> file 0x1000, so file = RVA - 0x400000.
+        # 0x4503c0: stream->read(buf, 0x22) then check for exactly 34 bytes.
+        evidence = {
+            0x4503EB: "6a228d4c2440",  # push 34; lea buffer at esp+0x40
+            0x4503F7: "83f822",        # cmp eax, 0x22 (exact read length)
+            0x45046F: "81e1ffff1f00",  # 21-bit field (and ecx, 0x1fffff)
+            0x45047F: "81e2ff030000",  # packed pair low 10 bits
+            0x450485: "c1e20b",        # shl edx, 11
+            0x450488: "c1e815",        # shr eax, 21 -> packed pair high bits
+            0x4504B9: "8b5e78",        # record-table base [esi+0x78]
+            0x4504BC: "c1e004",        # shl eax, 4 -> 16-byte record stride
+            0x450EB7: "83c35c",        # add ebx, 0x5c -> 92-byte runtime stride
+            0x4510E9: "0fbe44241c",    # movsx ax, signed control byte
+            0x4510EE: "663dfdff",  # cmp ax, -3 (tag validation)
+            0x451118: "663dffff",      # cmp ax, -1 (one-node special case)
+            0x451125: "663dfeff",      # cmp ax, -2 (two-node special case)
+        }
+        for rva, pattern in evidence.items():
+            with self.subTest(rva=hex(rva)):
+                offset = rva - 0x400000
+                self.assertEqual(raw[offset:offset + len(pattern) // 2].hex(),
+                                 pattern)
+
     def test_hat_record_tables_not_cross_game_reusable(self):
         """Matching signatures do not make HAT bodies transferable between games."""
         import gzip_simbin_tool as gz

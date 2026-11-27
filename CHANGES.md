@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 14:30:00 -0500 - HAT 34-byte node frame pinned from code
+- Pinned the HAT node frame field offsets from GTL.exe code evidence: exact 34-byte read, 21-bit field at +24, packed pair at +28, u16 at +32, six u32 child fields at +0..+23, three indices into the 16-byte record table, and a signed control byte dispatching node-count vs 16-byte-record branches at a 92-byte runtime stride. Full-tier code-evidence test added; the on-disk framing transform remains undecoded.
+
 ## 2026-11-28 14:00:00 -0500 - Raw texture extraction CLI
 - Added `mas_tool.py extract --as-bmp`, writing 16-byte-header raw RGB members (SCGT/F12001) as real 24-bit BMP files instead of headerless blobs.
 
