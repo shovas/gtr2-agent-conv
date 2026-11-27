@@ -27,7 +27,10 @@ signed control byte. Tested whether the HAT tail begins immediately after the
 control byte in `{0,1,254,255}`; no plausible framing was found at that offset
 or in the first 200 KB of Brno's tail. The reader's 8-byte read is therefore
 probably record payload rather than child counts, or the stream starts at an
-unrelated offset. Combined with the uniform 34-phase distribution and the
+unrelated offset. Re-tested the index-window search with all three declared
+bounds (b36=70,987; b40=76,437; b44=40,189): each shows strong enrichment over
+a byte shuffle (34.6x / 32.1x / 76.7x) but none yields a contiguous aligned
+node array, so choosing the correct bound does not unblock serialization. Combined with the uniform 34-phase distribution and the
 <5-record contiguous runs, this leaves the on-disk framing unresolved. Do not
 retry a fixed-offset tree parse without new code evidence.
 
