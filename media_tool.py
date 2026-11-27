@@ -851,6 +851,63 @@ def hat_height_match(payload: bytes, reference: bytes,
             "enrichment": shuffled / measured if measured else float("inf")}
 
 
+def hat_transfer_heights(source: bytes, target: bytes,
+                         precision: int = 2) -> tuple[bytes, dict] | None:
+    """Write GTL height samples into a GTR2 HAT for the same physical layout.
+
+    Same-layout HATs share ``(x,z)`` sample positions but store records in a
+    different order, so a positional lookup transfers terrain heights while
+    preserving the target's header, opaque identifiers and trailing node tree.
+    Requires matching layout signatures. Verified GTL NANDERSTORP ->
+    GTR2 3ANDERSTORP: 98.0% of positions matched, mean height difference
+    0.0006. A mismatched layout matches ~0% and is rejected.
+
+    Returns ``(new_payload, report)`` or ``None`` when either side is invalid.
+    """
+    import collections
+
+    if hat_layout_signature(source) != hat_layout_signature(target):
+        return None
+
+    def records(data: bytes) -> tuple[bytes, int, int]:
+        marker = data.find(b"generated\x00")
+        counts = hat_declared_counts(data)
+        if marker < 0 or counts is None:
+            return b"", marker, 0
+        body_at = marker + 10
+        return data[body_at:], body_at, counts[2]
+
+    source_body, _source_at, source_count = records(source)
+    target_body, target_at, target_count = records(target)
+    if source_count <= 0 or target_count <= 0:
+        return None
+    if 48 + 16 * source_count > len(source_body) or 48 + 16 * target_count > len(target_body):
+        return None
+
+    lookup = collections.defaultdict(list)
+    for k in range(source_count):
+        x, _unknown, height, z = struct.unpack_from("<fIff", source_body, 48 + 16 * k)
+        lookup[(round(x, precision), round(z, precision))].append(height)
+
+    output = bytearray(target)
+    matched = 0
+    differences = []
+    for k in range(target_count):
+        offset = target_at + 48 + 16 * k
+        x, _unknown, height, z = struct.unpack_from("<fIff", output, offset)
+        key = (round(x, precision), round(z, precision))
+        if key in lookup and lookup[key]:
+            replacement = lookup[key][0]
+            differences.append(abs(height - replacement))
+            struct.pack_into("<f", output, offset + 8, replacement)
+            matched += 1
+    report = {"matched": matched, "total": target_count,
+              "match_rate": matched / target_count,
+              "mean_abs_height_diff": (sum(differences) / len(differences)
+                                       if differences else 0.0)}
+    return bytes(output), report
+
+
 def hat_record_count(payload: bytes) -> int:
     """Return the number of 16-byte `[f32, u32, f32, f32]` records.
 
@@ -2039,6 +2096,27 @@ def main(argv=None):
     p.add_argument("dst")
     p.set_defaults(func=lambda a: print(
         _hat_cmd(a.src, a.dst)) or 0)
+    p = sub.add_parser("hat-transfer-heights",
+                       help="transfer GTL heights into a same-layout GTR2 HAT")
+    p.add_argument("src")
+    p.add_argument("target")
+    p.add_argument("dst")
+    def _hat_transfer_cmd(a):
+        import gzip
+        source = hat_decompress(a.src)
+        target = hat_decompress(a.target)
+        if source is None or target is None:
+            print("both inputs must be gzip HAT files")
+            return 1
+        result = hat_transfer_heights(source[0], target[0])
+        if result is None:
+            print("layout signatures differ; no transfer performed")
+            return 1
+        payload, report = result
+        Path(a.dst).write_bytes(gzip.compress(payload))
+        print(json.dumps(report, indent=2))
+        return 0
+    p.set_defaults(func=_hat_transfer_cmd)
     p = sub.add_parser("hat-match",
                        help="compare two HAT record tables by (x,z) position")
     p.add_argument("src")

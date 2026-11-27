@@ -1125,6 +1125,37 @@ class MediaToolTest(unittest.TestCase):
         self.assertIn("gMb1.000f", variants)
         self.assertIn("ver008", variants)
 
+    def test_hat_height_transfer_cli(self):
+        """GTL heights transfer into a same-layout GTR2 HAT by position."""
+        import json
+        import subprocess
+
+        source = ROOT.parent / "GTLSteam/UserData/LOG/HAT/NANDERSTORP.hat"
+        target = (ROOT.parent / "GTR2Steam/GameData/Locations/HAT_Dedicated"
+                  / "3ANDERSTORP.hat")
+        if not (source.is_file() and target.is_file()):
+            self.skipTest("matched GTL/GTR2 HAT corpus not present")
+        with tempfile.TemporaryDirectory() as td:
+            out = Path(td) / "out.hat"
+            result = subprocess.run(
+                [sys.executable, str(ROOT / "media_tool.py"),
+                 "hat-transfer-heights", str(source), str(target), str(out)],
+                capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            report = json.loads(result.stdout)
+            self.assertGreater(report["match_rate"], 0.95)
+            self.assertLess(report["mean_abs_height_diff"], 0.01)
+            payload = media_tool.hat_decompress(out)
+            self.assertIsNotNone(payload)
+            self.assertEqual(media_tool.validate_hat(payload[0]), [])
+            self.assertEqual(len(payload[0]),
+                             len(media_tool.hat_decompress(target)[0]))
+        wrong = ROOT.parent / "GTLSteam/UserData/LOG/HAT/MBNuerburgring.hat"
+        if wrong.is_file():
+            self.assertIsNone(media_tool.hat_transfer_heights(
+                media_tool.hat_decompress(wrong)[0],
+                media_tool.hat_decompress(target)[0]))
+
     def test_hat_height_match_api_and_cli(self):
         """The position-based HAT matcher reproduces the cross-game result."""
         import json

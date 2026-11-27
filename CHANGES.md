@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 02:00:00 -0500 - HAT height transfer primitive
+- Added `media_tool.hat_transfer_heights()` and `hat-transfer-heights GTL GTR2 OUT`: copies GTL terrain heights into a same-layout GTR2 HAT by (x,z) position (NANDERSTORP -> 3ANDERSTORP: 98.0% matched, mean diff 0.0006), preserving the target header/identifiers/node tree. Mismatched layouts are rejected. Full-tier test added.
+
 ## 2026-11-29 01:30:00 -0500 - RaceGMT outputs pass material validation
 - Verified all 574 converted RaceGMT meshes are clean under `validate_materials.check_gmt()`; added that check to the batch converter's RaceGMT branch and to the corpus regression test.
 
