@@ -105,6 +105,22 @@ class TextConvertTest(unittest.TestCase):
             self.assertFalse([p for p in problems if "non-.gtr MASFile" in p])
             self.assertFalse([p for p in problems if "missing Misc.gtr" in p])
 
+    def test_tdf_track_vars_transfer_to_gdb(self):
+        """rF1 per-track .tdf surface variables move into the GTR2 GDB."""
+        tdf = (ROOT.parent / "RF1Vanilla/GameData/Locations/Joesville"
+               / "Joesville_Speedway.tdf")
+        if not tdf.is_file():
+            self.skipTest("rF1 Joesville TDF not present")
+        variables = tc.tdf_track_vars(tdf.read_bytes())
+        self.assertEqual(len(variables), 12)
+        self.assertEqual(variables["roaddrygrip"], "1.00")
+        gdb = b"[GENERAL]\r\nSomeKey=1\r\n"
+        updated, added = tc.add_tdf_vars_to_gdb(gdb, variables)
+        self.assertEqual(added, 10)  # two rF1-only grip keys skipped
+        self.assertIn(b"RoadWetGrip=0.80\r\n", updated)
+        self.assertNotIn(b"RoadMetalGrip", updated)
+        self.assertIn(b"SomeKey=1\r\n", updated)
+
     def test_unified_rf1_tree_converts_and_validates(self):
         """A whole rF1 track converts to a GTR2-valid tree with templates."""
         import tempfile

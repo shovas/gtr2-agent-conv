@@ -693,6 +693,14 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
 
 ## 5. HAT placement in converted trees
 
+- **rF1 per-track `.tdf` → GTR2 `.gdb` track variables**: rF1 ships 12
+  per-track `.tdf` files with a `[TRACKVARS]` section; GTR2 ships **0** `.tdf`
+  files and reads the same variable names (e.g. `RoadDryGrip`,
+  `RoadWetGrip`, `RumbleBumpLen`) from the track's `.gdb`. `text_convert`
+  now transfers those overrides with GTR2's canonical spelling, skipping
+  rF1-only `RoadMetalGrip`/`RoadDustGrip` (10 keys transferred for Joesville).
+  Full-tier test: `test_tdf_track_vars_transfer_to_gdb`.
+
 - **CUBE MTS "material records" are actually triangles** — the 36-byte
   records with marker `128+n`, a 1.0f word and zeros store three u16 vertex
   indices at offsets +24/+26/+28 (e.g. `FENCE18.MTS` has 11 triangles with

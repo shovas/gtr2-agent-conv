@@ -86,6 +86,47 @@ def trk_extensions_to_gtr2(data: str) -> str:
     return "".join(out)
 
 
+def tdf_track_vars(data: str) -> dict[str, str]:
+    """Extract ``[TRACKVARS]`` overrides from an rF1 per-track `.tdf`.
+
+    The rF1 `.tdf` and GTR2 `specialfx.tec` share the same section/key grammar;
+    GTR2 has no per-track `.tdf` files and instead reads these variable names
+    from the track's `.gdb`. Only the rF1-specific `RoadMetalGrip`/
+    `RoadDustGrip` keys have no GTR2 counterpart and are skipped.
+    """
+    text = data if isinstance(data, str) else data.decode("latin-1")
+    match = re.search(r"(?ms)^\[TRACKVARS\]\s*\r?\n(.*?)(?=^\[|\Z)", text)
+    if not match:
+        return {}
+    out = {}
+    for line in match.group(1).splitlines():
+        m = KEYVALUE.match(line.rstrip("\r\n"))
+        if m:
+            out[m.group(2).strip().lower()] = m.group(3).strip()
+    return out
+
+
+def add_tdf_vars_to_gdb(gdb: bytes, variables: dict[str, str]) -> tuple[bytes, int]:
+    """Append missing TRACKVARS keys to a GTR2 GDB, preserving CRLF and comments."""
+    text = gdb.decode("latin-1")
+    existing = set(re.findall(r"(?mi)^\s*([A-Za-z_]\w*)\s*=", text))
+    # Canonical GTR2 spelling from GameData/Locations/specialfx.tec.
+    GTR2_VAR_NAMES = {
+        "roaddrygrip": "RoadDryGrip", "roadwetgrip": "RoadWetGrip",
+        "roadbumpamp": "RoadBumpAmp", "roadbumplen": "RoadBumpLen",
+        "rumbledrygrip": "RumbleDryGrip", "rumblewetgrip": "RumbleWetGrip",
+        "rumblebumpamp": "RumbleBumpAmp", "rumblebumplen": "RumbleBumpLen",
+    }
+    additions = [(GTR2_VAR_NAMES.get(key, key), value)
+                 for key, value in variables.items()
+                 if key not in existing and key not in ("roadmetalgrip", "roaddustgrip")]
+    if not additions:
+        return gdb, 0
+    ending = "\r\n" if "\r\n" in text else "\n"
+    return (text + ending + "".join(f"{k}={value}{ending}" for k, value in additions)
+            ).encode("latin-1"), len(additions)
+
+
 def convert_tree(source: str | Path, target: str | Path, check: bool = False,
                  templates: dict[str, Path] | None = None,
                  shared_archives: tuple[str | Path, ...] = ()) -> dict:
@@ -151,6 +192,15 @@ def convert_tree(source: str | Path, target: str | Path, check: bool = False,
                 if template is not None:
                     data = adapt_gdb_from_template(data, template.read_bytes())[0]
                     report["adapted"] += 1
+                # rF1 keeps surface feedback in a per-track .tdf; GTR2 reads
+                # the same TRACKVARS names from the track's .gdb instead.
+                tdf = src / (path.stem + ".tdf")
+                if not tdf.is_file():
+                    tdf = next(src.glob("*.tdf"), None)
+                if tdf is not None:
+                    variables = tdf_track_vars(tdf.read_bytes())
+                    data, added = add_tdf_vars_to_gdb(data, variables)
+                    report["tdf_vars"] = report.get("tdf_vars", 0) + added
                 out.write_bytes(data)
             report["copy"] += 1
         elif ext == ".scn":

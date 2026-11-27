@@ -1,3 +1,15 @@
+## CUBE MTS 4.20 submesh stream encoding (2026-11-29)
+
+Compared 4.10 and 4.20 submesh tables. 4.20 files parse geometry via the
+existing 196-byte descriptor grid, but their submesh streams are not u16
+triangle indices: values include many 0xFCxx/0xBFFF words, interpreting them
+as IEEE half-floats yields alternating NaNs and implausible magnitudes, and
+no repeat period below 8 words exists (period-8 rate 0.192). The
+`u32 count + u16 indices` layout used by 4.10 does not apply. No local
+QuickBMS/aluigi/rfactortools script or web result documents `CUBE_MTS_4.20`.
+**Unblock:** a producer/consumer trace or a known 4.10/4.20 pair with matching
+geometry to isolate the transform.
+
 ## Two remaining RaceGMT meshes use a distinct submesh type (2026-11-29)
 
 `plots01.gmt`/`plots02.gmt` in Zolder09 are the only 2 of 643 RaceGMT files
