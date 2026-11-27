@@ -11,6 +11,24 @@ Maintain three testing tiers with strict execution policies:
 - **Normal (≤5 minutes):** Run when broader validation is warranted by significant changes, shared dependencies, accumulated modifications, or elevated regression risk. Increase sampling depth, diversity, and integration coverage.
 - **Full (unrestricted duration):** Run only when explicitly requested by the user. Never automatically trigger through hooks, commits, pre-push checks, fallback logic, or other indirect mechanisms. A request to test or verify something does not implicitly authorize the full suite.
 
+## Required tier order
+
+Use the tiers **in order**, never out of order:
+
+1. **Quick first** — narrowly target the feature just changed plus its critical
+   invariants. Prefer a single module or a handful of tests over the whole
+   quick suite. This is the normal feedback loop during development.
+2. **Normal second** — run when quick passes and the change touches shared code,
+   several modules, or accumulated modifications. Normal is the broader
+   regression gate before any commit/push.
+3. **Full last** — only after quick *and* normal have passed in that order and
+   residual uncertainty remains. Full needs explicit user authorization; it is
+   never an automatic fallback or a substitute for the two cheaper tiers.
+
+Do not start with full, and do not treat a passing full run as permission to
+skip quick/normal on later changes. A failure found in any tier is diagnosed
+and fixed before advancing.
+
 ## Efficient testing techniques
 
 Combine appropriate techniques to maximize confidence per second of execution:

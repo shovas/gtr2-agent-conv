@@ -2,6 +2,12 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 13:00:00 -0500 - Low-priority test runs and tier order
+- Added `--nice` (default 10) and `--ionice` (default class 3 / idle) to `run_tests.py`; workers inherit both. Documented the mandatory quick → normal → full order in `docs/testing-protocol.md`, with feature-focused selection for the first two tiers.
+
+## 2026-11-29 12:30:00 -0500 - Parallel test execution
+- `run_tests.py` now runs test modules in parallel worker processes, one per detected **physical** core (hyperthreads excluded via `/proc/cpuinfo`, affinity-aware, with macOS and heuristic fallbacks), with `--jobs` override and serial mode under `--coverage`. Quick tier 40s -> 13s; normal tier 300s -> 90s here (4 physical cores). Regression tests verify serial/parallel counts match.
+
 ## 2026-11-29 12:00:00 -0500 - Fix synthetic TRK fixture
 - Updated the synthetic TRK fixture in the GTL converter tests to include a track instance with `HATTarget=True`, matching the new validator rule and real corpus TRKs.
 

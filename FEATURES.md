@@ -268,7 +268,7 @@ python3 pre_push_check.py
 
 **Command**:
 ```bash
-python3 run_tests.py --mode quick|normal|full
+python3 run_tests.py --mode quick|normal|full [--jobs N] [--nice N] [--ionice CLASS]
 ```
 
 ## 15. Inspect CUBE MTS meshes (Nascar SimRacing / F1C lineage)
