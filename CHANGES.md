@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 15:30:00 -0500 - RaceGMT column 0 decoded
+- Column 0 of RaceGMT's 36-byte triangle record is a unit-length horizontal projection of world (x,y): `0.180519*x + 0.983573*y`, 10.4 deg from +y, holding to <0.00045 across 240 records in five variants. Column 4 remains unassigned (linear fit residual 0.22). Full-tier test added.
+
 ## 2026-11-28 15:00:00 -0500 - HAT on-disk node-array negative
 - Searched HAT tails with the corrected b40 index bound: valid node-index windows are 27-36x enriched over a shuffled control but uniformly distributed across all 34 byte phases (max/mean 1.05, longest stride-34 run 5). Rules out a contiguous on-disk 34-byte node array; the typed-tree framing transform remains undecoded. Permutation-controlled full-tier test added.
 

@@ -167,6 +167,23 @@ class RaceGmtTest(unittest.TestCase):
         self.assertIn("triangles=48", result.stdout)
         self.assertIn("groups=[0, 1, 2, 3, 4]", result.stdout)
 
+    def test_f0_is_fixed_horizontal_projection(self):
+        """Column 0 is a unit-length projection of (x, y) at a constant angle."""
+        import math
+
+        base = ROOT.parent / "Race07Complete/GameData/Locations/Marrakech/Models"
+        files = [base / f"PEOPLE_STAND_0{i}.gmt" for i in range(1, 6)]
+        if not all(p.is_file() for p in files):
+            self.skipTest("PEOPLE_STAND variants not present")
+        cx, cy, intercept = 0.18051934549, 0.98357292081, 0.00024729259
+        self.assertAlmostEqual(math.hypot(cx, cy), 1.0, places=4)
+        for path in files:
+            for rec in race_gmt.read_triangle_records(path.read_bytes()):
+                x, y = rec["floats"][3], rec["floats"][1]
+                predicted = cx * x + cy * y + intercept
+                self.assertAlmostEqual(rec["floats"][0], predicted,
+                                       delta=0.001, msg=f"{path.name} {rec['ordinal']}")
+
     def test_f32_columns_track_header_translation(self):
         """Two per-triangle f32 columns shift exactly with the header bbox."""
         import statistics

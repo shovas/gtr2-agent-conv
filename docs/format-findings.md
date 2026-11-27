@@ -44,7 +44,16 @@ regression tests or an explicitly documented negative.
   (agreement at f32 precision, sd < 5e-6 over all 48 triangles). Since the
   header triples are `(max_x, y, z)` and `(min_x, y, z)`, the triple
   `(f3, f1, f2)` is a world-space position inside the header bbox for all
-  48 records in all five files. Columns 0 and 4 remain unassigned; 113/643 files carry a table at offset 292, so no
+  48 records in all five files. Column 0 is also decoded: a **unit-length
+  horizontal projection** of that position,
+  `f0 = 0.180519*x + 0.983573*y + 0.00025` (coefficient norm 1.0000015,
+  10.4 deg from +y), holding to <0.00045 on all 240 records across the five
+  variants. Full-tier test: `test_f0_is_fixed_horizontal_projection`.
+  Column 4 keeps the same spatial coefficients across variants but has a
+  residual of 0.22 under a linear fit; a transform search over x, -x, |x|,
+  log|x|, sqrt|x|, 1/x, x^2, the perpendicular horizontal projection and
+  hypot(x,y) gives nearly identical correlations (|r| = 0.930..0.939), so
+  no simple mapping is implied and column 4 remains unassigned; 113/643 files carry a table at offset 292, so no
   universal payload layout is claimed. Full-tier test:
   `test_f32_columns_track_header_translation`.
 - `gmt_layout.is_old()/is_new()` detect layouts; `old_to_new_semantic()` rebuilds
