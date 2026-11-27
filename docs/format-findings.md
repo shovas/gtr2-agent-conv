@@ -693,6 +693,18 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
 
 ## 5. HAT placement in converted trees
 
+- **CUBE MTS "material records" are actually triangles** — the 36-byte
+  records with marker `128+n`, a 1.0f word and zeros store three u16 vertex
+  indices at offsets +24/+26/+28 (e.g. `FENCE18.MTS` has 11 triangles with
+  indices 126..153 inside a 154-vertex submesh; `MESH12.MTS` has 9 triangles
+  585..611 inside 696 vertices). `mts_format.read_triangles()` decodes them;
+  indices are in range for **1,715 files** across F12002/F1C/NascarSimRacing.
+  This overturns the earlier "no triangle/index block in this layout"
+  conclusion and opens mesh conversion from those generations. The numeric
+  triples remain stable across same-name files, so the earlier rig-signature
+  observations are not invalidated. Full-tier test:
+  `test_material_records_are_triangle_indices`.
+
 - **rF2 GMT UVW exporter corroboration** (`rf2-developers-guide/
   docs.studio-397.com/display/DG/3ds+Max+GMT+file+UVW+Export.html`): GMT exports
   up to four UV sets (A/B/C/D) from the first four gTexture slots, two floats

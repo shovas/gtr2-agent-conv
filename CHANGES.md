@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 19:00:00 -0500 - CUBE MTS triangles decoded
+- Overturned the earlier "no triangle block" conclusion: the 36-byte CUBE MTS 4.10 records previously called "material/rig records" store three u16 vertex indices at +24/+26/+28. `mts_format.read_triangles()` decodes them with in-range indices in 1,715 files across F12002/F1C/NascarSimRacing. Full-tier test added; docs updated.
+
 ## 2026-11-29 18:30:00 -0500 - RaceGMT remaining-variant analysis
 - Characterized the last 2 unconvertible RaceGMT meshes: they use a distinct `0x2000403d` submesh type with a different post-vertex layout, not a stricter variant of the standard `0x20004051` format. Recorded the evidence and what would be needed to decode them.
 

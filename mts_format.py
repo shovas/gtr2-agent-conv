@@ -5,7 +5,11 @@ Verified from ../NascarSimRacing (4,200+ sampled meshes): both variants share
 `magic[16], u32 object_count, char name[8]`. Decoded structures: 8-u32 geometry
 table (200/200 files), 64-byte marker-based and alternate submesh records,
 36-byte vertices (3 position triples), 16-byte normals (3 floats + u32), and
-36-byte material records (4.10). This module only reads files, never edits them.
+36-byte records with marker `128+n` (4.10). The latter were first read as
+"material records" but are actually **triangle records**: three u16 vertex
+indices at +24/+26/+28, verified valid against submesh vertex counts in
+1,715 files across F12002/F1C/NascarSimRacing (`read_triangles()`). This
+module only reads files, never edits them.
 """
 from __future__ import annotations
 
@@ -161,6 +165,26 @@ def parse_material_records(data: bytes) -> list[dict]:
         if len(out) > 256:
             break
     return out
+
+
+def read_triangles(data: bytes) -> list[tuple[int, int, int]]:
+    """Return triangle vertex indices from a CUBE MTS 4.10 file.
+
+    The records previously called "material records" are actually **triangle
+    records**: the 36-byte structure holds three u16 vertex indices at offsets
+    +24, +26 and +28 (plus a sequential marker `128+n`, a 1.0f word and zeros).
+    Verified on F1 2002 `FENCE18.MTS`: 11 triangles with indices 126..153,
+    all inside the first submesh's 154 decoded vertices; `MESH12.MTS` has 9
+    consecutive triangles (585..611) inside a 696-vertex submesh.
+
+    Returns an empty list for non-4.10 files or when no records qualify.
+    """
+    triangles = []
+    for record in parse_material_records(data):
+        offset = record["offset"]
+        indices = struct.unpack_from("<3H", data, offset + 24)
+        triangles.append(indices)
+    return triangles
 
 
 def decode_material_numbers(record: dict) -> tuple[int, int, int]:

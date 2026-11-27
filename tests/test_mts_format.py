@@ -169,6 +169,42 @@ class MtsFormatTest(unittest.TestCase):
         self.assertEqual(len(table["submeshes"]), 5)
         self.assertEqual(table["submeshes"][0], (129, 0, 150, 6448, 150, 13648))
 
+    def test_material_records_are_triangle_indices(self):
+        """The 36-byte 'material' records actually hold triangle indices."""
+        found = 0
+        for root in ("F12002", "F1C", "NascarSimRacing"):
+            for archive in glob.glob(str(ROOT.parent / root / "**" / "*.mas"),
+                                     recursive=True):
+                try:
+                    entries = mas_tool.read_archive(archive)[1]
+                except Exception:
+                    continue
+                for entry in entries:
+                    data = entry.data or b""
+                    if not entry.name.lower().endswith(".mts") or data[:13] != b"CUBE_MTS_4.10":
+                        continue
+                    triangles = mf.read_triangles(data)
+                    if not triangles:
+                        continue
+                    try:
+                        geometry = mf.read_geometry(data)
+                    except Exception:
+                        continue
+                    if not geometry or not geometry.get("descriptors"):
+                        continue
+                    max_vertices = max(d["count_a"] for d in geometry["descriptors"])
+                    self.assertTrue(all(index < max_vertices
+                                        for tri in triangles for index in tri),
+                                    entry.name)
+                    found += 1
+                    if found >= 20:
+                        break
+                if found >= 20:
+                    break
+            if found >= 20:
+                break
+        self.assertGreaterEqual(found, 20)
+
     def test_material_records_are_shared_rig_tables(self):
         by = {}
         for a in glob.glob(str(ROOT.parent / "NascarSimRacing" / "**" / "*"), recursive=True):
