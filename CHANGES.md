@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 23:59:59 -0500 - Status dashboard refinement
+- `conversion_status.py` now marks CUBE MTS 4.20 as blocked (no positions or bone data in the MTS) and records that replay `small_b` is not fixed-point and uncorrelated with yaw-rate derivatives.
+
 ## 2026-11-29 23:59:59 -0500 - CUBE MTS 4.20 is skinned geometry
 - Verified across 25,605 files that 4.20 submesh streams are 12/16-byte normal/UV triples with sentinel words, not vertex positions. 4.20 meshes require external bone data; conversion remains blocked by missing geometry rather than stream packing.
 

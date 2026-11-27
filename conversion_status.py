@@ -71,11 +71,11 @@ BLOCKERS = (
     {"issue": "RaceGMT column 4", "state": "open",
      "detail": "no relationship to decoded geometry, UVs, normals or axes"},
     {"issue": "replay small_b identity", "state": "open",
-     "detail": "slow state channel correlated with smoothed steering, no unit mapping"},
+     "detail": "slow continuous state channel correlated with smoothed steering; not fixed-point quantized and uncorrelated with yaw-rate derivatives, no unit mapping"},
     {"issue": "FXM animation binding", "state": "partial",
      "detail": "TRS keyframes decode; .ani files give explicit GMT/LMA/Motions bindings (7,489 records), but in-game animation playback is untested"},
-    {"issue": "CUBE MTS 4.20 / skinned geometry", "state": "open",
-     "detail": "different record structure; external bone data required"},
+    {"issue": "CUBE MTS 4.20 / skinned geometry", "state": "blocked",
+     "detail": "streams hold unit normals/UVs, not positions; no local bone/weight data exists in the corpus, so geometry cannot be recovered from the MTS alone"},
 )
 
 
