@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 06:00:00 -0500 - f0 high-byte follow-up negative
+- Recorded that within the f0 mod-256 matching subset, `high == low+1` holds only 46.8% (vs 40.2% overall), so the high byte is not a simple successor. Stopped the hours-long full batch verification (GSC family, ~28k files written) since it is verification-only and consuming a full CPU core.
+
 ## 2026-11-29 05:30:00 -0500 - HAT validator checks node stream
 - Strengthened `validate_hat()`: the trailing node stream must be at least `bisection_count * 34` bytes (verified 1.029-1.278x over 197 local HATs), rejecting header-and-table-only files. Metamorphic truncation test added.
 

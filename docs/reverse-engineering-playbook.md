@@ -189,4 +189,6 @@ vertex count of all preceding meshes only reaches 31.6% (vs 1.1% shuffled),
 so the quantity is the immediately preceding mesh, not a running total;
 splitting by previous mesh's stream2/stream3 presence, vertex-count >255, or
 the 1-vs-2 offset by any tested mesh property gives nearly even splits. The
-signal is real but partial, with no known exact rule.
+signal is real but partial, with no known exact rule. A further split shows `high == low+1` in only 46.8% of the matching
+subset (40.2% overall), so the high byte is not a simple successor of the low
+byte either.
