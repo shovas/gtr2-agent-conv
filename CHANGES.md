@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 08:30:00 -0500 - HAT tail indices are game-specific
+- Compared 34-byte index triples in same-layout GTR2/Race07 HAT tails: only 148 shared, identical to a shuffled control. Node-stream data cannot be copied across games; height transfer must preserve the target tree. Recorded as a negative.
+
 ## 2026-11-29 08:00:00 -0500 - TRK validator requires HATTarget
 - Added a TRK validation rule from the archived ISI producer guide: at least one MeshFile line must declare `HATTarget=True` (34/34 GTR2 and 25/25 GTL TRKs do). The full GTR2 tree still validates clean; metamorphic test added.
 

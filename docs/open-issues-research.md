@@ -1,3 +1,13 @@
+## HAT tail index triples are game-specific (2026-11-29)
+
+Compared all byte-offset windows whose three packed index fields are valid
+(b44-bounded) in the tails of same-layout GTR2 3Brno and Race07 2007_Brno:
+82,931 vs 81,595 distinct triples but only 148 shared, exactly equal to a
+seeded shuffle control. The node-tree index data is therefore not shared
+across games, consistent with cross-game HAT bodies being non-transferable and
+with `hat_transfer_heights()` needing to preserve the target's node tree and
+only replace height samples. Do not attempt to copy a node stream between games.
+
 ## RaceGMT column 4 feature search (2026-11-29)
 
 Tried to derive triangle-record column 4 from the decoded quantities on
