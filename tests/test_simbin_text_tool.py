@@ -284,6 +284,20 @@ class SimbinTextToolTest(unittest.TestCase):
         self.assertGreaterEqual(objects, 7000)
         self.assertGreaterEqual(motions, 1500)
 
+    def test_ani_validator_rejects_incomplete_bindings(self):
+        """Missing object fields and empty motion groups are flagged."""
+        base = {"motions": {"walk": ["a.lma", "b.lma"]},
+                "objects": [{"kind": "Object", "meshfile": "m.gmt",
+                             "actorfile": "a.lma", "motions": "walk"}]}
+        self.assertEqual(stt.validate_ani(base), [])
+        broken = {"motions": {"walk": []},
+                  "objects": [{"kind": "Object", "meshfile": "m.gmt",
+                               "motions": "walk"}]}
+        problems = stt.validate_ani(broken)
+        self.assertTrue(any("empty Files list" in p for p in problems))
+        self.assertTrue(any("missing actorfile" in p for p in problems))
+        self.assertEqual(stt.validate_ani({"motions": {}, "objects": []}), [])
+
     def test_set_parser_corpus(self):
         """.set files: 22 CUBEASF camera/scene descriptors parse fully."""
         import glob
