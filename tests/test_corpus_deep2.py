@@ -6803,6 +6803,27 @@ class CorpusDeep2Test(unittest.TestCase):
                 self.assertIn("teammaps2.gtr", values)
                 self.assertIn("misc.gtr", values)
 
+    def test_sibling_corpus_mesh_carryover_rates(self):
+        """BMW/GTL meshes are largely byte-identical to GTR2; Race07's are not."""
+        def gmt_names(root):
+            return {p.name.lower(): p for p in root.rglob("*")
+                    if p.is_file() and p.suffix.lower() == ".gmt"}
+
+        target = gmt_names(ROOT.parent / "GTR2Steam/GameData")
+        expected = {"BMWM3Challenge": (26, 26), "GTLSteam": (25, 26),
+                    "Race07Vanilla": (0, 26), "VolvoTheGame": (0, 6)}
+        for corpus, (minimum, total) in expected.items():
+            source = gmt_names(ROOT.parent / corpus / "GameData")
+            if not source:
+                continue
+            shared = [n for n in set(source) & set(target)
+                      if source[n].stat().st_size <= 4_000_000]
+            self.assertGreaterEqual(len(shared), total, corpus)
+            identical = sum(source[n].read_bytes() == target[n].read_bytes()
+                            for n in shared)
+            self.assertGreaterEqual(identical, minimum, corpus)
+            self.assertLessEqual(identical, total, corpus)
+
     def test_gtl_gtr2_same_name_copy_convert_split(self):
         """Shared GMTs are byte-identical; shared text configs always differ."""
         configs = (".aiw", ".cam", ".gdb", ".trk", ".aud", ".car",

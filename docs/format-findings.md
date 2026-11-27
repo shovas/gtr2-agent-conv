@@ -643,6 +643,11 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
   `.aud`, `.car`, `.hdc`, `.tyr`, `.dmg`, `.rcd`) **differs** and must go through
   the conversion rules. Full-tier test:
   `test_gtl_gtr2_same_name_copy_convert_split`.
+  Across SimBin siblings the mesh carry-over rate varies sharply: BMW M3
+  Challenge 26/26 and GTL 25/26 shared `.gmt` names are byte-identical, but
+  Race07Vanilla 0/26, Race07Complete 2/26 and Volvo 0/6 are not (JCA-wrapped
+  or genuinely different assets). BMW also shares an identical `.cam` and
+  `.hed`. Full-tier test: `test_sibling_corpus_mesh_carryover_rates`.
 
 
 GTR2 ships every HAT asset under `GameData/Locations/HAT_Dedicated`; GTL uses

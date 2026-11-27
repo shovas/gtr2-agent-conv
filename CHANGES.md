@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 18:30:00 -0500 - SimBin sibling carry-over matrix
+- Measured same-name `.gmt` identity against GTR2: BMW M3 Challenge 26/26, GTL 25/26, Race07Vanilla 0/26, Race07Complete 2/26, Volvo 0/6. BMW also shares identical `.cam`/`.hed`. Full-tier test added.
+
 ## 2026-11-28 18:00:00 -0500 - GTL copy-vs-convert corpus rule
 - Established a corpus-backed copy rule for GTL→GTR2: 25/26 shared `.gmt` meshes are byte-identical (safe to copy), while every shared text config (`.aiw`, `.cam`, `.gdb`, `.trk`, `.aud`, `.car`, `.hdc`, `.tyr`, `.dmg`, `.rcd`) differs and must be converted. Full-tier test added.
 
