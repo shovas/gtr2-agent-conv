@@ -148,6 +148,15 @@ records from 120 RaceGMT files, column 4 also has weak/no correlation with the
 other four record columns (|r| ≤ 0.52). Do not pursue area/edge proxies further
 without a new structural hypothesis.
 
+## f0 cumulative vertex offset — weak (2026-11-27)
+
+Tested whether f0's bytes encode the cumulative vertex count of all preceding
+meshes (rather than just the immediately previous mesh) on 5,836 seeded GTR2
+meshes: `(cum - low) % 256 = 2` in only 17.5% and `(cum - byte2) % 256 = 1`
+in 18.1%, versus 87.8% / 64.1% for the immediately previous mesh's vertex
+count. The reference is confirmed to be the immediately preceding mesh;
+cumulative offsets add no decoder.
+
 ## replay small_b: wheel-speed channels — negative (2026-11-27)
 
 Tested whether `small_b` derives from the four u16 channels at record offset 8
