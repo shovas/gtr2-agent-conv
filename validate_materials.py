@@ -27,6 +27,24 @@ SURFACE_PREFIXES = (
 )
 
 
+def suggest_surface_prefix(material_name: str) -> str | None:
+    """Suggest a canonical SimBin surface prefix for an rF1-style name.
+
+    rF1 materials often put the surface token at the *end* of the name
+    (e.g. `RGED_TRACK2GRASSNS`, `RDCP_RUMCAP2GRASS`), while SimBin reads only
+    the first four characters. Corpus-checked on the converted rF1 tracks:
+    these suffix-style names account for all terrain-like prefix warnings.
+    Returns the canonical prefix from `specialfx.tec`, or `None`.
+    """
+    head = material_name.strip().upper()
+    for word, prefix in (("ASPHALT", "ROAD"), ("TARMAC", "ROAD"),
+                         ("GRAVEL", "GRVL"), ("GRASS", "GRAS"),
+                         ("DIRT", "DIRT"), ("SAND", "SAND")):
+        if word in head:
+            return prefix
+    return None
+
+
 def check_gmt(data: bytes, name: str = "") -> list[str]:
     g = gmt_format.parse_gmt(name, data)
     warnings = []
@@ -42,7 +60,11 @@ def check_gmt(data: bytes, name: str = "") -> list[str]:
         if head and head[:4] not in SURFACE_PREFIXES and any(
             word in head for word in ("GRASS", "GRAVEL", "ASPHALT", "TARMAC", "DIRT", "SAND")
         ):
-            warnings.append(f"material {mat.name!r} looks like terrain but lacks a SimBin prefix")
+            suggestion = suggest_surface_prefix(mat.name)
+            suffix = (f"; suggest prefix {suggestion}" if suggestion else "")
+            warnings.append(
+                f"material {mat.name!r} looks like terrain but lacks a "
+                f"SimBin prefix{suffix}")
     return warnings
 
 

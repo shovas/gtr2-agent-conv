@@ -70,6 +70,20 @@ class MaterialValidatorTest(unittest.TestCase):
         # small number of flagged native materials.
         self.assertGreaterEqual(warnings, 0)
 
+    def test_suggest_surface_prefix_for_rf1_suffix_names(self):
+        """rF1-style suffix materials get an actionable canonical prefix."""
+        cases = {
+            "RGED_TRACK2GRASSNS": "GRAS",
+            "RDCP_RUMCAP2GRASS": "GRAS",
+            "RGED_OVAL2GRASS": "GRAS",
+            "SOME_ASPHALT_PATH": "ROAD",
+            "TRACK2GRAVEL_EDGE": "GRVL",
+            "ROAD_A4": None,
+            "UNRELATED": None,
+        }
+        for name, expected in cases.items():
+            self.assertEqual(vm.suggest_surface_prefix(name), expected, name)
+
     def test_prefix_constants(self):
         self.assertTrue(set(("GRAS", "GRVL", "GRAV", "ROAD")) <= set(vm.SURFACE_PREFIXES))
         self.assertIn("DIRT", vm.SURFACE_PREFIXES)
