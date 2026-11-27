@@ -78,6 +78,12 @@ def validate_trk(data: bytes) -> list[str]:
         problems.append("stale teammaps entry")
     if not MISC_RE.search(data):
         problems.append("missing Misc.gtr")
+    # SimBin's HAT generator consumes the track meshes flagged HATTarget=True
+    # (archived ISI "Creating Tracks" guide); 34/34 GTR2 and 25/25 GTL TRKs
+    # declare it, so a converted TRK without it cannot produce a HAT.
+    text = data.decode("latin-1", "replace")
+    if not re.search(r"(?i)\bHATTarget\s*=\s*True\b", text):
+        problems.append("missing HATTarget=True")
     return problems
 
 

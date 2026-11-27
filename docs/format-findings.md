@@ -688,6 +688,9 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
   `../rF2_onlineTools/`):** tracks declare `HATTarget=True` on their MTS
   instance definitions; the HAT is generated on first load from the track
   geometry, AIW and GDB, and `Always Rebuild HAT` in the PLR forces refresh.
+  Corpus check: 34/34 GTR2 and 25/25 GTL TRKs declare `HATTarget=True` on
+  their track `MeshFile=` lines (Race07Vanilla does not), so `validate_trk()`
+  now requires it. Full-tier test: `test_trk_validator_requires_hattarget`.
   An independent forum note (`../hat-files/`) calls it a "Height Above
   Terrain" cache synthesized from `AIW+TRK+GDB`. No binary spec is published,
   and a report that GTR2-generated HATs work in Race07 while rF1-generated

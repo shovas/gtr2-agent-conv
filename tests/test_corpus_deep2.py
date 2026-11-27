@@ -7073,6 +7073,21 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
         self.assertIn("0 problem(s)", result.stdout)
 
+    def test_trk_validator_requires_hattarget(self):
+        """TRKs must flag at least one track mesh with HATTarget=True."""
+        import gtl_to_gtr2 as gtl
+
+        trk = (ROOT.parent / "GTR2Steam/GameData/Locations/Anderstorp"
+               / "3ANDERSTORP.trk")
+        if not trk.is_file():
+            self.skipTest("GTR2 Anderstorp TRK not present")
+        data = trk.read_bytes()
+        self.assertEqual(gtl.validate_trk(data), [], data[:80])
+        import re
+        stripped = re.sub(rb"HATTarget\s*=\s*True", b"HATTarget=False", data)
+        problems = gtl.validate_trk(stripped)
+        self.assertTrue(any("HATTarget" in msg for msg in problems), problems)
+
     def test_tree_validator_checks_hat_structure(self):
         """A corrupted HAT in HAT_Dedicated is reported by validate_gtr2_tree()."""
         import gzip_simbin_tool as gz
