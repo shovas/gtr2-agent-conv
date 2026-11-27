@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 23:30:00 -0500 - HAT heights match by position cross-game
+- Found that same-layout GTR2/Race07 HAT record tables share sample positions and terrain heights despite different record order: 91.3% of Brno records match by (x,z), with mean height difference 0.00026 vs 2.41 for a shuffled control (9,417x). Enables position-based validation of generated HATs. Full-tier test added.
+
 ## 2026-11-28 23:00:00 -0500 - RaceGMT in batch converter
 - Added a `racegmt` family to `batch_convert.py`, converting loose Race07 DLC `RaceGMT\0` meshes with relative paths preserved. `--limit 1` now writes one verified GMT for each of vrl/gtr1/gsc/racegmt; CLI test updated.
 

@@ -7102,6 +7102,48 @@ class CorpusDeep2Test(unittest.TestCase):
                 self.assertEqual(raw[offset:offset + len(pattern) // 2].hex(),
                                  pattern)
 
+    def test_hat_heights_match_by_position_cross_game(self):
+        """Same-layout HATs share (x,z) samples and heights despite reordering."""
+        import collections
+        import random
+        import statistics
+        import gzip_simbin_tool as gz
+        import media_tool as mt
+
+        pairs = (
+            ("GTR2Steam/GameData/Locations/HAT_Dedicated/3Brno.hat",
+             "Race07Vanilla/GameData/Locations/Brno_2007/2007_Brno.hat"),
+        )
+        checked = 0
+        for relative_a, relative_b in pairs:
+            path_a, path_b = ROOT.parent / relative_a, ROOT.parent / relative_b
+            if not (path_a.is_file() and path_b.is_file()):
+                continue
+            def records(path):
+                payload = gz.decompress(str(path))
+                offset = payload.find(b"generated\x00") + 10 + 48
+                return [struct.unpack_from("<fIff", payload, offset + 16 * k)
+                        for k in range(mt.hat_declared_counts(payload)[2])]
+            target, source = records(path_a), records(path_b)
+            lookup = collections.defaultdict(list)
+            for x, _unknown, height, z in target:
+                lookup[(round(x, 2), round(z, 2))].append(height)
+            matched = [(h, lookup[(round(x, 2), round(z, 2))][0])
+                       for x, _unknown, h, z in source
+                       if (round(x, 2), round(z, 2)) in lookup]
+            self.assertGreater(len(matched) / len(source), 0.85)
+            real = statistics.mean(abs(a - b) for a, b in matched)
+            heights = [b for _a, b in matched]
+            random.seed(2026)
+            random.shuffle(heights)
+            control = statistics.mean(abs(a - b) for (a, _b), b
+                                      in zip(matched, heights))
+            self.assertLess(real, 0.01)
+            self.assertGreater(control, 100 * real)
+            checked += 1
+        if not checked:
+            self.skipTest("matched cross-game HAT corpus not present")
+
     def test_hat_record_tables_not_cross_game_reusable(self):
         """Matching signatures do not make HAT bodies transferable between games."""
         import gzip_simbin_tool as gz
