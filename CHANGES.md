@@ -2,6 +2,12 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 16:30:00 -0500 - rF1 tree conversion write mode
+- `rf1_to_gtr2.py <source-dir> <target-dir> --tree` now writes every archive as a validated type-0 `.gtr` preserving relative paths; `--tree --check` remains write-free. Full-tier test added.
+
+## 2026-11-28 16:00:00 -0500 - Material-prefix archive audit
+- Added `validate_materials.py --archive [--json]` to report SimBin surface-prefix gaps across every GMT in an rF1 MAS archive (149 warnings in 2,001 sampled GMTs; Brianza.mas 78). Names are not rewritten — stage strings can reference them.
+
 ## 2026-11-28 15:30:00 -0500 - RaceGMT column 0 decoded
 - Column 0 of RaceGMT's 36-byte triangle record is a unit-length horizontal projection of world (x,y): `0.180519*x + 0.983573*y`, 10.4 deg from +y, holding to <0.00045 across 240 records in five variants. Column 4 remains unassigned (linear fit residual 0.22). Full-tier test added.
 

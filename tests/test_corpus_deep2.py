@@ -1393,6 +1393,42 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertIn("failed=0", result.stdout)
         self.assertNotIn("error:", result.stdout)
 
+    def test_rf1_tree_cli_write_mode(self):
+        """`rf1_to_gtr2.py --tree TARGET` writes validated type-0 archives."""
+        import subprocess
+        import tempfile
+        import mas_tool
+
+        root = (ROOT.parent / "RF1Vanilla" / "GameData" / "Locations"
+                / "Joesville")
+        if not root.is_dir():
+            self.skipTest("RF1Vanilla Joesville track not present")
+        with tempfile.TemporaryDirectory(dir="/tmp/opencode") as td:
+            check_target = Path(td) / "check"
+            result = subprocess.run(
+                [sys.executable, str(ROOT / "rf1_to_gtr2.py"),
+                 str(root), str(check_target), "--tree", "--check"],
+                capture_output=True, text=True)
+            self.assertNotEqual(result.returncode, 0)  # mutually exclusive flags
+            result = subprocess.run(
+                [sys.executable, str(ROOT / "rf1_to_gtr2.py"),
+                 str(root), "--tree", "--check"],
+                capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            target = Path(td) / "written"
+            result = subprocess.run(
+                [sys.executable, str(ROOT / "rf1_to_gtr2.py"),
+                 str(root), str(target), "--tree"],
+                capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn("written=2", result.stdout)
+            archives = sorted(p for p in target.rglob("*") if p.is_file())
+            self.assertEqual(len(archives), 2)
+            for archive in archives:
+                self.assertEqual(archive.suffix.lower(), ".gtr")
+                mtype, entries = mas_tool.read_archive(str(archive))
+                self.assertEqual(mtype, 0)
+                self.assertGreater(len(entries), 0)
     def test_rf1_cli_and_tree_use_semantic_bridge(self):
         """User-facing conversion entry points must preserve all submeshes."""
         import subprocess

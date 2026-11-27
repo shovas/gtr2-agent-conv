@@ -99,15 +99,25 @@ def main(argv=None) -> int:
         root = Path(args.source)
         if not root.is_dir():
             ap.error("--tree requires a source directory")
+        target = Path(args.target) if args.target else None
+        if target is not None and args.check:
+            ap.error("--check does not write output; omit the target")
+        if target is None and not args.check:
+            ap.error("--tree requires a target directory unless --check is used")
         archives = sorted(p for p in root.rglob("*")
                           if p.is_file()
                           and p.suffix.lower() in (".mas", ".gtr", ".gtl"))
-        checked = failed = members = 0
+        checked = failed = members = written = 0
         errors = []
         for archive in archives:
             try:
-                report = convert_archive(archive, check=True,
+                destination = None
+                if target is not None:
+                    destination = target / archive.relative_to(root).with_suffix(".gtr")
+                    destination.parent.mkdir(parents=True, exist_ok=True)
+                report = convert_archive(archive, destination, args.check,
                                          relayout=not args.structural)
+                written += int(destination is not None and destination.is_file())
             except Exception as exc:
                 failed += 1
                 errors.append((str(archive), f"{type(exc).__name__}: {exc}"))
@@ -115,7 +125,7 @@ def main(argv=None) -> int:
             checked += 1
             members += report["members"]
         print(f"archives={len(archives)} checked={checked} failed={failed} "
-              f"members={members}")
+              f"members={members} written={written}")
         for name, message in errors[:10]:
             print(f"error: {name}: {message[:120]}")
         return 1 if failed else 0

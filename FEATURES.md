@@ -185,6 +185,8 @@ python3 rf1_to_gtr2.py <archive.mas> <out.gtr>
 python3 rf1_to_gtr2.py <archive.mas> --check
 python3 rf1_to_gtr2.py <archive.mas> <out.gtr>   # semantic bridge preserves all submeshes (default)
 python3 rf1_to_gtr2.py <directory> --tree        # check every archive in a tree
+python3 rf1_to_gtr2.py <directory> <target-dir> --tree   # write .gtr archives
+python3 rf1_to_gtr2.py <directory> <target-dir> --tree   # write .gtr archives
 python3 rf1_to_gtr2.py <archive.mas> <out.gtr> --structural   # legacy single-submesh bridge
 ```
 **Limitations**: Geometry is preserved structurally and validated on 60 real GMTs, but no ground-truth pair exists and in-game behaviour is NOT validated.
