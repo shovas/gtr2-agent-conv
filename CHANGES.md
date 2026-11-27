@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 17:00:00 -0500 - Runtime validation progress under Wine
+- Found an existing Wine 11.21 install and resolved the `mfc100.dll` import blocker for `GTR2Dedicated.exe` by extracting it from the VC2010 redistributable CAB. The executable now starts and, under `WINEDEBUG=+file`, reads all track `.gdb`/`.trk` files and enumerates `HAT_Dedicated` `.hat` names — matching our validator's file set. Direct3D window creation still fails under Xvfb, so this is runtime *loading* evidence, not in-game acceptance. Steps, evidence and the remaining blocker recorded in `docs/runtime-validation.md`.
+
 ## 2026-11-29 16:00:00 -0500 - Fix two full-tier stale expectations
 - `batch_convert()` now falls back to `DEFAULT_ROOTS` for families a caller's `roots` dict omits (custom 3-family callers no longer KeyError on `racegmt`). The rF1 `--tree` check-mode test now passes `--check`, matching the CLI's write-mode requirement. Both reproduced from the old full-tier run and are fixed.
 

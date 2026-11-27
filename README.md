@@ -21,6 +21,7 @@ Tools and format documentation for converting ISIMotor-lineage sim content (rFac
 | `docs/task-plan.md` | Prioritised task plan with completion/blocked status. |
 | `docs/phs-research.md` | Resolved PHS investigation: evidence table, ranked hypotheses, recommendation. |
 | `docs/open-issues-research.md` | Offline research record for the five open issues (experiments, evidence, classification). |
+| `docs/runtime-validation.md` | Wine runtime status: DLL fixes, observed GTR2 GameData/HAT file access, D3D blocker, reproduction steps. |
 | `docs/reverse-engineering-playbook.md` | Reusable techniques that produced verified decoders, with worked examples and a repeatable investigation loop. |
 
 ## Features
