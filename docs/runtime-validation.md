@@ -346,3 +346,17 @@ converted archives or their `MASFile` references.
 at all; it requires a client-rendered session, which is currently blocked by
 the post-config crash after the VRAM-gate bypass. Do not spend further time
 adjusting converted `MASFile`/`SearchPath` lines for the dedicated server.
+
+## Sandbox incident and repair (2026-11-27)
+
+During the Hockenheim substitution, the sandbox event directory was a symlink
+into the read-only `GTR2Steam` install. `rm`/`cp` therefore modified the stock
+`NTHockenheim.trk` and `.AIW` in place, and the attempted restore created
+self-referential symlinks (`ELOOP`). The damage was detected by the normal
+test suite (`test_aiw_parse_from_reference_corpus`: 58 != 59; two
+`test_gtl_to_gtr2` failures). Both files were restored from the independent
+local install at `/vmhost-smbofficelinux/home_ollama/GTR2-Steam-231208/`;
+the full normal suite passes again. Byte-identity with the previous copies is
+not guaranteed, and no further experiments should mutate symlinked corpus
+paths.
+

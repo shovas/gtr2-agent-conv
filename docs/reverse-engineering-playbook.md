@@ -107,6 +107,23 @@ identical. A cheap hash comparison can eliminate most conversion work.
 The RaceGMT decode is not the only case where a small structural insight
 unlocked a whole family. These are worth applying deliberately elsewhere.
 
+### Sandbox substitution — never symlink a directory you will modify
+
+While testing converted track files, a sandbox directory was a **symlink into
+the read-only GTR2 install**. Running `rm`/`cp` inside it modified the
+reference install itself, and a "restore" `ln -s <same path>` created
+self-referential symlinks. Two stock `NTHockenheim` files were damaged before
+the mistake was noticed (tests failed with `ELOOP` and corpus mismatches).
+They were restored from another local GTR2 install, but byte-identity with the
+originals cannot be proven.
+
+**Lesson:** before substituting files in a sandbox, verify with `ls -ld` that
+every directory you will write to is a **real directory**, not a symlink into
+a corpus. Build the overlay top-down: real directories for anything mutable,
+symlinks only for read-only leaves. Never run `rm`/`cp` inside a symlinked
+corpus path, even for a "controlled" experiment. Prefer copying whole event
+directories into `/tmp` before editing.
+
 ### HAT node stream — exact EOF beats statistical enrichment
 
 The HAT framing took several sessions to close. The lessons generalise well.
