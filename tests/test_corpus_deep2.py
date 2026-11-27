@@ -1386,7 +1386,8 @@ class CorpusDeep2Test(unittest.TestCase):
         if not root.is_dir():
             self.skipTest("RF1Vanilla Joesville track not present")
         result = subprocess.run(
-            [sys.executable, str(ROOT / "rf1_to_gtr2.py"), str(root), "--tree"],
+            [sys.executable, str(ROOT / "rf1_to_gtr2.py"), str(root),
+             "--tree", "--check"],
             capture_output=True, text=True)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("checked=", result.stdout)

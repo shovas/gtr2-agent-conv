@@ -165,7 +165,8 @@ def batch_convert(template: bytes, out_dir: Path, limit: int = 0,
         target = out_dir / kind
         target.mkdir(exist_ok=True)
         scanned = written = 0
-        selected = roots[kind]
+        # Callers may override only some families; fall back to defaults.
+        selected = roots.get(kind, DEFAULT_ROOTS[kind])
         if not isinstance(selected, (list, tuple)):
             selected = (selected,)
         for root in selected:

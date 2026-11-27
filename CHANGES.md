@@ -2,6 +2,12 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 16:00:00 -0500 - Fix two full-tier stale expectations
+- `batch_convert()` now falls back to `DEFAULT_ROOTS` for families a caller's `roots` dict omits (custom 3-family callers no longer KeyError on `racegmt`). The rF1 `--tree` check-mode test now passes `--check`, matching the CLI's write-mode requirement. Both reproduced from the old full-tier run and are fixed.
+
+## 2026-11-29 15:30:00 -0500 - Corrected COMMONMAPS handling
+- Reverted the earlier decision to drop rF1's `COMMONMAPS` MASFile reference: its 44 shared assets (skies, smoke/skid textures, STARTBOX.GMT) have no equivalents in GTR2's stock archives, so dropping it would lose content. `text_convert.convert_tree()` now takes `shared_archives=` / `--shared` to convert the parent-folder `commonmaps.mas` into the target and keep the reference; Joesville still validates with 0 problems.
+
 ## 2026-11-29 14:30:00 - HAT per-phase byte negative
 - Modal-byte fraction across all 34 phases of Brno's HAT tail matches a shuffled control (0.055 vs 0.0546), so no fixed 34-byte phase carries a constant field. Recorded with the other HAT framing negatives.
 

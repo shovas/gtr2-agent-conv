@@ -55,12 +55,15 @@ def scn_to_trk(data: str, track_name: str = "") -> str:
     # MASFile line when the source SCN has no equivalent.
     if not any(re.match(r"^\s*MASFile\s*=\s*Misc\.gtr\s*$", line, re.I)
                for line in out):
+        insertion = None
         for index in range(len(out) - 1, -1, -1):
             if out[index].lstrip().lower().startswith("masfile="):
-                ending = out[index][-2:] if out[index].endswith("\r\n") else (
-                    "\n" if out[index].endswith("\n") else "")
-                out.insert(index + 1, f"MASFile=Misc.gtr{ending}")
+                insertion = index + 1
                 break
+        if insertion is None:
+            insertion = len(out)  # e.g. all source MASFiles were dropped
+        ending = ("\r\n" if out and out[-1].endswith("\r\n") else "\n")
+        out.insert(insertion, f"MASFile=Misc.gtr{ending}")
     return "".join(out)
 
 
@@ -83,13 +86,38 @@ def trk_extensions_to_gtr2(data: str) -> str:
     return "".join(out)
 
 
-def convert_tree(source: str | Path, target: str | Path, check: bool = False) -> dict:
-    """Convert an rFactor GameData tree: archives, AIW, SCN -> TRK, copy rest."""
+def convert_tree(source: str | Path, target: str | Path, check: bool = False,
+                 templates: dict[str, Path] | None = None,
+                 shared_archives: tuple[str | Path, ...] = ()) -> dict:
+    """Convert an rFactor GameData tree: archives, AIW, SCN -> TRK, copy rest.
+
+    ``templates`` optionally maps lowercase GTR2 basenames to template files;
+    matching ``.gdb``/``.aiw`` outputs receive the GTR2-only session/AIW keys
+    from those templates (values come from the template and are unverified for
+    tracks without a real GTR2 counterpart). ``shared_archives`` are converted
+    into the target root — rF1 keeps shared assets such as ``commonmaps.mas``
+    in the parent ``Locations`` folder, outside a single track's directory,
+    and the converted TRK still references them as ``.gtr``.
+    """
     import mas_tool
     from rf1_to_gtr2 import convert_archive
+    from gtl_to_gtr2 import adapt_aiw_from_template, adapt_gdb_from_template
 
     src, dst = Path(source), Path(target)
-    report = {"archives": 0, "aiw": 0, "scn": 0, "copy": 0}
+    templates = templates or {}
+    fallbacks = {}
+    for path in templates.values():
+        fallbacks.setdefault(path.suffix.lower(), path)
+    report = {"archives": 0, "aiw": 0, "scn": 0, "copy": 0, "adapted": 0}
+    for shared in shared_archives:
+        shared = Path(shared)
+        if not shared.is_file():
+            continue
+        out = dst / (shared.stem + ".gtr")
+        if not check:
+            out.parent.mkdir(parents=True, exist_ok=True)
+            convert_archive(shared, out, relayout=True)
+        report["archives"] += 1
     for path in src.rglob("*"):
         if not path.is_file():
             continue
@@ -107,8 +135,24 @@ def convert_tree(source: str | Path, target: str | Path, check: bool = False) ->
             if not check:
                 out = dst / rel
                 out.parent.mkdir(parents=True, exist_ok=True)
-                out.write_bytes(aiw_for_simbin(decode_config_bytes(path.read_bytes())).encode("latin-1"))
+                data = aiw_for_simbin(decode_config_bytes(path.read_bytes())).encode("latin-1")
+                template = templates.get(path.name.lower(), fallbacks.get(".aiw"))
+                if template is not None:
+                    data = adapt_aiw_from_template(data, template.read_bytes())[0]
+                    report["adapted"] += 1
+                out.write_bytes(data)
             report["aiw"] += 1
+        elif ext == ".gdb":
+            if not check:
+                out = dst / rel
+                out.parent.mkdir(parents=True, exist_ok=True)
+                data = path.read_bytes()
+                template = templates.get(path.name.lower(), fallbacks.get(".gdb"))
+                if template is not None:
+                    data = adapt_gdb_from_template(data, template.read_bytes())[0]
+                    report["adapted"] += 1
+                out.write_bytes(data)
+            report["copy"] += 1
         elif ext == ".scn":
             if not check:
                 out = (dst / rel).with_suffix(".trk")
@@ -130,8 +174,22 @@ def main(argv=None) -> int:
     ap.add_argument("source")
     ap.add_argument("target", nargs="?")
     ap.add_argument("--check", action="store_true", help="count conversions without writing")
+    ap.add_argument("--templates", metavar="DIR",
+                    help="directory of GTR2 .gdb/.aiw templates for key addition")
+    ap.add_argument("--shared", nargs="*", default=(),
+                    help="extra rF1 archive(s) to convert into the target root, "
+                         "e.g. GameData/Locations/commonmaps.mas")
     args = ap.parse_args(argv)
-    report = convert_tree(args.source, args.target or "/tmp/unused", args.check)
+    templates = {}
+    if args.templates:
+        root = Path(args.templates)
+        if not root.is_dir():
+            ap.error("--templates requires a directory")
+        templates = {p.name.lower(): p for p in root.rglob("*")
+                     if p.is_file() and p.suffix.lower() in (".gdb", ".aiw")}
+    report = convert_tree(args.source, args.target or "/tmp/unused",
+                          args.check, templates=templates,
+                          shared_archives=tuple(args.shared))
     print(report)
     return 0
 

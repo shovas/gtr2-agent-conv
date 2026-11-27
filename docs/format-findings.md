@@ -726,6 +726,23 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
   and a report that GTR2-generated HATs work in Race07 while rF1-generated
   ones do not matches our cross-game 0% record-order reuse. Reference only.
 
+- **rF1→GTR2 complete track tree (offline-validated):** the unified
+  `text_convert.convert_tree()` converts archives (semantic bridge), SCN→TRK
+  and AIW rules, and copies other files. With `--templates` providing GTR2
+  `.gdb`/`.aiw` files, session/AIW-only keys are added (17→2 validator
+  problems). rF1 keeps shared assets in the *parent* `Locations` folder:
+  `commonmaps.mas` holds 44 TGA/DDS/GMT files (skies, smoke/skid textures,
+  STARTBOX.GMT) and **none of those 44 names exist in GTR2's stock archives**,
+  even though GTR2's own `specialfx.tec` references names such as
+  `smokewhite.tga` and `skidwet.tga`. The correct conversion therefore
+  converts that parent archive to `commonmaps.gtr` (`shared_archives=` /
+  `--shared`) and keeps the TRK's `MASFile=COMMONMAPS.gtr` reference; dropping
+  the reference would silence the validator while losing shared assets. With
+  the archive present the Joesville tree has **0 validator problems**.
+  Template values for a different track are unverified; this is offline
+  structural validation only.
+  Full-tier test: `test_unified_rf1_tree_converts_and_validates`.
+
 - **GTL→GTR2 copy-vs-convert rule** (same basenames under `GameData`): 25/26
   shared `.gmt` meshes are **byte-identical** and safe to copy; the one
   exception (`Teams/M-FPDriver.gmt`) is a genuinely different mesh, not a

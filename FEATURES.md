@@ -192,7 +192,7 @@ python3 rf1_to_gtr2.py <directory> <target-dir> --tree   # write .gtr archives
 python3 rf1_to_gtr2.py <directory> <target-dir> --tree   # write .gtr archives
 python3 rf1_to_gtr2.py <archive.mas> <out.gtr> --structural   # legacy single-submesh bridge
 ```
-**Limitations**: Geometry is preserved structurally and validated on 60 real GMTs, but no ground-truth pair exists and in-game behaviour is NOT validated.
+**Complete rF1 track tree (offline-validated):** `text_convert.py <rF1-location-dir> <out-dir> --templates <GTR2-dir> --shared <parent>/commonmaps.mas` converts every archive to `.gtr` (including rF1's shared parent-folder archive), SCN to TRK, AIW to SimBin rules, and copies the rest; with GTR2 `.gdb`/`.aiw` templates it also adds the SimBin-only session/AIW keys. The Joesville track converts to a tree with **0 GTR2 validator problems** (with shared GTR2 archives known). Values copied from templates for a different track are unverified, and in-game behaviour is NOT validated.
 
 ## 10. Read GTTF / IRSR headers (partial)
 

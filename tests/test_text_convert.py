@@ -105,6 +105,32 @@ class TextConvertTest(unittest.TestCase):
             self.assertFalse([p for p in problems if "non-.gtr MASFile" in p])
             self.assertFalse([p for p in problems if "missing Misc.gtr" in p])
 
+    def test_unified_rf1_tree_converts_and_validates(self):
+        """A whole rF1 track converts to a GTR2-valid tree with templates."""
+        import tempfile
+        import gtl_to_gtr2 as gtl
+
+        src = ROOT.parent / "RF1Vanilla/GameData/Locations/Joesville"
+        template_dir = ROOT.parent / "GTR2Steam/GameData/Locations/Anderstorp"
+        shared = (ROOT.parent / "RF1Vanilla/GameData/Locations/commonmaps.mas",)
+        if not src.is_dir() or not template_dir.is_dir() or not shared[0].is_file():
+            self.skipTest("rF1/GTR2 Anderstorp corpora not present")
+        templates = {p.name.lower(): p for p in template_dir.iterdir()
+                     if p.is_file() and p.suffix.lower() in (".gdb", ".aiw")}
+        self.assertTrue(templates)
+        gtr_shared = {p.name.lower() for p in (ROOT.parent / "GTR2Steam/GameData").rglob("*")
+                      if p.is_file() and p.suffix.lower() == ".gtr"}
+        with tempfile.TemporaryDirectory(dir="/tmp/opencode") as td:
+            out = Path(td) / "converted"
+            report = tc.convert_tree(src, out, templates=templates,
+                                     shared_archives=shared)
+            self.assertEqual(report["archives"], 3)
+            self.assertEqual(report["adapted"], 2)
+            self.assertTrue((out / "commonmaps.gtr").is_file())
+            local = {p.name.lower() for p in out.rglob("*")
+                     if p.is_file() and p.suffix.lower() == ".gtr"}
+            self.assertEqual(gtl.validate_gtr2_tree(out, gtr_shared | local), [])
+
     def test_jca_encrypted_scn_decryption(self):
         """Race07/Volvo .scn files are JCA-wrapped; tree conversion must decrypt."""
         import glob
