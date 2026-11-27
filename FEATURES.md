@@ -240,6 +240,7 @@ python3 -c "import simbin_text_tool as s; print(s.parse_veh(open('car.veh','rb')
 ```bash
 python3 corpus_diff.py <dirA> <dirB> --ext gmt --archives
 python3 validate_materials.py <file.gmt>
+python3 validate_materials.py --archive <file.mas> [--json]
 ```
 
 ## 13. Run pre-push safety/privacy checks

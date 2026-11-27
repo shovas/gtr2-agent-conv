@@ -35,17 +35,47 @@ def check_gmt(data: bytes, name: str = "") -> list[str]:
     return warnings
 
 
+def check_archive(path: str | Path) -> list[tuple[str, str]]:
+    """Report SimBin-prefix warnings for every GMT member of a MAS archive.
+
+    Used to audit rF1 track archives before conversion: the RacerM rule says
+    SimBin reads only the first four material-name characters, and wrong
+    surface prefixes cause the "quicksand effect". Names are *not* edited —
+    stage strings can reference the original name.
+    """
+    import mas_tool
+    _mtype, entries = mas_tool.read_archive(path)
+    out = []
+    for entry in entries:
+        if not entry.name.lower().endswith(".gmt") or not entry.data:
+            continue
+        for warning in check_gmt(entry.data, entry.name):
+            out.append((entry.name, warning))
+    return out
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("files", nargs="+")
+    ap.add_argument("files", nargs="*")
+    ap.add_argument("--archive", action="store_true",
+                    help="treat inputs as MAS archives and scan their GMT members")
+    ap.add_argument("--json", action="store_true",
+                    help="emit warnings as JSON")
     args = ap.parse_args(argv)
-    total = 0
+    warnings = []
     for f in args.files:
-        warnings = check_gmt(Path(f).read_bytes(), f)
-        for w in warnings:
-            print(f"{f}: {w}")
-        total += len(warnings)
-    print(f"warnings={total}")
+        if args.archive:
+            warnings.extend((f"{f}::{entry}", warning)
+                            for entry, warning in check_archive(f))
+        else:
+            warnings.extend((f, w) for w in check_gmt(Path(f).read_bytes(), f))
+    if args.json:
+        import json
+        print(json.dumps(warnings, indent=2))
+    else:
+        for name, warning in warnings:
+            print(f"{name}: {warning}")
+        print(f"warnings={len(warnings)}")
     return 0
 
 
