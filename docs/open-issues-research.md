@@ -148,6 +148,15 @@ records from 120 RaceGMT files, column 4 also has weak/no correlation with the
 other four record columns (|r| ≤ 0.52). Do not pursue area/edge proxies further
 without a new structural hypothesis.
 
+## RaceGMT column 4: exact linear combination — negative (2026-11-27)
+
+Fitted column 4 as a fixed linear combination of the other four record floats
+plus a constant on 48 `PEOPLE_STAND_01` records. Least-squares coefficients
+are large and unstable (constant 7.58, c0 +267.9, c1 -263.6, c2 -0.35,
+c3 -48.3) and the max error is still 0.194. No fixed linear form explains the
+field; combined with the earlier negative families, column 4 needs producer
+code or a new structural hypothesis.
+
 ## CUBE MTS 4.20 quantized int16 positions — negative (2026-11-27)
 
 Tested whether 4.20 meshes hide vertex positions as quantized int16 triples
