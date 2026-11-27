@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 14:00:00 -0500 - f0 simple-name negatives
+- Recorded that f0's low byte does not derive from material name length, first character, character-code sum or vowel count (all at shuffled-control chance level ~3-4%).
+
 ## 2026-11-29 13:30:00 -0500 - small_b smoothed-steering association
 - Found a controlled association: after detrending both channels, replay `small_b` correlates with the 20-frame-smoothed steering channel in 7/8 replays (mean r 0.23 vs 0.00 shuffled). Recorded as an association, not a decoder; full-tier permutation test added.
 

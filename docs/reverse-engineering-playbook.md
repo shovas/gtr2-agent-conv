@@ -191,4 +191,6 @@ splitting by previous mesh's stream2/stream3 presence, vertex-count >255, or
 the 1-vs-2 offset by any tested mesh property gives nearly even splits. The
 signal is real but partial, with no known exact rule. A further split shows `high == low+1` in only 46.8% of the matching
 subset (40.2% overall), so the high byte is not a simple successor of the low
-byte either.
+byte either. Simple material-name properties (name length, first character,
+character-code sum, vowel count) also match at chance level (~3-4%, same as
+shuffled controls), so f0 is not a trivial string-derived metric.
