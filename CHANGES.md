@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 13:00:00 -0500 - Full-tier suite green
+- Verified `tests.test_corpus_deep2`: 264 tests, 0 failures (2,363 s, full tier), confirming the corrected full-tier expectations and all accumulated findings pass together. Normal tier also green: 263 tests, 0 failures in 239 s (within the 300 s budget).
+
 ## 2026-11-28 12:30:00 -0500 - RaceGMT f32 columns are positional
 - Found that three per-triangle f32 columns in `RaceGMT\0` meshes track the per-file header bounding-box translation exactly (f32 precision across five `PEOPLE_STAND` variants); `(f3, f1, f2)` is a world-space position inside the header bbox for all records. Columns 0 and 4 remain unassigned. Full-tier test added.
 
