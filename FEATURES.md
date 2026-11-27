@@ -45,7 +45,7 @@ python3 batch_convert.py --template template.gmt --out /tmp/gtr2_meshes --limit 
 **Commands**:
 ```bash
 python3 mas_tool.py list <archive>
-python3 mas_tool.py extract <archive> <outdir>
+python3 mas_tool.py extract <archive> <outdir> [--as-bmp]
 python3 mas_tool.py create <archive> <files...>
 python3 mas_tool.py add <archive> <files...>
 python3 mas_tool.py update <archive> <files...>

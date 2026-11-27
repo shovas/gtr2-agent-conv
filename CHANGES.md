@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 14:00:00 -0500 - Raw texture extraction CLI
+- Added `mas_tool.py extract --as-bmp`, writing 16-byte-header raw RGB members (SCGT/F12001) as real 24-bit BMP files instead of headerless blobs.
+
 ## 2026-11-28 13:30:00 -0500 - F12001 raw textures decode
 - Verified all 279 `Entry.type == 2` members in `../F12001` are raw 16-byte-header 24-bit RGB textures and decode to valid BMPs via the shared `scgt_raw_texture_to_bmp()` helper; corpus-wide test added.
 

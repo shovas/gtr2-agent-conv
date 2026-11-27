@@ -43,6 +43,35 @@ class F12001Test(unittest.TestCase):
         self.assertEqual(sigs, {mas_tool.MAS_TYPE401: 56, mas_tool.MAS_TYPE400: 24})
         self.assertEqual(total, 16720)
 
+    def test_extract_as_bmp_cli(self):
+        """`mas_tool.py extract --as-bmp` writes real BMPs for raw textures."""
+        import subprocess
+        import tempfile
+
+        archive = None
+        for candidate in F1.rglob("*.mas"):
+            if not candidate.is_file():
+                continue
+            try:
+                _mtype, entries = mas_tool.read_archive(candidate)
+            except Exception:
+                continue
+            if any(e.type == 2 for e in entries):
+                archive = candidate
+                break
+        if archive is None:
+            self.skipTest("archive with raw textures not present")
+        with tempfile.TemporaryDirectory() as td:
+            result = subprocess.run(
+                [sys.executable, str(ROOT / "mas_tool.py"), "extract",
+                 str(archive), "-o", td, "--as-bmp"],
+                capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            bmps = [p for p in Path(td).rglob("*")
+                    if p.is_file() and p.read_bytes()[:2] == b"BM"]
+            self.assertGreater(len(bmps), 0)
+            for path in bmps:
+                self.assertEqual(path.suffix.lower(), ".bmp")
     def test_type2_raw_textures_decode_to_bmp(self):
         """All F12001 type-2 members are raw 16-byte-header RGB textures."""
         import struct

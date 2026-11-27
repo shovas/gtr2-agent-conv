@@ -538,7 +538,13 @@ def cmd_extract(args: argparse.Namespace) -> int:
             continue
         dest = out / e.name
         dest.parent.mkdir(parents=True, exist_ok=True)
-        dest.write_bytes(e.data or b"")
+        payload = e.data or b""
+        if args.as_bmp:
+            bmp = scgt_raw_texture_to_bmp(payload)
+            if bmp is not None:
+                dest = dest.with_suffix(".bmp")
+                payload = bmp
+        dest.write_bytes(payload)
         if args.verbose:
             print(dest)
     return 0
@@ -609,6 +615,8 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("archive")
     p.add_argument("-o", "--outdir", default=".")
     p.add_argument("-v", "--verbose", action="store_true")
+    p.add_argument("--as-bmp", action="store_true",
+                   help="write 16-byte-header raw RGB members as real 24-bit BMPs")
     p.add_argument("files", nargs="*")
     p.set_defaults(func=cmd_extract)
 
