@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 19:30:00 -0500 - CUBE MTS to GTR2 mesh conversion
+- Added `mts_format.to_gtr2_gmt()`: decoded CUBE MTS triangle indices and rig-indexed positions feed `vrl_to_gmt.build_gmt()`. 389 F1 2002/F1C/NascarSimRacing meshes with plausible positions rebuild as parseable GTR2 GMTs; skinned meshes with non-finite/huge local coordinates are skipped. Full-tier test added.
+
 ## 2026-11-29 19:00:00 -0500 - CUBE MTS triangles decoded
 - Overturned the earlier "no triangle block" conclusion: the 36-byte CUBE MTS 4.10 records previously called "material/rig records" store three u16 vertex indices at +24/+26/+28. `mts_format.read_triangles()` decodes them with in-range indices in 1,715 files across F12002/F1C/NascarSimRacing. Full-tier test added; docs updated.
 

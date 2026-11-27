@@ -187,6 +187,38 @@ def read_triangles(data: bytes) -> list[tuple[int, int, int]]:
     return triangles
 
 
+def to_gtr2_gmt(data: bytes, template: bytes) -> bytes | None:
+    """Build a GTR2-layout GMT from a CUBE MTS 4.10 file.
+
+    Uses decoded triangle indices (`read_triangles()`) and the first submesh's
+    rig-indexed vertex positions (`read_geometry()`). Returns ``None`` when the
+    file is not 4.10, has no triangles, or its positions are not plausible
+    (skinned meshes with external bone data often contain NaN/huge values).
+    """
+    import vrl_to_gmt
+
+    if data[:13] != b"CUBE_MTS_4.10":
+        return None
+    triangles = read_triangles(data)
+    geometry = read_geometry(data)
+    if not triangles or not geometry or not geometry.get("descriptors"):
+        return None
+    vertices = geometry["descriptors"][0]["vertices"]
+    count = geometry["descriptors"][0]["count_a"]
+    if len(vertices) < count:
+        return None
+    if not all(all(isinstance(v, float) and v == v and abs(v) < 1e5
+                   for v in point) for point in vertices[:count]):
+        return None
+    max_index = max(index for tri in triangles for index in tri)
+    if max_index >= count:
+        return None
+    try:
+        return vrl_to_gmt.build_gmt(vertices[:count], triangles, template)
+    except (ValueError, struct.error):
+        return None
+
+
 def decode_material_numbers(record: dict) -> tuple[int, int, int]:
     """Decode a 4.10 material record's packed/small numeric fields.
 

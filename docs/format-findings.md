@@ -704,6 +704,11 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
   triples remain stable across same-name files, so the earlier rig-signature
   observations are not invalidated. Full-tier test:
   `test_material_records_are_triangle_indices`.
+  `mts_format.to_gtr2_gmt()` feeds the decoded triangles and the first
+  submesh's rig-indexed positions into `vrl_to_gmt.build_gmt()`; **389 files**
+  have plausible positions and rebuild as parseable GTR2 GMTs. The many
+  skinned meshes with NaN/huge local coordinates require external bone data
+  and are skipped. Full-tier test: `test_mts_converts_to_gtr2_gmt`.
 
 - **rF2 GMT UVW exporter corroboration** (`rf2-developers-guide/
   docs.studio-397.com/display/DG/3ds+Max+GMT+file+UVW+Export.html`): GMT exports

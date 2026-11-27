@@ -169,6 +169,49 @@ class MtsFormatTest(unittest.TestCase):
         self.assertEqual(len(table["submeshes"]), 5)
         self.assertEqual(table["submeshes"][0], (129, 0, 150, 6448, 150, 13648))
 
+    def test_mts_converts_to_gtr2_gmt(self):
+        """Convertible CUBE MTS meshes rebuild as parseable GTR2 GMTs."""
+        import gmt_format
+
+        template = None
+        for p in (ROOT.parent / "GTR2Steam/GameData").rglob("*.gtr"):
+            if not p.is_file():
+                continue
+            for e in mas_tool.read_archive(p)[1]:
+                if e.name.lower().endswith(".gmt") and e.data:
+                    template = e.data
+                    break
+            if template:
+                break
+        if template is None:
+            self.skipTest("GTR2 GMT template not present")
+        converted = 0
+        for root in ("F1C", "F12002"):
+            for archive in glob.glob(str(ROOT.parent / root / "**" / "*.mas"),
+                                     recursive=True):
+                try:
+                    entries = mas_tool.read_archive(archive)[1]
+                except Exception:
+                    continue
+                for entry in entries:
+                    data = entry.data or b""
+                    if not entry.name.lower().endswith(".mts"):
+                        continue
+                    out = mf.to_gtr2_gmt(data, template)
+                    if out is None:
+                        continue
+                    parsed = gmt_format.parse_gmt("converted.gmt", out)
+                    self.assertGreater(parsed.meshes[0].record.vertex_count, 0,
+                                       entry.name)
+                    converted += 1
+                    if converted >= 20:
+                        break
+                if converted >= 20:
+                    break
+            if converted >= 20:
+                break
+        self.assertGreaterEqual(converted, 20)
+
     def test_material_records_are_triangle_indices(self):
         """The 36-byte 'material' records actually hold triangle indices."""
         found = 0
