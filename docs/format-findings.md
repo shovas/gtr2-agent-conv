@@ -54,13 +54,16 @@ regression tests or an explicitly documented negative.
   `[cos, 0, sin, 0]`; `race_gmt.read_texture_axes()` returns those pairs and
   `f0 = sin*x + cos*y` reproduces all 240 records to <8e-6. Full-tier test:
   `test_texture_axes_decode_f0`. After the axis entries there is a second
-  table: a count word (5), a 12-byte section header, then five 64-byte
+  table: a 12-byte section header then a **contiguous array of 24** 64-byte
   vertices holding `[y,z,x]` world position, `[cos,~0,sin]` axis, two padding
-  words (the first NaN) and four repeated `(u,v)` pairs. All five variants
-  have the same UV corners (0.73711,-0.00631) and (0.73711,-0.99574);
-  `race_gmt.read_racegmt_vertices()` decodes them. Full-tier test:
-  `test_vertex_table_has_real_uvs`. The triangle records' u16 indices do not
-  index this five-vertex table (they reach 41), so their target is unknown.
+  words (the first NaN) and four repeated `(u,v)` pairs; an earlier reading
+  of a leading word as a count of 5 was wrong. A u32 count (24) and 24 u16
+  indices `0..23` follow. All five variants share the same UV corners
+  (0.73711,-0.00631) and (0.73711,-0.99574).
+  `race_gmt.read_racegmt_vertices()` and `read_racegmt_indices()` decode them.
+  Full-tier test: `test_vertex_table_has_real_uvs`. The 48 earlier triangle
+  records' u16 indices reach 41 and are a different array, so their target
+  remains unknown.
   Column 4 keeps the same spatial coefficients across variants but has a
   residual of 0.22 under a linear fit; a transform search over x, -x, |x|,
   log|x|, sqrt|x|, 1/x, x^2, the perpendicular horizontal projection and

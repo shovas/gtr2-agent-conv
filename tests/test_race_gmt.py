@@ -177,7 +177,9 @@ class RaceGmtTest(unittest.TestCase):
             self.skipTest("PEOPLE_STAND variants not present")
         for path in files:
             vertices = race_gmt.read_racegmt_vertices(path.read_bytes())
-            self.assertEqual(len(vertices), 5, path.name)
+            self.assertEqual(len(vertices), 24, path.name)
+            indices = race_gmt.read_racegmt_indices(path.read_bytes())
+            self.assertEqual(indices, list(range(24)), path.name)
             for vertex in vertices:
                 self.assertTrue(all(isfinite(v) for v in vertex["position"]))
                 self.assertGreater(abs(vertex["axis"][0]), 0.05)

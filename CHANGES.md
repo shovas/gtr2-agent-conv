@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 21:00:00 -0500 - RaceGMT vertex array corrected
+- Corrected the RaceGMT vertex-table decoding: the leading word is not a count of 5; the region is a contiguous 24-vertex array of 64-byte records followed by a u32 count (24) and 24 u16 indices 0..23. `read_racegmt_indices()` added; test and docs updated.
+
 ## 2026-11-28 20:30:00 -0500 - RaceGMT vertex/UV table decoded
 - Found a second table after the RaceGMT texture axes: five 64-byte vertices with world positions, per-vertex axes and UV corners (identical across the five PEOPLE_STAND variants). `race_gmt.read_racegmt_vertices()` decodes it; full-tier test added. The triangle u16 indices do not index this table, so the linkage remains unknown.
 

@@ -159,6 +159,7 @@ def cmd_info(args: argparse.Namespace) -> int:
             print(f"triangle_groups: {sorted({r['group'] for r in triangles})}")
             print(f"texture_axes: {len(axes)}")
             print(f"vertices_with_uv: {len(race_gmt.read_racegmt_vertices(raw))}")
+            print(f"vertex_indices: {len(race_gmt.read_racegmt_indices(raw))}")
             print("geometry: triangle records decoded (column 4 unassigned)")
         else:
             print("geometry: not decoded (RaceGMT container only)")

@@ -154,22 +154,45 @@ def read_racegmt_vertices(data: bytes) -> list[dict]:
     off = base + 36 * len(records) + 4 + 16 * len(axes)
     if off + 4 + 12 > len(data):
         return []
-    count = struct.unpack_from("<I", data, off)[0]
-    if not 0 < count <= 64 or off + 16 + 64 * count > len(data):
-        return []
+    row = off + 16
     out = []
-    for k in range(count):
-        row = off + 16 + 64 * k
+    while row + 64 <= len(data):
         y, z, x = struct.unpack_from("<3f", data, row)
         cos, zero, sin = struct.unpack_from("<3f", data, row + 12)
         if not (abs(zero) < 1e-5 and abs(cos) > 0.05 and abs(sin) > 0.05):
-            return []
+            break
         uvs = struct.unpack_from("<8f", data, row + 32)
         if uvs[0:2] != uvs[2:4] or uvs[4:6] != uvs[6:8]:
-            return []
+            break
         out.append({"position": (x, y, z), "axis": (cos, sin),
                     "uv": (uvs[0], uvs[1])})
+        row += 64
     return out
+
+
+def read_racegmt_indices(data: bytes) -> list[int]:
+    """Return the u16 index buffer following ``read_racegmt_vertices()``.
+
+    Verified on `PEOPLE_STAND_01`: after 24 vertex records a u32 count (24)
+    is followed by the sequential u16 indices 0..23. Returns an empty list
+    when that framing is absent.
+    """
+    header = parse_header(data)
+    base = 16 + len(header.name.encode("latin-1")) + 48 + 292
+    records = read_triangle_records(data)
+    axes = read_texture_axes(data)
+    if not records or len(axes) != len(records):
+        return []
+    vertices = read_racegmt_vertices(data)
+    if not vertices:
+        return []
+    off = base + 36 * len(records) + 4 + 16 * len(axes) + 16 + 64 * len(vertices)
+    if off + 4 > len(data):
+        return []
+    count = struct.unpack_from("<I", data, off)[0]
+    if not 0 < count <= 4096 or off + 4 + 2 * count > len(data):
+        return []
+    return list(struct.unpack_from(f"<{count}H", data, off + 4))
 
 
 def read_material_strings(data: bytes) -> list[str]:
