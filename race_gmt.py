@@ -198,6 +198,62 @@ def read_racegmt_indices(data: bytes) -> list[int]:
 
 
 SUBMESH_MAGIC = 0x20004051
+VARIANT_MAGIC = 0x2000403D
+VARIANT_VERTEX_STRIDE = 88
+
+
+def read_variant_submeshes(data: bytes) -> list[dict]:
+    """Decode the `0x2000403d` submesh variant used by the Zolder09 plots.
+
+    Unlike `0x20004051`, each vertex is **88 bytes**: ``[y,z,x]`` position,
+    ``[x,y,z]`` unit normal, a NaN/zero pad pair, unit tangent and bitangent
+    triples, then four ``(u,v)`` pairs. The index table follows all vertices.
+
+    Verified on `plots01.gmt` (37 vertices, 51 indices) and `plots02.gmt`
+    (32 vertices, 36 indices): every vertex normal is unit-length, and the
+    index count fits immediately after the vertex table.
+    """
+    out = []
+    needle = struct.pack("<I", VARIANT_MAGIC)
+    position = 0
+    while True:
+        position = data.find(needle, position)
+        if position < 0:
+            break
+        magic, group, count = struct.unpack_from("<III", data, position)
+        verts_at = position + 12
+        index_at = verts_at + VARIANT_VERTEX_STRIDE * count
+        if index_at + 4 > len(data):
+            position += 1
+            continue
+        index_count = struct.unpack_from("<I", data, index_at)[0]
+        if not 0 < index_count <= 8 * count or \
+                index_at + 4 + 2 * index_count > len(data):
+            position += 1
+            continue
+        vertices = []
+        for k in range(count):
+            row = verts_at + VARIANT_VERTEX_STRIDE * k
+            y, z, x = struct.unpack_from("<3f", data, row)
+            normal = struct.unpack_from("<3f", data, row + 12)
+            tangent = struct.unpack_from("<3f", data, row + 32)
+            bitangent = struct.unpack_from("<3f", data, row + 44)
+            if not (0.99 < sum(v * v for v in normal) < 1.01 and
+                    0.99 < sum(v * v for v in tangent) < 1.01 and
+                    0.99 < sum(v * v for v in bitangent) < 1.01):
+                break
+            uvs = struct.unpack_from("<8f", data, row + 56)
+            vertices.append({"position": (x, y, z),
+                             "uv": (uvs[0], uvs[1]),
+                             "uv_sets": tuple((uvs[2 * j], uvs[2 * j + 1])
+                                              for j in range(4))})
+        if len(vertices) == count:
+            indices = struct.unpack_from(f"<{index_count}H", data, index_at + 4)
+            if max(indices) < count:
+                out.append({"group": group, "vertices": vertices,
+                            "indices": indices})
+        position += 1
+    return out
 
 
 def read_racegmt_submeshes(data: bytes) -> list[dict]:
@@ -263,6 +319,8 @@ def to_gtr2_gmt(data: bytes, template: bytes) -> bytes | None:
     import vrl_to_gmt
 
     submeshes = read_racegmt_submeshes(data)
+    if not submeshes:
+        submeshes = read_variant_submeshes(data)
     if not submeshes:
         return None
     positions = []

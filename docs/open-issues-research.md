@@ -63,28 +63,29 @@ QuickBMS/aluigi/rfactortools script or web result documents `CUBE_MTS_4.20`.
 **Unblock:** a producer/consumer trace or a known 4.10/4.20 pair with matching
 geometry to isolate the transform.
 
-## Two remaining RaceGMT meshes use a distinct submesh type (2026-11-29)
+## Two remaining RaceGMT meshes use a distinct submesh type (resolved 2026-11-27)
 
-`plots01.gmt`/`plots02.gmt` in Zolder09 are the only 2 of 643 RaceGMT files
-without a `0x20004051` submesh table. **Correction (2026-11-27):** the earlier
-claim that they contain a `0x2000403d` section header was wrong — a full byte
-search finds **zero** `0x2000403d` dwords in either file. The actual distinct
-structure is:
+`plots01.gmt`/`plots02.gmt` in Zolder09 were the last 2 of 643 RaceGMT files
+without a `0x20004051` submesh table. **Correction of an earlier correction:**
+the `0x2000403d` header does exist (at offset 1255 / 995 respectively). A
+previous scan missed it because it is not 4-byte aligned and the byte pattern
+was searched as `3d 00 40 20` instead of the little-endian `3d 40 00 20`.
+A second earlier note claiming they have no such header was therefore wrong.
 
-- A 36-byte table header at **offset 351** with the record count at `+8`
-  (17 for `plots01`, 12 for `plots02`), followed by exactly that many 36-byte
-  triangle records. Every record is `[3 f32, 3 u16 indices, u16 flag=2,
-  u32 zero, u32 ordinal, 2 f32]`; the flag/zero/ordinal framing holds on
-  **17/17 and 12/12** records respectively. Full-tier regression test:
-  `test_racegmt_variant_plots_record_framing`.
-- Six 12-byte `[y, z, x]` position triples at offset 75 forming a flat ground
-  quad, but triangle indices reach 15, so those six are not the whole vertex
-  table. A 12-byte position + `u32 count=17` + 16-byte `[normal xyz, pad]`
-  table begins at offset 963; its positions do not align with the six at 75.
+The decoded variant is:
 
-**Unblock:** the vertex-position table that the 3-u16 indices address is not
-yet identified; once found, these two flat "plot" meshes can be routed
-through `vrl_to_gmt.build_gmt()` like the other 641 files.
+- `0x2000403d` section header `[magic, group=0, count=37 or 32]`.
+- **88-byte vertices**: `[y,z,x]` position, `[x,y,z]` unit normal, a NaN/zero
+  pad pair, unit tangent and bitangent triples, then four `(u,v)` pairs.
+  All 37/32 normals, tangents and bitangents are unit-length.
+- A `u32` index count followed by that many `u16` indices immediately after
+  the vertex table: 51 indices (max 36) for `plots01`, 36 (max 31) for
+  `plots02`.
+
+`read_variant_submeshes()` implements this and `to_gtr2_gmt()` falls back to
+it. **All 643/643 RaceGMT meshes now convert to parseable GTR2 GMTs.**
+Full-tier tests: `test_racegmt_corpus_converts_to_gtr2` (now requires exactly
+643) and `test_variant_submeshes_decode_zolder09_plots`.
 
 ## HAT tail per-phase byte structure (2026-11-29)
 

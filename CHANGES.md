@@ -5,8 +5,12 @@ Newest-first change log. Timestamps use repository commit dates (ISO 8601, local
 ## 2026-11-29 23:59:59 -0500 - D3D blocker isolated with minimal control
 - Compiled a standalone 12-line D3D9 program with wineg++ and ran it under Xvfb: it fails with the same `wined3d_caps_gl_ctx_create` error as GTR2Dedicated.exe. This proves the runtime blocker is environmental (Wine window/GL driver), not GTR2- or conversion-specific. Recorded with source and commands in docs/runtime-validation.md.
 
+## 2026-11-29 23:59:59 -0500 - All 643 RaceGMT meshes convert
+- Decoded the final two Race07 DLC plots (`plots01/02.gmt`): the `0x2000403d` variant uses 88-byte vertices (position, unit normal, NaN/zero pad, tangent, bitangent, four UV pairs) plus a `u16` index table. `to_gtr2_gmt()` now falls back to this decoder, reaching **643/643** RaceGMT meshes converting to parseable GTR2 GMTs. Full-tier and quick regression tests added.
+- Corrected an earlier incorrect note that claimed the plots had no `0x2000403d` header; it exists but is byte-unaligned, which the previous scan missed.
+
 ## 2026-11-29 23:59:59 -0500 - RaceGMT variant framing mapped
-- Corrected the docs: the two unconvertible Zolder09 plots have no `0x2000403d` header. They use a 36-byte table at offset 351 with a record count (+8: 17/12) and that many `[3 f32, 3 u16 indices, u16=2, u32=0, u32 ordinal, 2 f32]` records, verified on 17/17 and 12/12 records. Full-tier test added; the remaining unblock is the addressed vertex-position table.
+- (Superseded by the entry above) An earlier scan concluded the two Zolder09 plots have no `0x2000403d` header. They use a 36-byte table at offset 351 with a record count (+8: 17/12) and that many `[3 f32, 3 u16 indices, u16=2, u32=0, u32 ordinal, 2 f32]` records, verified on 17/17 and 12/12 records. Full-tier test added; the remaining unblock is the addressed vertex-position table.
 - Recorded that the apparent perfect correlation of RaceGMT column 4 with triangle area/edges/y-span is a collinearity artifact disproved by exact-error checks.
 
 ## 2026-11-29 23:59:59 -0500 - HAT grammar still incomplete

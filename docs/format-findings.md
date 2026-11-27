@@ -79,13 +79,13 @@ regression tests or an explicitly documented negative.
   parseable GTR2 GMTs. Coverage was raised from 574 by four assumption removals:
   submesh vertex counts exceed 4,096 (up to 10,515), group indices may start at
   1, the four UV sets may differ, and degenerate zero-normal vertices occur. The two remaining files (`plots01.gmt`/`plots02.gmt` in Zolder09) are a
-  distinct simpler RaceGMT variant with no `0x20004051` submesh table: a
-  36-byte table at offset 351 holds a count at +8 (17/12) and that many
-  36-byte records `[3 f32, 3 u16 indices, u16=2, u32=0, u32 ordinal, 2 f32]`;
-  the earlier `0x2000403d` header claim was incorrect (zero such dwords).
-  Their addressed vertex table is still unidentified. Full-tier tests:
+  distinct simpler RaceGMT variant: a `0x2000403d` header (offset 1255/995,
+  unaligned) with 37/32 **88-byte** vertices — `[y,z,x]` position, unit
+  normal, NaN/zero pad, unit tangent and bitangent, four UV pairs — followed
+  by 51/36 `u16` indices. `read_variant_submeshes()` decodes them, bringing
+  coverage to **643/643**. Full-tier tests:
   `test_racegmt_corpus_converts_to_gtr2` and
-  `test_racegmt_variant_plots_record_framing`.
+  `test_variant_submeshes_decode_zolder09_plots`.
   Column 4 of the triangle record remains unassigned.
   Column 4 keeps the same spatial coefficients across variants but has a
   residual of 0.22 under a linear fit; a transform search over x, -x, |x|,

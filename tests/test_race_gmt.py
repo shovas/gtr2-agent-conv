@@ -1,6 +1,7 @@
 """Tests for the partial RaceGMT header parser."""
 import glob
 import io
+import struct
 import sys
 import unittest
 from contextlib import redirect_stdout
@@ -198,6 +199,29 @@ class RaceGmtTest(unittest.TestCase):
             self.assertEqual(len(parsed.meshes), 1)
             self.assertEqual(parsed.meshes[0].record.vertex_count, 144)
             self.assertEqual(parsed.meshes[0].record.index_count, 144)
+
+    def test_variant_submeshes_decode_zolder09_plots(self):
+        """The 0x2000403d variant uses 88-byte vertices and decodes fully."""
+        base = (ROOT.parent / "Race07Complete/GameData/Locations/Zolder09"
+                / "MODELS")
+        for name, nv, ni in (("plots01.gmt", 37, 51), ("plots02.gmt", 32, 36)):
+            path = base / name
+            if not path.is_file():
+                self.skipTest("Race07Complete plots corpus not present")
+            data = path.read_bytes()
+            subs = race_gmt.read_variant_submeshes(data)
+            self.assertEqual(len(subs), 1, name)
+            self.assertEqual(len(subs[0]["vertices"]), nv, name)
+            self.assertEqual(len(subs[0]["indices"]), ni, name)
+            self.assertEqual(max(subs[0]["indices"]), nv - 1, name)
+            # Position word order is [y,z,x]; the exported tuple is (x,y,z).
+            raw_y, raw_z, raw_x = struct.unpack_from("<3f", data,
+                                                      data.find(b"\x3d\x40\x00\x20") + 12)
+            pos = subs[0]["vertices"][0]["position"]
+            self.assertAlmostEqual(pos[0], raw_x, places=4, msg=name)
+            self.assertAlmostEqual(pos[1], raw_y, places=4, msg=name)
+            self.assertAlmostEqual(pos[2], raw_z, places=4, msg=name)
+            self.assertEqual(len(subs[0]["vertices"][0]["uv_sets"]), 4, name)
 
     def test_submeshes_resolve_triangle_indices(self):
         """The 5 submesh vertex arrays resolve every triangle's u16 indices."""

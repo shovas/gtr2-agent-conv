@@ -7012,7 +7012,7 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertLess(len(control), len(matched))
 
     def test_racegmt_corpus_converts_to_gtr2(self):
-        """Most Race07 DLC meshes decode and rebuild as parseable GTR2 GMTs."""
+        """All 643 Race07 DLC meshes decode and rebuild as parseable GTR2 GMTs."""
         import glob
         import gmt_format as gf
         import mas_tool
@@ -7034,8 +7034,6 @@ class CorpusDeep2Test(unittest.TestCase):
             data = Path(name).read_bytes()
             if data[:8] != race_gmt.MAGIC:
                 continue
-            if not race_gmt.read_racegmt_submeshes(data):
-                continue
             decoded += 1
             out = race_gmt.to_gtr2_gmt(data, template)
             if out is None:
@@ -7044,7 +7042,7 @@ class CorpusDeep2Test(unittest.TestCase):
             if (parsed.meshes and parsed.meshes[0].record.vertex_count > 0
                     and not validate_materials.check_gmt(out, "converted.gmt")):
                 converted += 1
-        self.assertGreaterEqual(decoded, 640)
+        self.assertEqual(decoded, 643)
         self.assertEqual(converted, decoded)
 
     def test_rf1_conversion_preserves_all_archive_members(self):
@@ -7408,7 +7406,7 @@ class CorpusDeep2Test(unittest.TestCase):
             self.assertGreaterEqual(len(matched), minimum, corpus)
 
     def test_racegmt_variant_plots_record_framing(self):
-        """The two undecoded RaceGMT plots use a distinct 36-byte quad table."""
+        """The variant plots also carry a separate 36-byte triangle table."""
         import race_gmt as rg
 
         base = (ROOT.parent / "Race07Complete/GameData/Locations/Zolder09"
