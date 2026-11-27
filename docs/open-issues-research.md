@@ -148,6 +148,18 @@ records from 120 RaceGMT files, column 4 also has weak/no correlation with the
 other four record columns (|r| ≤ 0.52). Do not pursue area/edge proxies further
 without a new structural hypothesis.
 
+## RaceGMT column 4: perpendicular texture projection — negative (2026-11-27)
+
+Tested whether column 4 is the V-coordinate complementary to the already
+decoded column 0 (`texture U = sin*x + cos*y`). Using the per-record axis,
+`perp = -cos*x + sin*y` correlates r=-0.938 with column 4, and the fitted
+slope is remarkably stable across files (-0.049408 on three PEOPLE_STAND
+meshes), but the fit is **not exact**: max error 0.265 on a signal spanning
+about 1.07, and a quadratic fit only reduces it to 0.242. Intercepts differ
+per file (20.83 / 19.56 / 18.30), so this is a correlated proxy, not a
+decoder. Combined with the earlier geometry/UV/hash negatives, column 4
+should not be revisited without a new structural hypothesis or producer code.
+
 ## f0 stream3 rule is not deterministic (2026-11-27)
 
 The stream3 association does not yield a usable decoder. On 5,836 seeded

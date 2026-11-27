@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 23:59:59 -0500 - RaceGMT column 4 projection proxy disproved
+- The perpendicular texture-axis projection correlates with column 4 (r=-0.938) and has a stable slope across files, but linear/quadratic fits leave errors of 0.265/0.242 on a ~1.07-wide signal. Recorded as a proxy, not a decoder.
+
 ## 2026-11-29 23:59:59 -0500 - HAT leaf triangulation semantics verified
 - Verified that HAT leaf nodes index three spatially adjacent height-sample records: median triangle perimeter 8.9-12.7 m in true (x,z) vs 1364-2091 m for random triples, with 97.7-98.5% of real triangles under 100 m. Added `hat_leaf_record_indices()` and a permutation-controlled full-tier test. (An earlier draft measured the height field instead of x and reported weaker numbers; corrected.)
 
