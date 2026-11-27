@@ -195,6 +195,54 @@ def read_racegmt_indices(data: bytes) -> list[int]:
     return list(struct.unpack_from(f"<{count}H", data, off + 4))
 
 
+SUBMESH_MAGIC = 0x20004051
+
+
+def read_racegmt_submeshes(data: bytes) -> list[dict]:
+    """Decode all `0x20004051` submeshes in a RaceGMT payload.
+
+    Verified on `PEOPLE_STAND_01..05`: each section is a 12-byte header
+    ``[magic=0x20004051, group index, vertex count]``, then that many 64-byte
+    vertices (``[y,z,x], [cos,~0,sin], pad, (u,v) x4``), then a u32 count and
+    that many u16 indices. The five groups have 24/36/24/42/18 vertices —
+    exactly 3x the 8/12/8/14/6 triangle records of the opening table, whose
+    sequential indices address the matching group's vertex array.
+    """
+    records = read_triangle_records(data)
+    if not records:
+        return []
+    out = []
+    for position in range(len(data) - 12):
+        magic, group, count = struct.unpack_from("<III", data, position)
+        if magic != SUBMESH_MAGIC or group != len(out) or not 0 < count <= 4096:
+            continue
+        verts_at = position + 12
+        index_at = verts_at + 64 * count
+        if index_at + 4 + 2 * count > len(data):
+            continue
+        vertices = []
+        for k in range(count):
+            row = verts_at + 64 * k
+            y, z, x = struct.unpack_from("<3f", data, row)
+            cos, zero, sin = struct.unpack_from("<3f", data, row + 12)
+            if not (abs(zero) < 1e-5 and abs(cos) > 0.05 and abs(sin) > 0.05):
+                break
+            uvs = struct.unpack_from("<8f", data, row + 32)
+            if uvs[0:2] != uvs[2:4] or uvs[4:6] != uvs[6:8]:
+                break
+            vertices.append({"position": (x, y, z), "uv": (uvs[0], uvs[1])})
+        if len(vertices) != count:
+            continue
+        index_count = struct.unpack_from("<I", data, index_at)[0]
+        if index_count != count:
+            continue
+        indices = struct.unpack_from(f"<{count}H", data, index_at + 4)
+        if indices != tuple(range(count)):
+            continue
+        out.append({"group": group, "vertices": vertices, "indices": indices})
+    return out
+
+
 def read_material_strings(data: bytes) -> list[str]:
     """Extract NUL-terminated ASCII material/stage strings from the payload."""
     import re

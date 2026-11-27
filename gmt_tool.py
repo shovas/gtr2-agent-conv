@@ -160,7 +160,10 @@ def cmd_info(args: argparse.Namespace) -> int:
             print(f"texture_axes: {len(axes)}")
             print(f"vertices_with_uv: {len(race_gmt.read_racegmt_vertices(raw))}")
             print(f"vertex_indices: {len(race_gmt.read_racegmt_indices(raw))}")
-            print("geometry: triangle records decoded (column 4 unassigned)")
+            submeshes = race_gmt.read_racegmt_submeshes(raw)
+            print(f"submeshes: {len(submeshes)} "
+                  f"vertices={[len(s['vertices']) for s in submeshes]}")
+            print("geometry: triangles + submesh vertices decoded (column 4 unassigned)")
         else:
             print("geometry: not decoded (RaceGMT container only)")
         return 0

@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 21:30:00 -0500 - RaceGMT triangle indices resolved
+- Resolved the RaceGMT u16 index mystery: five `0x20004051` submesh sections hold 24/36/24/42/18 vertices (3x the 8/12/8/14/6 triangle records per group), and each triangle's indices address its group's vertex array. `race_gmt.read_racegmt_submeshes()` decodes them; CLI reports submesh counts. Full-tier test added.
+
 ## 2026-11-28 21:00:00 -0500 - RaceGMT vertex array corrected
 - Corrected the RaceGMT vertex-table decoding: the leading word is not a count of 5; the region is a contiguous 24-vertex array of 64-byte records followed by a u32 count (24) and 24 u16 indices 0..23. `read_racegmt_indices()` added; test and docs updated.
 

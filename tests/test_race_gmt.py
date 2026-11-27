@@ -167,6 +167,27 @@ class RaceGmtTest(unittest.TestCase):
         self.assertIn("triangles=48", result.stdout)
         self.assertIn("groups=[0, 1, 2, 3, 4]", result.stdout)
 
+    def test_submeshes_resolve_triangle_indices(self):
+        """The 5 submesh vertex arrays resolve every triangle's u16 indices."""
+        base = ROOT.parent / "Race07Complete/GameData/Locations/Marrakech/Models"
+        files = [base / f"PEOPLE_STAND_0{i}.gmt" for i in range(1, 6)]
+        if not all(p.is_file() for p in files):
+            self.skipTest("PEOPLE_STAND variants not present")
+        for path in files:
+            data = path.read_bytes()
+            submeshes = race_gmt.read_racegmt_submeshes(data)
+            records = race_gmt.read_triangle_records(data)
+            self.assertEqual(len(submeshes), 5, path.name)
+            for group, submesh in enumerate(submeshes):
+                expected = 3 * sum(1 for r in records if r["group"] == group)
+                self.assertEqual(len(submesh["vertices"]), expected, path.name)
+                self.assertEqual(list(submesh["indices"]),
+                                 list(range(expected)), path.name)
+            for record in records:
+                submesh = submeshes[record["group"]]
+                self.assertTrue(all(idx < len(submesh["vertices"])
+                                    for idx in record["indices"]), path.name)
+
     def test_vertex_table_has_real_uvs(self):
         """The table after the axes holds 5 world positions and UV corners."""
         from math import isfinite

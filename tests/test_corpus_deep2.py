@@ -1795,7 +1795,10 @@ class CorpusDeep2Test(unittest.TestCase):
             self.assertIn("texture_axes: 48", result.stdout)
             self.assertIn("vertices_with_uv: 24", result.stdout)
             self.assertIn("vertex_indices: 24", result.stdout)
-            self.assertIn("geometry: triangle records decoded", result.stdout)
+            self.assertIn("submeshes: 5 vertices=[24, 36, 24, 42, 18]",
+                          result.stdout)
+            self.assertIn("geometry: triangles + submesh vertices decoded",
+                          result.stdout)
 
     def test_f0_bytes_not_stage_indices(self):
         """f0 bytes do not index the material's stage strings."""

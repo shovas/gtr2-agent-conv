@@ -61,9 +61,17 @@ regression tests or an explicitly documented negative.
   indices `0..23` follow. All five variants share the same UV corners
   (0.73711,-0.00631) and (0.73711,-0.99574).
   `race_gmt.read_racegmt_vertices()` and `read_racegmt_indices()` decode them.
-  Full-tier test: `test_vertex_table_has_real_uvs`. The 48 earlier triangle
-  records' u16 indices reach 41 and are a different array, so their target
-  remains unknown.
+  Full-tier test: `test_vertex_table_has_real_uvs`. The earlier "5-vertex"
+  reading and the u16-index mystery are both resolved by the full submesh
+  scan: the payload contains **five** `0x20004051` submesh sections, each a
+  12-byte header `[magic, group, vertex count]` followed by that many 64-byte
+  vertices and a u32+u16 index buffer. Their vertex counts 24/36/24/42/18
+  are exactly **3x** the 8/12/8/14/6 triangle records in groups 0..4, and the
+  record indices (0,1,2), (3,4,5), ... address the matching group's vertices.
+  `race_gmt.read_racegmt_submeshes()` decodes all five, so both triangle
+  indices and UVs are resolved. Full-tier test:
+  `test_submeshes_resolve_triangle_indices`. Column 4 of the triangle record
+  remains unassigned.
   Column 4 keeps the same spatial coefficients across variants but has a
   residual of 0.22 under a linear fit; a transform search over x, -x, |x|,
   log|x|, sqrt|x|, 1/x, x^2, the perpendicular horizontal projection and
