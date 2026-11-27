@@ -410,3 +410,15 @@ This closes the simple config route; a working renderer remains the unblock.
 still ends at `GTR2 1.1000 has crashed` before any session. No new capability
 path was found; Wine itself reports "built without Vulkan support" as before.
 
+
+## Safe sandbox builder (2026-11-27)
+
+`runtime_sandbox.build_sandbox()` codifies the substituted-file workflow:
+every ancestor of a substituted path becomes a **real directory**, untouched
+files elsewhere are symlinks into the read-only install, and `UserData` is
+always real with a `DedicatedServer.ini` written from the verified key schema.
+`assert_no_mutable_symlinks()` checks those writable locations. Verified that
+the stock install is untouched, substituted bytes land in the sandbox, and
+siblings remain symlinks. CLI: `python3 runtime_sandbox.py GAME_DIR TARGET
+--substitute REL=FILE`. Unit tests: `tests/test_runtime_sandbox.py`.
+
