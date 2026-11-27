@@ -18,6 +18,23 @@
 - **`bink_build` from `raynorpat/libbink`** (optional, LGPL-2.1) - external encoder used by `media_tool.py bink-encode`; invoked as a separate executable (set `BINKBUILD` or put it on `PATH`), its code is not copied into this repo. Test skips if absent.
 - **Bink SDK/licensed tools** - not required: decode uses ffmpeg and BIKi encoding uses the external LGPL `libbink` (validated round-trip on real GTR2 BIK).
 
+## Runtime validation (optional, experimental)
+
+Not required for tests or conversions. Used only for the dedicated-server
+runtime checks documented in `docs/runtime-validation.md`:
+
+- **Wine 11.21** with a fresh prefix; `HKCU\Software\Wine\Drivers\Graphics=x11`
+  and `mfc100.dll` in `system32`/`syswow64` are needed to start
+  `GTR2Dedicated.exe`. No bundled copy.
+- **Xvfb** with a *persistent* display (e.g. `Xvfb :77 ... &` and `DISPLAY=:77`).
+  `xvfb-run -a` did not reliably propagate `DISPLAY` to Wine.
+- **Mesa llvmpipe** (`LIBGL_ALWAYS_SOFTWARE=1`) or zink/lavapipe provides a GL
+  context; a full client session is **still blocked** by a crash in GTR2's
+  D3D capability lookup. Only the dedicated server reaches a session.
+- **`runtime_sandbox.py`** builds a safe overlay for substituted track files:
+  every written path is a real directory; untouched stock files stay symlinks.
+  Never write through a symlinked game-install path.
+
 ## Development
 
 - **git** - repository history/change tracking.

@@ -254,7 +254,14 @@ python3 validate_materials.py --archive <file.mas> [--json]
 what converts to GTR2, how each path is validated, its measured coverage, and
 the remaining gaps — plus an explicit list of open blockers. This is a status
 dashboard, not a converter; all numbers come from the project's full-tier
-regression evidence.
+regression evidence. It currently reports **partial runtime acceptance**:
+converted rF1 TRK/AIW files ran in a completed GTR2 dedicated-server session,
+but converted track meshes have not been loaded or accepted in game.
+
+`python3 runtime_sandbox.py GAME_DIR TARGET --substitute REL=FILE` builds a
+safe overlay for runtime experiments: substituted files and `UserData` are
+real directories while untouched stock files are symlinks, so the read-only
+game install cannot be modified by mistake.
 
 ## 14. Run pre-push safety/privacy checks
 
