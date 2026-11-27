@@ -43,6 +43,40 @@ class F12001Test(unittest.TestCase):
         self.assertEqual(sigs, {mas_tool.MAS_TYPE401: 56, mas_tool.MAS_TYPE400: 24})
         self.assertEqual(total, 16720)
 
+    def test_padded_scanline_textures_decode(self):
+        """F12001 raw textures use 4-byte-aligned scanlines and decode to BMPs."""
+        import struct
+
+        if not F1.is_dir():
+            self.skipTest("F12001 corpus not present")
+        decoded = padded = 0
+        for path in F1.rglob("*"):
+            if not path.is_file() or path.suffix.lower() != ".mas":
+                continue
+            try:
+                _mtype, entries = mas_tool.read_archive(path)
+            except Exception:
+                continue
+            for entry in entries:
+                data = entry.data or b""
+                if len(data) < 16:
+                    continue
+                width, height, flags, _zero = struct.unpack_from("<4I", data, 0)
+                stride = ((width * 3 + 3) // 4) * 4
+                if flags != 24 or len(data) != 16 + stride * height:
+                    continue
+                if stride != width * 3:
+                    padded += 1
+                bmp = mas_tool.f12001_texture_to_bmp(data)
+                self.assertIsNotNone(bmp, entry.name)
+                self.assertEqual(struct.unpack_from("<IiiHH", bmp, 14),
+                                 (40, width, height, 1, 24))
+                decoded += 1
+            if decoded >= 4000:
+                break
+        self.assertGreater(decoded, 3000)
+        self.assertGreater(padded, 50)
+
     def test_extract_as_bmp_cli(self):
         """`mas_tool.py extract --as-bmp` writes real BMPs for raw textures."""
         import subprocess

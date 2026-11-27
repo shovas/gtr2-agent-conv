@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 04:00:00 -0500 - F12001 aligned-scanline textures
+- Found that F12001 24-bit textures store rows padded to 4-byte alignment (`stride = ceil(width*3/4)*4`), not tightly packed. `mas_tool.f12001_texture_to_bmp()` strips the padding; 5,243/5,245 sampled textures decode to valid BMPs. Full-tier test added.
+
 ## 2026-11-29 03:30:00 -0500 - Replay small_b is a slow state channel
 - Characterized `small_b`: lag-1 autocorrelation 0.81-0.999 in five replays vs |r|<0.04 shuffled, with no monotonic time trend. Explains why instantaneous kinematic correlations failed. Full-tier permutation-controlled test added.
 

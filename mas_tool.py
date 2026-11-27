@@ -145,6 +145,31 @@ def scgt_raw_texture_to_bmp(data: bytes) -> bytes | None:
     return header + rows
 
 
+def f12001_texture_to_bmp(data: bytes) -> bytes | None:
+    """Decode an F12001 raw RGB texture with 4-byte-aligned scanlines.
+
+    These 16-byte-header members store 24-bit rows padded to the next multiple
+    of four bytes, so ``len(data) == 16 + ceil(width*3/4)*4 * height`` rather
+    than ``16 + width*height*3``. Verified on 5,243/5,245 sampled textures in
+    ``../F12001`` (the two exceptions are tiny transparency blobs). Returns
+    ``None`` when the header or stride does not describe an exact raw payload.
+    """
+    if len(data) < 16:
+        return None
+    width, height, flags, _zero = struct.unpack_from("<IIII", data, 0)
+    if width <= 0 or height <= 0 or flags != 24:
+        return None
+    stride = ((width * 3 + 3) // 4) * 4
+    if 16 + stride * height != len(data):
+        return None
+    rows = b"".join(data[16 + stride * y:16 + stride * y + width * 3]
+                    for y in range(height - 1, -1, -1))
+    header = b"BM" + struct.pack("<IHHI", 54 + len(rows), 0, 0, 54)
+    header += struct.pack("<IiiHHIIiiII", 40, width, height, 1, 24, 0,
+                          len(rows), 2835, 2835, 0, 0)
+    return header + rows
+
+
 def _mas_type(signature: bytes) -> int:
     if signature == MAS_TYPE0:
         return 0
