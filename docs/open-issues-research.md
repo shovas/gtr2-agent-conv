@@ -148,6 +148,15 @@ records from 120 RaceGMT files, column 4 also has weak/no correlation with the
 other four record columns (|r| ≤ 0.52). Do not pursue area/edge proxies further
 without a new structural hypothesis.
 
+## HAT leaf extra fields are not plane coefficients (2026-11-27)
+
+Now that leaf triples are known to index three adjacent height samples,
+tested whether the other 24 bytes of each 34-byte leaf encode the triangle's
+height plane `height = a*x + b*z + c`. On 2,000 seeded leaves of
+3ANDERSTORP.hat, correlations between every leaf word offset (0,4,...,28)
+and the fitted (a,b,c) coefficients are all below |r|=0.24. The extra
+fields are not simple plane coefficients; their semantics remain open.
+
 ## f0 cumulative vertex offset — weak (2026-11-27)
 
 Tested whether f0's bytes encode the cumulative vertex count of all preceding
