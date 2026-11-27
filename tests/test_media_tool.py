@@ -955,6 +955,22 @@ class MediaToolTest(unittest.TestCase):
             self.assertEqual(a.rgba[3], 255)
 
 
+    def test_identify_simbin_gzip_containers(self):
+        """.dsi/.gtt/.vcr gzip containers are classified with payload details."""
+        import glob
+
+        for ext in (".dsi", ".gtt", ".vcr"):
+            sample = next((Path(p) for p in glob.glob(
+                str(ROOT.parent / "**" / f"*{ext}"), recursive=True)
+                if Path(p).is_file()), None)
+            if sample is None:
+                continue
+            with self.subTest(path=sample.name):
+                info = media_tool.identify(sample)
+                self.assertEqual(info.format, "simbin-gzip")
+                self.assertGreater(info.details["decompressed_size"],
+                                   info.details["compressed_size"] // 2)
+
     def test_identify_physics_audio_animation_text(self):
         """HDV/ENG/AUD/ANI text configs are identified by their key signatures."""
         import glob

@@ -476,6 +476,18 @@ def identify(path: str | Path) -> MediaInfo:
                 info["grid_origin_z"] = grid[2]
                 info["grid_inv_cell_z"] = grid[3]
             return MediaInfo(str(p), size, "hat-gzip", info)
+    # Other gzip-wrapped SimBin containers (Driving School scripts, time trials,
+    # replays). Their payloads begin with a `//[[gM` header or a binary stream.
+    if ext in (".dsi", ".gtt", ".vcr") and b[:2] == b"\x1f\x8b":
+        try:
+            import gzip_simbin_tool as gz
+            payload = gz.decompress(p)
+            details = {"compressed_size": size, "decompressed_size": len(payload)}
+            if payload.startswith(b"//[[gM"):
+                details["variant"] = payload[:14].decode("latin1", "replace").strip()
+            return MediaInfo(str(p), size, "simbin-gzip", details)
+        except Exception as exc:
+            return MediaInfo(str(p), size, "simbin-gzip", {"error": str(exc)[:80]})
     # NASCAR-era .hdr/.dat audio pair: the .hdr is an index and the companion
     # .dat is a plain MP3 stream. Content-based so it cannot collide with
     # unrelated .hdr files that lack an MP3 companion.

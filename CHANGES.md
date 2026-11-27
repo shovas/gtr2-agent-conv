@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 11:00:00 -0500 - Identify SimBin gzip containers
+- `media_tool.identify()` now classifies `.dsi`/`.gtt`/`.vcr` gzip containers as `simbin-gzip` with compressed/decompressed sizes and gMb variant, instead of "unknown". Full-tier test added.
+
 ## 2026-11-29 10:30:00 -0500 - Processed rF2 HTML documentation
 - Re-processed HTML files across `../` reference folders: rF2 GMT Converter/UVW exporter/DDS formats, track cheat-sheet, AIW tutorial and ISI FAQs. The exporter documents four exported UV sets A-D, exactly matching the eight floats at +32 in each RaceGMT vertex; decoders now expose all four. Corpus index and findings updated.
 
