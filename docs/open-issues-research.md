@@ -1,3 +1,15 @@
+## CUBE MTS 4.20 streams are normals/UVs, not positions (2026-11-27)
+
+Tested 12-byte triple parsing of 4.20 submesh streams across NascarSimRacing:
+**25,605 files** yield plausible finite triples. Examining `TLRC.MTS` shows
+`stream_a` is 16-byte records `[f32, f32, f32, sentinel]` with values like
+(-0.99995, 0.00198, -0.0101, 0.0) — **unit normals**, and `stream_b` is
+12-byte records of similar 3-vectors (e.g. (0.9329, 0.3603, 2.35e-38), where
+the third word is a tiny denormal sentinel). Neither stream contains world
+positions. This confirms 4.20 meshes are skinned assets whose vertex positions
+reside in external bone/weight data not present in the MTS file; the blocker
+for converting them is missing geometry, not just stream packing.
+
 ## Replay `small_b` quantization negative (2026-11-27)
 
 Tested 779 Brno replay samples for fixed-point quantization: scaling by

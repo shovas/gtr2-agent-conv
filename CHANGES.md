@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 23:59:59 -0500 - CUBE MTS 4.20 is skinned geometry
+- Verified across 25,605 files that 4.20 submesh streams are 12/16-byte normal/UV triples with sentinel words, not vertex positions. 4.20 meshes require external bone data; conversion remains blocked by missing geometry rather than stream packing.
+
 ## 2026-11-29 23:59:00 -0500 - Omit HAT caches from GTL conversions
 - `gtl_to_gtr2.convert_tree()` now skips engine-generated `.hat` caches (reported as `hat_skipped`) instead of copying incompatible bodies into a GTR2 tree. Fixed the resulting undefined-variable bug in the `include_others` path; full-tier test added.
 
