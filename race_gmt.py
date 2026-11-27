@@ -135,6 +135,43 @@ def read_texture_axes(data: bytes) -> list[tuple[float, float]]:
             for k in range(count)]
 
 
+def read_racegmt_vertices(data: bytes) -> list[dict]:
+    """Return the vertex table that follows the texture-axis entries.
+
+    Verified on `PEOPLE_STAND_01..05`: a count word, a 12-byte section header,
+    then one 64-byte record per vertex holding ``[y, z, x]`` world position,
+    the ``[cos, 0, sin]`` texture axis, two padding words (first is NaN), and
+    four repeated ``(u, v)`` pairs. All five files have 5 vertices with the
+    same UV corners (0.73711, -0.00631) and (0.73711, -0.99574). Returns an
+    empty list for other RaceGMT layouts.
+    """
+    header = parse_header(data)
+    base = 16 + len(header.name.encode("latin-1")) + 48 + 292
+    records = read_triangle_records(data)
+    axes = read_texture_axes(data)
+    if not records or len(axes) != len(records):
+        return []
+    off = base + 36 * len(records) + 4 + 16 * len(axes)
+    if off + 4 + 12 > len(data):
+        return []
+    count = struct.unpack_from("<I", data, off)[0]
+    if not 0 < count <= 64 or off + 16 + 64 * count > len(data):
+        return []
+    out = []
+    for k in range(count):
+        row = off + 16 + 64 * k
+        y, z, x = struct.unpack_from("<3f", data, row)
+        cos, zero, sin = struct.unpack_from("<3f", data, row + 12)
+        if not (abs(zero) < 1e-5 and abs(cos) > 0.05 and abs(sin) > 0.05):
+            return []
+        uvs = struct.unpack_from("<8f", data, row + 32)
+        if uvs[0:2] != uvs[2:4] or uvs[4:6] != uvs[6:8]:
+            return []
+        out.append({"position": (x, y, z), "axis": (cos, sin),
+                    "uv": (uvs[0], uvs[1])})
+    return out
+
+
 def read_material_strings(data: bytes) -> list[str]:
     """Extract NUL-terminated ASCII material/stage strings from the payload."""
     import re

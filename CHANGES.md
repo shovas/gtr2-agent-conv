@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 20:30:00 -0500 - RaceGMT vertex/UV table decoded
+- Found a second table after the RaceGMT texture axes: five 64-byte vertices with world positions, per-vertex axes and UV corners (identical across the five PEOPLE_STAND variants). `race_gmt.read_racegmt_vertices()` decodes it; full-tier test added. The triangle u16 indices do not index this table, so the linkage remains unknown.
+
 ## 2026-11-28 20:00:00 -0500 - RaceGMT CLI reports decoded triangles
 - `gmt_tool.py info FILE` now reports decoded RaceGMT triangle count, group list and texture-axis count for meshes carrying the table, instead of "geometry: not decoded" everywhere. CLI regression updated.
 

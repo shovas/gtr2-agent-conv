@@ -167,6 +167,25 @@ class RaceGmtTest(unittest.TestCase):
         self.assertIn("triangles=48", result.stdout)
         self.assertIn("groups=[0, 1, 2, 3, 4]", result.stdout)
 
+    def test_vertex_table_has_real_uvs(self):
+        """The table after the axes holds 5 world positions and UV corners."""
+        from math import isfinite
+
+        base = ROOT.parent / "Race07Complete/GameData/Locations/Marrakech/Models"
+        files = [base / f"PEOPLE_STAND_0{i}.gmt" for i in range(1, 6)]
+        if not all(p.is_file() for p in files):
+            self.skipTest("PEOPLE_STAND variants not present")
+        for path in files:
+            vertices = race_gmt.read_racegmt_vertices(path.read_bytes())
+            self.assertEqual(len(vertices), 5, path.name)
+            for vertex in vertices:
+                self.assertTrue(all(isfinite(v) for v in vertex["position"]))
+                self.assertGreater(abs(vertex["axis"][0]), 0.05)
+                self.assertLess(abs(vertex["axis"][1]), 1.0)
+            self.assertAlmostEqual(vertices[0]["uv"][0], 0.73711, places=4)
+            self.assertAlmostEqual(vertices[0]["uv"][1], -0.00631, places=4)
+            self.assertAlmostEqual(vertices[1]["uv"][1], -0.99574, places=4)
+
     def test_texture_axes_decode_f0(self):
         """Each triangle's texture axis (cos,sin) reproduces its column 0."""
         base = ROOT.parent / "Race07Complete/GameData/Locations/Marrakech/Models"

@@ -1793,6 +1793,7 @@ class CorpusDeep2Test(unittest.TestCase):
             self.assertIn("triangles: 48", result.stdout)
             self.assertIn("triangle_groups: [0, 1, 2, 3, 4]", result.stdout)
             self.assertIn("texture_axes: 48", result.stdout)
+            self.assertIn("vertices_with_uv: 5", result.stdout)
             self.assertIn("geometry: triangle records decoded", result.stdout)
 
     def test_f0_bytes_not_stage_indices(self):
