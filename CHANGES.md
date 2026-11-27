@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 22:00:00 -0500 - RaceGMT to GTR2 mesh conversion
+- Added `race_gmt.py <file> --to-gtr2 <out> --template <gtr2.gmt>` and `to_gtr2_gmt()`: decoded submesh vertices/UVs/indices are rebuilt as a one-submesh GTR2 GMT via `vrl_to_gmt.build_gmt()` (PEOPLE_STAND_01 → 144 vertices/144 indices, re-parsed). In-game correctness untested. Full-tier test added.
+
 ## 2026-11-28 21:30:00 -0500 - RaceGMT triangle indices resolved
 - Resolved the RaceGMT u16 index mystery: five `0x20004051` submesh sections hold 24/36/24/42/18 vertices (3x the 8/12/8/14/6 triangle records per group), and each triangle's indices address its group's vertex array. `race_gmt.read_racegmt_submeshes()` decodes them; CLI reports submesh counts. Full-tier test added.
 

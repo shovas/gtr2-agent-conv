@@ -243,6 +243,34 @@ def read_racegmt_submeshes(data: bytes) -> list[dict]:
     return out
 
 
+def to_gtr2_gmt(data: bytes, template: bytes) -> bytes | None:
+    """Build a GTR2-layout GMT from a decoded RaceGMT mesh.
+
+    Concatenates all submesh vertices (world positions and UVs) and their
+    triangle indices with per-submesh offsets, then uses
+    ``vrl_to_gmt.build_gmt()`` to emit a one-submesh GTR2 GMT. Normals are
+    computed from the triangles. Returns ``None`` when no submeshes decode.
+    """
+    import vrl_to_gmt
+
+    submeshes = read_racegmt_submeshes(data)
+    if not submeshes:
+        return None
+    positions = []
+    uvs = []
+    triangles = []
+    for submesh in submeshes:
+        offset = len(positions)
+        positions.extend(v["position"] for v in submesh["vertices"])
+        uvs.extend(v["uv"] for v in submesh["vertices"])
+        indices = list(submesh["indices"])
+        for i in range(0, len(indices) - 2, 3):
+            triangles.append(tuple(offset + indices[i + j] for j in range(3)))
+    if not triangles:
+        return None
+    return vrl_to_gmt.build_gmt(positions, triangles, template, uvs=uvs)
+
+
 def read_material_strings(data: bytes) -> list[str]:
     """Extract NUL-terminated ASCII material/stage strings from the payload."""
     import re
@@ -319,7 +347,23 @@ def main(argv=None) -> int:
                     help="print decoded material groups with stage types/channels")
     ap.add_argument("--triangles", action="store_true",
                     help="print decoded 36-byte triangle records (offset-292 tables)")
+    ap.add_argument("--to-gtr2", metavar="OUT",
+                    help="convert one RaceGMT mesh to a GTR2-layout GMT")
+    ap.add_argument("--template", metavar="GMT",
+                    help="GTR2 GMT structural template for --to-gtr2")
     args = ap.parse_args(argv)
+    if args.to_gtr2:
+        if not args.template or len(args.files) != 1:
+            ap.error("--to-gtr2 requires --template and exactly one input file")
+        source = Path(args.files[0]).read_bytes()
+        template = Path(args.template).read_bytes()
+        converted = to_gtr2_gmt(source, template)
+        if converted is None:
+            print("no decodable RaceGMT submeshes")
+            return 1
+        Path(args.to_gtr2).write_bytes(converted)
+        print(f"{args.to_gtr2}: {len(converted)} bytes")
+        return 0
     for f in args.files:
         try:
             data = Path(f).read_bytes()

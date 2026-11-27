@@ -167,6 +167,38 @@ class RaceGmtTest(unittest.TestCase):
         self.assertIn("triangles=48", result.stdout)
         self.assertIn("groups=[0, 1, 2, 3, 4]", result.stdout)
 
+    def test_racegmt_converts_to_gtr2_gmt(self):
+        """A decoded RaceGMT mesh builds a parseable GTR2 GMT."""
+        import subprocess
+        import tempfile
+        import gmt_format as gf
+        import mas_tool
+
+        source = ROOT.parent / ("Race07Complete/GameData/Locations/Marrakech/"
+                                "Models/PEOPLE_STAND_01.gmt")
+        archive = next((p for p in (ROOT.parent / "GTR2Steam/GameData").rglob("*.gtr")
+                        if p.is_file()), None)
+        if not source.is_file() or archive is None:
+            self.skipTest("RaceGMT/GTR2 template corpora not present")
+        _mtype, entries = mas_tool.read_archive(archive)
+        template = next((e.data for e in entries
+                         if e.name.lower().endswith(".gmt") and e.data), None)
+        if template is None:
+            self.skipTest("no GTR2 GMT template")
+        with tempfile.TemporaryDirectory(dir="/tmp/opencode") as td:
+            tpl = Path(td) / "template.gmt"
+            tpl.write_bytes(template)
+            out = Path(td) / "out.gmt"
+            result = subprocess.run(
+                [sys.executable, str(ROOT / "race_gmt.py"), str(source),
+                 "--to-gtr2", str(out), "--template", str(tpl)],
+                capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            parsed = gf.parse_gmt("out.gmt", out.read_bytes())
+            self.assertEqual(len(parsed.meshes), 1)
+            self.assertEqual(parsed.meshes[0].record.vertex_count, 144)
+            self.assertEqual(parsed.meshes[0].record.index_count, 144)
+
     def test_submeshes_resolve_triangle_indices(self):
         """The 5 submesh vertex arrays resolve every triangle's u16 indices."""
         base = ROOT.parent / "Race07Complete/GameData/Locations/Marrakech/Models"
