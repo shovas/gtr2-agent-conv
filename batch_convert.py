@@ -20,6 +20,7 @@ import gmt_layout
 import gmt_semantic
 import gtr1_to_gmt
 import mas_tool
+import race_gmt
 import simbin_text_tool as stt
 import validate_materials
 import vrl_to_gmt
@@ -28,6 +29,8 @@ ROOT = Path(__file__).resolve().parent
 DEFAULT_ROOTS = {
     "vrl": ROOT.parent / "SportsCarGtUsa",
     "gtr1": ROOT.parent / "GTR1Vanilla",
+    # Race 07 DLC meshes are loose `RaceGMT\0` files, not archive members.
+    "racegmt": ROOT.parent / "Race07Complete",
     # All four ISI-encrypted GSC-family corpora use the same member decoder;
     # sampled conversions from each pass geometry/UV validation 20/20.
     "gsc": (
@@ -77,6 +80,25 @@ def convert_member(kind: str, data: bytes, template: bytes, name: str,
         if reasons is not None:
             reasons[reason] = reasons.get(reason, 0) + 1
 
+    if kind == "racegmt":
+        if data[:8] != race_gmt.MAGIC:
+            skip("not_racegmt")
+            return None
+        try:
+            output = race_gmt.to_gtr2_gmt(data, template)
+        except (ValueError, struct.error) as exc:
+            skip(f"racegmt_build:{type(exc).__name__}:{exc}")
+            return None
+        if output is None:
+            skip("no_racegmt_submeshes")
+            return None
+        parsed = gmt_format.parse_gmt("out.gmt", output)
+        if not parsed.meshes or parsed.meshes[0].record.vertex_count == 0:
+            skip("empty_racegmt_output")
+            return None
+        if reasons is not None:
+            reasons["ok"] = reasons.get("ok", 0) + 1
+        return output
     if kind == "gsc":
         decoded = gmt_semantic.decode_gsc_member(data)
         if decoded is None:
@@ -134,7 +156,8 @@ def batch_convert(template: bytes, out_dir: Path, limit: int = 0,
     out_dir.mkdir(parents=True, exist_ok=True)
     report: dict[str, int] = {}
     reasons = reasons if reasons is not None else {}
-    for kind, ext in (("vrl", ".vrl"), ("gtr1", ".gmt"), ("gsc", ".gmt")):
+    for kind, ext in (("vrl", ".vrl"), ("gtr1", ".gmt"), ("gsc", ".gmt"),
+                      ("racegmt", ".gmt")):
         target = out_dir / kind
         target.mkdir(exist_ok=True)
         scanned = written = 0
@@ -142,15 +165,33 @@ def batch_convert(template: bytes, out_dir: Path, limit: int = 0,
         if not isinstance(selected, (list, tuple)):
             selected = (selected,)
         for root in selected:
-            for arc, entry in archive_members(Path(root), ext, kind):
-                data = convert_member(kind, entry.data, template, entry.name, reasons)
-                scanned += 1
-                if data is not None:
-                    safe = arc.stem + "_" + Path(entry.name).stem + ".gmt"
-                    (target / safe).write_bytes(data)
-                    written += 1
-                if limit and scanned >= limit:
-                    break
+            if kind == "racegmt":
+                # Loose DLC meshes: preserve relative paths under the corpus.
+                source_root = Path(root)
+                candidates = sorted(p for p in source_root.rglob("*.gmt")
+                                    if p.is_file() and p.read_bytes()[:8] == race_gmt.MAGIC)
+                for path in candidates:
+                    data = convert_member(kind, path.read_bytes(), template,
+                                          path.name, reasons)
+                    scanned += 1
+                    if data is not None:
+                        safe = path.relative_to(source_root).with_suffix(".gmt")
+                        destination = target / safe
+                        destination.parent.mkdir(parents=True, exist_ok=True)
+                        destination.write_bytes(data)
+                        written += 1
+                    if limit and scanned >= limit:
+                        break
+            else:
+                for arc, entry in archive_members(Path(root), ext, kind):
+                    data = convert_member(kind, entry.data, template, entry.name, reasons)
+                    scanned += 1
+                    if data is not None:
+                        safe = arc.stem + "_" + Path(entry.name).stem + ".gmt"
+                        (target / safe).write_bytes(data)
+                        written += 1
+                    if limit and scanned >= limit:
+                        break
             if limit and scanned >= limit:
                 break
         report[f"{kind}_scanned"] = scanned

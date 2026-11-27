@@ -68,7 +68,7 @@ class CliSmokeTest(unittest.TestCase):
                 self.assertEqual(bc.main(
                     ["--template", str(template), "--out", td, "--limit", "1"]), 0)
             printed = out.getvalue()
-            for family in ("vrl", "gtr1", "gsc"):
+            for family in ("vrl", "gtr1", "gsc", "racegmt"):
                 self.assertIn(f"{family}_scanned=1", printed)
                 self.assertIn(f"{family}_written=1", printed)
 

@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 23:00:00 -0500 - RaceGMT in batch converter
+- Added a `racegmt` family to `batch_convert.py`, converting loose Race07 DLC `RaceGMT\0` meshes with relative paths preserved. `--limit 1` now writes one verified GMT for each of vrl/gtr1/gsc/racegmt; CLI test updated.
+
 ## 2026-11-28 22:30:00 -0500 - RaceGMT conversion scales to corpus
 - Relaxed RaceGMT submesh validation: the per-vertex 3-word field is a unit normal (upward faces `(0,1,0)`), and index buffers are triangle lists rather than vertex-count strips. 574/643 DLC meshes now decode (350k vertices, 149k triangles) and all 574 rebuild as parseable GTR2 GMTs. Corpus-wide full-tier test added.
 
