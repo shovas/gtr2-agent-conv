@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 13:30:00 -0500 - small_b smoothed-steering association
+- Found a controlled association: after detrending both channels, replay `small_b` correlates with the 20-frame-smoothed steering channel in 7/8 replays (mean r 0.23 vs 0.00 shuffled). Recorded as an association, not a decoder; full-tier permutation test added.
+
 ## 2026-11-29 13:00:00 -0500 - Low-priority test runs and tier order
 - Added `--nice` (default 10) and `--ionice` (default class 3 / idle) to `run_tests.py`; workers inherit both. Documented the mandatory quick → normal → full order in `docs/testing-protocol.md`, with feature-focused selection for the first two tiers.
 

@@ -5610,6 +5610,66 @@ class CorpusDeep2Test(unittest.TestCase):
         self.assertGreaterEqual(checked, 4)
         self.assertEqual(slow, checked)
 
+    def test_driver_small_b_tracks_smoothed_steering(self):
+        """After detrending, small_b correlates with smoothed steering channel."""
+        import random
+        import statistics
+        import gzip_simbin_tool as gz
+        import simbin_events_tool as st
+
+        def corr(first, second):
+            mean_a, mean_b = statistics.mean(first), statistics.mean(second)
+            numerator = sum((a - mean_a) * (b - mean_b)
+                            for a, b in zip(first, second))
+            denominator = (sum((a - mean_a) ** 2 for a in first)
+                           * sum((b - mean_b) ** 2 for b in second)) ** 0.5
+            return numerator / denominator if denominator else 0.0
+
+        def smooth(values, width):
+            return [statistics.mean(values[max(0, i - width):
+                                            min(len(values), i + width + 1)])
+                    for i in range(len(values))]
+
+        def detrend(values, width=50):
+            return [value - baseline for value, baseline
+                    in zip(values, smooth(values, width))]
+
+        roots = (ROOT.parent / "GTR2Steam/ReplayData",
+                 ROOT.parent / "GTLSteam/ReplayData")
+        observed = []
+        controls = []
+        for root in roots:
+            if not root.is_dir():
+                continue
+            for path in sorted(root.glob("*.Vcr")):
+                frames = st.parse_vcr_frames(gz.decompress(str(path)))
+                if not frames:
+                    continue
+                values = []
+                for frame in frames["frames"]:
+                    for record in frame["records"]:
+                        if st.vcr_record_tag(record["header"]) == 0:
+                            state = st.vcr_driver_state(record["data"])
+                            if state:
+                                values.append(state)
+                            break
+                if len(values) < 300:
+                    continue
+                pilot = detrend([state["small_b"] for state in values])
+                steering = detrend([state["short_pair_difference"]
+                                    for state in values])
+                feature = smooth(steering, 20)
+                observed.append(corr(pilot, feature))
+                shuffled = pilot[:]
+                random.seed(2026)
+                random.shuffle(shuffled)
+                controls.append(corr(shuffled, feature))
+        self.assertGreaterEqual(len(observed), 6)
+        self.assertGreaterEqual(sum(value > 0 for value in observed),
+                               len(observed) - 1)
+        self.assertGreater(statistics.mean(observed),
+                           10 * statistics.mean(controls))
+
     def test_driver_small_b_unexplained_by_kinematics(self):
         """No tested kinematic channel explains small_b consistently."""
         import math

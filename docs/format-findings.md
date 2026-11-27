@@ -332,7 +332,12 @@ regression tests or an explicitly documented negative.
   lag-1 autocorrelation 0.81–0.999 across five 680–7,446-frame replays versus
   |r| < 0.04 for seeded shuffles. It has no monotonic time trend (r −0.02..−0.22),
   which explains why instantaneous kinematic correlations failed. Full-tier
-  test: `test_driver_small_b_is_slow_state_channel`.
+  test: `test_driver_small_b_is_slow_state_channel`. A second controlled signal: after removing a 50-frame moving-average trend
+  from both channels, `small_b` correlates positively with the 20-frame-smoothed
+  steering channel (`short_pair_difference`) in **7 of 8** replays (r +0.06..+0.47,
+  one -0.08); mean r 0.23 vs 0.00 for seeded shuffles. This is an association
+  with the *smoothed* steering-like channel, not a unit mapping or decoder.
+  Full-tier test: `test_driver_small_b_tracks_smoothed_steering`.
   Full-tier test: `test_driver_small_a_tracks_elevation_change`. Calibration
   against AIW-derived road gradient is track-dependent (Brno HOT LAP r=0.98,
   Imola r=0.00), so no universal scale conversion is claimed; guarded by
