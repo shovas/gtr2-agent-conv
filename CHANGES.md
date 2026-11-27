@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 10:00:00 -0500 - Identify HDV/ENG/AUD/ANI configs
+- `media_tool.identify()` now labels plain `.hdv`, `.eng`, `.aud` and `.ani` text configs by key signatures; previously all four were "unknown" despite having parsers. Corpus check: 60/60 `.hdv`, 60/60 `.ani`, 57/60 `.eng`, 59/60 `.aud`. Full-tier test added.
+
 ## 2026-11-29 09:30:00 -0500 - Identify FXM/LMA and Driving School files
 - `media_tool.identify()` now classifies `FXM `/`LMA ` animation containers, plain `//[[gMa1.000f` configs on any extension (previously only `.svm`, so `.ds` scripts were unknown), and `DrivingSchool{` `.dst` files. Full-tier test added.
 

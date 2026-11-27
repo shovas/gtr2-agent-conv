@@ -955,6 +955,23 @@ class MediaToolTest(unittest.TestCase):
             self.assertEqual(a.rgba[3], 255)
 
 
+    def test_identify_physics_audio_animation_text(self):
+        """HDV/ENG/AUD/ANI text configs are identified by their key signatures."""
+        import glob
+
+        root = ROOT.parent
+        checks = ((".hdv", "hdv"), (".eng", "eng"), (".aud", "aud"),
+                  (".ani", "ani"))
+        for ext, expected in checks:
+            sample = next((Path(p) for p in glob.glob(
+                str(root / "**" / f"*{ext}"), recursive=True)
+                if Path(p).is_file()), None)
+            if sample is None:
+                continue
+            with self.subTest(path=sample.name):
+                found = media_tool.identify(sample).format
+                self.assertIn(found, (expected, "text-jca"), found)
+
     def test_identify_fxm_ds_and_dst(self):
         """FXM magics, gMa-marked .ds and DrivingSchool .dst are identified."""
         import glob

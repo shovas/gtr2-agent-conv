@@ -411,6 +411,17 @@ def identify(path: str | Path) -> MediaInfo:
     # rFactor .veh vehicle descriptor (key=value with Graphics=/HDVehicle=)
     if ext == ".veh" and (b"Graphics=" in b[:8192] or b"HDVehicle=" in b[:8192]):
         return MediaInfo(str(p), size, "rfactor-veh", {"extension": ext})
+    # ISI physics/audio/animation text configs with distinctive key signatures.
+    # These were previously "unknown" even though simbin_text_tool parses them.
+    prefix = b[:16384]
+    if ext == ".hdv" and (b"[GENERAL]" in prefix or b"high-detail vehicle" in prefix):
+        return MediaInfo(str(p), size, "hdv", {"extension": ext})
+    if ext == ".eng" and b"RPMTorque=" in prefix:
+        return MediaInfo(str(p), size, "eng", {"extension": ext})
+    if ext == ".aud" and (b"_ENGINE_" in prefix or b"ENGINE_" in prefix):
+        return MediaInfo(str(p), size, "aud", {"extension": ext})
+    if ext == ".ani" and (b"Motions=" in prefix or b".lma" in prefix.lower()):
+        return MediaInfo(str(p), size, "ani", {"extension": ext})
     # rFactor scene scripts: .scr (Actor/Mesh blocks), .cin (CinematicEvent)
     if ext == ".scr" and b"Actor" in b[:8192]:
         return MediaInfo(str(p), size, "rfactor-scr", {"extension": ext})
