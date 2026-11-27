@@ -78,3 +78,19 @@ File enumeration/reading is **not** in-game acceptance. Distinguish:
 structural validity (our offline validators), semantic compatibility (field
 meaning), runtime loading (files opened), visual correctness (rendering), and
 functional in-game acceptance (driving). This setup reaches only the third.
+
+## Additional D3D experiments (2026-11-29)
+
+- `glxinfo -B` under Xvfb reports Mesa llvmpipe 26.1.1, OpenGL 4.6, direct
+  rendering — so X/Mesa itself works. Wine still reports
+  `wined3d_caps_gl_ctx_create Failed to create a window` at 16/24/32-bit
+  depths, with or without `LIBGL_ALWAYS_SOFTWARE`/`GALLIUM_DRIVER=llvmpipe`.
+- Only x86_64 `libGL.so.1` is installed. The i686 Mesa RPMs were downloaded
+  and extracted locally (`dnf download --arch i686 mesa-libGL mesa-dri-drivers`
+  + `rpm2cpio`), but `mesa-libGL.i686` provides only `libGLX_mesa.so.0`,
+  not `libGL.so.1`; passwordless `sudo` is unavailable for a system install.
+- Wine is a WoW64 build (i386-windows DLLs, x86_64-unix .so), so a 32-bit GL
+  library may not be the issue. A virtual-desktop `explorer /desktop=` launch
+  failed with `ShellExecuteEx failed: Module not found`.
+- **What would unblock:** a Wine build with working wined3d window creation,
+  or a headless loader that consumes `.gdb`/`.trk`/`.hat` without D3D.

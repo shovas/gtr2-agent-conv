@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 20:00:00 -0500 - MTS family in batch converter and runtime findings
+- Added a fifth `mts` family to `batch_convert.py` (F12002/F1C/NascarSimRacing, 4.10 magic filter); CLI test updated. Documented that Xvfb provides working Mesa llvmpipe GLX but Wine still cannot create a D3D window at any depth, and that i686 Mesa GL libraries would need local RPM extraction (no passwordless sudo) — the runtime gap remains open.
+
 ## 2026-11-29 19:30:00 -0500 - CUBE MTS to GTR2 mesh conversion
 - Added `mts_format.to_gtr2_gmt()`: decoded CUBE MTS triangle indices and rig-indexed positions feed `vrl_to_gmt.build_gmt()`. 389 F1 2002/F1C/NascarSimRacing meshes with plausible positions rebuild as parseable GTR2 GMTs; skinned meshes with non-finite/huge local coordinates are skipped. Full-tier test added.
 

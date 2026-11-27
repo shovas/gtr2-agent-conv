@@ -22,7 +22,7 @@ Vertex fields 9/10 are decoded as UV pairs and written into the GTR2 UV block; d
 
 ## Batch-convert mesh archives
 
-**What it does**: Walks SportsCarGtUsa, GTR1Vanilla and GSC-family archives plus loose Race 07 DLC `RaceGMT\0` meshes, converts every decoded mesh with the converters above, verifies each output by re-parsing and material checks, and writes only verified GMTs to a directory you choose.
+**What it does**: Walks SportsCarGtUsa, GTR1Vanilla, GSC-family and F1 2002/F1C/NascarSimRacing CUBE MTS archives plus loose Race 07 DLC `RaceGMT\0` meshes, converts every decoded mesh with the converters above, verifies each output by re-parsing and material checks, and writes only verified GMTs to a directory you choose.
 
 **How to ask**:
 - "Batch-convert the SCGT and GTR1 meshes into `/tmp/gtr2_meshes` using this GTR2 GMT as a template."

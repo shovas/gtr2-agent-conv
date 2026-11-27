@@ -20,6 +20,7 @@ import gmt_layout
 import gmt_semantic
 import gtr1_to_gmt
 import mas_tool
+import mts_format
 import race_gmt
 import simbin_text_tool as stt
 import validate_materials
@@ -31,6 +32,9 @@ DEFAULT_ROOTS = {
     "gtr1": ROOT.parent / "GTR1Vanilla",
     # Race 07 DLC meshes are loose `RaceGMT\0` files, not archive members.
     "racegmt": ROOT.parent / "Race07Complete",
+    # CUBE MTS 4.10 meshes in F1 2002 / F1C / NASCAR SimRacing.
+    "mts": (ROOT.parent / "F12002", ROOT.parent / "F1C",
+            ROOT.parent / "NascarSimRacing"),
     # All four ISI-encrypted GSC-family corpora use the same member decoder;
     # sampled conversions from each pass geometry/UV validation 20/20.
     "gsc": (
@@ -80,6 +84,25 @@ def convert_member(kind: str, data: bytes, template: bytes, name: str,
         if reasons is not None:
             reasons[reason] = reasons.get(reason, 0) + 1
 
+    if kind == "mts":
+        if data[:13] != b"CUBE_MTS_4.10":
+            skip("not_mts_410")
+            return None
+        try:
+            output = mts_format.to_gtr2_gmt(data, template)
+        except (ValueError, struct.error) as exc:
+            skip(f"mts_build:{type(exc).__name__}:{exc}")
+            return None
+        if output is None:
+            skip("mts_no_plausible_geometry")
+            return None
+        parsed = gmt_format.parse_gmt("out.gmt", output)
+        if not parsed.meshes or parsed.meshes[0].record.vertex_count == 0:
+            skip("empty_mts_output")
+            return None
+        if reasons is not None:
+            reasons["ok"] = reasons.get("ok", 0) + 1
+        return output
     if kind == "racegmt":
         if data[:8] != race_gmt.MAGIC:
             skip("not_racegmt")
@@ -161,7 +184,7 @@ def batch_convert(template: bytes, out_dir: Path, limit: int = 0,
     report: dict[str, int] = {}
     reasons = reasons if reasons is not None else {}
     for kind, ext in (("vrl", ".vrl"), ("gtr1", ".gmt"), ("gsc", ".gmt"),
-                      ("racegmt", ".gmt")):
+                      ("racegmt", ".gmt"), ("mts", ".mts")):
         target = out_dir / kind
         target.mkdir(exist_ok=True)
         scanned = written = 0
@@ -189,6 +212,8 @@ def batch_convert(template: bytes, out_dir: Path, limit: int = 0,
                         break
             else:
                 for arc, entry in archive_members(Path(root), ext, kind):
+                    if kind == "mts" and not (entry.data or b"").startswith(b"CUBE_MTS_4.10"):
+                        continue
                     data = convert_member(kind, entry.data, template, entry.name, reasons)
                     scanned += 1
                     if data is not None:

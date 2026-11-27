@@ -71,6 +71,9 @@ class CliSmokeTest(unittest.TestCase):
             for family in ("vrl", "gtr1", "gsc", "racegmt"):
                 self.assertIn(f"{family}_scanned=1", printed)
                 self.assertIn(f"{family}_written=1", printed)
+            # MTS candidates in the first archive are skinned meshes, so the
+            # family is wired but may not write with --limit 1.
+            self.assertIn("mts_scanned=1", printed)
 
     def test_all_tools_respond_to_help(self):
         for name in TOOLS:
