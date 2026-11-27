@@ -1,3 +1,16 @@
+## HAT control framing — sequential parse status (2026-11-27)
+
+Following the statistically confirmed `[u32,u32,i8]` framing, a sequential
+walk from `table_end+160` (643232 in 3Brno) parses 9 groups before breaking:
+control -1 consumes 1 node, -2 consumes 2 nodes, and control 0 consumes no
+node plus one extra byte. At group 10 (offset 643690) control=1 but the
+following 34-byte window fails the index bound, and nearby offsets ±7 have
+no valid control byte. Interpreting the two header u32s as f32 coordinates
+is inconsistent across the 1,796 candidates (some plausible, many huge), so
+the header semantics are not simply x/y. **Unblock:** the exact grammar for
+control values 0/1/2 and the bytes consumed per group, from producer code or
+a successful full-tail walk on a small HAT.
+
 ## CUBE MTS 4.20 streams are normals/UVs, not positions (2026-11-27)
 
 Tested 12-byte triple parsing of 4.20 submesh streams across NascarSimRacing:
