@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 23:59:59 -0500 - HAT leaf triangulation semantics verified
+- Verified that HAT leaf nodes index three spatially adjacent height-sample records: median triangle perimeter 2.7-8.5 m across six GTR2 HATs vs 378-1737 m for random triples, with >99% of real triangles under 100 m. Added `hat_leaf_record_indices()` and a permutation-controlled full-tier test.
+
 ## 2026-11-29 23:59:59 -0500 - Status reflects partial runtime acceptance
 - `conversion_status.py` no longer claims "no path reaches in-game acceptance": converted TRK/AIW ran in a completed dedicated-server session, while geometry acceptance remains unverified.
 

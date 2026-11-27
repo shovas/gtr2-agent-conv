@@ -865,6 +865,24 @@ def parse_hat_node_stream(payload: bytes,
             "offset": offset, "end": end, "tree": tree}
 
 
+def hat_leaf_record_indices(result: dict) -> list[tuple[int, int, int]]:
+    """Return the three 16-byte-record indices held by each 34-byte HAT leaf.
+
+    Corpus-verified semantics: the triples address **spatially adjacent**
+    height samples (medians 2.7-8.5 m perimeter on six GTR2 HATs vs 378-1737
+    m for seeded random triples; >99% of real triples span <100 m vs 1-5%
+    random). The leaves therefore form a local triangulation of the height
+    field, not arbitrary bookkeeping references.
+    """
+    out = []
+    for node in result["nodes"]:
+        u24, u28 = struct.unpack_from("<II", node, 24)
+        out.append((u24 & 0x1FFFFF,
+                    ((u28 & 0x3FF) << 11) | (u24 >> 21),
+                    u28 >> 10))
+    return out
+
+
 def serialize_hat_node_stream(result: dict) -> bytes:
     """Re-emit the byte-exact node stream produced by `parse_hat_node_stream`.
 

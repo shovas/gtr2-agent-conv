@@ -1398,6 +1398,42 @@ class MediaToolTest(unittest.TestCase):
         self.assertAlmostEqual(info.details["grid_inv_cell_z"], 0.02603,
                                delta=1e-4)
 
+    def test_hat_leaf_indices_address_adjacent_records(self):
+        """HAT leaf triples index nearby height samples (triangulation)."""
+        import gzip_simbin_tool as gz
+        import media_tool as mt
+        import math
+        import random
+        import statistics
+        import struct
+
+        base = ROOT.parent / "GTR2Steam/GameData/Locations/HAT_Dedicated"
+        paths = [base / name for name in ("3ANDERSTORP.hat", "3Brno.hat")]
+        if not all(p.is_file() for p in paths):
+            self.skipTest("GTR2 HAT corpus not present")
+        for path in paths:
+            payload = gz.decompress(str(path))
+            parsed = mt.parse_hat_node_stream(payload)
+            self.assertIsNotNone(parsed)
+            body = payload[payload.find(b"generated\x00") + 10:]
+            positions = [struct.unpack_from("<ff", body, 48 + 16 * i + 8)
+                         for i in range(parsed["counts"][2])]
+            triples = mt.hat_leaf_record_indices(parsed)
+            rng = random.Random(2026)
+            sample = rng.sample(triples, min(1000, len(triples)))
+
+            def perimeter(indices):
+                pts = [positions[i] for i in indices]
+                return sum(math.dist(pts[i], pts[(i + 1) % 3]) for i in range(3))
+
+            real = [perimeter(t) for t in sample]
+            control = [perimeter(tuple(rng.randrange(len(positions))
+                                       for _ in range(3))) for _ in sample]
+            self.assertLess(statistics.median(real), 15, path.name)
+            self.assertGreater(statistics.median(control), 100, path.name)
+            self.assertLess(statistics.median(real) * 10,
+                            statistics.median(control), path.name)
+
     def test_hat_node_stream_parses_to_exact_eof(self):
         """The recursive control grammar consumes the HAT body exactly."""
         import gzip_simbin_tool as gz

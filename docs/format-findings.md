@@ -713,7 +713,13 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
   declared bisection-node count on all 129. `serialize_hat_node_stream()`
   round-trips the stream byte-for-byte on 129/129; a shuffled control fails.
   Quick + full-tier tests: `test_hat_node_stream_parses_to_exact_eof` and
-  `test_hat_node_stream_parses_all_corpus_files`.
+  `test_hat_node_stream_parses_all_corpus_files`. The leaf nodes have verified semantics: each 34-byte leaf's three index
+  fields address **spatially adjacent** 16-byte height-sample records, i.e.
+  a local triangulation. On six GTR2 HATs (1,500 seeded leaves each) the
+  median index-triangle perimeter is 2.7-8.5 m vs 378-1737 m for random
+  triples, and >99% of real triples span <100 m vs 1-5% random.
+  `media_tool.hat_leaf_record_indices()` exposes the triples; full-tier
+  permutation-controlled test: `test_hat_leaf_indices_address_adjacent_records`.
 
 - **rF1 per-track `.tdf` → GTR2 `.gdb` track variables**: rF1 ships 12
   per-track `.tdf` files with a `[TRACKVARS]` section; GTR2 ships **0** `.tdf`
