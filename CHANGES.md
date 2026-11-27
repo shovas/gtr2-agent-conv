@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 04:30:00 -0500 - Aligned textures in extract CLI
+- `mas_tool.py extract --as-bmp` now also uses `f12001_texture_to_bmp()`, so F12001 font archives export real BMPs from aligned-scanline members (font.MAS: 13 valid BMPs). Full-tier test added.
+
 ## 2026-11-29 04:00:00 -0500 - F12001 aligned-scanline textures
 - Found that F12001 24-bit textures store rows padded to 4-byte alignment (`stride = ceil(width*3/4)*4`), not tightly packed. `mas_tool.f12001_texture_to_bmp()` strips the padding; 5,243/5,245 sampled textures decode to valid BMPs. Full-tier test added.
 

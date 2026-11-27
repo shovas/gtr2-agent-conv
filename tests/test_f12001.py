@@ -43,6 +43,25 @@ class F12001Test(unittest.TestCase):
         self.assertEqual(sigs, {mas_tool.MAS_TYPE401: 56, mas_tool.MAS_TYPE400: 24})
         self.assertEqual(total, 16720)
 
+    def test_extract_padded_textures_as_bmp_cli(self):
+        """`mas_tool.py extract --as-bmp` handles aligned-scanline textures."""
+        import subprocess
+
+        archive = next((p for p in F1.rglob("*")
+                        if p.is_file() and p.name.lower() == "font.mas"), None)
+        if archive is None:
+            self.skipTest("F12001 font archive not present")
+        import tempfile
+        with tempfile.TemporaryDirectory(dir="/tmp/opencode") as td:
+            result = subprocess.run(
+                [sys.executable, str(ROOT / "mas_tool.py"), "extract",
+                 str(archive), "-o", td, "--as-bmp"],
+                capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            bmps = [p for p in Path(td).rglob("*.bmp")
+                    if p.read_bytes()[:2] == b"BM"]
+            self.assertGreater(len(bmps), 5)
+
     def test_padded_scanline_textures_decode(self):
         """F12001 raw textures use 4-byte-aligned scanlines and decode to BMPs."""
         import struct

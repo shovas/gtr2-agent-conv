@@ -566,6 +566,8 @@ def cmd_extract(args: argparse.Namespace) -> int:
         payload = e.data or b""
         if args.as_bmp:
             bmp = scgt_raw_texture_to_bmp(payload)
+            if bmp is None:
+                bmp = f12001_texture_to_bmp(payload)
             if bmp is not None:
                 dest = dest.with_suffix(".bmp")
                 payload = bmp
