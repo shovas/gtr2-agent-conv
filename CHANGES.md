@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 07:30:00 -0500 - RaceGMT column 4 negative
+- Recorded that triangle column 4 cannot be fit from decoded x/y/z/U/axes/ordinal/group or submesh facing vectors (best max error 0.245 over 48 records). It remains unassigned.
+
 ## 2026-11-29 07:00:00 -0500 - Canonical GTR2 material tokens found
 - Extracted 29 authoritative material tokens from GTR2's own `specialfx.tec`; 9/10 rF1-only names flagged by `validate_materials` contain one (e.g. PDRT_DIRT->dirt, SANDO->sand). Recorded as a candidate mapping, not an auto-rename, since stage strings reference originals. Full-tier controlled test added.
 

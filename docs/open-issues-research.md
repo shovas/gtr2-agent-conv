@@ -1,3 +1,14 @@
+## RaceGMT column 4 feature search (2026-11-29)
+
+Tried to derive triangle-record column 4 from the decoded quantities on
+`PEOPLE_STAND_01`: x, y, z, texture U, per-record axis (cos,sin), perpendicular
+projection, x^2/y^2, hypot(x,y), ordinal, group, and each submesh's 3-word
+facing vector. Best single-feature fit was x^2 with max error 0.245 over 48
+records (x alone 0.247); adding the per-group facing vector makes the least
+squares system singular because it is constant within each group. The value is
+not a linear function of any decoded field, so column 4 stays unassigned. Do
+not repeat this feature search without a new structural hypothesis.
+
 ## HAT stream-start framing search (2026-11-29)
 
 The GTL.exe reader at `0x451080` reads two u32 words (8 bytes) followed by a
