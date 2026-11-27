@@ -249,3 +249,37 @@ buttons.
 Sandbox recipe (keeps the read-only install untouched): create a directory of
 symlinks to the GTR2 files, add `UserData/DedicatedServer.ini`, and run
 `wine GTR2Dedicated.exe` from there under the persistent Xvfb setup.
+
+## Converted rF1 track files in a live session (2026-11-27)
+
+A sandbox (`/tmp/opencode/gtr2conv`) was built with symlinks to all stock GTR2
+files, except that `GameData/Locations/Anderstorp` held the converted Joesville
+tree: `3ANDERSTORP.trk` and `3ANDERSTORP.AIW` were replaced with the converted
+rF1 versions, and the converted `JoesVille_Speedway*.gtr` /
+`commonmaps.gtr` archives were placed beside them. A `Joesville` alias
+directory made the converted TRK's `SearchPath=GameData\Locations\Joesville`
+resolvable. The dedicated-server wizard was driven to `Start` as above.
+
+Verified with `WINEDEBUG=+file`:
+
+- The engine **opened the converted TRK** from the converted search path:
+  `CreateFileW L"GAMEDATA\\LOCATIONS\\Joesville\\3ANDERSTORP.trk"`.
+  No SEH errors occurred.
+- It **enumerated** the converted archives (`FindNextFileW returning
+  L"JoesVille_Speedway.gtr"`, `..._map.gtr`) but **did not open them**; the
+  only `.gtr` files actually opened were shared stock archives
+  (`CREW.GTR`, `STEX.GTR`, `TEAMMAPS.GTR`, `SKIES_*.GTR`).
+- The server then advanced through the other 34 stock events (e.g. Hockenheim
+  car files were loaded), so the substituted event was exercised only during
+  initial load.
+
+This is the first time **converter output** was consumed by a D3D-initialised
+GTR2 process: the converted `.trk` was found and opened, with no crash. It is
+still not geometry acceptance — the converted mesh archives were enumerated
+but not loaded, which is consistent with a dedicated server not needing track
+meshes for rendering.
+
+**Unblock:** confirm whether the dedicated server ever loads track mesh
+archives (a client-rendered session may be required), and whether `MASFile`
+resolution in converted TRKs needs stock archive names. Then check whether a
+client accepts the converted geometry.
