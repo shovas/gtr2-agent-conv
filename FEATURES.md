@@ -290,7 +290,7 @@ python3 mts_format.py <file.mts>
 python3 mts_format.py --detail <file.mts>
 ```
 
-**Decoded**: 8-u32 geometry table, two submesh-record layouts, 36-byte vertices / 16-byte normals, 4.10 material records. **Limitations**: material IDs reference an external table not present locally; no triangle/index block in this layout.
+**Decoded**: 8-u32 geometry table, two submesh-record layouts, 36-byte vertices / 16-byte normals, and 4.10 records formerly called "materials" but proven to be **triangle records** (three u16 vertex indices). `mts_format.to_gtr2_gmt()` converts 389 meshes with plausible local positions to GTR2 GMTs. **Limitations**: skinned meshes need external bone data; the 4.20 variant uses a different stream packing and is not yet decoded.
 
 ## 17. Inspect `RaceGMT` material/stage blocks (Race 07 DLC)
 

@@ -74,12 +74,11 @@ regression tests or an explicitly documented negative.
   three 64-byte words as a **unit normal**, not a horizontal axis: upward
   faces carry `(0,1,0)`. Index buffers are triangle lists (often 1.5x the
   vertex count), not vertex-count strips. With those relaxations
-  `read_racegmt_submeshes()` decodes **574/643** Race07 DLC meshes (350,389
-  vertices, 148,773 triangles), and all 574 rebuild via `to_gtr2_gmt()` into
-  parseable GTR2 GMTs. Further assumption removals raised this to **641/643**
-  meshes: submesh vertex counts exceed 4,096 (up to 10,515), group indices may
-  start at 1, the four UV sets may differ, and degenerate zero-normal vertices
-  occur. The two remaining files (`plots01.gmt`/`plots02.gmt` in Zolder09) are a
+  `read_racegmt_submeshes()` decodes **641/643** Race07 DLC meshes (~350k
+  vertices, ~149k triangles), and all 641 rebuild via `to_gtr2_gmt()` into
+  parseable GTR2 GMTs. Coverage was raised from 574 by four assumption removals:
+  submesh vertex counts exceed 4,096 (up to 10,515), group indices may start at
+  1, the four UV sets may differ, and degenerate zero-normal vertices occur. The two remaining files (`plots01.gmt`/`plots02.gmt` in Zolder09) are a
   distinct simpler RaceGMT variant with no `0x20004051` submesh table. Full-tier test: `test_racegmt_corpus_converts_to_gtr2`.
   Column 4 of the triangle record remains unassigned.
   Column 4 keeps the same spatial coefficients across variants but has a

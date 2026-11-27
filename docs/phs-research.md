@@ -88,7 +88,7 @@ New angles tried that were not in the first investigation:
 | Experiment | Result | Interpretation |
 |---|---|---|
 | `strings` for `PAR2`, `PAR 2.0`, `RecvSlic`, `FileDesc`, `Update_0901` across `GTL.exe`, `GTLDedicated.exe`, `GTLConfig.exe`, `GTLReporter.exe`, and all DLLs | **No hits** | GTL binaries contain no PAR2 vocabulary; consistent with PHS being unused update artifacts, not proof (loader may use hashes/indices) |
-| Runtime trace under Wine (`WINEDEBUG=+file`) | GTL exits with status 53; `Net.dll` needs `MFC42.DLL`, unavailable; winetricks `mfc42` fails (status 43) | Runtime consumer trace is **blocked by environment**, not by evidence |
+| Runtime trace under Wine (`WINEDEBUG=+file`) | GTL exits with status 53; `Net.dll` needs `MFC42.DLL`, unavailable; winetricks `mfc42` fails (status 43) | Runtime consumer trace is **blocked by environment**, not by evidence. 2026-11-27 update: MFC42 was later obtained via the cached VC6 redistributable and a working Wine 11.21 prefix exists (`docs/runtime-validation.md`), but the GTL Net.dll trace has not been rerun; GTR2Dedicated instead needs mfc100.dll (resolved) and fails only on D3D window creation |
 | Compare `RecvSlic` bodies across AI/TRACKS/CARS | Distinct bodies, exponent fields `0x3b`, `0x3a`, `0x35`; each body MD5 differs | Distinct recovery slices for one file — expected PAR2 behaviour |
 | Entropy of slice bodies vs controls | Slice bodies 7.9996 bits/byte ≈ `os.urandom` 7.9969; compressed BIK 7.73; zlib text 2.67 | Uniformly random, consistent with Reed–Solomon parity data |
 | File length divisibility | 384000-byte slice size; files hold 1–2 full slices plus metadata/partial slices | Consistent with truncated/partial PAR2 sets |

@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 23:00:00 -0500 - Documentation consistency fixes
+- Corrected stale claims: `FEATURES.md` CUBE MTS section now documents decoded triangle records and the 389-mesh converter instead of "no triangle block"; `docs/format-findings.md` RaceGMT section no longer shows the superseded 574/643 figure; `docs/phs-research.md` notes that MFC42 is now obtainable and GTR2's mfc100 blocker is resolved.
+
 ## 2026-11-29 22:30:00 -0500 - MTS 4.20 near-duplicate and small_b negatives
 - Compared the exact-size SKIDOUT01.MTS 4.10/4.20 pair: table offset shifts by 4, stream_b count changes 16→14, and payload packing differs. Recorded the precise unblock (producer trace or larger near-duplicate set). Also recorded that replay `small_b` is not fixed-point quantized at any tested scale.
 
