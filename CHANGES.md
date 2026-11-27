@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-28 20:00:00 -0500 - RaceGMT CLI reports decoded triangles
+- `gmt_tool.py info FILE` now reports decoded RaceGMT triangle count, group list and texture-axis count for meshes carrying the table, instead of "geometry: not decoded" everywhere. CLI regression updated.
+
 ## 2026-11-28 19:30:00 -0500 - RaceGMT texture U decoded exactly
 - Found the on-disk texture-axis table in `RaceGMT\0` meshes: a count word followed by one 16-byte `[cos,0,sin,0]` entry per triangle. `race_gmt.read_texture_axes()` plus `f0 = sin*x + cos*y` reproduces all 240 sampled records to <8e-6, upgrading the earlier fitted projection to an exact decoder. Full-tier test added.
 

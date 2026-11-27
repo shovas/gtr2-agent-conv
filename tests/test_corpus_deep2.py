@@ -1790,7 +1790,10 @@ class CorpusDeep2Test(unittest.TestCase):
             self.assertIn("variant: racegmt", result.stdout)
             self.assertIn("racegmt_name: people_stand_01", result.stdout)
             self.assertIn("triple3_equals_triple4: True", result.stdout)
-            self.assertIn("geometry: not decoded", result.stdout)
+            self.assertIn("triangles: 48", result.stdout)
+            self.assertIn("triangle_groups: [0, 1, 2, 3, 4]", result.stdout)
+            self.assertIn("texture_axes: 48", result.stdout)
+            self.assertIn("geometry: triangle records decoded", result.stdout)
 
     def test_f0_bytes_not_stage_indices(self):
         """f0 bytes do not index the material's stage strings."""

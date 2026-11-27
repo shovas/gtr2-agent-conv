@@ -152,7 +152,15 @@ def cmd_info(args: argparse.Namespace) -> int:
         triples = [header.floats[i:i + 3] for i in range(0, len(header.floats), 3)]
         print(f"quad_triples: {len(triples)}")
         print(f"triple3_equals_triple4: {len(triples) == 4 and triples[2] == triples[3]}")
-        print("geometry: not decoded (RaceGMT container only)")
+        triangles = race_gmt.read_triangle_records(raw)
+        axes = race_gmt.read_texture_axes(raw)
+        if triangles:
+            print(f"triangles: {len(triangles)}")
+            print(f"triangle_groups: {sorted({r['group'] for r in triangles})}")
+            print(f"texture_axes: {len(axes)}")
+            print("geometry: triangle records decoded (column 4 unassigned)")
+        else:
+            print("geometry: not decoded (RaceGMT container only)")
         return 0
     h = read_header(args.file, parse_meshes=args.meshes)
     print(f"path: {h.path}")
