@@ -1,3 +1,15 @@
+## Two remaining RaceGMT meshes use a distinct submesh type (2026-11-29)
+
+`plots01.gmt`/`plots02.gmt` in Zolder09 are the only 2 of 643 RaceGMT files
+without a `0x20004051` submesh table. Both contain a single `0x2000403d`
+section header (`[magic, group=0, count=37 or 32]`) followed by 64-byte
+records, but their post-vertex data does not follow the `u32 count + u16
+indices` layout (the count word at that offset is garbage / 0xFFFFFFFF), and
+their first records contain zero/degenerate axis vectors. Three larger files
+also contain the 0x2000403d byte pattern but only inside float data, not as a
+header. Decoding this variant needs a separate layout investigation; it does
+not affect the 641/643 already convertible meshes.
+
 ## HAT tail per-phase byte structure (2026-11-29)
 
 Computed the modal-byte fraction for each of the 34 phases of Brno's HAT tail:

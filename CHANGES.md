@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 18:30:00 -0500 - RaceGMT remaining-variant analysis
+- Characterized the last 2 unconvertible RaceGMT meshes: they use a distinct `0x2000403d` submesh type with a different post-vertex layout, not a stricter variant of the standard `0x20004051` format. Recorded the evidence and what would be needed to decode them.
+
 ## 2026-11-29 18:00:00 -0500 - RaceGMT coverage raised to 641/643
 - Removed four unjustified decoder restrictions: vertex count capped at 4,096 (actual max 10,515), group indices forced to start at 0, four UV sets forced identical, and zero-normal vertices rejected. Coverage rose 574 → 641 of 643 DLC meshes, all converting to parseable GTR2 GMTs. The last two are a distinct simpler variant with no submesh table.
 
