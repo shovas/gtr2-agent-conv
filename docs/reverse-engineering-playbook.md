@@ -102,6 +102,67 @@ Before building a converter, measure identity against the target corpus. GTL
 safe), while every shared text config differs. Race07/Volvo meshes are not
 identical. A cheap hash comparison can eliminate most conversion work.
 
+## Other big wins and what they teach
+
+The RaceGMT decode is not the only case where a small structural insight
+unlocked a whole family. These are worth applying deliberately elsewhere.
+
+### F1 2000 type-2.5 BMPs — undercounted member sizes
+315 "undecoded" BMPs stored a zlib stream at offset 30 whose final **14 bytes
+were written past the declared `zsize`**, in the gap before the next member.
+The same pattern had already been found independently in SCGT `AMBC.BMP`
+(trailing 5 bytes past the declared size). **Lesson:** when a member's data
+does not decompress or validate, inspect the bytes immediately *after* its
+declared boundary before concluding the payload is encrypted or unsupported.
+Generations of ISI archives undercount trailing bytes.
+
+### rF1 semantic bridge — structural ≠ semantic conversion
+A structural old→new GMT bridge produced valid-looking files but failed
+`validate_conversion` on 0/150 multi-submesh sources; the semantic bridge
+preserving every submesh passed 150/150 and 253/253 archived members.
+**Lesson:** a converter that preserves byte structure can still lose the
+semantics the target engine needs. Validate with an independent reader and
+test multi-object cases specifically — single-object samples hide the bug.
+
+### GTL→GTR2 container layer — derive rules from the target corpus
+Every rewrite (`.gtl`→`.gtr`, `teammaps.gtl`→`teammaps2.gtr`, `Misc.gtr`
+insertion, CRLF preservation) came from counting what 25 GTL and 34 GTR2 TRKs
+actually contain, not from assumed equivalence. **Lesson:** enumerate the
+target corpus's invariants first; the conversion rules are usually the minimal
+set that makes source files satisfy them.
+
+### HAT position matching — stable keys beat record order
+Same-layout HATs from different games have <1% identical records by index, yet
+91–98% of `(x,z)` sample positions match with near-identical heights.
+**Lesson:** when two versions of a dataset appear incompatible, look for a
+stable spatial or semantic key before declaring the data untransferable. Order
+and identifiers are often regenerated; positions are not.
+
+### JCA text configs — accept alternative syntax markers
+Section-only configs (`Tweak { }` with no `=`) were rejected by a detector that
+required `=`. **Lesson:** a heuristic tuned on one corpus can reject valid
+variants of another. Check the *negative* cases in the source corpus, and
+share the predicate between the detector and the decoder so they cannot drift.
+
+### Full-suite failures — check for stale expectations first
+Two full-tier failures turned out to be assertions written before legitimate
+parser improvements (v1.05 replay validation; broadened stream extraction).
+**Lesson:** when a long-running suite fails, reproduce the assertions and ask
+whether the *expected value* is obsolete before hunting a regression. Record
+the new baseline beside the test.
+
+### Material validator — baseline in the target corpus
+`validate_materials` flags ~2% of native GTR2 meshes too, so its warnings are
+advisory. **Lesson:** run any diagnostic on the target corpus before treating
+its output as evidence of a conversion defect; otherwise you chase false
+positives that the target game itself contains.
+
+### Copy-vs-convert measurement — eliminate work before doing it
+GTL 25/26 and BMW 26/26 same-name GMTs are byte-identical to GTR2, while every
+shared text config differs. **Lesson:** hash-compare against the target corpus
+first. A cheap identity check can remove most conversion work and tells you
+which families actually need a converter.
+
 ## Repeatable loop
 
 1. Pick a source format and a target field the writer needs.

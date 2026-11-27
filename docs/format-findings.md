@@ -825,8 +825,11 @@ a superficial string mapping would be wrong. Full-tier test:
 The full technique list with worked examples is
 `docs/reverse-engineering-playbook.md` (near-duplicate diffs, count/ordinal
 anchors, hunting for fitted constants on disk, coverage-driven relaxation,
-distribution-preserving controls, reuse of validated writers). Start there when
-opening a new format; this section keeps the short rules.
+distribution-preserving controls, reuse of validated writers). It also records
+the transferable lessons from the other major unlocks (F1 2000 trailing-byte
+members, the rF1 semantic bridge, GTL container rules, HAT position matching,
+stale-suite expectations, validator baselines and copy-vs-convert measurement).
+Start there when opening a new format; this section keeps the short rules.
 
 - A shuffle control preserves the multiset, so it cannot test whether a value
   distribution is special (e.g. "fraction of packed u16s decoding as small
