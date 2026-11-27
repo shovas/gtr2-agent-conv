@@ -148,6 +148,18 @@ records from 120 RaceGMT files, column 4 also has weak/no correlation with the
 other four record columns (|r| ≤ 0.52). Do not pursue area/edge proxies further
 without a new structural hypothesis.
 
+## replay small_b: linear/curvature models — negative (2026-11-27)
+
+On `Brno HOT LAP.Vcr` (779 frames), `small_b` spans only (-0.0421, 0.0485).
+A linear fit against smoothed `angle_like` gives RMS error 0.0134 and max
+error 0.0486 — comparable to the whole signal range — for window widths 5,
+20 and 50, so it is not a scaled/filtered steering angle. Correlations with
+position-derived quantities are weak: heading rate r=+0.289, speed r=+0.056,
+v^2 * heading rate r=+0.259, |heading rate| r=+0.038. Combined with the
+earlier negatives (not fixed-point quantized; uncorrelated with yaw-rate
+derivatives) there is still no unit mapping. Do not repeat these linear
+models without a new structural hypothesis.
+
 ## f0 index-count signal is explained by ic == vc (2026-11-27)
 
 Within the dominant `(2, 1)` byte-offset group (3,072 seeded GTR2 meshes),
