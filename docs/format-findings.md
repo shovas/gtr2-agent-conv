@@ -839,10 +839,11 @@ still ruled out. Full-tier tests: `test_hat_header_bytes_4_to_16_are_track_stabl
   Template values for a different track are unverified; this is offline
   structural validation only.
   Full-tier tests: `test_unified_rf1_tree_converts_and_validates` and
-  `test_unified_conversion_generalizes_across_tracks` — 12 real rF1 tracks
+  `test_unified_conversion_generalizes_across_tracks` — all 16 real rF1 tracks
   convert with **0 GTR2 validator problems** each (BamaSuperspeedway,
   Barcelona, Brianza, Essington, EuroRing, Jacksonville, Jiading, Joesville,
-  Lienz, Mills, Montreal, Northamptonshire). Archive members are preserved
+  Lienz, Mills, Montreal, Northamptonshire, Nuerburg, OrchardLake,
+  Sardian_Heights, Toban). Archive members are preserved
   exactly on six sampled tracks (source members + the shared `commonmaps`
   archive = converted members, zero lost or gained). Full-tier test:
   `test_rf1_conversion_preserves_all_archive_members`.

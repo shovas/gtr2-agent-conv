@@ -5,6 +5,9 @@ Newest-first change log. Timestamps use repository commit dates (ISO 8601, local
 ## 2026-11-29 23:59:59 -0500 - Status dashboard stale entries fixed
 - `conversion_status.py` now reports 643/643 RaceGMT meshes (the `0x2000403d` variant is decoded) and no longer lists the HAT node-tree serializer as missing; remaining gaps are column 4 and in-game acceptance.
 
+## 2026-11-29 23:59:59 -0500 - All 16 rF1 tracks validate
+- Audited every rF1 vanilla location tree: all 16 convert with 0 GTR2 validator problems. Expanded the full-tier regression test from 6 to 16 tracks and updated docs/dashboard claims.
+
 ## 2026-11-29 23:59:59 -0500 - ANI bindings preserved by GTL tree conversion
 - Verified that converting the GTL Anderstorp tree preserves all 256 ANI MeshFile/ActorFile references and their shared-archive resolution pattern; regression test added.
 

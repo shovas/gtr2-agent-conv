@@ -7104,7 +7104,7 @@ class CorpusDeep2Test(unittest.TestCase):
                         (ROOT.parent / "GTR2Steam/GameData").rglob("*")
                         if p.is_file() and p.suffix.lower() == ".gtr"}
         checked = 0
-        for track in sorted(p for p in base.iterdir() if p.is_dir())[:6]:
+        for track in sorted(p for p in base.iterdir() if p.is_dir()):
             with tempfile.TemporaryDirectory(dir="/tmp/opencode") as td:
                 out = Path(td) / "out"
                 tc.convert_tree(track, out, templates=templates,
@@ -7114,7 +7114,7 @@ class CorpusDeep2Test(unittest.TestCase):
                 self.assertEqual(gtl.validate_gtr2_tree(out, shared_names | local),
                                  [], track.name)
                 checked += 1
-        self.assertGreaterEqual(checked, 6)
+        self.assertGreaterEqual(checked, 16)
 
     def test_gtl_gtr2_same_name_copy_convert_split(self):
         """Shared GMTs are byte-identical; shared text configs always differ."""
