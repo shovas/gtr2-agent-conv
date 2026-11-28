@@ -121,6 +121,61 @@ def build_sandbox(game_root: str | Path, target: str | Path,
     return dest
 
 
+def parse_session_results(directory: str | Path) -> list[dict]:
+    """Parse dedicated-server Practice/Qualify/Race result files.
+
+    GTR2 writes `//[[gMa1.000f]]` config-text files under
+    `UserData/Log_Dedicated/Results` after a completed session. Returns one
+    dict per file with the scene, AI database, and track length fields used
+    to verify which converted track the engine actually loaded.
+    """
+    root = Path(directory)
+    results = []
+    if not root.is_dir():
+        return results
+    for path in sorted(root.glob("*.txt")):
+        data = path.read_bytes().decode("latin-1")
+        fields = {}
+        for line in data.splitlines():
+            if "=" in line:
+                key, _, value = line.partition("=")
+                fields[key.strip()] = value.strip().strip('"')
+        results.append({
+            "file": path.name,
+            "scene": fields.get("Scene", ""),
+            "aidb": fields.get("AIDB", ""),
+            "track_length": float(fields["Track Length"])
+            if "Track Length" in fields else None,
+            "race_mode": fields.get("RaceMode", ""),
+        })
+    return results
+
+
+def acceptance_report(results: list[dict], expected_scene: str,
+                      expected_length: float | None = None,
+                      tolerance: float = 1.0) -> dict:
+    """Summarise whether a session actually used the expected track.
+
+    Structural validity is not game acceptance; this checks the engine's
+    own session output, which records the loaded `.trk`/`.aiw` paths and the
+    computed track length.
+    """
+    matching = [r for r in results
+                if r["scene"].upper().endswith(expected_scene.upper())]
+    length_ok = []
+    if expected_length is not None:
+        length_ok = [r for r in matching
+                     if r["track_length"] is not None
+                     and abs(r["track_length"] - expected_length) <= tolerance]
+    return {
+        "sessions": len(results),
+        "scene_matches": len(matching),
+        "length_matches": len(length_ok),
+        "accepted": bool(matching) and (expected_length is None
+                                        or bool(length_ok)),
+    }
+
+
 def patch_client_config(data: bytes) -> bytes:
     """Return a client `Config.ini` that avoids the Wine/llvmpipe startup crash.
 

@@ -46,6 +46,28 @@ class RuntimeSandboxTest(unittest.TestCase):
             self.assertEqual(
                 (game / "GameData/Locations/Hockenheim/stock.trk").read_bytes(), b"STOCK")
 
+    def test_session_result_parsing_and_acceptance(self):
+        """Session result files reveal which track the engine actually used."""
+        with tempfile.TemporaryDirectory(dir="/tmp/opencode") as td:
+            results_dir = Path(td) / "Results"
+            results_dir.mkdir()
+            payload = (
+                '//[[gMa1.000f (c)2004    ]] [[\x00\x00]]\r\n'
+                '[Header]\r\nGame=GTR2\r\n\r\n[Race]\r\nRaceMode=5\r\n'
+                'Scene=GAMEDATA\\LOCATIONS\\Hockenheim\\NTHockenheim.TRK\r\n'
+                'AIDB=GAMEDATA\\LOCATIONS\\Hockenheim\\NTHockenheim.AIW\r\n'
+                'Track Length=656.6953\r\n'
+            ).encode("latin-1")
+            (results_dir / "Probe_Practice1.txt").write_bytes(payload)
+            parsed = rs.parse_session_results(results_dir)
+            self.assertEqual(len(parsed), 1)
+            self.assertAlmostEqual(parsed[0]["track_length"], 656.6953)
+            report = rs.acceptance_report(parsed, "NTHockenheim.TRK", 656.7)
+            self.assertTrue(report["accepted"])
+            self.assertEqual(report["scene_matches"], 1)
+            bad = rs.acceptance_report(parsed, "3ANDERSTORP.TRK", 4018.0)
+            self.assertFalse(bad["accepted"])
+
     def test_client_config_patch_preserves_other_keys(self):
         cfg = (b"//[[gMa1.000f]]\r\nVIDEOMODE=12\r\nVIDEORAM=-52\r\n"
                b"SHADERLEVEL=0\r\nRaceName=Probe\r\n")

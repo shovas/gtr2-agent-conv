@@ -258,6 +258,11 @@ regression evidence. It currently reports **partial runtime acceptance**:
 converted rF1 TRK/AIW files ran in a completed GTR2 dedicated-server session,
 but converted track meshes have not been loaded or accepted in game.
 
+`runtime_sandbox.parse_session_results()` and `acceptance_report()` read the
+dedicated server's result files and report whether a session actually loaded
+the expected track (scene path and computed length) — distinguishing engine
+acceptance from structural validity.
+
 `python3 runtime_sandbox.py GAME_DIR TARGET --substitute REL=FILE` builds a
 safe overlay for runtime experiments: substituted files and `UserData` are
 real directories while untouched stock files are symlinks, so the read-only
