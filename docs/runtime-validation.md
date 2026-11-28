@@ -470,3 +470,22 @@ never `VIDEOMODE`, so this lever was previously missed.
 **Next:** navigate the client UI (or connect it to the dedicated server) to
 load a session and check whether converted track `.gtr` archives open.
 
+
+### Client UI state after the VIDEOMODE fix (2026-11-27)
+
+The client reaches a full-screen `CUBERealtime` "GTR2" window and opens the
+UI archives (`GFX.GTR`, `UIASSETS.GTR`, `UIDATA\GTR2OPTIONS*.GTR`,
+`UIDATA\GTR2TEXTOPTIONS.GTR`) plus all GameData GDBs, with 0 SEH errors.
+Screenshots via `DISPLAY=:77 import -window root` show menu layouts as gray /
+pale rectangles with no readable text (font/texture rendering under
+llvmpipe), so menu items cannot be identified visually. Coordinate mouse
+clicks and synthetic Enter/arrow keys did not produce a session in the
+screen locations tried; one transition from the initial splash to a menu did
+occur but could not be attributed conclusively to a click.
+
+**Unblock for geometry acceptance:** identify the client menu bindings (from
+`UIDATA` assets, GTR2 UI documentation, or a working renderer where text is
+readable), or connect the client to the already-working dedicated server over
+the network, then drive a session and check for track `.gtr` opens. The
+startup crash itself is solved and should not be re-investigated.
+
