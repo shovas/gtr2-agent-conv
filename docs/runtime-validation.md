@@ -524,3 +524,18 @@ archives (`.gtr` opens stayed at the same 8 UI archives).
 a working renderer, UI layout definition, or a network/console entry point)
 before client-side geometry acceptance can be tested.
 
+
+## UI element table found (2026-11-27)
+
+GTR2.exe contains an 869-entry table of UI element name pointers at file
+offset `0x2E53E0` (VA `0x6E61E0`), including
+`APP_Button_GameModeSelect_QuickRace`, `_Practice`, `_GrandPrix`,
+`_Championship`, `_TimeTrial`, `_DrivingSchool`, `_Multiplayer`. A function at
+`0x4C21F0` compares a supplied name against this table (869 strcmp calls,
+limit `0x365`) and dispatches through a jump table at `0x4CD57C`. This gives
+a concrete implementation handle for future UI automation: resolve a named
+element to its ID, then find/invoke its activation handler, instead of blind
+coordinate clicking. Winedbg can breakpoint this function (it is hit
+repeatedly during startup), so click-driven hits can be distinguished with an
+auto-continue command sequence.
+
