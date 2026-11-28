@@ -539,3 +539,16 @@ coordinate clicking. Winedbg can breakpoint this function (it is hit
 repeatedly during startup), so click-driven hits can be distinguished with an
 auto-continue command sequence.
 
+
+### QuickRace UI element dispatch detail (2026-11-27)
+
+The name-to-ID function's jump table at `0x4CD57C` maps index 75
+(`APP_Button_GameModeSelect_QuickRace`) to handler `0x4C3B3F`: it allocates a
+280-byte object, stores `0x28` at `[obj+0x18]`, calls `0x4CF1D0(obj, 2)`, and
+returns it. `0x4CF1D0` installs vtable `0x68B954` and stores the value `2` at
+`[obj+0x114]`; neighbouring buttons use similar constructors. This is the
+element **factory**, not the click action — calling it would only construct a
+button. The activation handler is likely a separate virtual method on that
+vtable, so future automation should locate the vtable slot invoked on mouse
+release rather than the factory.
+
