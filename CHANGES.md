@@ -8,6 +8,9 @@ Newest-first change log. Timestamps use repository commit dates (ISO 8601, local
 ## 2026-11-29 23:59:59 -0500 - All 16 rF1 tracks validate
 - Audited every rF1 vanilla location tree: all 16 convert with 0 GTR2 validator problems. Expanded the full-tier regression test from 6 to 16 tracks and updated docs/dashboard claims.
 
+## 2026-11-29 23:59:59 -0500 - Wine runtime guide for agents and users
+- Added `docs/wine-runtime-guide.md`: complete reproducible setup for GTR2/GTR2Dedicated under Wine (prefix, mfc100.dll, x11 driver, persistent Xvfb, VIDEOMODE root cause, optional VRAM/D3DX fixes, safe sandbox, dedicated-server wizard, result parsing, verification checklist and troubleshooting). Linked from `DEPENDENCIES.md` and `FEATURES.md`; corrected the stale status header in `docs/runtime-validation.md`.
+
 ## 2026-11-29 23:59:59 -0500 - HAT generation uses local triangles
 - Added `nearest_sample_triangles()` so generated HAT leaves reference locally faithful, non-degenerate triangles instead of placeholder successor triples. Generated HATs remain validator-clean on track-like samples; test updated.
 

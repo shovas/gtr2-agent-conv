@@ -248,6 +248,8 @@ python3 validate_materials.py <file.gmt>
 python3 validate_materials.py --archive <file.mas> [--json]
 ```
 
+Reproducing the runtime checks under Wine (Xvfb, prefix setup, D3D and config fixes, known limits) is documented in `docs/wine-runtime-guide.md`.
+
 ## 13. Review conversion status
 
 `python3 conversion_status.py [--json]` prints a compact per-family report of

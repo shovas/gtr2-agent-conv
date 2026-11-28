@@ -1,8 +1,13 @@
 # Runtime validation status (2026-11-27)
 
 Goal: observe GTR2 actually loading converted content. Status: **partial** —
-the executable starts and enumerates/reads GameData, but cannot create a
-Direct3D window in this environment.
+`GTR2Dedicated.exe` runs a full session that consumes converted TRK/AIW, and
+`GTR2.exe` starts with a working D3D context, but no client session has been
+entered and converted geometry has not been loaded. Earlier notes in this
+file about "D3D window creation fails" were superseded by the persistent-Xvfb
+and `VIDEOMODE` findings below.
+
+For a reproducible, end-user-facing setup recipe, see `docs/wine-runtime-guide.md`.
 
 ## Environment discovered
 

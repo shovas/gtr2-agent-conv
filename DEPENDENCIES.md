@@ -18,6 +18,8 @@
 - **`bink_build` from `raynorpat/libbink`** (optional, LGPL-2.1) - external encoder used by `media_tool.py bink-encode`; invoked as a separate executable (set `BINKBUILD` or put it on `PATH`), its code is not copied into this repo. Test skips if absent.
 - **Bink SDK/licensed tools** - not required: decode uses ffmpeg and BIKi encoding uses the external LGPL `libbink` (validated round-trip on real GTR2 BIK).
 
+Step-by-step setup for Wine, Xvfb, the `mfc100.dll` and `VIDEOMODE` fixes, the dedicated-server wizard and troubleshooting: `docs/wine-runtime-guide.md`.
+
 ## Runtime validation (optional, experimental)
 
 Not required for tests or conversions. Used only for the dedicated-server
