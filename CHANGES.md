@@ -2,6 +2,26 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 23:59:59 -0500 - Client startup root cause and status update
+- Traced the long-standing `0x59D46C` client crash to the `VIDEOMODE` config key via winedbg breakpoint/watchpoint; `VIDEOMODE=0` or `1` reaches the full GTR2 game window. Added `runtime_sandbox.patch_client_config()` with tests. Client startup is no longer blocked; navigating a client session to load converted geometry remains.
+- Client UI text renders as blank rectangles under llvmpipe; coordinate clicks/keyboard did not reach a session. Recorded the exact unblock: identify menu bindings or connect the client to the dedicated server.
+- Status dashboard updated to reflect that the client starts; only geometry acceptance remains unverified.
+
+## 2026-11-29 23:59:59 -0500 - RaceGMT and CUBE MTS negatives
+- Column 4 is not a fixed linear combination of the other record floats (max error 0.194, unstable coefficients).
+- CUBE MTS 4.20 has no quantized int16 position table; only short coincidental runs overlapping the normal stream. 4.20 geometry still requires external bone data.
+- Docs for new tools synced across `AGENTS.md`, `DEPENDENCIES.md`, `FEATURES.md`.
+
+## 2026-11-29 23:59:59 -0500 - Safe sandbox and HAT negative
+- Partial runtime acceptance reproduced via `runtime_sandbox.build_sandbox()` with real-directory substitution; result `Track Length=656.6953`, 0 SEH errors. The server's `Boot Client` button did not load a client.
+- HAT leaf extra fields are not triangle height-plane coefficients (all correlations |r|<0.24 on 2,000 leaves).
+- Added `runtime_sandbox.py`: safe overlay builder where substituted files and `UserData` are real directories and untouched stock files stay symlinks; `assert_no_mutable_symlinks()` and a CLI. Prevents writes through symlinked corpora.
+- `validate_materials` now suggests canonical `specialfx.tec` prefixes for rF1-style suffix material names; audited on 2,208 converted GMTs.
+
+## 2026-11-29 23:59:59 -0500 - f0 and replay negatives
+- f0 cumulative vertex offsets are far weaker (17.5%) than the immediately previous mesh (87.8%).
+- Replay `small_b` shows no relationship to wheel-speed-like u16 channels or lagged state channels (all |r|<0.25).
+
 ## 2026-11-29 23:59:59 -0500 - ANI validator strengthened
 - `validate_ani()` now flags empty motion groups and Object bindings missing MeshFile/ActorFile/Motions. Corpus-verified: 7,489 objects and 1,576 groups across 240 ANI files remain clean; a targeted test confirms rejection of incomplete bindings.
 
