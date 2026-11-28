@@ -46,6 +46,16 @@ class RuntimeSandboxTest(unittest.TestCase):
             self.assertEqual(
                 (game / "GameData/Locations/Hockenheim/stock.trk").read_bytes(), b"STOCK")
 
+    def test_client_config_patch_preserves_other_keys(self):
+        cfg = (b"//[[gMa1.000f]]\r\nVIDEOMODE=12\r\nVIDEORAM=-52\r\n"
+               b"SHADERLEVEL=0\r\nRaceName=Probe\r\n")
+        patched = rs.patch_client_config(cfg)
+        self.assertIn(b"VIDEOMODE=0\r\n", patched)
+        self.assertIn(b"VIDEORAM=256\r\n", patched)
+        self.assertIn(b"SHADERLEVEL=0\r\n", patched)
+        self.assertIn(b"RaceName=Probe\r\n", patched)
+        self.assertEqual(patched.count(b"VIDEOMODE="), 1)
+
     def test_ini_settings_override(self):
         with tempfile.TemporaryDirectory(dir="/tmp/opencode") as td:
             path = Path(td) / "DedicatedServer.ini"

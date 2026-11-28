@@ -121,6 +121,29 @@ def build_sandbox(game_root: str | Path, target: str | Path,
     return dest
 
 
+def patch_client_config(data: bytes) -> bytes:
+    """Return a client `Config.ini` that avoids the Wine/llvmpipe startup crash.
+
+    Root cause (dynamic trace, 2026-11-27): `TvOverlayMan::CreateOverlays`
+    looks up entry index `0x6FCD44` in a list at `global+0x120`. That index is
+    written from parsing `VIDEOMODE`; values that map to 2 or higher return
+    NULL under llvmpipe and are dereferenced unchecked at `0x59D46C`.
+    `VIDEOMODE=0` (and 1) reach the full `CUBERealtime` game window.
+
+    Only these two keys are changed; everything else is preserved verbatim.
+    """
+    text = data.decode("latin-1")
+    out = []
+    for line in text.splitlines(keepends=True):
+        if line.strip().upper().startswith("VIDEOMODE="):
+            out.append("VIDEOMODE=0\r\n")
+        elif line.strip().upper().startswith("VIDEORAM="):
+            out.append("VIDEORAM=256\r\n")
+        else:
+            out.append(line)
+    return "".join(out).encode("latin-1")
+
+
 def assert_no_mutable_symlinks(root: str | Path,
                                substituted: list[str] | None = None) -> list[str]:
     """Return writable locations that are (unsafely) symlinks.

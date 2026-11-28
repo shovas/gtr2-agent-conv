@@ -437,3 +437,36 @@ loaded: the only `.gtr` opens remained shared archives (`CREW`, `STEX`,
 `TEAMMAPS`, `SKIES_*`), with 0 SEH errors. So the built-in client-boot path
 does not provide geometry acceptance either.
 
+
+## CLIENT STARTUP CRASH ROOT CAUSE FOUND — VIDEOMODE (2026-11-27)
+
+Dynamic tracing with `winedbg --gdb` (breakpoint `0x59D46C`, hardware
+watchpoint on `0x6FCD44`) found the actual producer of the failing index:
+
+- at the crash `eax = 0` (lookup result), and `0x6FCD44 = 2`;
+- a hardware watchpoint caught `0x6FCD44` being written from `0x41D754`,
+  where `0x41D735` calls a config parser with the literal key **`VIDEOMODE`**
+  (`0x66D2B8`) and stores the parsed value;
+- the lookup is in `TvOverlayMan::CreateOverlays` (`0x59D450`) against the
+  list at `global + 0x120`; the list has no entry for index 2, so the
+  unchecked `mov edx,[eax+0x8]` at `0x59D46C` faults.
+
+**This was a configuration artifact, not a Wine/D3D capability deficit.**
+Controlled sweep with the VRAM gate already bypassed:
+
+```
+VIDEOMODE=0  -> process alive, top window: CUBERealtime 'GTR2'   (WORKS)
+VIDEOMODE=1  -> process alive, top window: CUBERealtime 'GTR2'   (WORKS)
+VIDEOMODE=2/3/4/8 -> crash at 0x59D46C
+```
+
+With `VIDEOMODE=0` the client opens `GFX.GTR`, `UIASSETS.GTR`, and the
+`UIDATA\GTR2*.GTR` UI archives, enumerates all GameData GDBs, and renders a
+`CUBERealtime` window (textures are blank under llvmpipe, but the UI tree and
+file loads work). `runtime_sandbox.patch_client_config()` applies this fix
+deterministically. Earlier config sweeps varied `SHADERLEVEL`/`VIDEODRIVER`,
+never `VIDEOMODE`, so this lever was previously missed.
+
+**Next:** navigate the client UI (or connect it to the dedicated server) to
+load a session and check whether converted track `.gtr` archives open.
+
