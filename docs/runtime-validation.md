@@ -562,3 +562,21 @@ menu regions, recorded **0 hits**, so slot 0 is not the mouse-release
 activation path (likely a constructor/destructor). No usable activation
 handler was found by this route.
 
+
+### UI input method audit (2026-11-27) — no session entry
+
+- `WINEDEBUG=+dinput` shows the game polls DirectInput devices, but only a
+  mouse enumeration line appears; XTEST button events do not produce visible
+  DirectInput button-state activity.
+- Direct `PostMessage(WM_LBUTTONDOWN/UP)` to the `CUBERealtime` window
+  changes the screenshot hash, but moving the mouse away changes it again —
+  so the changes are hover/animation, not stable navigation.
+- Command-line tokens found in GTR2.exe: `-JoinMoRe`, `+auto`, `+dedicated`,
+  `+password "`. Running `GTR2.exe +auto` still opens only UI archives (8
+  `.gtr` files) with no track session and 0 SEH errors.
+- Breakpoints on four shared UI vtable slots after startup recorded 0 hits
+  on XTEST clicks.
+
+**Conclusion:** no input/automation route found so far reaches a session in
+this environment. A readable UI or a native Windows run remains the unblock.
+
