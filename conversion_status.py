@@ -80,7 +80,28 @@ BLOCKERS = (
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--json", action="store_true", help="emit JSON")
+    ap.add_argument("--runtime-results", metavar="DIR",
+                    help="dedicated-server Results directory to summarise")
+    ap.add_argument("--expect-scene", metavar="NAME",
+                    help="expected .trk basename for --runtime-results")
+    ap.add_argument("--expect-length", type=float, metavar="METRES",
+                    help="expected track length for --runtime-results")
     args = ap.parse_args(argv)
+    if args.runtime_results:
+        from runtime_sandbox import parse_session_results, acceptance_report
+
+        results = parse_session_results(args.runtime_results)
+        verdict = acceptance_report(results, args.expect_scene or "",
+                                    args.expect_length)
+        if args.json:
+            print(json.dumps({"sessions": results, "verdict": verdict},
+                             indent=2))
+        else:
+            print(f"Runtime sessions: {verdict['sessions']}")
+            print(f"Scene matches:    {verdict['scene_matches']}")
+            print(f"Length matches:   {verdict['length_matches']}")
+            print("Accepted: " + ("yes" if verdict["accepted"] else "no"))
+        return 0
     report = {"families": list(FAMILIES), "blockers": list(BLOCKERS),
               "legend": {"validated": "offline validation passes on sampled data",
                          "partial": "bounded conversion path exists",

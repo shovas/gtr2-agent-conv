@@ -78,6 +78,30 @@ class RuntimeSandboxTest(unittest.TestCase):
         self.assertIn(b"RaceName=Probe\r\n", patched)
         self.assertEqual(patched.count(b"VIDEOMODE="), 1)
 
+    def test_status_cli_runtime_report(self):
+        """The dashboard CLI summarises runtime acceptance results."""
+        import contextlib
+        import io
+
+        import conversion_status
+
+        with tempfile.TemporaryDirectory(dir="/tmp/opencode") as td:
+            result = Path(td) / "A_Practice1.txt"
+            result.write_bytes(
+                b"//[[gMa1.000f]]\r\n[Race]\r\n"
+                b"Scene=GAMEDATA\\LOCATIONS\\Hockenheim\\NTHockenheim.TRK\r\n"
+                b"Track Length=656.6953\r\n")
+            out = io.StringIO()
+            with contextlib.redirect_stdout(out):
+                self.assertEqual(conversion_status.main(
+                    ["--runtime-results", td, "--expect-scene",
+                     "NTHockenheim.TRK", "--expect-length", "656.7"]), 0)
+            self.assertIn("Accepted: yes", out.getvalue())
+            with contextlib.redirect_stdout(out):
+                self.assertEqual(conversion_status.main(
+                    ["--runtime-results", td, "--expect-scene", "WRONG.TRK"]), 0)
+            self.assertIn("Accepted: no", out.getvalue())
+
     def test_ini_settings_override(self):
         with tempfile.TemporaryDirectory(dir="/tmp/opencode") as td:
             path = Path(td) / "DedicatedServer.ini"

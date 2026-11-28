@@ -204,6 +204,16 @@ results = parse_session_results(sandbox / "UserData/Log_Dedicated/Results")
 print(acceptance_report(results, "NTHockenheim.TRK", 656.7))
 ```
 
+The same check is available from the status dashboard:
+
+```sh
+python3 conversion_status.py --runtime-results \
+  sandbox/UserData/Log_Dedicated/Results \
+  --expect-scene NTHockenheim.TRK --expect-length 656.7
+# Runtime sessions: 1 / Scene matches: 1 / Length matches: 1 / Accepted: yes
+```
+
+
 A successful converted-content run looked like:
 
 ```
