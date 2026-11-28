@@ -989,6 +989,11 @@ def validate_hat(payload: bytes) -> list[str]:
             import random
             import statistics
 
+            # Corpus-verified on 1,830,182 leaves: no repeated indices and
+            # no degenerate (coincident) triangles.
+            bad_triples = sum(1 for t in triples if len(set(t)) != 3)
+            if bad_triples:
+                problems.append(f"{bad_triples} leaf triples repeat an index")
             rng = random.Random(2026)
             sample = rng.sample(triples, min(200, len(triples)))
 

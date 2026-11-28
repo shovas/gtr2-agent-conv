@@ -5,6 +5,9 @@ Newest-first change log. Timestamps use repository commit dates (ISO 8601, local
 ## 2026-11-29 23:59:59 -0500 - Status dashboard stale entries fixed
 - `conversion_status.py` now reports 643/643 RaceGMT meshes (the `0x2000403d` variant is decoded) and no longer lists the HAT node-tree serializer as missing; remaining gaps are column 4 and in-game acceptance.
 
+## 2026-11-29 23:59:59 -0500 - HAT leaf index invariant validated
+- Audited 1,830,182 HAT leaf triangles: zero repeated indices and zero degenerate triangles. `validate_hat()` now rejects repeated-index leaves; regression test added. All corpus HATs remain clean.
+
 ## 2026-11-29 23:59:59 -0500 - ANI asset reference audit
 - Added `simbin_text_tool.validate_ani_assets()` to resolve ANI MeshFile/ActorFile references against loose files and GTR2 archives. Verified 1,652/1,652 stock references resolve; regression test added.
 

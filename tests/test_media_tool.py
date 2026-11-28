@@ -1398,6 +1398,31 @@ class MediaToolTest(unittest.TestCase):
         self.assertAlmostEqual(info.details["grid_inv_cell_z"], 0.02603,
                                delta=1e-4)
 
+    def test_validate_hat_detects_repeated_leaf_indices(self):
+        """Leaf triples with repeated indices are rejected."""
+        import gzip_simbin_tool as gz
+        import media_tool as mt
+        import struct
+
+        path = (ROOT.parent / "GTR2Steam/GameData/Locations/HAT_Dedicated"
+                / "3ANDERSTORP.hat")
+        if not path.is_file():
+            self.skipTest("GTR2 HAT corpus not present")
+        payload = gz.decompress(str(path))
+        self.assertEqual(mt.validate_hat(payload), [])
+        parsed = mt.parse_hat_node_stream(payload)
+        patched = bytearray(payload)
+        search = parsed["offset"]
+        for node in parsed["nodes"][:100]:
+            off = patched.find(node, search)
+            self.assertGreaterEqual(off, 0)
+            search = off + 34
+            struct.pack_into("<I", patched, off + 24, 1 | (1 << 21))
+            struct.pack_into("<I", patched, off + 28, 1 | (1 << 10))
+        self.assertIsNotNone(mt.parse_hat_node_stream(bytes(patched)))
+        self.assertTrue(any("repeat an index" in p
+                            for p in mt.validate_hat(bytes(patched))))
+
     def test_validate_hat_detects_scrambled_leaf_triples(self):
         """The HAT validator rejects leaf triples that are not adjacent."""
         import gzip_simbin_tool as gz
