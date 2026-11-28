@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 23:59:59 -0500 - Status dashboard stale entries fixed
+- `conversion_status.py` now reports 643/643 RaceGMT meshes (the `0x2000403d` variant is decoded) and no longer lists the HAT node-tree serializer as missing; remaining gaps are column 4 and in-game acceptance.
+
 ## 2026-11-29 23:59:59 -0500 - Quick-tier rebalance and UI table finding
 - `test_runtime_sandbox` (4 tests, ~0.003 s) moved to the quick tier: quick 21 modules / 151 tests in ~17 s. Recorded GTR2.exe's 869-entry UI element name table (VA 0x6E61E0), name-to-ID function 0x4C21F0, and dispatch jump table 0x4CD57C for future name-based UI automation.
 
