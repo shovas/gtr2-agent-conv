@@ -63,7 +63,7 @@ FAMILIES = (
 
 BLOCKERS = (
     {"issue": "in-game acceptance", "state": "blocked",
-     "detail": "a completed Practice1 session used converted rF1 TRK/AIW (result Track Length=656.7 m vs stock 3685.8 m); converted .gtr mesh archives were never opened and the client is blocked by a VRAM gate/crash, so geometry acceptance is unverified"},
+     "detail": "a completed Practice1 session used converted rF1 TRK/AIW (Track Length=656.7 m vs stock 3685.8 m); client startup was fixed (VIDEOMODE=0 root cause) and reaches the GTR2 game window, but no client session has been navigated yet, so converted .gtr geometry acceptance is unverified"},
     {"issue": "GMT f0 exact encoding", "state": "open",
      "detail": "mod-256 low-byte signal and family-level material association only"},
     {"issue": "RaceGMT column 4", "state": "open",
