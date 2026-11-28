@@ -1412,7 +1412,11 @@ class MediaToolTest(unittest.TestCase):
         template = gz.decompress(str(path))
         samples = [(i * 1.0, 0.0, math.sin(i * 0.5) * 5.0)
                    for i in range(64)]
-        generated = mt.generate_hat_skeleton(template, samples)
+        triples = mt.nearest_sample_triangles(samples)
+        self.assertEqual(len(triples), 64)
+        self.assertTrue(all(len(set(t)) == 3 for t in triples))
+        generated = mt.generate_hat_skeleton(template, samples,
+                                             triangles=triples)
         self.assertIsNotNone(generated)
         self.assertEqual(mt.hat_declared_counts(generated)[0], 64)
         self.assertEqual(mt.hat_declared_counts(generated)[1], 63)

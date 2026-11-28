@@ -865,9 +865,47 @@ def parse_hat_node_stream(payload: bytes,
             "offset": offset, "end": end, "tree": tree}
 
 
+def nearest_sample_triangles(samples: list[tuple[float, float, float]],
+                             neighbors: int = 12) -> list[tuple[int, int, int]]:
+    """Build one locally-faithful triangle per sample.
+
+    For each sample, choose the pair of nearby samples with the smallest
+    perimeter that forms a non-degenerate triangle in the (x,z) plane. This
+    produces spatially local, non-repeated triples suitable for HAT leaves.
+    Complexity is O(n * neighbors^2) after a linear nearest-neighbour scan.
+    """
+    n = len(samples)
+    if n < 3:
+        return []
+    out = []
+    for i in range(n):
+        x0, _, z0 = samples[i]
+        candidates = sorted(
+            ((math.dist((x0, z0), (samples[j][0], samples[j][2])), j)
+             for j in range(n) if j != i))[:min(neighbors, n - 1)]
+        best = None
+        for a in range(len(candidates)):
+            for b in range(a + 1, len(candidates)):
+                j, k = candidates[a][1], candidates[b][1]
+                x1, z1 = samples[j][0], samples[j][2]
+                x2, z2 = samples[k][0], samples[k][2]
+                area = abs((x1 - x0) * (z2 - z0) - (x2 - x0) * (z1 - z0))
+                if area < 1e-9:
+                    continue
+                perimeter = (math.dist((x0, z0), (x1, z1))
+                             + math.dist((x1, z1), (x2, z2))
+                             + math.dist((x2, z2), (x0, z0)))
+                if best is None or perimeter < best[0]:
+                    best = (perimeter, (i, j, k))
+        out.append(best[1] if best else (i, (i + 1) % n, (i + 2) % n))
+    return out
+
+
 def generate_hat_skeleton(template: bytes,
                           samples: list[tuple[float, float, float]],
-                          polygon_field: int = 0) -> bytes | None:
+                          polygon_field: int = 0,
+                          triangles: list[tuple[int, int, int]] | None = None
+                          ) -> bytes | None:
     """Generate a structurally valid HAT from ``(x, height, z)`` samples.
 
     Uses a template only for the opaque header/signature/grid and the first
@@ -908,10 +946,12 @@ def generate_hat_skeleton(template: bytes,
     for x, height, z in samples:
         records.extend(struct.pack("<fIff", x, polygon_field, height, z))
 
+    triples = triangles or nearest_sample_triangles(samples)
+    if len(triples) != n:
+        return None
+
     def node(index: int) -> bytes:
-        # Each sample owns one leaf referencing itself and its two successors
-        # in sample order, giving spatially local triangles for ordered input.
-        a, b, c = (index % n, (index + 1) % n, (index + 2) % n)
+        a, b, c = triples[index]
         u24 = (a & 0x1FFFFF) | ((b & 0x7FF) << 21)
         u28 = ((b >> 11) & 0x3FF) | ((c & 0x3FFFFF) << 10)
         return leaf_prefix + struct.pack("<II", u24, u28) + leaf_tail
