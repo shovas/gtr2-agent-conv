@@ -505,3 +505,22 @@ via native X11) works and changes menu screens; synthetic `mouse_event`
 inside Wine did not. `+connect 127.0.0.1` and `RUNBENCHMARKS=1` did not
 auto-start a session.
 
+
+### Native d3dx9_41.dll test (2026-11-27)
+
+Downloaded Microsoft's freely redistributable `directx_Jun2010_redist.exe`
+(~96 MB) and extracted `Mar2009_d3dx9_41_x86.cab` to obtain the genuine
+`d3dx9_41.dll` (4.0 MB). Installed it only into the sandbox Wine prefix
+(`system32` and `syswow64`) with `WINEDLLOVERRIDES='d3dx9_41=n'`.
+
+Result: the client still starts with `VIDEOMODE=0` and the
+`Unhandled filter 0x4` fixmes drop from 29 to **0**, proving the native DLL
+is used. The menu text is nevertheless still blank rectangles, so the filter
+fixme was not the sole cause of unreadable UI. XTEST clicks and XTEST key
+events changed menu layouts but did not reach a session or open any track
+archives (`.gtr` opens stayed at the same 8 UI archives).
+
+**Unblock unchanged:** identify the actual menu control path (readable UI on
+a working renderer, UI layout definition, or a network/console entry point)
+before client-side geometry acceptance can be tested.
+
