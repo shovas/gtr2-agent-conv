@@ -284,6 +284,15 @@ class SimbinTextToolTest(unittest.TestCase):
         self.assertGreaterEqual(objects, 7000)
         self.assertGreaterEqual(motions, 1500)
 
+    def test_ani_assets_resolve_in_stock_corpus(self):
+        """Every stock ANI MeshFile/ActorFile resolves to an archive member."""
+        base = ROOT.parent / "GTR2Steam"
+        if not base.is_dir():
+            self.skipTest("GTR2 corpus not present")
+        report = stt.validate_ani_assets(base)
+        self.assertGreater(report["references"], 1000)
+        self.assertEqual(report["missing"], {}, report["missing"])
+
     def test_ani_validator_rejects_incomplete_bindings(self):
         """Missing object fields and empty motion groups are flagged."""
         base = {"motions": {"walk": ["a.lma", "b.lma"]},

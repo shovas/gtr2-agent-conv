@@ -332,6 +332,49 @@ def parse_ani(data: bytes | str) -> dict:
     return result
 
 
+def validate_ani_assets(root: str | Path) -> dict:
+    """Check that every ANI MeshFile/ActorFile resolves in a GTR2 tree.
+
+    The stock GTR2 corpus has 7,489 Object bindings; all 1,652 distinct
+    MeshFile/ActorFile references resolve to loose files or members of a
+    `.gtr` archive anywhere under the install. Converted subtrees may omit
+    shared assets, so this reports counts rather than raising.
+    """
+    from pathlib import Path as _Path
+
+    base = _Path(root)
+    members = {p.name.lower() for p in base.rglob("*")
+               if p.is_file() and not p.name.lower().endswith(".gtr")}
+    try:
+        import mas_tool
+
+        for archive in base.rglob("*.gtr"):
+            try:
+                entries = mas_tool.read_archive(str(archive))[1]
+            except Exception:
+                continue
+            members.update(e.name.lower() for e in entries)
+    except ImportError:
+        pass
+    total = 0
+    missing: dict[str, int] = {}
+    for ani in base.rglob("*.ani"):
+        try:
+            parsed = parse_ani(ani.read_bytes())
+        except Exception:
+            continue
+        for binding in parsed["objects"]:
+            for field in ("meshfile", "actorfile"):
+                value = binding.get(field, "").replace("/", "\\").lower()
+                if not value:
+                    continue
+                total += 1
+                name = _Path(value).name
+                if name not in members:
+                    missing[name] = missing.get(name, 0) + 1
+    return {"references": total, "missing": missing}
+
+
 def validate_ani(parsed: dict) -> list[str]:
     """Check the corpus-verified invariants of an ANI binding set.
 
