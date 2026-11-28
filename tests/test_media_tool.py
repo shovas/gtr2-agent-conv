@@ -1398,6 +1398,33 @@ class MediaToolTest(unittest.TestCase):
         self.assertAlmostEqual(info.details["grid_inv_cell_z"], 0.02603,
                                delta=1e-4)
 
+    def test_generate_hat_skeleton_is_validator_clean(self):
+        """A generated HAT parses, round-trips and passes validate_hat."""
+        import gzip_simbin_tool as gz
+        import math
+
+        import media_tool as mt
+
+        path = (ROOT.parent / "GTR2Steam/GameData/Locations/HAT_Dedicated"
+                / "3ANDERSTORP.hat")
+        if not path.is_file():
+            self.skipTest("GTR2 HAT corpus not present")
+        template = gz.decompress(str(path))
+        samples = [(i * 1.0, 0.0, math.sin(i * 0.5) * 5.0)
+                   for i in range(64)]
+        generated = mt.generate_hat_skeleton(template, samples)
+        self.assertIsNotNone(generated)
+        self.assertEqual(mt.hat_declared_counts(generated)[0], 64)
+        self.assertEqual(mt.hat_declared_counts(generated)[1], 63)
+        parsed = mt.parse_hat_node_stream(generated)
+        self.assertIsNotNone(parsed)
+        self.assertEqual(len(parsed["nodes"]), 64)
+        self.assertEqual(parsed["groups"], 63)
+        self.assertEqual(mt.serialize_hat_node_stream(parsed),
+                         generated[generated.find(b"generated\x00") + 10
+                                   + parsed["offset"]:])
+        self.assertEqual(mt.validate_hat(generated), [])
+
     def test_validate_hat_detects_repeated_leaf_indices(self):
         """Leaf triples with repeated indices are rejected."""
         import gzip_simbin_tool as gz

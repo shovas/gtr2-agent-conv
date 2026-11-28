@@ -865,6 +865,71 @@ def parse_hat_node_stream(payload: bytes,
             "offset": offset, "end": end, "tree": tree}
 
 
+def generate_hat_skeleton(template: bytes,
+                          samples: list[tuple[float, float, float]],
+                          polygon_field: int = 0) -> bytes | None:
+    """Generate a structurally valid HAT from ``(x, height, z)`` samples.
+
+    Uses a template only for the opaque header/signature/grid and the first
+    24 bytes of a leaf node. The 16-byte records, the leaf index triples and
+    the entire recursive control stream are built from scratch: polygon
+    indices are bisected until segments of 1-2 remain (exactly the
+    ``hat_bisection_count()`` recursion), and each leaf triple references
+    three samples that share the sample's own index (a degenerate triangle
+    placeholder). Callers must replace leaf triples with a real triangulation
+    before using the result for terrain queries.
+
+    Returns a full gzipped HAT payload with ``validate_hat()``-clean framing,
+    or ``None`` when the template is not a decodable HAT.
+    """
+    counts = hat_declared_counts(template)
+    if counts is None or not samples:
+        return None
+    marker = template.find(b"generated\x00")
+    prefix = template[:marker + 10]
+    body = template[marker + 10:]
+    n = len(samples)
+    if n < 2 or 48 + 16 * n > len(body):
+        return None
+    parsed = parse_hat_node_stream(template)
+    if parsed is None:
+        return None
+    leaf_prefix = parsed["nodes"][0][:24]
+    leaf_tail = parsed["nodes"][0][32:]
+
+    # Header with regenerated counts: polygons, T(polygons), records.
+    bisection = hat_bisection_count(n)
+    if bisection is None:
+        return None
+    header = bytearray(body[:48])
+    struct.pack_into("<3I", header, 36, n, bisection, n)
+
+    records = bytearray()
+    for x, height, z in samples:
+        records.extend(struct.pack("<fIff", x, polygon_field, height, z))
+
+    def node(index: int) -> bytes:
+        # Each sample owns one leaf referencing itself and its two successors
+        # in sample order, giving spatially local triangles for ordered input.
+        a, b, c = (index % n, (index + 1) % n, (index + 2) % n)
+        u24 = (a & 0x1FFFFF) | ((b & 0x7FF) << 21)
+        u28 = ((b >> 11) & 0x3FF) | ((c & 0x3FFFFF) << 10)
+        return leaf_prefix + struct.pack("<II", u24, u28) + leaf_tail
+
+    def build(indices: list[int]) -> bytes:
+        if len(indices) == 1:
+            return struct.pack("<IIb", 0, 0, -1) + node(indices[0])
+        if len(indices) == 2:
+            return (struct.pack("<IIb", 0, 0, -2) + node(indices[0])
+                    + node(indices[1]))
+        mid = len(indices) // 2
+        return (struct.pack("<IIb", 0, 0, 0) + b"\x00"
+                + build(indices[:mid]) + build(indices[mid:]))
+
+    stream = build(list(range(n)))
+    return prefix + bytes(header) + bytes(records) + stream
+
+
 def hat_leaf_record_indices(result: dict) -> list[tuple[int, int, int]]:
     """Return the three 16-byte-record indices held by each 34-byte HAT leaf.
 

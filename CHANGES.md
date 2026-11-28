@@ -5,6 +5,9 @@ Newest-first change log. Timestamps use repository commit dates (ISO 8601, local
 ## 2026-11-29 23:59:59 -0500 - Status dashboard stale entries fixed
 - `conversion_status.py` now reports 643/643 RaceGMT meshes (the `0x2000403d` variant is decoded) and no longer lists the HAT node-tree serializer as missing; remaining gaps are column 4 and in-game acceptance.
 
+## 2026-11-29 23:59:59 -0500 - Independent HAT skeleton generation
+- Added `media_tool.generate_hat_skeleton()`: builds HAT records, leaf triples and the recursive bisection stream from `(x, height, z)` samples. Generated HATs parse, round-trip byte-exactly and pass `validate_hat()` on path-like samples (64 leaves / 63 groups). Reuses template header/leaf-prefix bytes; structural skeleton only, not semantic terrain generation. Full-tier test added.
+
 ## 2026-11-29 23:59:59 -0500 - HAT leaf index invariant validated
 - Audited 1,830,182 HAT leaf triangles: zero repeated indices and zero degenerate triangles. `validate_hat()` now rejects repeated-index leaves; regression test added. All corpus HATs remain clean.
 
