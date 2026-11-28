@@ -19,6 +19,25 @@ def _trks(root: str) -> list[Path]:
 
 
 class GtlToGtr2Test(unittest.TestCase):
+    def test_tree_conversion_preserves_ani_references(self):
+        """Converting a GTL track tree does not lose ANI asset bindings."""
+        import shutil
+
+        import simbin_text_tool as stt
+
+        source = ROOT.parent / "GTLSteam/GameData/Locations/Anderstorp"
+        if not source.is_dir():
+            self.skipTest("GTL corpus not present")
+        with tempfile.TemporaryDirectory(dir="/tmp/opencode") as td:
+            out = Path(td) / "converted"
+            g.convert_tree(source, out)
+            before = stt.validate_ani_assets(source)
+            after = stt.validate_ani_assets(out)
+            self.assertEqual(before["references"], after["references"])
+            self.assertGreater(before["references"], 100)
+            self.assertEqual(set(before["missing"]), set(after["missing"]))
+            self.assertEqual(before["missing"], after["missing"])
+
     def test_corpus_masfile_rules(self):
         gtl, gtr2 = _trks("GTLSteam"), _trks("GTR2Steam")
         if not gtl or not gtr2:

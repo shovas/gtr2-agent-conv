@@ -5,6 +5,9 @@ Newest-first change log. Timestamps use repository commit dates (ISO 8601, local
 ## 2026-11-29 23:59:59 -0500 - Status dashboard stale entries fixed
 - `conversion_status.py` now reports 643/643 RaceGMT meshes (the `0x2000403d` variant is decoded) and no longer lists the HAT node-tree serializer as missing; remaining gaps are column 4 and in-game acceptance.
 
+## 2026-11-29 23:59:59 -0500 - ANI bindings preserved by GTL tree conversion
+- Verified that converting the GTL Anderstorp tree preserves all 256 ANI MeshFile/ActorFile references and their shared-archive resolution pattern; regression test added.
+
 ## 2026-11-29 23:59:59 -0500 - Independent HAT skeleton generation
 - Added `media_tool.generate_hat_skeleton()`: builds HAT records, leaf triples and the recursive bisection stream from `(x, height, z)` samples. Generated HATs parse, round-trip byte-exactly and pass `validate_hat()` on path-like samples (64 leaves / 63 groups). Reuses template header/leaf-prefix bytes; structural skeleton only, not semantic terrain generation. Full-tier test added.
 
