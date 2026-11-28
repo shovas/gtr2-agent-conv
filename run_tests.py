@@ -40,6 +40,7 @@ QUICK = (
     "test_simbin_text_tool", "test_gtr1_vanilla", "test_scgt", "test_gmt_variants",
     "test_fxm_crosscorpus", "test_simbin_tools", "test_run_tests_modes",
     "test_anm_format", "test_bc6h_format", "test_bc7_format",
+    "test_runtime_sandbox",
 )
 
 # Medium-cost tests (corpora read but bounded); target total ≤5 min.
