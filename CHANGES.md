@@ -2,6 +2,9 @@
 
 Newest-first change log. Timestamps use repository commit dates (ISO 8601, local offset).
 
+## 2026-11-29 23:59:59 -0500 - Quick-tier rebalance and UI table finding
+- `test_runtime_sandbox` (4 tests, ~0.003 s) moved to the quick tier: quick 21 modules / 151 tests in ~17 s. Recorded GTR2.exe's 869-entry UI element name table (VA 0x6E61E0), name-to-ID function 0x4C21F0, and dispatch jump table 0x4CD57C for future name-based UI automation.
+
 ## 2026-11-29 23:59:59 -0500 - Client startup root cause and status update
 - Traced the long-standing `0x59D46C` client crash to the `VIDEOMODE` config key via winedbg breakpoint/watchpoint; `VIDEOMODE=0` or `1` reaches the full GTR2 game window. Added `runtime_sandbox.patch_client_config()` with tests. Client startup is no longer blocked; navigating a client session to load converted geometry remains.
 - Client UI text renders as blank rectangles under llvmpipe; coordinate clicks/keyboard did not reach a session. Recorded the exact unblock: identify menu bindings or connect the client to the dedicated server.
