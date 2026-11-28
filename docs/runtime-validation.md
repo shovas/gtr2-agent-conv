@@ -552,3 +552,13 @@ button. The activation handler is likely a separate virtual method on that
 vtable, so future automation should locate the vtable slot invoked on mouse
 release rather than the factory.
 
+
+### QuickRace vtable slot0 test (2026-11-27)
+
+The QuickRace button's vtable differs from a generic button only in slot 0
+(`0x4D0C10` vs `0x4CF220`); all other slots are identical. A breakpoint at
+`0x4D0C10` with auto-continue across startup, followed by XTEST clicks on
+menu regions, recorded **0 hits**, so slot 0 is not the mouse-release
+activation path (likely a constructor/destructor). No usable activation
+handler was found by this route.
+
