@@ -489,3 +489,19 @@ readable), or connect the client to the already-working dedicated server over
 the network, then drive a session and check for track `.gtr` opens. The
 startup crash itself is solved and should not be re-investigated.
 
+
+### UI text diagnosis (2026-11-27)
+
+`WINEDEBUG=+seh` on menu navigation shows repeated
+`fixme:d3dx:d3dx_load_pixels_from_pixels Unhandled filter 0x4` (trilinear)
+from Wine's d3dx9 implementation. This explains the blank white/grey menu:
+UI textures are loaded but filtered/failed through an unsupported path.
+`TEXDETAIL=0`/`OBJDETAIL=0` did not change it. No native Microsoft
+`d3dx9_41.dll` exists in any local corpus (only Wine's own built-ins).
+
+**Unblock for readable UI:** a native d3dx9 DLL or a Wine d3dx build handling
+filter 0x4, then repeat XTEST menu navigation. XTEST (`XTestFakeButtonEvent`
+via native X11) works and changes menu screens; synthetic `mouse_event`
+inside Wine did not. `+connect 127.0.0.1` and `RUNBENCHMARKS=1` did not
+auto-start a session.
+
